@@ -11,6 +11,24 @@ $(document).ready(function()
 	g_numSensors = 1
 	g_storeTime = []
 	g_key = null
+	g_led = 1
+	
+	$.fn.ledFlash = function()
+	{
+		//alert("Flash LED");
+		if (g_led == 0)
+		{
+			$.ajax({url : "api/actuators", data : {id : 0, set : 1}})
+			g_led = 1
+			$("#led").html("LED On");
+		}
+		else
+		{
+			$.ajax({url : "api/actuators", data : {id : 0, set : 0}})
+			g_led = 0
+			$("#led").html("LED Off");
+		}
+	}
 
 	$.fn.pruneSensorData = function(id)
 	{
@@ -112,8 +130,7 @@ $(document).ready(function()
 		$("#plots").html(plotsHTML)
 
 		controlHTML = "<h2 id=control0>Controls</h2>\n"
-		controlHTML += "<p> Pressure: <input type=text id=control0_value value=\"100\"/>"
-		controlHTML += "<button id=actuator0 onclick=\"$(document).setPressure()\">SET</button> </p>"
+		controlHTML += "<button id=led onclick=\"$(document).ledFlash()\">LED On</button>"
 		
 		$("#controls").html(controlHTML)
 
