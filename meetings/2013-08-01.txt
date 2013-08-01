@@ -1,0 +1,60 @@
+Meeting at 15:00 in G19
+
+Present: Sam Moore, James Rosher, Justin Kruger
+
+1. Server Hardware
+ - Prefer a Raspberry Pi as main server, easy to setup a GUI via a webserver
+   - Raspberry Pi has limited GPIO pins and no ADC pins; interface with lower level device(s), eg: Arduino
+   - Raspberry Pi can handle USB devices directly, eg: Webcams, Arduino, and can take power from a USB hub
+ - Does Raspberry Pi have sufficient processing power and/or storage?
+     - Videos will be rescource intensive
+     - Attach external USB hard drive for storage
+     - Analyse some/most/all data on client machine to save processing power
+     - Need to investigate the processing and storage requirements, and the capabilities of a Raspberry Pi
+ - Mounting of Server Hardware
+   - Need an enclosure to protect this system when the can explodes
+   - Hardware should be easily removable and/or all ports easily accessable
+   - Need to determine exactly what the hardware is and then consult the Mechanical Team.
+ - Power
+   - Determine what we are going to use and then consult Electronics Team
+     
+2. Data collection, sensors, remote control
+  - USB cameras may be connected directly to main server
+  - May need a lower level system independent of the main server to collect data from other sensor types
+  - Expect to deal with Analogue, Digital (on/off) and Serial inputs, and both Digital and Analogue outputs
+  - Need to consult with Sensors and Electronics Teams about sensor inputs
+  - Need to consult with Pneumatics and Electronics Teams about control outputs
+  - Need to consult with Electronics team about using USB devices (they are a "connector")
+
+3. Network
+  - Wired vs Wireless network
+  - Wireless - less risk of cable being accidentally unplugged, more risk of loss of signal
+  - Wired - opposite
+
+3. Safety & Security
+  - System needs to cope with loss of network, power, or air
+  - System should not be accessable by unauthorised people
+  - Only one person should access system at a time
+  - Software should be able to change to redundant hardware if a critical system fails
+  - Control mechanical safety mechanisms
+    - eg: Hardware switch must be enabled to allow remote access (decrease likely hood of security compromise while system isn't in use)
+    - Hardware switch must be enabled to allow system to become pressurised
+  - Safety mechanisms that function even when software fails
+    - eg: Electronic release valve, stays open only when power is delivered
+  - Indicator lights controlled by server hardware
+  - Need to consult pretty much every other team about this
+
+Stuff to do:
+  - Sam:
+    - Feasability of Raspberry Pi as main server
+    - Be the Meeting Convener
+  - James:
+    - Investigate GUI design and layout
+  - Justin:
+    - Investigate what sort of sensors we can expect to have to interface
+  - Rowan:
+
+
+Finished sometime after 16:00
+
+  
