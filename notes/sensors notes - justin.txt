@@ -1,0 +1,37 @@
+PRESSURE SENSORS
+
+-	A cheap, pretty good pressure sensor in the range required is the MPX2202 manufactured by Freescale (costs about $15).
+-	For the system several will be needed? One or two inside the box, maybe a couple in the piping/pneumatics system.
+-	Sensor has 3 used pins: supply voltage, ground and output voltage, and one unused.
+-	Pressure is measured by the sensor and given as a scaled linear output voltage.
+-	Range of 0-40mV over 0-200kPa.
+-	Most Freescale sensors have analog output as far as I can tell.
+-	More expensive sensors are more accurate (with less error), which might be necessary for the project. 
+-	Honeywell make the Truestability series which cost around $35. 
+-	These have an amplified analog output, and resolution of 0.03%.
+-	Output voltage range is from 0 to the supply voltage (either 3.3V or 5.0V)
+-	Sensor has 3 used pins: supply voltage, ground and output voltage, and 4/8 pins total
+-	Pressure sensors which donÅft have pins (i.e. plug in via cables) are generally much more expensive and heavy-duty
+
+STRAIN GAUGES
+
+-	Cheap strain gauges are available from Omega ($30-40 for a pack of 5)
+-	Input/output varies but it is generally a pair of solder pads or input leads. 
+-	Voltage is applied to the input and a small voltage is read from the output, proportional to the strain.
+-	Analog output usually in the millivolt range.
+-	Number of leads/solder pads can vary, but most common is just one input wire and one output wire.
+-	Multiple strain gauges can be connected to a single ÅepadÅf.
+-	For the coke can we shouldnÅft need more than one or two gauges (and maybe one to measure strain on the box for safety?).
+-	Micron also make strain gauges.
+-	Input and output are thin 1.5cm leads or small contact pads. Same type of analog, low voltage output.
+-	One input lead & one output lead.
+-	Strain gauges have different shapes (bar, U-shape, M-shape) which might change the number of wires etc, but it depends on what the sensors team chooses.
+
+REGULATORS
+
+-	Electronic pressure regulators are made by Parker.
+-	Require 12-24V supply voltage, 0-5V input voltage, and 0-5V output voltage.
+-	Electrical connector has 8 contact pins: 5 for input, 2 for output, and one unused.
+-	Pins are absolute zero control, supply voltage, setpoint, valve current, signal common, pressure output and valve test voltage output.
+-	Emerson also make regulators that can accept both analog and digital inputs from a computer, and have can give an analog or digital output (with a single cable).
+-	These are more expensive though and I'm not sure what connector the cable has.
