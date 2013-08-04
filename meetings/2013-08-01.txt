@@ -31,7 +31,7 @@ Present: Sam Moore, James Rosher, Justin Kruger
   - Wireless - less risk of cable being accidentally unplugged, more risk of loss of signal
   - Wired - opposite
 
-3. Safety & Security
+4. Safety & Security
   - System needs to cope with loss of network, power, or air
   - System should not be accessable by unauthorised people
   - Only one person should access system at a time
