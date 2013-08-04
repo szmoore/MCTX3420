@@ -1,0 +1,264 @@
+--- Log opened Sat Aug 03 15:12:13 2013
+15:12 -!- matches [matches@motsugo.ucc.gu.uwa.edu.au] has joined #mctxuwa_softdev
+15:12 -!- Irssi: #mctxuwa_softdev: Total of 3 nicks [0 ops, 0 halfops, 0 voices, 3 normal]
+15:12 -!- Irssi: Join to #mctxuwa_softdev was synced in 2 secs
+15:12 < matches> Good idea with the IRC channel
+15:12 < matches> I'm Sam Moore by the way
+15:14 < Callum_> Hey. Finally someone else 
+15:19 < Callum_> Hmm should probably close the app so my phone has enough battery to get me home. 
+15:21 -!- Callum_ [~androirc@101.119.30.123] has quit ["AndroIRC - Android IRC Client ( http://www.androirc.com )"]
+15:45 -!- james__ [~chatzilla@CPE-58-160-245-152.wa.bigpond.net.au] has quit [Ping timeout]
+15:51 -!- Irssi: #mctxuwa_softdev: Total of 1 nicks [0 ops, 0 halfops, 0 voices, 1 normal]
+15:51 -!- matches [matches@motsugo.ucc.gu.uwa.edu.au] has left #mctxuwa_softdev []
+--- Log closed Sat Aug 03 15:51:28 2013
+--- Log opened Sat Aug 03 15:51:51 2013
+15:51 -!- matches [matches@motsugo.ucc.gu.uwa.edu.au] has joined #mctxuwa_softdev
+15:51 -!- Irssi: #mctxuwa_softdev: Total of 1 nicks [0 ops, 0 halfops, 0 voices, 1 normal]
+15:51 -!- Irssi: Join to #mctxuwa_softdev was synced in 2 secs
+15:52 -!- matches changed the topic of #mctxuwa_softdev to: MCTX3420 UWA
+15:52 -!- matches changed the topic of #mctxuwa_softdev to: MCTX3420 UWA - Team 4 (Software, Firmware, GUI)
+16:40 -!- matches changed the topic of #mctxuwa_softdev to: MCTX3420 UWA - Team 4 (Software and stuff)
+16:52 -!- james__ [~chatzilla@CPE-58-160-245-152.wa.bigpond.net.au] has joined #mctxuwa_softdev
+16:54 -!- You're now known as sam__
+16:54 < sam__> Yuck
+16:54 -!- You're now known as sam_moore
+16:55 < sam_moore> That works
+16:55 < james__> Yuck?
+16:55 < james__> Oh right
+16:55 < james__> all the underscores?
+16:55 < sam_moore> Yeah
+16:55 < james__> its a bit of a pain
+17:01 < sam_moore> I think you might be able to comment on changes if you use github
+17:01 < sam_moore> I'll see if I can copy the repository there
+17:01 < james__>  you should be able to
+17:01 < sam_moore> It does seem useful
+17:01 < james__> its what it waas designed for really
+17:01 < sam_moore> Yeah, gitweb is a bit more limited
+17:02 < james__> Yeah.  Or at least the features aren't as easily accesible as in github
+17:10 < sam_moore> I'll clone the repository into github now
+17:24 < james__> Need to be logged in but it looks like you can comment
+18:13 -!- Callum [~Callum@220-253-137-113.dyn.iinet.net.au] has joined #mctxuwa_softdev
+20:38 -!- Callum [~Callum@220-253-137-113.dyn.iinet.net.au] has quit [Ping timeout]
+22:01 -!- james__ [~chatzilla@CPE-58-160-245-152.wa.bigpond.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 22.0/20130618035212]"]
+22:15 -!- Irssi: #mctxuwa_softdev: Total of 1 nicks [0 ops, 0 halfops, 0 voices, 1 normal]
+--- Day changed Sun Aug 04 2013
+10:43 -!- Callum [~Callum@220-253-137-113.dyn.iinet.net.au] has joined #mctxuwa_softdev
+10:47 < Callum> morning
+10:49 < sam_moore> Hi
+10:52 < Callum> What is there we need to get done? i haven't really done anything yet
+10:53 < sam_moore> We need to write a progress report on what we need to get done :P
+10:53 < Callum> Thats the other thing i wanted to know, is the progress report per person or per group?
+10:53 < sam_moore> It's per group, and it only has to be one page
+10:54 < Callum> I'v had a quick look through the stuff online and only thing i can see is the example but it looks like its per person in that
+10:54 < Callum> ok, that makes things a lot easier then
+10:54 < sam_moore> We are meant to have our own technical diaries with handwritten notes
+10:54 < Callum> yea saw that as well
+10:55 < sam_moore> So, at the meeting we sort of worked out a vague idea of what systems we'll need
+10:55 < Callum> yea had a read through the meeting notes
+10:56 < Callum> seemed like a solid start
+10:56 < sam_moore> Yes, I think I'll do a block diagram about it
+10:56 < sam_moore> Since I actually have a raspberry pi I've been playing with it
+10:57 < sam_moore> No one's really done that much though, to be fair our group was only completely formed by Friday
+10:57 < Callum> Well, I'm the guy that moved into the group :p
+10:58 < sam_moore> Is there anything in particular you'd like to work on?
+10:59 < Callum> Il have another look through the meeting notes, but i don't really have any experience working with this hardware. Just mainly C + Java, but i pick stuff up pretty quick
+10:59 < Callum> well, any hardware other than what we did in embedded
+11:02 < sam_moore> We need to learn more about the actual requirements of the system I think, not sure how much we can work out without talking to all the other groups
+11:03 < Callum> Yea true. Might have a play around with git sometime soon to get used to it
+11:03 < sam_moore> Oh, something I listed in an email was image processing, that will be important
+11:05 < sam_moore> Anyway, if you can try and find something that interests you that seems useful and just write a little bit on that, it would be great
+11:06 < sam_moore> Learning git would be useful, you can write about that, it doesn't matter if Rowan does it as well since we'll all need to learn more
+11:07 < sam_moore> I know enough of git to work on my own projects, but there are a lot of features designed for group work that I've never used
+11:37 -!- james__ [~chatzilla@CPE-58-160-245-152.wa.bigpond.net.au] has joined #mctxuwa_softdev
+11:42 < Callum> Sam, I think i got a different ssh key from github; So if im going to use this you'll likely need to add it
+11:42 < Callum> And hey James
+11:43 -!- Callum__ [~chatzilla@220-253-137-113.dyn.iinet.net.au] has joined #mctxuwa_softdev
+11:45 -!- Callum [~Callum@220-253-137-113.dyn.iinet.net.au] has quit [EOF From client]
+11:59 -!- james__ [~chatzilla@CPE-58-160-245-152.wa.bigpond.net.au] has quit [Ping timeout]
+12:09 < sam_moore> Callum__: Ok, send it to me
+12:11 < sam_moore> If you have github accounts let me know those as well
+12:11 -!- james__ [~chatzilla@CPE-58-160-245-152.wa.bigpond.net.au] has joined #mctxuwa_softdev
+12:11 < james__> Hey
+12:12 < sam_moore> Hi
+12:12 < sam_moore> You guys can't see what's written in the channel whilst you're not in it, right?
+12:12 < james__> How are things
+12:12 < james__> Nope
+12:12 < james__> Its only once you log in  that you can read it
+12:13 < sam_moore> I'm messing around with git a bit, I've sent an email about the progress report
+12:13 < james__> Unless you log it there isn't any way to go back to previous convos
+12:13 < sam_moore> I'd like to meet at 2pm on Monday if that's possible
+12:13 < james__> sounds good
+12:13 < sam_moore> I'm running irssi in screen on a server, so I'll have everything logged
+12:13 < sam_moore> I'll look into making the logs available on git
+12:14 < Callum__> think anyone would care if i go to G19 without the safety meeting? not like we're actually doing anything.
+12:14 < james__> i'm using chatzilla so there is an inbuilt log function
+12:15 < james__> Don't know tbh
+12:15 < sam_moore> Callum__: No, but just try not do anything unsafe or the rest of us will get the blame :P
+12:15 < Callum__> well, we could just meet somewhere else. Not like we need to go there
+12:16 < sam_moore> Adrian did say that we could have people visit the lab, but we are responsible for anyone we bring in without the safety course.
+12:16 < sam_moore> Ok, what's another good place?
+12:16 < james__> No idea
+12:16 < james__> The lab is kinda nice and quite/out of the way
+12:16 < Callum__> ok well it should be fine. If it's a suitable meeting location than just go with it.
+12:17 < sam_moore> I don't think it will be a big deal to go in G19, just don't use any equipment. It is a good place.
+12:17 < Callum__> Yea. just making sure it wont be a problem
+12:18 < Callum__> Im going to get some lunch. 
+12:40 < sam_moore> You need to use git@github.com:matchesucc/MCTX3420.git to commit using your ssh key
+12:41 < sam_moore> If you give me your username, I think you can use https://github.com/matchesucc/MCTX3420.git
+12:41 < sam_moore> You should be able to commit to git.ucc with your ssh key
+12:42 < sam_moore> But I think we'll prefer github. It looks like it has more features. I'll use that as the main repository and keep git.ucc up to date in case github explodes.
+12:43 < Callum__> username: Callum-
+12:45 < sam_moore> Right, before you commit your changes, pull from the server
+12:45 < sam_moore> If your repository is "up to date" with the server and you make changes, it is really easy
+12:46 < sam_moore> If it isn't and you have changes that contradict something done on the server, we'll have to merge the repositories, and from what I've heard that's usually a pain
+12:47 < sam_moore> We'll probably have to deal with it at some point.
+12:48 < Callum__> how do you pull from github>
+12:51 < sam_moore> Not sure how you do it in the gui, is there a "pull" or "fetch" button
+12:52 < Callum__> not that i can see
+12:52 < sam_moore> Hang on, I'll start windows and see if I can work out how to do it
+12:53 < james__> are you logged in?
+12:53 < sam_moore> Yes
+12:53 < sam_moore> Cool, you can even edit the files entirely from github
+12:54 < Callum__> you can?
+12:54 < sam_moore> Well, I can
+12:54 < sam_moore> I added Callum- as a collaborator; can you see the repository?
+12:55 < Callum__> i could see it before
+12:55 < Callum__> wait hang on
+12:56 < james__> can you add me aswell?
+12:56 < james__> username: firefields
+12:57 < Callum__> i can edit it from the browser
+12:57 < sam_moore> Done
+12:57 < sam_moore> Excellent, that's a start
+12:59 < james__> I can comment
+13:00 < sam_moore> The browser editor actually looks pretty good
+13:01 < sam_moore> Hmm
+13:01 < sam_moore> We need to be able to pull from github to our own machines though
+13:01 < sam_moore> So we can actually run code
+13:02 < sam_moore> I can do it myself using the command line
+13:02 < sam_moore> I'll see how to do it using the GUI
+13:03 < james__> I am having a look through the documentation now trying to find it
+13:07 < sam_moore> I wonder what happens when two people edit a file at the same time
+13:07 < james__> Lets edit the readme?
+13:08 < sam_moore> Alright.
+13:08 < james__> I am currently editing
+13:08 < james__> Can you get in?
+13:09 < sam_moore> Yes, and it looks the same
+13:09 < sam_moore> Make some changes and commit it, then I'll go and we'll see what happens
+13:09 < james__> Done
+13:09 < sam_moore> It says that you have committed since I started editing
+13:10 < sam_moore> Whoops, but I could still overwrite it
+13:11 < sam_moore> Ok, at least it gives us a warning, that's nice
+13:11 < sam_moore> I think the key to this will be: 1) Try and work on different source files 2) Send lots of spam to IRC when you do stuff
+13:11 < james__> Also
+13:11 < james__> if you look in history my changes are still there
+13:11 < sam_moore> Yeah, that's nice
+13:12 < sam_moore> And I think we can go back to them
+13:12 < james__> I am reading about this fork and pull method as well.  Might work well
+13:13 < james__> Essentially you fork the repo. Make changes then request for it to be pulled back into the master repo 
+13:13 < sam_moore> Yes, that will likely be the best way to go about it.
+13:13 < james__> That way all changes can be viewed and then confirmed before going into the master copy
+13:15 < james__> https://help.github.com/articles/fork-a-repo
+13:15 < james__> and this https://help.github.com/articles/using-pull-requests
+13:17 < sam_moore> I think in the long run it will be easier to use the command line when you work on your local machine
+13:17 < Callum__> might just end up learning how to do it all from command line anyway
+13:17 < sam_moore> All the tutorials seem to give the command line stuff
+13:17 < Callum__> yea
+13:17 < Callum__> suppose you could use the gui just to look at whats there
+13:17 < sam_moore> `git add remote github git@github.com:matchesucc/MCTX3420.git`
+13:17 < sam_moore> `git pull github master`
+13:17 < sam_moore> Make changes
+13:17 < sam_moore> `git add .`
+13:18 < sam_moore> `git commit`
+13:18 < sam_moore> `git push github master`
+13:18 < sam_moore> Well, that's just directly going to the repository without forking it
+13:19 < Callum__> is the add thing for staging?
+13:19 < sam_moore> Yeah; you have to tell it what changes to stage to the commit
+13:19 < Callum__> yea
+13:19 < sam_moore> I think there is an option to automatically add all changed files
+13:20 < sam_moore> I've always just manually done them, makes it easier to work out what I actually did before writing the commit message
+13:20 < james__> Do we want to fork first
+13:20 < sam_moore> Probably
+13:20 < james__> That way someone can't make a change that is incorrect into the master
+13:21 < sam_moore> Yes, this sounds good
+13:22 < sam_moore> It won't let me fork it (probably because I'm the "owner")
+13:24 < james__> I have forked succesfully
+13:25 < james__> maybe branch?
+13:25 < sam_moore> No, branches are different
+13:25 < james__> Right...
+13:25 < james__> well i made a branch for you? :P
+13:26 < sam_moore> It doesn't matter if I directly edit the master repository anyway; I'll have to deal with all the pull requests before I do anything mysekf
+13:27 < sam_moore> Yeah, we don't want to use branches just yet
+13:28 < sam_moore> A fork is for each person working on the code; a branch is for when you want to make changes to something that might break parts of the code that already work
+13:28 < sam_moore> For example: You have some really badly written code, but it does what it's meant to do
+13:28 < sam_moore> So you make a branch "Improve networking code" or something like that
+13:29 < sam_moore> Then you redo it, and only when you're done you merge your branch back into the master, getting rid of all the old code
+13:30 < james__> Fair enough. I think i have made a pull request...
+13:30 < sam_moore> Cool
+13:31 < sam_moore> Now it should be in the main repository
+13:32 < james__> yeah. worked
+13:32 < sam_moore> I show up as the author of your changes, which is a bit silly
+13:33 < Callum__> firefields opened this pull request 15 hours ago
+13:33 < Callum__> what
+13:34 < sam_moore> Is the clock on your local machine correct?
+13:34 < Callum__> yea
+13:34 < Callum__> matchesucc merged 1 commit into matchesucc:master  from firefields:master  2 minutes ago
+13:34 < Callum__> it also says that
+13:34 < james__> Right.... Thats weird
+13:35 < sam_moore> You guys should also be able to merge the pull requests, since you're collaborators
+13:36 < Callum__> alright
+13:36 < james__> Yeah. Should be able to
+13:36 < sam_moore> So in summary: Fork the repository, make a pull request, go and check that nothing will break horribly, and then you can merge it
+13:36 < james__> pretty much
+13:36 < sam_moore> Cool
+13:36 < sam_moore> We should put this in the progress report
+13:37 < Callum__> Yea, detailing how we plan to collaborate the code
+13:38 < sam_moore> So, should I put our IRC channel log into git?
+13:39 < Callum__> probably a good idea
+13:39 < sam_moore> That way people who weren't in the channel can read conversations they missed 
+13:39 < Callum__> unlikely be that useful but it would be good to have everything archived
+13:42 < james__> Its always good to have everything archived
+13:47 < Callum__> so noone else getting weird timestamps on github
+13:47 < james__> not that i can see
+13:48 < sam_moore> No, they all make sense to me
+13:48 < Callum__> also my forked repo doesnt have the updated readme
+13:48 < Callum__> iv added the upstream and tried fetch upstream and doesnt seem to do anything
+13:48 < sam_moore> Try merging after the fetch
+13:48 < sam_moore> fetch + merge = pull
+13:49 < sam_moore> "Pull request" is a bit confusing, because you're not asking to pull from my repository; you're requesting that I pull from yours
+13:49 < Callum__> yea, i got that. how do i do the merge?
+13:50 < sam_moore> git merge upstream/master
+13:51 < Callum__> yup that worked
+13:51 < sam_moore> The GUI seems really terrible, I have no idea how to do this stuff with it
+13:52 < sam_moore> I thought it might be easier if people weren't used to the command line, but there aren't that many commands
+13:52 < Callum__> yea
+13:52 < james__> Its easier to comment etc
+13:53 < james__> But some of the functionality is horribly buried
+13:53 < sam_moore> Do you get a text editor in the terminal when you want to commit?
+13:54 < sam_moore> Oh well, whatever people find easiest
+14:09 < Callum__> alright well i just submitted a pull request and accepted it
+14:10 < sam_moore> Yep
+14:10 < sam_moore> Callum- authored in 15 hours
+14:11 < sam_moore> ?
+14:11 < Callum__> ahahahahahaah
+14:11 < sam_moore> Are you from the future?
+14:11 < sam_moore> Does IRC mess with the space time continuum
+14:11 < Callum__> it says 15 minutes ago for me, but the rest are 17 hjours ago
+14:11 < Callum__> i must be from the future :o
+14:12 < sam_moore> Someone's clock is out of skew
+14:13 < sam_moore> That is really wierd
+14:13 < sam_moore> You merged the pull request... before the file was changed... according to this history
+14:14 < sam_moore> Oh!
+14:14 < sam_moore> Is it because github is based in the US
+14:14 < Callum__> but for you all the times are right apart from mine?
+14:14 < Callum__> and for me all the times are wrong but mine
+14:15 < sam_moore> Well it's only showing relative times
+14:15 < Callum__> or do you get weird results from james as well?
+14:15 < sam_moore> James times look reasonable
+14:15 < Callum__> hmm. weird
+14:15 < sam_moore> But notice how a lot of our stuff is on 3rd August, it's actually the 4th today
+14:16 < Callum__> hmm yea
+14:17 < sam_moore> I kind of think we should fix this, it's not a major issue but it will certainly be confusing
+14:18 < sam_moore> Hey, wierd, the times look sensible in git.ucc
+14:18 < sam_moore> http://git.ucc.asn.au/?p=matches/MCTX3420.git;a=summary
+14:19 < Callum__> yea agreed 
+14:19 < Callum__> and that is kinda weird
