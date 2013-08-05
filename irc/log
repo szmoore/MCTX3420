@@ -262,3 +262,49 @@
 14:18 < sam_moore> http://git.ucc.asn.au/?p=matches/MCTX3420.git;a=summary
 14:19 < Callum__> yea agreed 
 14:19 < Callum__> and that is kinda weird
+14:20 < Callum__> i cant seem to find anything in account settings for a timezone
+14:21 < Callum__> Anything else we need done by tomorrow? because i have a bunch of other stuff I'd like to get done
+14:21 < sam_moore> While you're in account settings, you can set your author name for commits
+14:22 < sam_moore> No, there's nothing urgent at this stage
+14:22 < sam_moore> It's only the first week, and we only need 1 page
+14:22 < sam_moore> We can be like "Here is a page of details on how we got Git to work" if we have to
+14:22 < Callum__> Yea just we need to make sure we have enough for 1 page
+14:23 < Callum__> hmm, true i suppose. set up IRC + git repo + discussed an outline on what is going to be required
+14:24 < Callum__> Tbh he'l likely be happy if we just give him a summary of those meeting minutes
+14:25 < Callum__> Anyway i'l divert my attention for now then. If you come across anything interesting or something that can be done il stick around in the channel
+14:25 < sam_moore> Ok, thanks
+14:26 < sam_moore> The first automatic commit of the irc logs seems to have worked!
+14:26 < sam_moore> It also copies everything to git.ucc so we have a backup
+14:26 < Callum__> nice
+14:27 < sam_moore> The times might be correct as well :P
+14:27 < Callum__> was just like "where is it? " then i realise i was looking at my forked repo
+14:27 < sam_moore> Oh, just make sure you don't push anything to the git.ucc repo, because it doesn't go the other way
+14:27 < sam_moore> Actuall I'll just remove everyone's keys to stop that from happening
+14:28 < Callum__> haha, good to be sure. We need to make sure the other 2 have this sorted out. hopefully they rock up to the meeting tomorrow
+14:28 < Callum__> oh wow. the logs go all the way back to when you first connected
+14:28 < Callum__> haha
+14:30 < Callum__> and according to me the logs were commited 15 hours ago
+14:32 < sam_moore> Yeah, my logs will be the best to keep because I don't have to quit, so I should get everything
+14:33 < Callum__> yea
+14:34 < Callum__> Sigh. end of first week. already just written myself a fairly long list of things i need to do, which is by no means comprehensive
+14:36 < sam_moore> I think I have a lot of work to do as well, I should do something for another unit
+14:36 < sam_moore> See you later
+14:36 < Callum__> later
+15:32 < sam_moore> Ok, so pretty much anyone can comment on our stuff, and pretty much anyone can submit bug reports
+15:32 < sam_moore> I'm going to say that's useful, and we should tell all the other teams about it
+15:33 < sam_moore> Also I was supposed to go do something else, whoops
+16:30 -!- james__ [~chatzilla@CPE-58-160-245-152.wa.bigpond.net.au] has quit [Ping timeout]
+18:35 < sam_moore> I changed my username because someone pointed out it sounds like "matches succ"
+18:35 < sam_moore> But the old links should redirect
+18:35 -!- justin_ [~justin@125.253.101.228] has joined #mctxuwa_softdev
+18:36 -!- justin_ is now known as justin_kruger
+18:37 -!- justin_kruger [~justin@125.253.101.228] has quit [EOF From client]
+18:37 < sam_moore> Whoops
+20:21 < Callum__> whoops?
+21:20 < sam_moore> EOF From client
+21:32 < sam_moore> I wonder how I can get people's forks to merge into the main repository without them having to issue a pull request
+21:34 < sam_moore> Ah, I can't, because basically they have total control over their own fork
+21:35 < sam_moore> Everyone just remember to fetch from upstream before you do work and issue a pull request when you are done, and hopefully things will stay relatively in sync.
+21:50 -!- Callum__ [~chatzilla@220-253-137-113.dyn.iinet.net.au] has quit [Ping timeout]
+--- Day changed Mon Aug 05 2013
+00:00 -!- Irssi: #mctxuwa_softdev: Total of 1 nicks [0 ops, 0 halfops, 0 voices, 1 normal]
