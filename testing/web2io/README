@@ -1,0 +1,6 @@
+This software will implement an interface between requests via HTTP and low level sensors/control on the server.
+
+Briefly investigated CGI scripts. Realised that interprocess communication will be difficult and complex.
+Low level sensors will be polled continuously, but the client will not be continuously receiving information.
+
+Currently looking at implementing webserver and low level sensors/control in the same program on the server.
