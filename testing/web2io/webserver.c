@@ -4,13 +4,13 @@
  * 
  */
 
-#define _POSIX_C_SOURCE 200809L // needed for some low level POSIX stuff to work
+#define _POSIX_C_SOURCE 200809L // needed for some POSIX stuff to work
 
 // --- Standard headers --- //
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h> // string helper functions
-#include <wctype.h> // wide character classication (white space)
+#include <ctype.h> // character types
 #include <signal.h> // for signal handling
 
 // --- Custom headers --- //
@@ -33,7 +33,12 @@ void ParseArguments(int argc, char ** argv)
 {
 	options.program = argv[0];
 	options.verbosity = LOGDEBUG;
-	options.port = 8080; // Using 8080 instead of 80 for now because to use 80 you have to run the program as root
+	if (argc > 1)
+		options.port = atoi(argv[1]); // Allow us change the port for testing (I keep getting "address in use" errors)
+	else
+		options.port = 8080; // Using 8080 instead of 80 for now because to use 80 you have to run the program as root
+	options.sfd = -1;
+	options.bound_sfd = -1;
 	log_print(LOGDEBUG, "ParseArguments", "Called as %s with %d arguments.", options.program, argc);
 }
 
@@ -57,8 +62,16 @@ void SignalHandler(int sig)
 void Cleanup()
 {
 	log_print(LOGDEBUG, "Cleanup", "Begin cleanup.");
-	Network_close(options.sfd); // close socket
-	Network_close(options.bound_sfd); // unbind
+	if (options.sfd >= 0)
+	{
+		Network_close(options.sfd); // close socket
+		options.sfd = -1;
+	}
+	if (options.bound_sfd >= 0)
+	{
+		Network_close(options.bound_sfd); // unbind
+		options.bound_sfd = -1;
+	}
 	log_print(LOGDEBUG, "Cleanup", "Unbound from port %d successfully", options.port);
 	log_print(LOGDEBUG, "Cleanup", "Done.");
 
@@ -71,15 +84,39 @@ void Cleanup()
  * @param request - The request string
  * @param sfd - Socket to respond through
  */
-void Get(const char * request, int sfd)
+void Get(char * request, int sfd)
 {
-	log_print(LOGDEBUG, "Get", "Got GET request: %s", request);
+	log_print(LOGDEBUG, "Get", "Got GET request: \"%s\"", request);
+
+	int i = 0;
+	while (!isspace(request[++i]) && request[i] != '\0'); //NOTE: Don't need to check first character
+	request[i] = '\0';
+
 	char response[BUFSIZ];
-
+	int len = 0;
 	// TODO: Magical low level interfacing stuff!
-
-	int len = sprintf(response, "Content-type: text/plain\n\nYou requested %s using GET\n", request);
-	write(sfd, response, len);
+	if (strcmp("/sensor", request) == 0) // dummy test
+	{
+		len = sprintf(response, "SENSOR OFFLINE\n");
+	}
+	else
+	{
+		FILE * f = fopen(request+1, "r");
+		if (f == NULL)
+		{
+			log_print(LOGWARN, "Get", "File \"%s\" doesn't exist", request+1);
+			len = sprintf(response, "You requested \"%s\" using GET\n", request);
+		}
+		else
+		{
+			while (fgets(response, sizeof(response), f) != NULL)
+			{
+				write(sfd, response, strlen(response));
+			}
+		}
+	}
+	if (len > 0)
+		write(sfd, response, len);
 }
 
 /**
@@ -88,15 +125,29 @@ void Get(const char * request, int sfd)
  * @param request - The request string
  * @param sfd - Socket to respond through
  */
-void Post(const char * request, int sfd)
+void Post(char * request, int sfd)
 {
-	log_print(LOGDEBUG, "Post", "Got POST request: %s", request);
+	log_print(LOGDEBUG, "Post", "Got POST request: \"%s\"", request);
+	int i = 0;
+	while (!isspace(request[++i]) && request[i] != '\0'); //NOTE: Don't need to check first character
+	request[i] = '\0';
+
 	char response[BUFSIZ];
+	int len = 0;
 
 	// TODO: Magical low level interfacing stuff!
 
-	int len = sprintf(response, "Content-type: text/plain\n\nYou requested %s using POST\n", request);
-	write(sfd, response, len);
+
+	if (strcmp("/actuator", request) == 0) // dummy test
+	{
+		len = sprintf(response, "ACTUATOR OFFLINE\n");
+	}
+	else
+	{	
+		len = sprintf(response, "You requested \"%s\" using POST\n", request);
+	}
+	if (len > 0)
+		write(sfd, response, len);
 
 }
 
@@ -138,17 +189,21 @@ int main(int argc, char ** argv)
 			char buffer[BUFSIZ]; //NOTE: Won't be able to respond to requests longer than BUFSIZ
 			// read a request
 			int len = read(options.sfd, buffer, sizeof(buffer));
-			log_print(LOGDEBUG, "main", "Read %d characters. Buffer is %s", len, buffer);
+			log_print(LOGDEBUG, "main", "Read %d characters. Buffer is \"%s\"", len, buffer);
 
 			// Parse request
 			for (int i = 0; i < sizeof(buffer) && buffer[i] != '\0'; ++i)
 			{
 				// Look for "GET" or "POST" followed by a whitespace
-				if (iswspace(buffer[i])) // whitespace
+				if (isspace(buffer[i])) // whitespace
 				{
-					while (iswspace(buffer[++i]) && buffer[i] != '\0'); // Skip whitespace
+					while (isspace(buffer[++i]) && buffer[i] != '\0'); // Skip whitespace
 					char * req = buffer+i; // set request string
-					buffer[i] = '\0'; // terminate request type
+				
+					buffer[i-1] = '\0'; // terminate request type
+					while (buffer[++i] != '\n' && buffer[i] != '\0'); // find next newline
+					buffer[i-1] = '\0';
+					
 					if (strcmp("GET", buffer) == 0) // Compare with "GET"
 					{
 						Get(req, options.sfd);
@@ -159,8 +214,8 @@ int main(int argc, char ** argv)
 					}
 					else // Unknown request
 					{
-						log_print(LOGWARN, "main", "Unrecognised request type %s (request %s)", buffer, req);
-						char response[] = "Content-type: text/plain\n\nError: Unrecognised request";
+						log_print(LOGWARN, "main", "Unrecognised request type \"%s\" (request \"%s\")", buffer, req);
+						char response[] = "Error: Unrecognised request\n";
 						write(options.sfd, response, sizeof(response));
 					}
 					break;
@@ -169,7 +224,10 @@ int main(int argc, char ** argv)
 
 			// Close connection
 			Network_close(options.sfd);
+			Network_close(options.bound_sfd);
+			options.sfd = -1;
 			log_print(LOGDEBUG, "main", "Closed connection to client");
+			break;
 	}
 
 
