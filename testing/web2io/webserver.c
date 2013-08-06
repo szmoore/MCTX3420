@@ -93,8 +93,12 @@ void Get(char * request, int sfd)
 	request[i] = '\0';
 
 	char response[BUFSIZ];
-	int len = 0;
 	// TODO: Magical low level interfacing stuff!
+
+	int len = sprintf(response, "HTTP/1.1 200 OK\nContent-type: text/html\n\n");
+	write(sfd, response, len);
+	len = 0;
+
 	if (strcmp("/sensor", request) == 0) // dummy test
 	{
 		len = sprintf(response, "SENSOR OFFLINE\n");
@@ -133,7 +137,9 @@ void Post(char * request, int sfd)
 	request[i] = '\0';
 
 	char response[BUFSIZ];
-	int len = 0;
+	int len = sprintf(response, "HTTP/1.1 200 OK\nContent-type: text/html\n\n");
+	write(sfd, response, len);
+	len = 0;
 
 	// TODO: Magical low level interfacing stuff!
 
@@ -224,10 +230,8 @@ int main(int argc, char ** argv)
 
 			// Close connection
 			Network_close(options.sfd);
-			Network_close(options.bound_sfd);
 			options.sfd = -1;
 			log_print(LOGDEBUG, "main", "Closed connection to client");
-			break;
 	}
 
 
