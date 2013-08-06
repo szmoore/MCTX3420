@@ -308,3 +308,78 @@
 21:50 -!- Callum__ [~chatzilla@220-253-137-113.dyn.iinet.net.au] has quit [Ping timeout]
 --- Day changed Mon Aug 05 2013
 00:00 -!- Irssi: #mctxuwa_softdev: Total of 1 nicks [0 ops, 0 halfops, 0 voices, 1 normal]
+07:51 -!- james__ [~chatzilla@CPE-58-160-245-152.wa.bigpond.net.au] has joined #mctxuwa_softdev
+08:13 -!- james__ [~chatzilla@CPE-58-160-245-152.wa.bigpond.net.au] has quit [Ping timeout]
+10:29 -!- Callum_ [~androirc@130.95.109.236] has joined #mctxuwa_softdev
+10:33 -!- Callum_ [~androirc@130.95.109.236] has quit ["AndroIRC - Android IRC Client ( http://www.androirc.com )"]
+11:01 -!- james__ [~chatzilla@130.95.117.8] has joined #mctxuwa_softdev
+11:19 -!- Callum [~Callum@130.95.248.224] has joined #mctxuwa_softdev
+11:19 < Callum> hallo
+11:29 < sam_moore> Hi
+11:30 < sam_moore> I've spoken to Omid from the electronics team, they are in charge of the "microcontroller"
+11:31 < sam_moore> Apparently they think a raspberry pi is a good choice
+11:31 < sam_moore> I told him we thought we might need a lower level device to do the ADC/DAC in particular
+11:32 < sam_moore> But they seem to think a raspberry pi by itself will work
+11:33 < sam_moore> I'm kind of not sure who's responsible for this part, since we have "server hardware" and they have "microcontroller" and the raspberry pi is sort of both
+11:33 < sam_moore> But if we agree we want a raspberry pi it probably won't be an issue
+11:33 < sam_moore> Also apparently the unit coordinators recommended the raspberry pi as well
+11:34 < Callum> Yea he did
+11:34 < james__> Well we are using the raspberry pi as a server
+11:34 < james__> And we can bootstrap microcontrollers onto it
+11:34 < james__> So i guess we are in charge of the pi
+11:35 < james__> And the are in charge of the hardware around it
+11:35 < james__> *they
+11:35 < sam_moore> Seems logical
+11:36 < sam_moore> I don't know if you get email notifications; I did a block diagram using the ideas from our first meeting
+11:36 < sam_moore> I kind of added some thoughts of my own
+11:38 < sam_moore> Hopefully it makes sense
+11:41 < sam_moore> If either of you gets time, would you like to start typing some of the progress report?
+11:51 -!- Callum [~Callum@130.95.248.224] has quit [Ping timeout]
+11:51 < james__> Do we have to submit a progress report?  Because the guide to mechatronics project work that was on lms said we had to do some things for week 1 but not that
+11:52 < sam_moore> I'm pretty sure we do
+11:52 < sam_moore> Hang on
+11:53 < sam_moore> All teams are expected to report next monday (see the report format in the unit outline/overview).
+11:53 < sam_moore> All teams must review their sub-system and provide high level detail of what is required.
+11:54 < sam_moore>  All team must take an integrated approach. (I assume this means we have to start talking to other teams ASAP)
+11:54 < sam_moore> I think the block diagram is a good start for the high level detail
+11:54 < sam_moore> Then make some notes about how we're collaborating using git
+11:55 < james__> git and irc
+11:55 < sam_moore> We should decide whether Rowan or I will be the meeting convener
+11:56 < james__> I think you
+11:56 < james__> Just because you actually know what is going on
+11:56 < sam_moore> Yes, I'm happy to do it and I think I can do a good job
+11:56 < sam_moore> I just don't want to try and take over the group or something
+11:56 < sam_moore> I have a good idea of what's going on, but we'll still need everyone to contribute
+11:57 < sam_moore> I'm not a particular expert in any area, I just sort of know enough to have a general idea of how to approach things
+11:57 < james__> Its important that the person who represents us has a firm knowledge base of whats possible and what we plan to do. Ultimately you are the person who best fills those requirements
+11:58 < sam_moore> Ok, thanks, if everyone agrees we'll tell Rowan that when we meet
+11:58 < sam_moore> And he can still talk to his friends for us, in fact the more of us that can communicate with the other teams the better
+11:59 < james__> True
+12:00 < james__> there isn't anything that says he can't talk to others
+12:00 < sam_moore> Omid said his team was going to rotate the meeting convener, maybe we could try that later on once everyone has a better idea of what we're doing
+12:00 < sam_moore> Anyway, I should do some other work, see you at 2pm
+12:01 < james__> Yeah might be worth it.  Gives everyone a taster
+12:01 < james__> okay see you then
+14:45 -!- justin_kruger [~justinkru@130.95.99.119] has joined #mctxuwa_softdev
+15:00 -!- james__ [~chatzilla@130.95.117.8] has quit [Ping timeout]
+15:34 -!- justin_kruger [~justinkru@130.95.99.119] has quit [EOF From client]
+18:26 -!- Callum__ [~chatzilla@203.59.10.8] has joined #mctxuwa_softdev
+20:38 < sam_moore> I'm going to try using the GitHub issues and milestones thing
+20:39 < sam_moore> It might help with keeping track of what we need to do and what we've done
+20:45 -!- justin_kruger [~justinkru@125.253.101.228] has joined #mctxuwa_softdev
+20:50 < sam_moore> I think we had some difficulty setting specific goals for this week
+20:50 < sam_moore> I can try and put together some longer term goals as a start, if that's helpful
+20:51 < sam_moore> Hmm
+20:52 < sam_moore> We weren't given a lot of requirements that the guy was asking us about
+21:06 < sam_moore> So the most important task seems to be "determine those requirements"
+21:07 < sam_moore> Well, we talked about it in the meeting, but I'm going to make GitHub issues for each of the areas so we have a good record
+21:32 < Callum__> Sam are you talking to yourself or am i not just seeing the other messages?
+21:35 < sam_moore> Yeah, just ranting
+21:36 < sam_moore> Well if you read the messages, then I was talking to you :P
+21:37 < Callum__> haha just they seemed like they were structured like you were responding to someone
+21:39 < sam_moore> I guess that's how I'm used to using IRC, people tend to say stuff broadly directed at anyone even though they won't get an immediate reply
+21:39 < sam_moore> Or even if they don't need a reply
+21:45 < Callum__> Fair enough
+21:51 -!- justin_kruger [~justinkru@125.253.101.228] has quit [Ping timeout]
+--- Day changed Tue Aug 06 2013
+00:33 -!- Callum__ [~chatzilla@203.59.10.8] has quit [EOF From client]
