@@ -383,3 +383,89 @@
 21:51 -!- justin_kruger [~justinkru@125.253.101.228] has quit [Ping timeout]
 --- Day changed Tue Aug 06 2013
 00:33 -!- Callum__ [~chatzilla@203.59.10.8] has quit [EOF From client]
+10:48 -!- Callum__ [~chatzilla@203.59.10.8] has joined #mctxuwa_softdev
+11:10 -!- james__ [~chatzilla@130.95.55.134] has joined #mctxuwa_softdev
+12:05 -!- james__ [~chatzilla@130.95.55.134] has quit [Ping timeout]
+12:28 -!- james__ [~chatzilla@130.95.89.85] has joined #mctxuwa_softdev
+12:57 -!- james__ [~chatzilla@130.95.89.85] has quit [Ping timeout]
+15:01 -!- justin_kruger [~justinkru@125.253.101.228] has joined #mctxuwa_softdev
+15:02 -!- justin_kruger [~justinkru@125.253.101.228] has quit [EOF From client]
+15:12 < Callum__> Is the only image processing that needs doing detecting the edge of the can? (and doing measuring how it changes with time etc)
+15:30 -!- james__ [~chatzilla@130.95.89.3] has joined #mctxuwa_softdev
+15:39 < Callum__> hey
+15:39 < james__> what up
+15:39 < sam_moore> Hi
+15:39 < Callum__> Is the only image processing that needs doing detecting the edge of the can? (and doing measuring how it changes with time etc)
+15:40 < sam_moore> Callum__: I think so
+15:40 < james__> As far as i understand it yes
+15:40 < Callum__> plus just booted up ubuntu on laptop. havent touched it since i did C programming a year ago xD
+15:40 < sam_moore> It would also be nice to just have unprocessed images streamed to the GUI
+15:40 < Callum__> yea what i was thinking
+15:41 < Callum__> firstly, i can look into only processing a portion of the image, so we could get away with a larger resolution
+15:41 < sam_moore> With the server side interface, I'm starting to think I'll ditch the apache2 webserver + CGI and integrate a minimal webserver + the lower level stuff into the same program
+15:41 < Callum__> and openCV has a couple of algorithms to detect edges
+15:41 < Callum__> so will likely look into one or 2 of those
+15:41 < sam_moore> Just thinking about all the layers that are involved with the CGI approach... it probably won't turn out easier to code, and it will definitely be slower
+15:42 < sam_moore> Plus, if we really care about performance, the apache2 webserver has a lot of features we don't care about
+15:42 < james__> As long as i can access the raw files etc i should be able to display it via a gui
+15:42 < sam_moore> The main one being it's designed to cope with multiple users well, and we want to configure it to only allow ONE user
+15:43 < sam_moore> Yes, that sounds good
+15:44 < Callum__> responding to who? me or james?
+15:44 < sam_moore> Um... both now
+15:44 < Callum__> haah
+15:45 < sam_moore> Anyway, I've realised that our software will place an upper limit on the quality of the sensors
+15:45 < james__> true
+15:45 < sam_moore> Since we weren't given a requirement on quality, we should aim to get it as high as feasible
+15:45 < sam_moore> But sensors group needs to have some idea of the upper limit that our software will place on quality
+15:45 < Callum__> yea. 
+15:46 < james__> Start simple and ramp it up until the hardware breaks?
+15:46 < sam_moore> No point streaming 1000 images a second if the JavaScript GUI can't send requests that fast.
+15:46 < sam_moore> Yep.
+15:46 < sam_moore> I know you're supposed to do task break downs and all that time management stuff, but the fact is we need to experiment with actual code to work out the best implementation
+15:47 < james__> yeah. break it down into code and test code?
+15:48 < sam_moore> Maybe?
+15:49 < sam_moore> Well, we've got a high level idea of the software
+15:49 < sam_moore> The first tasks should be "decide on the best software implementation of each level"
+15:49 < sam_moore> To do that we need to test some minimalistic implementations
+15:50 < Callum__> yea
+15:50 < sam_moore> So, to set a goal for week 2, can it be "Decide on software implementation at each point in the block diagram"
+15:51 < sam_moore> And "Determine upper limit on data transfer rate through software systems"
+15:51 < sam_moore> The second one might take a bit longer.
+15:52 < Callum__> githubs down for maintenance. hahah
+15:52 < sam_moore> That happened like 2 seconds after I submitted a comment on the CGI stuff
+15:53 < sam_moore> For a while it was showing me a Unicorn (?)
+15:53 < Callum__> yea i got that before
+15:53 < Callum__> when trying to access on my laptop
+15:53 < sam_moore> Well... we have the git.ucc server
+15:54 < sam_moore> But I was starting to like the Issues and Comments and all those actual features
+15:54 < Callum__> hmm. doubt it will be down for long. will have to see
+16:10 < Callum__> back up
+17:22 -!- james__ [~chatzilla@130.95.89.3] has quit [Ping timeout]
+18:09 -!- RowanHeinrich [~RowanHein@124.171.231.242] has joined #mctxuwa_softdev
+18:10 -!- RowanHeinrich [~RowanHein@124.171.231.242] has quit [""]
+18:34 -!- Rowan [~Rowan@124.171.231.242] has joined #mctxuwa_softdev
+18:35 < Rowan> test test
+18:35 < Rowan> ??
+18:43 < Callum__> Hey
+18:56 -!- github [~github@192.30.252.50] has joined #mctxuwa_softdev
+18:56 -github:#mctxuwa_softdev- [MCTX3420] none pushed 2 new commits to master: http://git.io/ZDMvew
+18:56 -github:#mctxuwa_softdev- MCTX3420/master 64b0cd9 Sam Moore: Investigate software for interfacing with hardware via HTTP requests...
+18:56 -github:#mctxuwa_softdev- MCTX3420/master 5afaa23 Sam Moore: Merge branch 'master' of github:szmoore/MCTX3420
+18:56 -!- github [~github@192.30.252.50] has left #mctxuwa_softdev []
+18:57 -!- github [~github@192.30.252.48] has joined #mctxuwa_softdev
+18:57 -github:#mctxuwa_softdev- [MCTX3420] none pushed 1 new commit to master: http://git.io/1nMEMA
+18:57 -github:#mctxuwa_softdev- MCTX3420/master 9579cea Sam Moore: Makefile for webserver test...
+18:57 -!- github [~github@192.30.252.48] has left #mctxuwa_softdev []
+19:41 -!- Rowan [~Rowan@124.171.231.242] has quit [Ping timeout]
+23:09 -!- Callum__ [~chatzilla@203.59.10.8] has quit [EOF From client]
+23:21 -!- justin_kruger [~justinkru@125.253.101.228] has joined #mctxuwa_softdev
+23:21 -!- justin_kruger [~justinkru@125.253.101.228] has quit [EOF From client]
+--- Day changed Wed Aug 07 2013
+00:24 -!- github [~github@192.30.252.60] has joined #mctxuwa_softdev
+00:24 -github:#mctxuwa_softdev- [MCTX3420] none pushed 1 new commit to master: http://git.io/5DEPzw
+00:24 -github:#mctxuwa_softdev- MCTX3420/master fe2fc11 Sam Moore: More work on webserver test...
+00:24 -!- github [~github@192.30.252.60] has left #mctxuwa_softdev []
+00:52 -!- github [~github@192.30.252.53] has joined #mctxuwa_softdev
+00:52 -github:#mctxuwa_softdev- [MCTX3420] none pushed 1 new commit to master: http://git.io/r6aFJw
+00:52 -github:#mctxuwa_softdev- MCTX3420/master e615433 Sam Moore: Add necessary HTTP response headers...
+00:52 -!- github [~github@192.30.252.53] has left #mctxuwa_softdev []
