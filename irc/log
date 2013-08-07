@@ -469,3 +469,31 @@
 00:52 -github:#mctxuwa_softdev- [MCTX3420] none pushed 1 new commit to master: http://git.io/r6aFJw
 00:52 -github:#mctxuwa_softdev- MCTX3420/master e615433 Sam Moore: Add necessary HTTP response headers...
 00:52 -!- github [~github@192.30.252.53] has left #mctxuwa_softdev []
+01:00 -!- github [~github@192.30.252.48] has joined #mctxuwa_softdev
+01:00 -github:#mctxuwa_softdev- [MCTX3420] none pushed 1 new commit to master: http://git.io/eZPWcQ
+01:00 -github:#mctxuwa_softdev- MCTX3420/master b101617 Sam Moore: Automatic commit of irc logs
+01:00 -!- github [~github@192.30.252.48] has left #mctxuwa_softdev []
+10:07 -!- Irssi: #mctxuwa_softdev: Total of 1 nicks [0 ops, 0 halfops, 0 voices, 1 normal]
+11:15 -!- justin_kruger [~justinkru@125.253.101.228] has joined #mctxuwa_softdev
+11:15 -!- justin_kruger [~justinkru@125.253.101.228] has quit [EOF From client]
+19:36 -!- Callum__ [~chatzilla@203.59.10.8] has joined #mctxuwa_softdev
+20:43 -!- Irssi: #mctxuwa_softdev: Total of 2 nicks [0 ops, 0 halfops, 0 voices, 2 normal]
+20:45 -github:#mctxuwa_softdev- [MCTX3420] none pushed 3 new commits to master: http://git.io/Dhb-Fg
+20:45 -github:#mctxuwa_softdev- MCTX3420/master fe2fc11 Sam Moore: More work on webserver test...
+20:45 -github:#mctxuwa_softdev- MCTX3420/master e615433 Sam Moore: Add necessary HTTP response headers...
+20:45 -github:#mctxuwa_softdev- MCTX3420/master b101617 Sam Moore: Automatic commit of irc logs
+20:45 -github:#mctxuwa_softdev- [MCTX3420] none pushed 3 new commits to master: http://git.io/Dhb-Fg
+20:45 -github:#mctxuwa_softdev- MCTX3420/master fe2fc11 Sam Moore: More work on webserver test...
+20:45 -github:#mctxuwa_softdev- MCTX3420/master e615433 Sam Moore: Add necessary HTTP response headers...
+20:45 -github:#mctxuwa_softdev- MCTX3420/master b101617 Sam Moore: Automatic commit of irc logs
+20:46 < sam_moore> Whoops, I was trying to make it less spammy and ended up making it spam us
+20:53 < Callum__> haha nice work
+20:58 < sam_moore> I have a minimal web server in C done
+20:58 < sam_moore> It was surprisingly easy actually
+21:05 -github:#mctxuwa_softdev- [MCTX3420] none pushed 2 new commits to master: http://git.io/Tui0FA
+21:05 -github:#mctxuwa_softdev- MCTX3420/master c1321a7 Sam Moore: Test webserver with minimalist JavaScript...
+21:05 -github:#mctxuwa_softdev- MCTX3420/master 1b2939d Sam Moore: Merge branch 'master' of github:szmoore/MCTX3420...
+21:07 < sam_moore> Hooray, more spam
+21:07 < sam_moore> Maybe I should just turn that off.
+21:35 < Callum__> Maybe, its kinda goods to know when people commit things though, restricted to one line would be good
+23:23 -!- Callum__ [~chatzilla@203.59.10.8] has quit [Ping timeout]
