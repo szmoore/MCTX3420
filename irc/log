@@ -502,3 +502,43 @@
 08:59 -!- Callum_ [~androirc@101.119.30.118] has quit ["AndroIRC - Android IRC Client ( http://www.androirc.com )"]
 14:12 -!- justin_kruger [~justinkru@125.253.101.228] has joined #mctxuwa_softdev
 14:12 -!- justin_kruger [~justinkru@125.253.101.228] has quit [EOF From client]
+--- Day changed Sun Aug 11 2013
+11:18 -!- Callum__ [~chatzilla@124-171-171-92.dyn.iinet.net.au] has joined #mctxuwa_softdev
+12:57 -!- justin_kruger [~justinkru@125.253.101.228] has joined #mctxuwa_softdev
+13:55 -!- justin_kruger [~justinkru@125.253.101.228] has quit [EOF From client]
+14:09 < Callum__> actually so much work to do already. 
+14:47 < sam_moore> Yep
+15:15 < Callum__> well iv spent some time thinking over this, finally get around to writing it down. so iv probably spent close to 4 hours or so thinking about it (while doing other things) but really only spent an hour and a half according to diary
+15:25 < sam_moore> We can always flesh out people's reports with graphs and stuff
+15:27 < Callum__> well we doing 1 per person or group?
+15:29 < sam_moore> 1 per person is the safest way to go I think
+15:29 < sam_moore> We can always summarise them
+15:30 < Callum__> well, tbh i think we should do 1 per person and summarise, but not necessarily go for a full page. thing is not sure how they expect us to do 1 page for 5 people AND be detailed
+15:30 < sam_moore> Yep
+15:31 < Callum__> so they might end up making it 1 per person anyway. 
+15:31 < Callum__> not very well thought out either way
+15:31 < sam_moore> Let's just submit a multiple page report, with a bit from each person and a summary. If some people have less than a page that's fine.
+15:32 < Callum__> Yea, agreed thats the best way to go about it. Unless they complain about it being too long
+15:32 < sam_moore> That's why we include a summary :P
+15:33 < sam_moore> Although, it might be difficult to make the summary actually summarise things, since everyone's already using pretty concise summaries
+15:33 < sam_moore> Oh well, writing more stuff is safer to start with.
+15:34 < Callum__> hmm. its kind of a pain though, write it all down in your book...oh look now i need to rewrite most of it for a report..
+15:34 < sam_moore> Ah crap, I forgot about the book
+15:34 < Callum__> haha
+15:34 < sam_moore> Yeah... write it all down in the git commit messages, write it all down in the report, write it all down in the diary...
+15:35 < sam_moore> I suppose in the "Real World" you have to do stuff like this
+15:35 < Callum__> yea true 
+18:16 < Callum__> Not sure when il get round to writing what i'v done but il do it tonight some time. We finalising it tomorrow and printing it off then?
+18:27 < sam_moore> Yes, I'd like to have it done before the meeting, or at least do it first thing in the meeting
+18:27 < sam_moore> Then there are some things I need to ask everyone about to progress with my part of the code
+18:27 < sam_moore> Since I'm sort of doing the bit in the middle that gets all the other bits to talk to each other
+18:28 < sam_moore> I think it would be good to keep all the raspberry pi code in a single process, running in seperate threads
+18:29 < sam_moore> But to do that we'd need everyone to use the same language
+18:30 < sam_moore> Also we need to start thinking about the structure of the system in a bit more detail
+18:31 < sam_moore> Like: We can't just transfer data straight to a GUI, because the user will want to use the GUI to start the experiment, then go away and come back later to view results (and possibly save them on their own machine)
+18:32 < sam_moore> Also if we do transfer everything straight to the GUI we'd be limited by the speed of the GUI, and JavaScript requests are slow
+18:34 < Callum__> yea
+18:34 < sam_moore> Pretty easy to just dump stuff to a data file, but we probably also want the ability to do it in realtime
+18:35 < sam_moore> Anyway, good luck, see you tomorrow
+18:36 < Callum__> Alright, cya tomorrow them
+23:08 -!- Callum__ [~chatzilla@124-171-171-92.dyn.iinet.net.au] has quit [EOF From client]
