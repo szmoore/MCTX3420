@@ -545,3 +545,174 @@
 --- Day changed Mon Aug 12 2013
 13:10 -!- justin_kruger [~justinkru@130.95.180.147] has joined #mctxuwa_softdev
 13:10 -!- justin_kruger [~justinkru@130.95.180.147] has quit [EOF From client]
+--- Log closed Tue Aug 13 07:49:14 2013
+--- Log opened Tue Aug 13 07:55:27 2013
+07:55 -!- sam_moor1 [matches@motsugo.ucc.gu.uwa.edu.au] has joined #mctxuwa_softdev
+07:55 -!- Irssi: #mctxuwa_softdev: Total of 2 nicks [0 ops, 0 halfops, 0 voices, 2 normal]
+07:55 -!- Irssi: Join to #mctxuwa_softdev was synced in 9 secs
+07:59 -!- sam_moore [matches@motsugo.ucc.gu.uwa.edu.au] has quit [Ping timeout]
+10:01 -!- Callum [~chatzilla@124-171-171-92.dyn.iinet.net.au] has joined #mctxuwa_softdev
+10:01 < Callum> So apparently we have a new member..
+10:12 < sam_moor1> Yep, Jeremy Tan, apparently he's doing CS as well?
+10:13 < sam_moor1> So, with the two sources of confusion we have so far...
+10:13 < sam_moor1> 1. The Camera - Adrian thinks we need one, Sensors team doesn't, everyone needs to recheck calculations
+10:14 < sam_moor1> The "Can" team wanted to use some kind of tiny can with a relatively thick wall, Adrian recommended a Coke Can, Oliver used Rockstar Cans last year and recommended them
+10:14 < Callum> well, they may be right in saying we may not be able to do any proper processing on it
+10:14 < Callum> but we will need one to relay whats actually HAPPENING in the system
+10:14 < Callum> surely the sensors team see that..
+10:15 < sam_moor1> I guess, I told them in their meeting it would probably be useful
+10:15 < sam_moor1> Anyway...
+10:15 < sam_moor1> We all got in trouble for not communicating between teams well enough
+10:15 < sam_moor1> So now the 9am session is for teams to communicate (at least one member is meant to go)
+10:15 < Callum> how many people went to the lecture?
+10:15 < sam_moor1> About 6
+10:16 < Callum> haha
+10:16 < sam_moor1> I think only one team didn't have a representative, electronics?
+10:16 < Callum> hmm. thats not too bad then. 
+10:16 < Callum> but still, not really our fault communication was poor. we attempted to set up meetings and to convene with others.
+10:17 < Callum> The only other thing we could have done is actually told people, right we're meeting at this time. come or dont (then you'd have like 1 or 2 people at most)
+10:17 < sam_moor1> Yeah, I really think this project needed some kind of direction at the start
+10:17 < sam_moor1> I think that's what we're going to have to do
+10:18 < sam_moor1> We're going to have to be more assertive; we think we need Arduinos, electronics team doesn't seem to know, we should just say "Right, we're using some Arduinos"
+10:18 < sam_moor1> At least that's the vibe I got from Adrian
+10:18 < sam_moor1> Also what happened to my name
+10:18 < Callum> hmm ok. it would help if we had the team convener meeting to do that
+10:18 -!- You're now known as sam_moore
+10:19 < Callum> and no idea
+10:19 -!- Irssi: #mctxuwa_softdev: Total of 2 nicks [0 ops, 0 halfops, 0 voices, 2 normal]
+10:20 < sam_moore> Also, so far we've neglected physical details a bit
+10:20 < sam_moore> Lastly, we need to start ordering things as soon as possible
+10:21 < sam_moore> Oh, and we (as in, all teams) are supposed to have a schedule of tasks agreed upon
+10:21 < sam_moore> Right, I need to have lunch
+10:21 < sam_moore> *breakfast
+10:22 < sam_moore> Then I guess I can panic some more
+10:23 < Callum> haha. we'v only had 2 weeks to work on this really. We can pull it back.
+10:24 < sam_moore> The scary part is where they do a very similar project every year and no one ever succeeds :S
+10:25 < sam_moore> They seem to think simply throwing the entire class at it (instead of one team of 6) will make it work this time
+10:25 < sam_moore> Oh well, they can't just fail the entire class
+10:25 < sam_moore> It would be nice to actually succeed though
+10:30 < Callum> Yea, well even if it doesnt work a lot of the marking will come from the shit like the diary
+10:30 < Callum> but yes, it would be nice to see a can go boom
+11:57 < Callum> alright so am i still doing the taking images thing and storing it? Coz we pretty much need the camera. what we do with the images though dno
+11:58 < sam_moore> Just take the images and save them to a file for a start I guess
+12:00 < Callum> alright. 
+12:13 < Callum> I might reinstall linux on my laptop, stick with ubuntu or go debian?
+12:51 < sam_moore> I'd recommend debian
+12:51 < sam_moore> It's not that much harder to use, but it's closer to raspian
+13:06 < Callum> alright. any port better to use?
+13:15 < sam_moore> Oh, stick with "stable"
+13:15 < sam_moore> ie: Wheezy
+13:16 < sam_moore> No matter what you do, do NOT get "Sid"
+13:18 < Callum> nah i meant the architecture
+13:20 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+13:20 < jtanx> yallo
+13:20 < Callum> hey
+13:21 < sam_moore> Hi
+13:23 < jtanx> i should say that right now I cant access g19 because I haven't gone through the safety induction yet
+13:23 < sam_moore> Callum: The architecture shouldn't matter too much
+13:24 < Callum> we can let you in. As long as you don't do anything stupid it will be fine 
+13:24 < Callum> alright
+13:25 < sam_moore> We can just compile code on the RPi itself, or if that's too slow (I doubt it) there will be cross compilers
+13:25 < Callum> true
+13:25 < sam_moore> It's just nice to be able to run test software in debian
+13:25 < jtanx> so do you have access to an/the RPi and the other microcontrollers, or is that tba
+13:26 < sam_moore> We have access to "an" (not "the") RPi
+13:26 < Callum> rowan has an arduino too
+13:26 < sam_moore> Ah, that's good
+13:26 < Callum> atleast i think he said he did
+13:27 < Callum> just dont know the exact hardware we're using and won't get access to it for a few weeks atleast (hopefully not too long. need to make sure other teams are doing everything on time)
+13:27 < Callum> speaking of which we should write up a time schedule for our team and make sure a project one gets written up
+13:27 < sam_moore> Adrian said to allow for 6 weeks ordering time
+13:28 < sam_moore> Yeah, the entire class needs to agree on a schedule
+13:28 < Callum> hmm. true i guess, by the time adrian gets the bill of materials, clears it and the stuff gets ordered in
+13:28 < Callum> but at the current rate shit wont be chosen in time
+13:29 < jtanx> i'm surprised that not much has been done in three weeks
+13:29 < sam_moore> The problem is there are too many people working on this
+13:29 < Callum> its been less than 3 weeks though
+13:30 < sam_moore> Right. Let's make a schedule then.
+13:30 < sam_moore> Just a second
+13:30 < Callum> we only got the teams on like wed first week
+13:30 < jtanx> ok
+13:31 < Callum> And having 5-6 people per team across 6 teams without a project manager...makes sense
+13:31 < sam_moore> Haha
+13:31 < sam_moore> Ok, so I have an excel document
+13:31 < sam_moore> Anyone here actually made a schedule for a project?
+13:32 < jtanx> nope
+13:32 < sam_moore> Welp
+13:32 < jtanx> ms project was suggested in cits3200
+13:32 < jtanx> nice gantt chart and everything
+13:32 < sam_moore> Does it allow collaborative editing?
+13:33 < sam_moore> Also, is there an open source version :P
+13:33 < sam_moore> Ok, I've shared a google spreadsheet
+13:34 < jtanx> not likely haha although there was something called ms project server which might allow collaboraitve stuff
+13:34 < jtanx> you can get this all off msdnaa
+13:34 < jtanx> but since noone's used it before it might be better to stick with excel
+13:34 < sam_moore> Ok, let's just try and think what we need to get other teams to do, and what we need to do for other teams
+13:35 < Callum> HAHAH
+13:35 < sam_moore> Well
+13:35 < Callum> Hello everyone,
+13:35 < Callum> It appears that the lab signup sheets for GENG4402, the MECH/MCTX/Oil and Gas students have dissapeared from the desk at the stairwell.
+13:35 < Callum> Can you please check if you have it and return it as soon as possible? Many students still need to sign up. I will then scan and put online once complete so that you can check when your lab is.
+13:35 < Callum> PLEASE RETURN THE SHEETS.
+13:35 < Callum> Thank you
+13:35 < Callum> thats hilarious
+13:35 < jtanx> ~~
+13:36 < sam_moore> Oh dear
+13:36 < sam_moore> It strikes me that something like a Makefile, except a bit more GUI, would be good for this
+13:37 < jtanx> wait
+13:37 < jtanx> you lost me there - what are you referring to
+13:37 < Callum> ^
+13:37 < sam_moore> To compile C projects that involve several files, you use something called "make"
+13:37 < sam_moore> You write a Makefile for it
+13:37 < jtanx> yah
+13:38 < sam_moore> The Makefile has a list of targets and what they depend on
+13:38 < sam_moore> And how to make them once their dependency exists
+13:38 < jtanx> ok
+13:38 < sam_moore> Then you run "make" and it reads the make file and magically compiles everything in the right order
+13:38 < Callum> yea we get what make is
+13:39 < sam_moore> Ok, I was referring to the list of tasks
+13:39 < sam_moore> That depend on each other
+13:39 < jtanx> ook
+13:39 < jtanx> well
+13:39 < sam_moore> It was a bad joke
+13:39 < sam_moore> I am not seriously suggesting we use make to plan the project
+13:40 < Callum> hahahah
+13:40 < Callum> now that i would like to see :p
+13:40 < jtanx> um just with git
+13:40 < jtanx> i've never done pull requests before
+13:40 < sam_moore> Neither had we until last week :P
+13:41 < sam_moore> Basically you make your own fork of the repositoy, and there is a pull request button that lets you ask to have the changes merged back into the upstream repository
+13:42 < jtanx> ahh
+13:42 < jtanx> ok
+13:51 < jtanx> well that was pretty straight forward - I understand it now
+15:06 < sam_moore> I made a #mctxuwa channel for group representatives
+15:06 < sam_moore> I don't know if people will use it, but at least it's an attempt at something
+15:47 < Callum> tbh it makes more sense for us all to use one
+15:47 < Callum> unless the one for everyone is actually used often enough to justify us having our own
+16:11 < sam_moore> Yeah, there's nothing stopping people that aren't group representatives from joining it
+16:11 < sam_moore> It will certainly make it easier if there are more people talking to other teams directly than just the representative
+16:11 < sam_moore> We might still want our own for discussing the details of code
+16:12 < sam_moore> Speaking of which, I'm currently tidying up the test webserver code I wrote
+16:17 < sam_moore> Does: FunctionName, variable_name, Structure, Extern_FunctionName, g_global_variable seem suitable
+16:19 < sam_moore> Well, unless anyone objects before I've satisfied my obsessive compulsive urges, that's what it will be
+16:19 < sam_moore> Until then, it'll probably take a while, and find-replace is fast
+16:20 < sam_moore> Other than that, the style of comments/documentation in the test webserver is what I'll keep using
+16:22 < sam_moore> If someone wants to actually write code... it would be good to have a watchdog program that uses exec to start the main program and detects SIGCHLD when it crashes
+16:22 < sam_moore> Then we can put some kind of emergency "Turn all the things off!" in that
+16:57 < jtanx> what about something like this? http://stackoverflow.com/questions/696839/how-do-i-write-a-bash-script-to-restart-a-process-if-it-dies
+16:58 < sam_moore> Oh cool, that looks good
+17:03 < sam_moore> I'll be back later tonight, bye
+17:21 < jtanx> umm
+17:21 < jtanx> wow okay you're actually writing a webserver from the ground up?
+17:22 < jtanx> what if you just had software that got the results and then wrote that to a html/php file
+17:22 < jtanx> then you can just run nginx and serve it up
+17:45 < jtanx> or what about if you ran an sql server, so you update the database from your program
+17:46 < jtanx> then you can either use php to interface with the database
+17:46 < jtanx> or you could make some sort of api and serve the data in json format
+17:50 < jtanx> sqlite
+19:12 < jtanx> you could do something like this: http://pastebin.com/mEdbu4jR
+19:13 < jtanx> where instead of outputting html, you could make it output json, which is then interpreted by your actual webpage
+20:44 -!- Callum [~chatzilla@124-171-171-92.dyn.iinet.net.au] has quit [Ping timeout]
+20:49 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 22.0/20130618035212]"]
+20:56 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+22:40 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 22.0/20130618035212]"]
