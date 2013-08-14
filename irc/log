@@ -716,3 +716,153 @@
 20:49 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 22.0/20130618035212]"]
 20:56 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
 22:40 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 22.0/20130618035212]"]
+--- Day changed Wed Aug 14 2013
+07:58 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:13 < jtanx> I've done a version using fastcgi, which was surprisingly quite easy to set up
+09:13 < jtanx> see here: https://github.com/jtanx/MCTX3420/tree/master/testing/fastcgi-approach
+10:41 < sam_moore> That looks interesting, I'd prefer that to the PHP/database solution
+10:42 < sam_moore> My concern is: You have to query the web server to start the process, even though it keeps running
+10:42 < sam_moore> Also, I know "write a custom HTTP server" sounds scary, but it does actually work
+10:43 < jtanx> nah
+10:43 < jtanx> fastcgi
+10:43 < jtanx> the process is started once and always runs
+10:43 < jtanx> so you have a request loop
+10:44 < jtanx> wait
+10:44 < jtanx> how do you envision it working?
+10:45 < sam_moore> Oh, right, I see how the fastcgi approach would work, it's basically the same idea; you have something responding to HTTP queries in one thread, something dealing with sensors/actuators in seperate threads
+10:45 < jtanx> yeah
+10:46 < jtanx> except that you don't have to worry about maintaining your own webserver
+10:46 < sam_moore> Cool
+10:46 < sam_moore> I do think that the HTTP server isn't that hard, and it's mostly working
+10:46 < sam_moore> But we can probably switch to fastcgi
+10:48 < sam_moore> I mean, we still have to parse a query string right?
+10:48 < jtanx> well yes
+10:48 < jtanx> if your request was
+10:48 < jtanx> http://blah/cgi/?key=value&anotherkey=value2
+10:48 < jtanx> you'd get back key=value&anotherkey=value2
+10:48 < jtanx> as query string
+10:50 < jtanx> try it out here: http://124.169.120.181:8080/cgi
+10:51 < jtanx> (hopefully that forwards ok)
+10:51 < sam_moore> Yep, that's cool
+10:51 < sam_moore> The HTTP server I wrote basically does that
+10:51 < sam_moore> But if it really bothers you, I'm fine with switching to fastcgi :P
+10:52 < jtanx> well whatever works
+10:52 < jtanx> but I thought it might be more maintainable if you used something that already exists :P
+10:52 < sam_moore> Yeah, but thinking about it, what maintainence does the HTTP server require?
+10:53 < sam_moore> Oh well, it's a good idea
+10:53 < jtanx> for this situation not much
+10:57 < sam_moore> We can pretty easily start with a structure that would allow us to switch, but I'd lean towards keeping the custom HTTP server
+10:58 < sam_moore> Have you done multithreading in C before?
+10:58 < jtanx> in windows yes
+10:58 < jtanx> on linux not really
+10:58 < sam_moore> Ah, I've only done it on linux
+10:58 < jtanx> i did a bit in operating systems
+10:59 < jtanx> but kinda forgot
+10:59 < sam_moore> It shouldn't be too hard for our purposes
+11:00 < jtanx> that thing with running a custom webserver is that if anyone wants to reuse this in the future, i doubt they'd really like the idea of that
+11:01 < jtanx> say they had some new fangled thing that requires php
+11:01 < jtanx> which isn't going to work 
+11:01 < jtanx> but with a standard webserver like apache or nginx, it's really easy to just install an extra addon
+11:02 < sam_moore> I suppose... what would they need the new fangled php thing for?
+11:03 < jtanx> well that's the thing - for now I don't know, but it could be required
+11:03 < sam_moore> Yeah, good point
+11:03 < sam_moore> Ok, another reason to use an existing web server, is we might require some advanced features if we want to be serious about the safety stuff
+11:04 < sam_moore> For example, it would be a fair amount of work to add SSL to make the custom thing do https
+11:04 < jtanx> oh yeah
+11:04 < jtanx> that too
+11:04 < sam_moore> Also we might want some authentication on it
+11:04 < jtanx> nginx/apache are highly customisable
+11:05 < sam_moore> I've never used nginx, what are it'
+11:05 < sam_moore> s advantages over apache2?
+11:05 < jtanx> nginx
+11:05 < jtanx> yup
+11:05 < jtanx> its really good
+11:05 < sam_moore> Haha
+11:05 < jtanx> a lot of sites use it because it's fast
+11:05 < sam_moore> Fast is good
+11:05 < jtanx> faster than apache
+11:05 < sam_moore> Sold
+11:05 < sam_moore> Well, we only need one user as well
+11:05 < sam_moore> In fact, we deliberately do not want to have multiple clients able to use the thing at the same time
+11:05 < jtanx> haha true
+11:07 < sam_moore> Ok, so I think you've convinced me to use fastcgi
+11:07 < sam_moore> Most of the custom HTTP server was reused code, so I didn't waste too much time on it
+11:07 < jtanx> haha ok
+11:07 < jtanx> have you written one before?
+11:09 < sam_moore> Not specifically a HTTP server, but I've written a project for posix systems with a fair bit of networking
+11:09 < sam_moore> git.ucc.asn.au/?p=matches/swarm.git
+11:10 < jtanx> nice
+11:10 < sam_moore> It allows you to run a shell, eg: bash accross multiple machines at once
+11:11 < sam_moore> Not as useful as I thought it might be, but it was fun
+11:12 < jtanx> heh
+11:12 < jtanx> what did you end up using it for?
+11:13 < sam_moore> I was setting up a programming competition where you have AIs play against each other
+11:13 < sam_moore> I wanted to make a round robin
+11:13 < sam_moore> So I had a bash script setup to do that, but then I got impatient, because it would have to run the games in order
+11:14 < jtanx> oO
+11:14 < sam_moore> Well it turned out no one entered the competition, so I probably didn't need to go overboard
+11:14 < sam_moore> But maybe I can use it for something else
+11:15 < sam_moore> For the threading I'm thinking of using pthreads
+11:16 < sam_moore> The alternative is OpenMP, but it's more suited to numerical computation, rather than having seperate things talking to each other
+11:16 < jtanx> okay
+11:17 < sam_moore> My goal for this week was to have the framework started, so we just have some really basic threads running and then we can start implementing them
+11:17 < jtanx> yeah that would be good
+11:18 < sam_moore> If you want to do some work with the fastcgi part so that we'll be able to parse the query strings, that would probably be a good start
+11:18 < sam_moore> We don't have the exact details of pretty much anything yet
+11:18 < sam_moore> Maybe talk to James/Rowan about how the GUI is going to query the server
+11:19 < sam_moore> Also, did you see my suggested naming convention?
+11:19 < jtanx> no
+11:20 < sam_moore> I don't really mind, although I'd prefer not to have hungarian notation
+11:20 < sam_moore> As long as it'
+11:20 < sam_moore> s consistent
+11:21 < sam_moore> But the suggestion was: FunctionName, variable_name (local or member), Structure, ENUMVALUE, Extern_FunctionName, g_global
+11:21 < jtanx> okay I'll try to keep to that
+11:22 < sam_moore> Cool, I should probably go do something else
+12:33 < jtanx> i gotta go
+12:33 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 22.0/20130618035212]"]
+15:39 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+16:22 -!- justin_kruger [~justinkru@125.253.101.228] has joined #mctxuwa_softdev
+16:23 -!- justin_kruger [~justinkru@125.253.101.228] has quit [EOF From client]
+16:43 -!- jtanx_ [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+16:56 < jtanx_> a beagleboard
+16:56 < jtanx_> hmm
+16:58 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit [Ping timeout]
+16:58 -!- jtanx_ is now known as jtanx
+17:03 < jtanx> is it the beaglebone black?
+17:03 < jtanx> sounds interesting
+17:04 < sam_moore> They didn't specify
+17:04 < sam_moore> Oh right, I accidentally cut out his message
+17:04 < sam_moore> tl;dr "Beagle Board"
+17:04 < jtanx> the beagle board is around $125 though
+17:04 < sam_moore> Probably the Beaglebone black
+17:04 < sam_moore> Oh really
+17:04 < sam_moore> Heh
+17:04 < jtanx> yeah
+17:05 < jtanx> the beaglebone black is $45
+17:05 < jtanx> but just looking the A/D converter on the black has a max voltage of 1.8v
+17:05 < sam_moore> That's probably what they meant, since they said it is "not much more expensive"
+17:05 < sam_moore> That should be fine; the sensors team says things are in mV
+17:05 < jtanx> okay
+17:05 < jtanx> that's good
+17:05 < sam_moore> Really though... electronics should be asking the sensors team stuff like this
+17:06 < jtanx> heh yeah
+17:06 < sam_moore> They should probably have asked us if it was feasable for software
+17:06 < sam_moore> Maybe they had someone who knew it would be, but still
+17:06 < sam_moore> It looks like it is anyway, so crisis averted
+17:07 < jtanx> just with the sensors, I think that the diferences need to be amplified so it covers the full range of the A/D converter
+17:07 < sam_moore> Yes, the sensors guy knows that
+17:07 < jtanx> yeah so if its only 1.8v there's less range than 0-5v
+17:08 < jtanx> is that compensated enough by having a 12 bit a/d converter vs a 10 bit (i think arduino is 10 bit) converter
+17:10 < sam_moore> I think so; you get ~4x more resolution from the 12 bit ADC and lose ~3x from the lower range
+17:10 < sam_moore> Also there's no set requirement yet on what the resolution should be
+17:11 < jtanx> true
+17:11 < jtanx> well in any case the bb black sounds quite nice
+17:11 < sam_moore> Yep, it'll probably be good to use
+17:14 < sam_moore> I'm much happier now that we actually have regular verbal communication with the other teams
+18:23 < sam_moore> I'm looking into getting doxygen working for this
+18:59 < jtanx> for the documentation?
+18:59 < jtanx> seems good, but never used it before myself
+19:01 < jtanx> looks a lot like javadoc
+21:26 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 22.0/20130618035212]"]
+21:34 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+22:54 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 22.0/20130618035212]"]
