@@ -3,18 +3,16 @@
  * @purpose Declaration of structure to handle options passed to program
  */
 
-#include <stdint.h>
+#ifndef _OPTIONS_H
+#define _OPTIONS_H
 
 typedef struct
 {
 	const char * program; //name of program
-	uint8_t verbosity; // verbosity level
-	int port; // port to use for webserver
-	int bound_sfd; // socket webserver has bound to
-	int sfd; // socket connected to client
-	
+	int verbosity; // verbosity level
+
 } Options;
 
+extern Options g_options;
 
-
-extern Options options;
+#endif //_OPTIONS_H
