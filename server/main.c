@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <signal.h> // for signal handling
 #include <string.h> // string functions
+#include <pthread.h>
 
 // --- Custom headers --- //
 #include "log.h"

@@ -1,7 +1,7 @@
 # Makefile for rpi side server
 CXX = gcc
 FLAGS = -std=c99 -Wall -Werror -pedantic -g
-LIB = 
+LIB = -lpthread
 OBJ = log.o main.o
 RM = rm -f
 
