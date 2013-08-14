@@ -1,9 +1,10 @@
+
 /**
  * @file sensor.h
- * @purpose Declarations for sensor thread stuff
+ * @purpose Declarations for sensor thread related stuff
  */
 
-///TODO: Add more; this is currently just for testing
+
 
 #ifndef _SENSOR_H
 #define _SENSOR_H

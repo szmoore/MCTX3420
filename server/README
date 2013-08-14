@@ -1,7 +1,9 @@
-This code will run on the Raspberry Pi server.
+This code will run on the server.
 
 The software will implement an interface between requests made by a browser using HTTP and low level sensors/control on the server.
 
-Multiple threads will be used; one running a HTTP server, and one or more for interacting with sensors/actuators.
-A watchdog program should be created to start the main server program and handle software crashes.
+Multiple threads will be used; one responding to HTTP requests, and one or more for interacting with sensors/actuators.
+A watchdog bash script can becreated to start the main server program and handle software crashes.
+
+Note: Documentation can be generated using Doxygen.
 

@@ -16,8 +16,7 @@ static char * unspecified_funct = (char*)"???";
 // --- Function implementations --- //
 
 /**
- * @funct Log
- * @purpose Print a message to stderr
+ * Print a message to stderr
  * @param level - Specify how severe the message is.
 	If level is higher (less urgent) than the program's verbosity (see options.h) no message will be printed
  * @param funct - String indicating the function name from which this function was called.
@@ -72,8 +71,7 @@ void Log(int level, char * funct, char * fmt, ...)
 }
 
 /**
- * @funct Fatal
- * @purpose Handle a Fatal error in the program by printing a message and exiting the program
+ * Handle a Fatal error in the program by printing a message and exiting the program
 	CALLING THIS FUNCTION WILL CAUSE THE PROGAM TO EXIT
  * @param funct - Name of the calling function
  * @param fmt - A format string

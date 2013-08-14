@@ -1,6 +1,6 @@
 /**
  * @file main.c
- * @purpose Entry point to the program, starts threads, handles cleanup on program exit
+ * @purpose main and its helper functions, signal handling and cleanup functions
  */
 
 #define _POSIX_C_SOURCE 200809L // For strsignal to work
@@ -22,35 +22,31 @@ Options g_options; // options passed to program through command line arguments
 // --- Function definitions --- //
 
 /**
- * @funct ParseArguments
- * @purpose Parse command line arguments, set up an options variable
- * @param argc - Num args
- * @param argv - Array of args
- * @param opts - Pointer to options.  &g_options
+ * Parse command line arguments, initialise g_options
+ * @param argc - Number of arguments
+ * @param argv - Array of argument strings
  */
-void ParseArguments(int argc, char ** argv, Options * opts)
+void ParseArguments(int argc, char ** argv)
 {
-	opts->program = argv[0]; // program name
-	opts->verbosity = LOGDEBUG; // default log level
-	Log(LOGDEBUG, "ParseArguments", "Called as %s with %d arguments.", opts->program, argc);
+	g_options.program = argv[0]; // program name
+	g_options.verbosity = LOGDEBUG; // default log level
+	Log(LOGDEBUG, "ParseArguments", "Called as %s with %d arguments.", g_options.program, argc);
 }
 
 /**
- * @funct SignalHandler
- * @purpose Handle signals
- * @param sig - The signal
+ * Handle a signal
+ * @param signal - The signal number
  */
-void SignalHandler(int sig)
+void SignalHandler(int signal)
 {
 	// At the moment just always exit.
 	// Call `exit` so that Cleanup will be called to... clean up.
-	Log(LOGWARN, "SignalHandler", "Got signal %d (%s). Exiting.", sig, strsignal(sig));
+	Log(LOGWARN, "SignalHandler", "Got signal %d (%s). Exiting.", signal, strsignal(signal));
 	exit(sig);
 }
 
 /**
- * @funct Cleanup
- * @purpose Called when program exits
+ * Cleanup before the program exits
  */
 void Cleanup()
 {
@@ -60,8 +56,7 @@ void Cleanup()
 }
 
 /**
- * @funct main
- * @purpose Main entry point; start worker threads, setup signal handling, wait for threads to exit, exit
+ * Main entry point; start worker threads, setup signal handling, wait for threads to exit, exit
  * @param argc - Num args
  * @param argv - Args
  * @returns 0 on success, error code on failure
