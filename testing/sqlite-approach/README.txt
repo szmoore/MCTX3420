@@ -1,3 +1,5 @@
+Note: Should be discarded in favour of the fastcgi approach
+
 SQLite approach to interfacing with web frontend:
 
 *Main program reads in sensor data and updates the sqlite database 
