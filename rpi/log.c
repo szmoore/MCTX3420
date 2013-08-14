@@ -31,7 +31,7 @@ void Log(int level, char * funct, char * fmt, ...)
 		Fatal("Log", "Format string is NULL");
 
 	// Don't print the message unless we need to
-	if (level > options.verbosity) 
+	if (level > g_options.verbosity) 
 		return;
 
 	if (funct == NULL)
@@ -59,7 +59,7 @@ void Log(int level, char * funct, char * fmt, ...)
 	}
 
 	// Print: Program name, PID, severity string, function name first
-	fprintf(stderr, "%s [%d] : %s : %s - ", options.program, getpid(), severity, funct);
+	fprintf(stderr, "%s [%d] : %s : %s - ", g_options.program, getpid(), severity, funct);
 
 	// Then pass additional arguments with the format string to vfprintf for printing
 	va_list va;
@@ -93,7 +93,7 @@ void Fatal(char * funct, char * fmt, ...)
 	if (funct == NULL)
 		funct = unspecified_funct;
 
-	fprintf(stderr, "%s [%d] : %s : FATAL - ", options.program, getpid(), funct);
+	fprintf(stderr, "%s [%d] : %s : FATAL - ", g_options.program, getpid(), funct);
 
 	va_list va;
 	va_start(va, fmt);

@@ -13,6 +13,6 @@ typedef struct
 
 } Options;
 
-extern Options g_options;
+extern Options g_options; // global options structure
 
 #endif //_OPTIONS_H

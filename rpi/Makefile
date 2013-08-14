@@ -1,11 +1,11 @@
-# Makefile for web2io testing stuff
+# Makefile for rpi side server
 CXX = gcc
 FLAGS = -std=c99 -Wall -Werror -pedantic -g
 LIB = 
-OBJ = network.o log.o webserver.o
+OBJ = log.o main.o
 RM = rm -f
 
-BIN = webserver
+BIN = server
 
 $(BIN) : $(OBJ)
 	$(CXX) $(FLAGS) -o $(BIN) $(OBJ)
