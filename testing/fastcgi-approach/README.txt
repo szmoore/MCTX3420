@@ -4,7 +4,7 @@ process will receive responses from the browser in the response loop. Hence,
 sensor data can be read in another thread while the response loop runs.
 
 Setup:
-Compile fastcgi_test.c with:
+Compile fastcgi_test.c with: (the libfcgi-dev package must be installed)
 gcc fastcgi_test.c -lfcgi -o fastcgi_test
 
 Configure nginx to pass all requests to the address /cgi/ to the application:
