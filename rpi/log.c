@@ -11,12 +11,12 @@
 #include "options.h"
 
 // --- Static variables --- //
-static char * unspecified_funct = (char*)"???";
+static const char * unspecified_funct = "???";
 
 // --- Function implementations --- //
 
 /**
- * @funct Log
+ * @funct LogEx
  * @purpose Print a message to stderr
  * @param level - Specify how severe the message is.
 	If level is higher (less urgent) than the program's verbosity (see options.h) no message will be printed
@@ -25,36 +25,41 @@ static char * unspecified_funct = (char*)"???";
  * @param fmt - A format string
  * @param ... - Arguments to be printed according to the format string
  */
-void Log(int level, char * funct, char * fmt, ...)
+void LogEx(int level, const char * funct, ...)
 {
+	const char *fmt;
+	va_list va;
+	va_start(va, funct);
+	fmt = va_arg(va, const char*);
+	
 	if (fmt == NULL) // sanity check
-		Fatal("Log", "Format string is NULL");
+		FatalEx("Log", "Format string is NULL");
 
 	// Don't print the message unless we need to
-	if (level > g_options.verbosity) 
+	if (level > g_options.verbosity)
 		return;
 
 	if (funct == NULL)
 		funct = unspecified_funct;
 
 	// Make a human readable severity string
-	char severity[BUFSIZ];
+	const char *severity;
 	switch (level)
 	{
 		case LOGERR:
-			sprintf(severity, "ERROR");
+			severity = "ERROR";
 			break;
 		case LOGWARN:
-			sprintf(severity, "WARNING");
+			severity = "WARNING";
 			break;
 		case LOGNOTE:
-			sprintf(severity, "NOTICE");
+			severity = "NOTICE";
 			break;
 		case LOGINFO:
-			sprintf(severity, "INFO");
+			severity = "INFO";
 			break;
 		default:
-			sprintf(severity, "DEBUG");
+			severity = "DEBUG";
 			break;
 	}
 
@@ -62,8 +67,6 @@ void Log(int level, char * funct, char * fmt, ...)
 	fprintf(stderr, "%s [%d] : %s : %s - ", g_options.program, getpid(), severity, funct);
 
 	// Then pass additional arguments with the format string to vfprintf for printing
-	va_list va;
-	va_start(va, fmt);
 	vfprintf(stderr, fmt, va);
 	va_end(va);
 
@@ -72,21 +75,25 @@ void Log(int level, char * funct, char * fmt, ...)
 }
 
 /**
- * @funct Fatal
+ * @funct FatalEx
  * @purpose Handle a Fatal error in the program by printing a message and exiting the program
 	CALLING THIS FUNCTION WILL CAUSE THE PROGAM TO EXIT
  * @param funct - Name of the calling function
  * @param fmt - A format string
  * @param ... - Arguments to be printed according to the format string
  */
-void Fatal(char * funct, char * fmt, ...)
+void FatalEx(const char * funct, ...)
 {
+	const char *fmt;
+	va_list va;
+	va_start(va, funct);
+	fmt = va_arg(va, const char*);
 	
 	if (fmt == NULL)
 	{
 		// Fatal error in the Fatal function.
 		// (This really shouldn't happen unless someone does something insanely stupid)
-		Fatal("Fatal", "Format string is NULL");
+		FatalEx("Fatal", "Format string is NULL");
 		return; // Should never get here
 	}
 
@@ -95,8 +102,6 @@ void Fatal(char * funct, char * fmt, ...)
 
 	fprintf(stderr, "%s [%d] : %s : FATAL - ", g_options.program, getpid(), funct);
 
-	va_list va;
-	va_start(va, fmt);
 	vfprintf(stderr, fmt, va);
 	va_end(va);
 	fprintf(stderr, "\n");
