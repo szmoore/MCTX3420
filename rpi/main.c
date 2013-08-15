@@ -31,7 +31,7 @@ void ParseArguments(int argc, char ** argv, Options * opts)
 {
 	opts->program = argv[0]; // program name
 	opts->verbosity = LOGDEBUG; // default log level
-	Log(LOGDEBUG, "ParseArguments", "Called as %s with %d arguments.", opts->program, argc);
+	Log(LOGDEBUG, "Called as %s with %d arguments.", opts->program, argc);
 }
 
 /**
@@ -43,7 +43,7 @@ void SignalHandler(int sig)
 {
 	// At the moment just always exit.
 	// Call `exit` so that Cleanup will be called to... clean up.
-	Log(LOGWARN, "SignalHandler", "Got signal %d (%s). Exiting.", sig, strsignal(sig));
+	Log(LOGWARN, "Got signal %d (%s). Exiting.", sig, strsignal(sig));
 	exit(sig);
 }
 
@@ -53,8 +53,8 @@ void SignalHandler(int sig)
  */
 void Cleanup()
 {
-	Log(LOGDEBUG, "Cleanup", "Begin cleanup.");
-	Log(LOGDEBUG, "Cleanup", "Finish cleanup.");
+	Log(LOGDEBUG, "Begin cleanup.");
+	Log(LOGDEBUG, "Finish cleanup.");
 
 }
 
@@ -67,6 +67,7 @@ void Cleanup()
  */
 int main(int argc, char ** argv)
 {
+	ParseArguments(argc, argv, &g_options);
 	return 0;
 }
 
