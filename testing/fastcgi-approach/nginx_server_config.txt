@@ -1,5 +1,5 @@
         #Custom cgi
-        location ~ ^/cgi/([^?]*) {
+        location ~ ^/api/?([^?]*) {
                 fastcgi_pass 127.0.0.1:9005;
                 fastcgi_param  GATEWAY_INTERFACE  CGI/1.1;
                 fastcgi_param  SERVER_HOSTNAME    mctxsoft;
