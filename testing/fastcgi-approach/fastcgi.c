@@ -51,7 +51,7 @@ static char *KeyPair(char *in, const char **key, const char **value) {
 	}
 	//Split was not found, set to default value
 	*value = "";
-	return next ? next : "";
+	return next;
 }
 
 static void BeginResponse(int response_code, const char *module) {
