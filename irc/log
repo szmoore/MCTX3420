@@ -866,3 +866,123 @@
 21:26 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 22.0/20130618035212]"]
 21:34 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
 22:54 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 22.0/20130618035212]"]
+--- Day changed Thu Aug 15 2013
+01:20 -!- justin_kruger [~justinkru@125.253.101.228] has joined #mctxuwa_softdev
+01:20 -!- justin_kruger [~justinkru@125.253.101.228] has quit [EOF From client]
+07:58 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+08:21 < jtanx> hey
+08:22 < jtanx> just a suggestion for the logging functions, but you can use macros
+08:22 < jtanx> to get the function name (and even file name)
+08:22 < jtanx> v
+08:22 < jtanx> http://gcc.gnu.org/onlinedocs/cpp/Standard-Predefined-Macros.html
+08:23 < jtanx> so you can do stuff like #define Log(level, fmt, ...) LogReal(level, __func__, fmt, __VA_ARGS__)
+08:25 < jtanx> it should be c99 conformant
+09:15 < jtanx> I created a pull request anyway
+09:33 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 22.0/20130618035212]"]
+13:33 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+13:39 < sam_moore> Yeah, I probably should have looked at that
+13:46 < jtanx> back to the rpi+arduino
+13:47 < jtanx> didn't they know about the beagle board black, or can that not be used for some reason?
+13:48 < jtanx> beagle bone* black
+14:20 < sam_moore> I don't know what model they were looking at exactly
+14:20 < sam_moore> I told them the Beagle Bone was about $50, I haven't had much time to research it myself
+14:20 < sam_moore> I didn't know about the Beagle Board/Bone, which was why I suggeste the RPi + Arduino
+14:20 < sam_moore> They originally were just considering an Arduino
+14:21 < sam_moore> Which would not have been fun for the remote interfacing stuff
+14:21 < sam_moore> Well we could do it, but we wouldn't be able to have a nice web browser controlled GUI, probably some dedicated networked server/client with a GUI program installed on the client machine
+14:22 < sam_moore> Also image processing would have been interesting
+14:23 < sam_moore> Next time there's a combined groups meeting, hopefully we can talk to them more
+14:24 < jtanx> yeah
+14:24 < jtanx> there's quite a few
+14:24 < jtanx> there's a beagleboard which is ~150
+14:24 < jtanx> beaglebone which is ~90
+14:24 < jtanx> beaglebone black which is ~50
+14:24 < sam_moore> Right
+14:24 < sam_moore> So they were probably looking at the beaglebone for $90
+14:24 < jtanx> yeah probably
+14:24 < jtanx> it's weird because the black version has better specs, from what i can see
+14:25 < sam_moore> But still, even for $150, if it saves us 10 hours of writing code to interface the RPi with Arduinos, it will be worth it
+14:25 < jtanx> yeah exactly
+14:25 < sam_moore> Arduinos themselves cost a bit
+14:25 < jtanx> well
+14:25 < jtanx> you can get equivalents off ebay
+14:25 < jtanx> like an uno is $10
+14:26 < sam_moore> The only issue with the beaglebone to avoid having to use arduinos as well, is whether it has enough ADC by itself
+14:26 < jtanx> yeah
+14:26 < jtanx> well how many sensors are needed
+14:26 < sam_moore> If it doesn't, you might have to add an Arduino or two anyway
+14:26 < jtanx> you could just add on an adc chip
+14:26 < sam_moore> Yes, or something like that
+14:27 < jtanx> the beaglebone has like a bazillion gpio ports
+14:31 < sam_moore> Well without getting into the specific details, it sounds like we should recommend they use that
+14:32 < sam_moore> Apparently the sensors team will have a list ready by monday, which will be good
+14:33 < jtanx> that'd be good
+14:35 < jtanx> when are combined group meetings? just the 9am slot? 
+14:36 < sam_moore> 9am Tuesday is the "official" time picked by Adrian, 2pm Wednesday is the time that we agreed between the teams
+14:36 < sam_moore> I'm going to go to both, if more people want to come from the team that's also good
+14:37 < sam_moore> Realistically not everyone is going to come, so I'll have to send emails a lot
+14:38 < jtanx> ok
+14:39 < sam_moore> What account do you need to be invited to the dropbox?
+14:39 < sam_moore> I think Alex invited everyone using their student email
+14:40 < sam_moore> Oh right, you wouldn't have been in the list that he used if you enrolled late
+14:40 < jtanx> yeah, through student email would be good
+14:41 < jtanx> last year's experiment ran with an arduino diecimila which only had 5 analogue inputs
+14:41 < jtanx> any reason why we need more?
+14:41 < jtanx> sorry that's 6
+14:42 < sam_moore> I think the estimate was: 4-6 strain gauges, 1 temperature sensor, 1 microphone, 2 pressure gauges, 1 (maybe 2) USB webcam
+14:43 < jtanx> ok
+14:44 < jtanx> At that rate you would definitely need something with more analogue inputs
+14:45 < sam_moore> We also might need a DAC for one of the pneumatics team's devices
+14:46 < sam_moore> But you can't get that on a microcontroller, there'd have to be a seperate module
+14:46 < jtanx> yep
+14:48 < jtanx> it'd be no point interfacing an arduino to the rpi/beaglebone if all you want is more analog inputs
+14:49 < sam_moore> If you can get modules for ADC that can talk to a rpi/beaglebone, then yes
+14:49 < jtanx> yeah
+14:49 < jtanx> I don't think they're too hard to wire up
+14:50 < sam_moore> I think the electronics team should be considering all this, but I don't know since we haven't verbally spoken
+14:50 < sam_moore> Well not at length anyway
+14:51 < sam_moore> Just when I happen to bump into Omid
+14:51 < jtanx> hmm
+14:54 < sam_moore> This project is probably going to be a good lesson in "Why you need a project manager"
+14:55 < jtanx> so true
+14:59 < jtanx> with the web interface, what sort of update times are we looking at?
+15:00 < sam_moore> My tests with apache2 and the custom HTTP server showed it took about 50us for jQuery to get an AJAX request
+15:01 < sam_moore> There was only one data point returned each time though, we can probably optimise it a bit by returning multiple data points with a request
+15:01 < jtanx> yeah
+15:07 < jtanx> I wonder what sort of performance impact running one (or two) cameras would have on the rpi/beaglebone
+15:44 < jtanx> urgh
+15:45 < jtanx> I was wondering why my nginx config wasn't working
+15:45 < jtanx> until I realised that gedit was creating a backup copy of the config file
+15:45 < jtanx> so nginx was reading both the original and backup
+17:28 < sam_moore> That's wierd, you'd think it would only read one config file
+17:34 < jtanx> well it was in a config directory
+17:36 < sam_moore> Oh, ok
+18:49 < jtanx> so the current idea i have with the web thing is
+18:49 < jtanx> you can query it like http://domain/api/module?key=value&key=value2
+18:50 < jtanx> and then you could return something in json format or whatever is most suitable for the ajax query
+19:46 < jtanx> you can test it at http://mctx.us.to:8080/apoi
+19:46 < jtanx> woops, http://mctx.us.to:8080/api
+19:46 < jtanx> the only 'module' which will give a response of '200 OK' is sensors
+19:47 < jtanx> which currently spits back any arguments you pass to it
+19:47 < jtanx> eg http://mctx.us.to:8080/api/sensors?k=v
+19:50 < jtanx> hopefully it doesn't break
+20:44 < sam_moore> I'll take a look
+20:45 < sam_moore> Looks good
+20:45 < sam_moore> I'm writing a dummy thread for a sensor now
+21:04 < jtanx> the code behind it (in the cgi module) is a bit clunky right now though
+21:04 < jtanx> is there a meeting tomorrow?
+21:05 < sam_moore> I don't think so, sorry
+21:06 < jtanx> ok that's alright
+21:06 < sam_moore> Things aren't urgent (yet)
+21:07 < jtanx> heh
+21:12 < sam_moore> For the progress report: I'd like everyone to write a page individually, then we can summarize those in the group report
+21:12 < sam_moore> Well you don't have to write a whole page, and if you miss a week or so it's not a big problem
+21:16 < jtanx> ok
+21:17 < jtanx> i'll try to remember that
+21:18 < jtanx> do you think we need to keep track of how long we spend on this project
+21:18 < jtanx> for that 'cost estimate'
+21:28 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 22.0/20130618035212]"]
+21:34 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+22:23 < sam_moore> For the cost estimate: Yes, we are supposed to have a technical diary (hand written)
+22:23 < sam_moore> Including all notes and times worked on the project
+22:40 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 22.0/20130618035212]"]
