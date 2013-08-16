@@ -6,7 +6,7 @@
 
 
 
-
+#include "query.h"
 
 #include "sensor.h"
 #include "log.h"
@@ -32,8 +32,7 @@ void QuerySensor(int id) //TODO: This code will form the SensorHandler FastCGI f
 		}
 		else
 		{
-			fseek(file, 0, SEEK_SET);
-			rewind(file);
+			fseek(file, (s->read_offset)*sizeof(DataPoint), SEEK_SET);
 			amount_read = fread(&buffer, sizeof(DataPoint), QUERY_BUFSIZ, file);
 			s->read_offset += amount_read;
 			Log(LOGDEBUG, "Read %d data points; offset now at %d", amount_read, s->read_offset);

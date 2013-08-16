@@ -2,7 +2,7 @@
 CXX = gcc
 FLAGS = -std=c99 -Wall -Werror -pedantic -g
 LIB = -lpthread
-OBJ = log.o sensor.o test_request.o main.o
+OBJ = log.o sensor.o query.o main.o
 RM = rm -f
 
 BIN = server

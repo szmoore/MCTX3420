@@ -105,13 +105,12 @@ void * Sensor_Main(void * arg)
 		// CRITICAL SECTION (no threads should be able to read/write the file at the same time)
 		pthread_mutex_lock(&(s->mutex));
 
-			// Open binary file and dump buffer into it
-			FILE * file = fopen(s->filename, "wb");
+			// Open binary file in append mode and dump buffer into it
+			FILE * file = fopen(s->filename, "ab");
 			if (file == NULL)
 			{
-				Fatal("Couldn't open file \"%s\" mode wb - %s", s->filename, strerror(errno));
+				Fatal("Couldn't open file \"%s\" mode ab - %s", s->filename, strerror(errno));
 			}
-			fseek(file, 0, SEEK_END);
 			int amount_written = fwrite(s->buffer, sizeof(DataPoint), SENSOR_DATABUFSIZ, file);
 			if (amount_written != SENSOR_DATABUFSIZ)
 			{
