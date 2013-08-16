@@ -15,12 +15,10 @@
     Structure, ENUMVALUE, Extern_FunctionName, g_global
 */
 
-//Replace with whatever holds the 'data'
-typedef struct Data Data;
-enum {RESPONSE_OK = 200, RESPONSE_BADREQUEST = 400,
-	  RESPONSE_UNAUTHORIZED = 401};
+enum {STATUS_OK = 200, STATUS_BADREQUEST = 400,
+	  STATUS_UNAUTHORIZED = 401};
 
-typedef void (*ModuleHandler) (Data *data, char *params);
+typedef void (*ModuleHandler) (void *data, char *params);
 
 /**
  * Extracts a key/value pair from a request string.
@@ -31,34 +29,42 @@ typedef void (*ModuleHandler) (Data *data, char *params);
  * @return A pointer to the start of the next search location, or NULL if
  *         the EOL is reached.
  */
-static char *KeyPair(char *in, const char **key, const char **value) {
-	char *next, *split;
+char *FCGI_KeyPair(char *in, const char **key, const char **value)
+{
+	char *ptr;
 	if (!in || !*in) { //Invalid input or string is EOL
 		return NULL;
 	}
 
 	*key = in;
-	//Must be first so value will be empty if it's not specified
-	if ((next = strchr(in, '&'))) {
-		*next++ = 0;
-	} else { //Don't return NULL as current pair needs to be returned
-		next = "";
+	//Find either = or &, whichever comes first
+	if ((ptr = strpbrk(in, "=&"))) {
+		if (*ptr == '&') { //No value specified
+			*value = ptr;
+			*ptr++ = 0;
+		} else {
+			//Stopped at an '=' sign
+			*ptr++ = 0;
+			*value = ptr;
+			if ((ptr = strchr(ptr,'&'))) {
+				*ptr++ = 0;
+			} else {
+				ptr = "";
+			}
+		}
+	} else { //No value specified and no other pair
+		ptr = "";
+		*value = ptr;
 	}
-	if ((split = strchr(in, '='))) {
-		*split++ = 0;
-		*value = split; 
-		return next;
-	}
-	//Split was not found, set to default value
-	*value = "";
-	return next;
+	return ptr;
 }
 
-static void BeginResponse(int response_code, const char *module) {
-	switch (response_code) {
-		case RESPONSE_OK:
+void FCGI_BeginJSON(int status_code, const char *module)
+{
+	switch (status_code) {
+		case STATUS_OK:
 			break;
-		case RESPONSE_UNAUTHORIZED:
+		case STATUS_UNAUTHORIZED:
 			printf("Status: 401 Unauthorized\r\n");
 			break;
 		default:
@@ -69,32 +75,36 @@ static void BeginResponse(int response_code, const char *module) {
 	printf("\t\"module\" : \"%s\"", module);
 }
 
-static void BuildResponse(const char *key, const char *value) {
+void FCGI_BuildJSON(const char *key, const char *value)
+{
 	printf(",\r\n\t\"%s\" : \"%s\"", key, value);
 }
 
-static void EndResponse() {
+void FCGI_EndJSON() 
+{
 	printf("\r\n}\r\n");
 }
 
-static void SensorsHandler(Data *data, char *params) {
+static void SensorsHandler(void *data, char *params) 
+{
 	const char *key, *value;
-	BeginResponse(RESPONSE_OK, "sensors");
- 
-   	while ((params = KeyPair(params, &key, &value))) {
-   		BuildResponse(key, value);
-   	}
-   	EndResponse();
 	
+	//Begin a request only when you know the final result
+	//E.g whether OK or not.
+	FCGI_BeginJSON(STATUS_OK, "sensors");
+   	while ((params = FCGI_KeyPair(params, &key, &value))) {
+   		FCGI_BuildJSON(key, value);
+   	}
+   	FCGI_EndJSON();
 }
 
-void FCGI_RequestLoop (Data *data)
+void FCGI_RequestLoop (void *data)
 {
 	int count = 0;
 	while (FCGI_Accept() >= 0)   {
 		ModuleHandler module_handler = NULL;
 		char module[BUFSIZ], params[BUFSIZ];
-		
+
 		//strncpy doesn't zero-truncate properly
 		snprintf(module, BUFSIZ, "%s", getenv("DOCUMENT_URI_LOCAL"));
 		snprintf(params, BUFSIZ, "%s", getenv("QUERY_STRING"));
@@ -102,7 +112,7 @@ void FCGI_RequestLoop (Data *data)
 		//Remove trailing slashes (if present) from module query
 		size_t lastchar = strlen(module) - 1;
 		if (lastchar > 0 && module[lastchar] == '/')
-			module[lastchar] = '\0';
+			module[lastchar] = 0;
 		
 
 		if (!strcmp("sensors", module)) {
@@ -116,20 +126,16 @@ void FCGI_RequestLoop (Data *data)
 		} else {
 			char buf[BUFSIZ];
 			
-			BeginResponse(400, module);
-			BuildResponse("description", "400 Invalid response");
+			FCGI_BeginJSON(400, module);
+			FCGI_BuildJSON("description", "400 Invalid response");
 			snprintf(buf, BUFSIZ, "%d", count);
-			BuildResponse("request-number", buf);
-			BuildResponse("params", params);
-			BuildResponse("host", getenv("SERVER_HOSTNAME"));
-			EndResponse();
+			FCGI_BuildJSON("request-number", buf);
+			FCGI_BuildJSON("params", params);
+			FCGI_BuildJSON("host", getenv("SERVER_HOSTNAME"));
+			FCGI_EndJSON();
 		}
 
 		count++;
-		//Debgging:
-		//printf("Module: %s, Params: %s<br>\n", module, params);
-		//printf("Request number %d, host <i>%s</i>\n",
-		//	count++, getenv("SERVER_HOSTNAME"));
 	}
 }
 
