@@ -986,3 +986,161 @@
 22:23 < sam_moore> For the cost estimate: Yes, we are supposed to have a technical diary (hand written)
 22:23 < sam_moore> Including all notes and times worked on the project
 22:40 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 22.0/20130618035212]"]
+--- Day changed Fri Aug 16 2013
+08:00 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:48 < jtanx> I was wondering what sort of model you have for reading/storing sensor values and controlling actuators
+10:02 < sam_moore> At the moment each sensor has a thread that continuously polls the sensor and dumps data to a binary file
+10:03 < sam_moore> For reading there is a thread that fills a buffer from the file when it gets a request
+10:04 < sam_moore> It might be better to change to a single thread for sensors/actuators though
+10:04 < jtanx> yeah, I was about to say if it was necessary to have one for each
+10:05 < sam_moore> Probably not, if you had varying polling speeds it would be useful, because you could poll the fast sensors seperately from the slow ones
+10:05 < jtanx> how do you wish to pass the data to the fcgi module?
+10:06 < jtanx> right now
+10:06 < jtanx> i've kinda set it so
+10:06 < jtanx> there's this thing called a ModuleHandler
+10:07 < jtanx> so you can pass it some data (tba what this is), and it also receives the query string from the use
+10:09 < sam_moore> Well, the ModuleHandler gets called whenever the right HTTP request is made right?
+10:10 < sam_moore> So, that function retrieves the data it needs to respond to the request
+10:10 < jtanx> well rightnow the typedef is
+10:10 < jtanx> typedef void (*ModuleHandler) (Data *data, char *params);
+10:10 < jtanx> so it's up to you to write a module handler (eg SensorsHandler)
+10:11 < sam_moore> Ok, data's a bit of an ambigous name, so is that something passed to the ModuleHandler when the FastCGI gets a request?
+10:11 < jtanx> well the data thing was a placeholder for whatever sensors/actuators data there was
+10:11 < sam_moore> Is it meant to be sensor data, or is it a value that the user has passed through HTTP
+10:11 < jtanx> the query string is part of params
+10:11 < sam_moore> Ok, right, that makes more sense
+10:12 < sam_moore> My view had the ModuleHandler getting the appropriate data itself
+10:12 < jtanx> Ok
+10:12 < sam_moore> Given the params
+10:13 < jtanx> I'm just not really used to using global variables
+10:13 < sam_moore> The global sensors array?
+10:13 < jtanx> yeah
+10:13 < jtanx> i take it that's where you access data from?
+10:14 < sam_moore> Yes
+10:14 < jtanx> oh yeah one more thing, when you get a request, should it only return the latest data?
+10:20 < sam_moore> We should probably think some more about this as a whole group
+10:20 < sam_moore> So, you have a sensor that can (probably) poll a lot faster than you get requests via jQuery
+10:21 < sam_moore> You can write it so that you only actually query the sensor when you get a request, but then you're wasting the chance to get data that could be useful
+10:22 < sam_moore> Or you can have it so that the sensor is continuously polling (What my code is simulating at the moment)
+10:22 < sam_moore> With the continuosuly polling sensor; when you get a request, you can either return the most recent block of data you got
+10:23 < sam_moore> Or you can have it so that the data will be sent in sequential order (which is what my code currently does)
+10:23 < jtanx> hmm
+10:23 < sam_moore> I'm pretty sure continously polling is better than querying each time you get a request, since after all this is an experiment and you want the data
+10:23 < jtanx> yeah
+10:24 < jtanx> I agree with you there
+10:24 < jtanx> so you're saying, continuously poll and log the results
+10:24 < jtanx> and when a request comes in, send back all the data up to the point when the last request came in
+10:25 < sam_moore> Well that's what the server program I wrote simulates at the moment.
+10:25 < sam_moore> However it might be more sensible for the request to just get the most recent data.
+10:25 < jtanx> hmm
+10:25 < sam_moore> Ah, yeah that's probably better actually
+10:25 < jtanx> then you're logging more points than youdisplay
+10:26 < sam_moore> Yes, but you can always add a function to pull all the data points and save to a csv or something like that.
+10:26 < sam_moore> In fact I think we'd want to do that.
+10:27 < jtanx> yeah ok
+10:27 < jtanx> that sounds not too bad
+10:27 < jtanx> but if that's the case
+10:27 < sam_moore> If you actually use this for an experiment, you're not going to want to have to do all your analysis in a JavaScript GUI
+10:27 < jtanx> true
+10:27 < sam_moore> The GUI is for getting live information on the state of the system more than for data analysis
+10:27 < jtanx> but if that's the case you might want to allow direct access to the latest dataset
+10:28 < jtanx> instead of having to read from the file
+10:28 < jtanx> if that's possible
+10:28 < jtanx> then you can directly record the results in csv format
+10:28 < sam_moore> Yes, I thought about that; you can have a buffer of points accessed by the request thread easily enough
+10:29 < sam_moore> There are some difficulties though with managing the buffer
+10:30 < sam_moore> Wait, maybe it's easier than I though
+10:30 < sam_moore> Yeah, the reason I started saving stuff to a binary file was because I was thinking of the requests having to get the data in sequence
+10:32 < sam_moore> I have some other stuff to do today unfortunately
+10:33 < sam_moore> I have a feeling it won't be trivial to just access the most recent dataset, I'll have to think about it
+10:34 < sam_moore> However, currently it should be easy to change so that the request gets data from the end of the binary file, rather than keeping track of its position
+10:34 < sam_moore> The function QuerySensor is what I was thinking the SensorHandler would do to get data; it just fills a buffer and prints it at the moment
+10:35 < sam_moore> Binary file access is pretty fast, we could even just keep the binary file and change the data to csv when it goes to the client
+10:36 < jtanx> ok, I'll keep that in mind
+11:11 < sam_moore> Oh, you can replace the Data* pointer with a Sensor* pointer and then not have to use the global variable directly, that's probably best
+11:13 < jtanx> well it might not only be sensor data
+11:13 < jtanx> it could be actuator stuff or anything else
+11:13 < sam_moore> I suppose
+11:14 < jtanx> maybe I should change the typedef to void*
+11:14 < jtanx> then you can cast it to whatever
+11:14 < sam_moore> Yeah, that will work
+11:15 < sam_moore> Actuator stuff is going to be a bit of a seperate (hopefully easier) problem
+11:15 < sam_moore> In that case you can just wait for a query before doing anything
+11:15 < sam_moore> Anyway, I've distracted myself again, this is just too interesting :S
+11:15 < jtanx> hahaha
+11:16 < jtanx> anycase for the actuator you would have a separate handler function
+11:16 < sam_moore> Yes
+11:16 < jtanx> eg ActuatorHandler
+11:20 < jtanx> fcgi is pretty whack
+11:20 < jtanx> it replaces printf
+11:21 < jtanx> so when you printf (or fwrite for binary?), that gets sent to the client
+12:03 < jtanx> hey
+12:04 < jtanx> what if we stored stuff in an sqlite library
+12:04 < jtanx> sorry database
+12:04 < jtanx> on second thoughts nah
+14:58 -!- jtanx_ [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:01 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit [Ping timeout]
+15:02 -!- jtanx_ is now known as jtanx
+15:11 -!- jtanx_ [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:18 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit [Ping timeout]
+18:59 -!- jtanx_ is now known as jtanx
+21:28 < sam_moore> So, I did a bit of testing with sqlite vs a binary file
+21:28 < sam_moore> sqlite takes about 1000x as long for saving data
+21:28 < sam_moore> I haven't tested reading it back yet
+21:28 < sam_moore> But more worrying
+21:28 < sam_moore> I get a segmentation fault using sqlite
+21:29 < sam_moore> And it's in the sqlite library somewhere; not my test code
+21:29 < sam_moore> Running sqlite in valgrind shows a bunch of complaints about uninitialised values
+21:29 < sam_moore> So... I'd recommend we just use a binary file
+21:30 < sam_moore> A database is good for storing more complex data, but when you just need to store data recorded in a sequence, it's probably unnecessary
+21:36 < jtanx> yeah sqlite not so good for file performance
+21:36 < jtanx> because every insert it has to confirm the write to disk
+21:36 < jtanx> the segfault
+21:36 < jtanx> may actually be because you didn't initialse the mutex
+21:36 < jtanx> es
+21:36 < jtanx> i tried compiling it on mingw and it segfaults on the mutex unlock
+21:37 < sam_moore> Re: fcgi replacing printf - It probably calls dup2 to change stdout from the terminal to a domain socket or fifo that nginx listens to
+21:37 < jtanx> nah 
+21:38 < jtanx> fcgi_stdio just has a bunch of defines
+21:38 < sam_moore> Oh really, that's wierd
+21:38 < jtanx> so printf becomes FCGI_printf
+21:38 < jtanx> so fcgi_stdio must be the first include in the fcgi module
+21:38 < sam_moore> I would have thought it was simpler to just change stdout than replace the whole printf function
+21:38 < sam_moore> But whatever, we're not implementing fcgi :P
+21:38 < jtanx> haha
+21:39 < sam_moore> Oh, the mutex needs initialising, yeah
+21:39 < sam_moore> But the test I did was just a serial program, no mutex
+21:39 < jtanx> ah
+21:39 < jtanx> well
+21:39 < sam_moore> We'll be using gcc to compile on the beaglebone/rpi
+21:40 < sam_moore> I think some implementations of pthreads need an initialiser but others don't, I'll have to check
+21:40 < sam_moore> But pthread_mutex_init doesn't show up in man pages on debian
+21:40 < jtanx> yeah it's not on ubuntu either
+21:41 < jtanx> have you ever worked with clang
+21:42 < sam_moore> No
+21:42 < jtanx> neither but it seems pretty cool
+21:45 < jtanx> when you compile it gives better diagnostic output when something goes wrong
+21:46 < jtanx> it's a drop in replacement for gcc
+21:47 < sam_moore> Interesting
+21:51 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["brb"]
+21:55 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:57 < jtanx> if you kept the file handles for the sensor data always open
+21:58 < jtanx> and immediately wrote to them when a data point is polled 
+21:58 < jtanx> is there much performance difference to buffering first?
+22:05 < sam_moore> Yeah, it's probably better to keep the file handles always open
+22:05 < sam_moore> The operating system will use some kind of buffer for the file anyway
+22:06 < sam_moore> I've got some basic programs, maybe I'll make some performance graphs tomorrow
+22:07 < sam_moore> On the other hand, I need to do some of the meta stuff (list of tasks that need to be completed, etc) before Monday
+22:08 < sam_moore> I should look into a #define or something to initialise the mutexes if they need to be
+22:09 < sam_moore> Anyway, I need to sleep
+22:11 < sam_moore> I wonder how James and Callum are going, they haven't been in the channel for a while
+22:12 < jtanx> yeah, it's pretty quiet
+22:17 < sam_moore> If we can get a second meeting in the week, preferably a longer one that would be good
+22:18 < sam_moore> Particularly if we can start working on code at the same time
+22:18 < sam_moore> But we'll see
+22:18 < sam_moore> Everyone has other stuff to do after all
+22:18 < sam_moore> I'm spending way too much time on this unit compared to my others
+22:18 < sam_moore> Then again this unit will probably require the most work
+22:19 < sam_moore> Anyway, bye
+22:23 < jtanx> bye
+22:46 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 22.0/20130618035212]"]
