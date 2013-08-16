@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdarg.h>
+#include "common.h"
 
 //To get around a 'pedantic' C99 rule that you must have at least 1 variadic arg, combine fmt into that.
 #define Log(level, ...) LogEx(level, __func__, __VA_ARGS__)
