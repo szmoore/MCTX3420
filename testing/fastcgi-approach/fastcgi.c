@@ -2,23 +2,13 @@
  * @file fastcgi.c
  * @purpose Runs the FCGI request loop to handle web interface requests.
  * 
- * <stdio.h> should not be included, because these functions are handled by
- * fcgi_stdio.h. If included, it must be included after fcgi_stdio.h.
+ * fcgi_stdio.h must be included before all else so the stdio function
+ * redirection works ok.
  */
  
 #include <fcgi_stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
-/*
-	But the suggestion was: FunctionName, variable_name (local or member),
-    Structure, ENUMVALUE, Extern_FunctionName, g_global
-*/
-
-enum {STATUS_OK = 200, STATUS_BADREQUEST = 400,
-	  STATUS_UNAUTHORIZED = 401};
-
-typedef void (*ModuleHandler) (void *data, char *params);
+#include "fastcgi.h"
+//#include "common.h"
 
 /**
  * Extracts a key/value pair from a request string.
@@ -59,7 +49,12 @@ char *FCGI_KeyPair(char *in, const char **key, const char **value)
 	return ptr;
 }
 
-void FCGI_BeginJSON(int status_code, const char *module)
+/**
+ * Begins a response to the client in JSON format.
+ * @param status_code The HTTP status code to be returned.
+ * @param module The name of the module that initiated the response.
+ */
+void FCGI_BeginJSON(StatusCodes status_code, const char *module)
 {
 	switch (status_code) {
 		case STATUS_OK:
@@ -75,29 +70,29 @@ void FCGI_BeginJSON(int status_code, const char *module)
 	printf("\t\"module\" : \"%s\"", module);
 }
 
+/**
+ * Adds a key/value pair to a JSON response. The response must have already
+ * been initiated by FCGI_BeginJSON. Note that characters are not escaped.
+ * @param key The key of the JSON entry
+ * &param value The value associated with the key.
+ */
 void FCGI_BuildJSON(const char *key, const char *value)
 {
 	printf(",\r\n\t\"%s\" : \"%s\"", key, value);
 }
 
+/**
+ * Ends a JSON response that was initiated by FCGI_BeginJSON.
+ */
 void FCGI_EndJSON() 
 {
 	printf("\r\n}\r\n");
 }
 
-static void SensorsHandler(void *data, char *params) 
-{
-	const char *key, *value;
-	
-	//Begin a request only when you know the final result
-	//E.g whether OK or not.
-	FCGI_BeginJSON(STATUS_OK, "sensors");
-   	while ((params = FCGI_KeyPair(params, &key, &value))) {
-   		FCGI_BuildJSON(key, value);
-   	}
-   	FCGI_EndJSON();
-}
-
+/**
+ * Main FCGI request loop that receives/responds to client requests.
+ * @param data A data field to be passed to the selected module handler.
+ */ 
 void FCGI_RequestLoop (void *data)
 {
 	int count = 0;
@@ -116,9 +111,9 @@ void FCGI_RequestLoop (void *data)
 		
 
 		if (!strcmp("sensors", module)) {
-			module_handler = SensorsHandler;
-		} else if (!strcmp("admin", module)) {
-			//module_handler = AdminHandlerReplace with pointer to admin handler
+			//module_handler = Handler_Sensors;
+		} else if (!strcmp("actuators", module)) {
+			
 		}
 
 		if (module_handler) {
@@ -137,8 +132,4 @@ void FCGI_RequestLoop (void *data)
 
 		count++;
 	}
-}
-
-int main(int argc, char *argv[]) {
-	FCGI_RequestLoop(NULL);
 }
