@@ -25,21 +25,10 @@ void QuerySensor(int id) //TODO: This code will form the SensorHandler FastCGI f
 	//CRITICAL SECTION (Don't access file while sensor thread is writing to it!)
 	pthread_mutex_lock(&(s->mutex));
 
-		FILE * file = fopen(s->filename, "rb");
-		if (file == NULL)
-		{
-			Log(LOGWARN, "Couldn't open file \"%s\" mode rb - %s", s->filename, strerror(errno));			
-		}
-		else
-		{
-			fseek(file, (s->read_offset)*sizeof(DataPoint), SEEK_SET);
-			amount_read = fread(&buffer, sizeof(DataPoint), QUERY_BUFSIZ, file);
-			s->read_offset += amount_read;
-			Log(LOGDEBUG, "Read %d data points; offset now at %d", amount_read, s->read_offset);
-			
-			fclose(file);
-		}
-
+		fseek(s->file, -QUERY_BUFSIZ*sizeof(DataPoint), SEEK_END);
+		amount_read = fread(&buffer, sizeof(DataPoint), QUERY_BUFSIZ, s->file);
+		Log(LOGDEBUG, "Read %d data points", amount_read);
+		
 	pthread_mutex_unlock(&(s->mutex));
 	//End critical section
 

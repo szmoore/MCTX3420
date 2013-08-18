@@ -14,10 +14,9 @@
 /** Number of data points to keep in sensor buffers **/
 #define SENSOR_DATABUFSIZ 10
 
+
 /** Number of sensors **/
 #define NUMSENSORS 1
-
-#define FILENAMESIZE 10
 
 /** Structure to represent data recorded by a sensor at an instant in time **/
 typedef struct
@@ -40,7 +39,7 @@ typedef struct
 	/** Offset position in binary file for query thread to read from**/
 	int read_offset;
 	/** File to write data into when buffer is full **/
-	char filename[FILENAMESIZE];
+	FILE * file;
 	/** Thread running the sensor **/
 	pthread_t thread;
 	/** Mutex to protect access to stuff **/
