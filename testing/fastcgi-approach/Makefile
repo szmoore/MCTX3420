@@ -1,7 +1,7 @@
-CXX = gcc
+CXX = clang
 FLAGS = -std=c99 -Wall -Werror -pedantic -g
-LIB = -lpthread -lfcgi
-OBJ = fastcgi.o
+LIB = -lpthread -lfcgi -lcrypto
+OBJ = main.o fastcgi.o
 RM = rm -f
 
 BIN = fast

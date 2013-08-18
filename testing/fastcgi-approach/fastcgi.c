@@ -1,14 +1,65 @@
 /**
  * @file fastcgi.c
  * @purpose Runs the FCGI request loop to handle web interface requests.
- * 
+ *
  * fcgi_stdio.h must be included before all else so the stdio function
  * redirection works ok.
  */
- 
+
 #include <fcgi_stdio.h>
+#include <openssl/sha.h>
 #include "fastcgi.h"
-//#include "common.h"
+#include "common.h"
+#include <time.h>
+
+static void LoginHandler(void *data, char *params) {
+	static char loginkey[41] = {0}, ip[256];
+	static time_t timestamp = 0;
+	const char *key, *value;
+	int force = 0, end = 0;
+
+	while ((params = FCGI_KeyPair(params, &key, &value))) {
+		if (!strcmp(key, "force"))
+			force = !force;
+		else if (!strcmp(key, "end"))
+			end = !end;
+	}
+
+	if (end) {
+		*loginkey = 0;
+		FCGI_BeginJSON(200, "login");
+		FCGI_EndJSON();
+		return;
+	}
+
+	time_t now = time(NULL);
+	if (force || !*loginkey || (now - timestamp > 180)) {
+		SHA_CTX sha1ctx;
+		unsigned char sha1[20];
+		int i = rand();
+
+		SHA1_Init(&sha1ctx);
+		SHA1_Update(&sha1ctx, &now, sizeof(now));
+		SHA1_Update(&sha1ctx, &i, sizeof(i));
+		SHA1_Final(sha1, &sha1ctx);
+
+		timestamp = now;
+		for (i = 0; i < 20; i++)
+			sprintf(loginkey+i*2, "%02x", sha1[i]);
+		sprintf(ip, "%s", getenv("REMOTE_ADDR"));
+		FCGI_BeginJSON(200, "login");
+		FCGI_BuildJSON("key", loginkey);
+		FCGI_EndJSON();
+	} else {
+		char buf[128];
+		strftime(buf, 128, "%H:%M:%S %d-%m-%Y",localtime(&timestamp)); 
+		FCGI_BeginJSON(401, "login");
+		FCGI_BuildJSON("description", "Already logged in");
+		FCGI_BuildJSON("user", ip); 
+		FCGI_BuildJSON("time", buf);
+		FCGI_EndJSON();
+	}
+}
 
 /**
  * Extracts a key/value pair from a request string.
@@ -111,7 +162,9 @@ void FCGI_RequestLoop (void *data)
 		
 
 		if (!strcmp("sensors", module)) {
-			//module_handler = Handler_Sensors;
+			module_handler = Handler_Sensors;
+		} else if (!strcmp("login", module)) {
+			module_handler = LoginHandler;
 		} else if (!strcmp("actuators", module)) {
 			
 		}
@@ -127,6 +180,8 @@ void FCGI_RequestLoop (void *data)
 			FCGI_BuildJSON("request-number", buf);
 			FCGI_BuildJSON("params", params);
 			FCGI_BuildJSON("host", getenv("SERVER_HOSTNAME"));
+			FCGI_BuildJSON("user", getenv("REMOTE_USER"));
+			FCGI_BuildJSON("userip", getenv("REMOTE_ADDR"));
 			FCGI_EndJSON();
 		}
 
