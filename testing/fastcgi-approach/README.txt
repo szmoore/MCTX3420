@@ -7,8 +7,8 @@ Setup:
 Compile fastcgi_test.c with: (the libfcgi-dev package must be installed)
 gcc fastcgi_test.c -lfcgi -o fastcgi_test
 
-Configure nginx to pass all requests to the address /cgi/ to the application:
-Edit /etc/nginx/sites-enabled/default by adding the contents of nginx_server_config.txt
+Configure nginx:
+Use the config files in -etc-nginx (representing files in /etc/nginx)
 
 Restart nginx:
 /etc/init.d/nginx restart
