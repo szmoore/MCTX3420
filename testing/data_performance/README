@@ -1,0 +1,3 @@
+A few tests of performance for different methods of storing/transferring sensor data.
+The important thing to remember is that the data is stored and accessed sequentially.
+A database, whilst a useful thing and definitely capable of being used for this, is probably overkill.

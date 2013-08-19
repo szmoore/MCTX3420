@@ -70,6 +70,8 @@ void Sensor_Init(Sensor * s, int id)
 	{
 		Fatal("Too many sensors! FILENAMESIZE is %d; increase it and recompile.", FILENAMESIZE);
 	}
+
+	pthread_mutex_init(&(s->mutex), NULL);
 		
 	sprintf(filename, "%d", s->id);
 	unlink(filename); //TODO: Move old files somewhere
