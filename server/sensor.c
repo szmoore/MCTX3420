@@ -48,8 +48,8 @@ DataPoint GetData(int sensor_id)
  */
 void Destroy(Sensor * s)
 {
-	//TODO: Surely we'll need to do something here?
 	// Maybe move the binary file into long term file storage?
+	fclose(s->file);
 }
 
 
@@ -64,14 +64,18 @@ void Sensor_Init(Sensor * s, int id)
 	s->read_offset = 0;
 	s->id = id;
 
+	#define FILENAMESIZE 4
+	char filename[FILENAMESIZE];
 	if (s->id >= pow(10, FILENAMESIZE))
 	{
 		Fatal("Too many sensors! FILENAMESIZE is %d; increase it and recompile.", FILENAMESIZE);
 	}
-	sprintf(s->filename, "%d", s->id);
-	unlink(s->filename); //TODO: Move old files somewhere
+		
+	sprintf(filename, "%d", s->id);
+	unlink(filename); //TODO: Move old files somewhere
 
-	Log(LOGDEBUG, "Initialised sensor %d; binary file is \"%s\"", id, s->filename);
+	s->file = fopen(filename, "a+b"); // open binary file
+	Log(LOGDEBUG, "Initialised sensor %d; binary file is \"%s\"", id, filename);
 }
 
 
@@ -104,23 +108,13 @@ void * Sensor_Main(void * arg)
 
 		// CRITICAL SECTION (no threads should be able to read/write the file at the same time)
 		pthread_mutex_lock(&(s->mutex));
-
-			// Open binary file in append mode and dump buffer into it
-			FILE * file = fopen(s->filename, "ab");
-			if (file == NULL)
-			{
-				Fatal("Couldn't open file \"%s\" mode ab - %s", s->filename, strerror(errno));
-			}
-			int amount_written = fwrite(s->buffer, sizeof(DataPoint), SENSOR_DATABUFSIZ, file);
+			fseek(s->file, 0, SEEK_END);
+			int amount_written = fwrite(s->buffer, sizeof(DataPoint), SENSOR_DATABUFSIZ, s->file);
 			if (amount_written != SENSOR_DATABUFSIZ)
 			{
 				Fatal("Wrote %d data points and expected to write %d to \"%s\" - %s", amount_written, SENSOR_DATABUFSIZ, strerror(errno));
 			}
-
 			Log(LOGDEBUG, "Wrote %d data points for sensor %d", amount_written, s->id);
-
-			fclose(file);
-
 		pthread_mutex_unlock(&(s->mutex));
 		// End of critical section
 
