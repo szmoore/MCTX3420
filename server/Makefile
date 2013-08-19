@@ -1,8 +1,8 @@
-# Makefile for rpi side server
+# Makefile for server software
 CXX = gcc
 FLAGS = -std=c99 -Wall -Werror -pedantic -g
-LIB = -lpthread
-OBJ = log.o sensor.o query.o main.o
+LIB = -lpthread -lfcgi -lssl
+OBJ = log.o sensor.o fastcgi.o main.o
 RM = rm -f
 
 BIN = server

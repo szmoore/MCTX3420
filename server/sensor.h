@@ -31,14 +31,14 @@ typedef struct
 typedef struct
 {
 	/** ID number of the sensor **/
-	enum {SENSOR_TEST0=0, SENSOR_TEST1=1} id;
+	enum {SENSOR_TEST0=0, SENSOR_TEST1=1, SENSOR_NONE} id;
 	/** Buffer to store data from the sensor **/
 	DataPoint buffer[SENSOR_DATABUFSIZ];
 	/** Index of last point written in the data buffer **/
 	int write_index;
 	/** Offset position in binary file for query thread to read from**/
 	int read_offset;
-	/** File to write data into when buffer is full **/
+	/** Binary file to write data into when buffer is full **/
 	FILE * file;
 	/** Thread running the sensor **/
 	pthread_t thread;
@@ -53,6 +53,8 @@ extern Sensor g_sensors[];
 
 extern void Sensor_Init(Sensor * s, int id); // Initialise sensor
 extern void * Sensor_Main(void * args); // main loop for sensor thread; pass a Sensor* cast to void*
+
+extern int Sensor_Query(Sensor * s, DataPoint * buffer, int bufsiz); // fill buffer with sensor data
 
 
 #endif //_SENSOR_H

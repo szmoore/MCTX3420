@@ -64,9 +64,10 @@ void Sensor_Init(Sensor * s, int id)
 	s->read_offset = 0;
 	s->id = id;
 
-	#define FILENAMESIZE 4
+	#define FILENAMESIZE BUFSIZ
 	char filename[FILENAMESIZE];
-	if (s->id >= pow(10, FILENAMESIZE))
+	//if (s->id >= pow(10, FILENAMESIZE))
+	if (false)
 	{
 		Fatal("Too many sensors! FILENAMESIZE is %d; increase it and recompile.", FILENAMESIZE);
 	}
@@ -116,7 +117,7 @@ void * Sensor_Main(void * arg)
 			{
 				Fatal("Wrote %d data points and expected to write %d to \"%s\" - %s", amount_written, SENSOR_DATABUFSIZ, strerror(errno));
 			}
-			Log(LOGDEBUG, "Wrote %d data points for sensor %d", amount_written, s->id);
+			//Log(LOGDEBUG, "Wrote %d data points for sensor %d", amount_written, s->id);
 		pthread_mutex_unlock(&(s->mutex));
 		// End of critical section
 
@@ -124,6 +125,26 @@ void * Sensor_Main(void * arg)
 		
 	}
 	return NULL;
+}
+
+/**
+ * Fill buffer with most recent sensor data
+ * @param s - Sensor to use
+ * @param buffer - Buffer to fill
+ * @param bufsiz - Size of buffer to fill
+ * @returns The number of DataPoints actually read
+ */
+int Sensor_Query(Sensor * s, DataPoint * buffer, int bufsiz)
+{
+	int amount_read = 0;
+	//CRITICAL SECTION (Don't access file while sensor thread is writing to it!)
+	pthread_mutex_lock(&(s->mutex));
+		
+		fseek(s->file, -bufsiz*sizeof(DataPoint), SEEK_END);
+		amount_read = fread(buffer, sizeof(DataPoint), bufsiz, s->file);
+		//Log(LOGDEBUG, "Read %d data points", amount_read);		
+	pthread_mutex_unlock(&(s->mutex));
+	return amount_read;
 }
 
 

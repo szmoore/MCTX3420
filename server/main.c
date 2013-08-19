@@ -9,7 +9,7 @@
 #include <signal.h> // for signal handling
 
 // --- Custom headers --- //
-#include "query.h"
+#include "fastcgi.h"
 #include "log.h"
 #include "options.h"
 #include "sensor.h"
@@ -74,7 +74,7 @@ int main(int argc, char ** argv)
 	}
 
 	// run request thread in the main thread
-	Query_Main(NULL); //TODO: Replace with FastCGI code
+	FCGI_RequestLoop(NULL);
 	return 0;
 }
 

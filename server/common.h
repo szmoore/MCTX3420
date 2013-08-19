@@ -16,5 +16,6 @@
 #include <errno.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <assert.h>
 
 #endif //_COMMON_H
