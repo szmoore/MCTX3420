@@ -76,9 +76,8 @@ static void SensorHandler(void * data, char * params)
 
 	int sensor_id = SENSOR_NONE;
 
-	do
+	while ((params = FCGI_KeyPair(params, &key, &value)) != NULL)
 	{
-		params = FCGI_KeyPair(params, &key, &value);
 		Log(LOGDEBUG, "Got key=%s and value=%s", key, value);
 		if (strcmp(key, "id") == 0)
 		{
@@ -104,14 +103,13 @@ static void SensorHandler(void * data, char * params)
 			break;
 		}		
 	}
-	while (params != NULL && *params != '\0');
-	
+
 	if (sensor_id == SENSOR_NONE)
 	{
 		Log(LOGERR, "No sensor id specified");
 		status = STATUS_BADREQUEST;
 	}
-	if (sensor_id >= NUMSENSORS || sensor_id < 0)
+	else if (sensor_id >= NUMSENSORS || sensor_id < 0)
 	{
 		Log(LOGERR, "Invalid sensor id %d", sensor_id);
 		status = STATUS_BADREQUEST;
