@@ -8,17 +8,34 @@
 
 #include <fcgi_stdio.h>
 #include <openssl/sha.h>
-#include "fastcgi.h"
-#include "common.h"
-#include "sensor.h"
-#include "log.h"
 #include <time.h>
 
-static void LoginHandler(void *data, char *params) {
-	static char loginkey[41] = {0}, ip[256];
-	static time_t timestamp = 0;
+#include "common.h"
+#include "fastcgi.h"
+#include "sensor.h"
+#include "log.h"
+
+#define LOGIN_TIMEOUT 180
+
+struct FCGIContext {
+	/**The time of last valid logged-in user access*/
+	time_t login_timestamp;
+	char login_key[41];
+	char login_ip[16];
+	/**The name of the current module**/
+	const char *current_module;
+	/**For debugging purposes?**/
+	int response_number;
+};
+
+/**
+ * Handles user logins.
+ * @param context The context to work in
+ * @param params User specified parameters
+ */
+static void LoginHandler(FCGIContext *context, char *params) {
 	const char *key, *value;
-	int force = 0, end = 0;
+	bool force = 0, end = 0;
 
 	while ((params = FCGI_KeyPair(params, &key, &value))) {
 		if (!strcmp(key, "force"))
@@ -28,14 +45,16 @@ static void LoginHandler(void *data, char *params) {
 	}
 
 	if (end) {
-		*loginkey = 0;
-		FCGI_BeginJSON(200, "login");
+		*(context->login_key) = 0;
+		FCGI_BeginJSON(context, STATUS_OK);
 		FCGI_EndJSON();
 		return;
 	}
 
 	time_t now = time(NULL);
-	if (force || !*loginkey || (now - timestamp > 180)) {
+	if (force || !*(context->login_key) || 
+	   (now - context->login_timestamp > LOGIN_TIMEOUT)) 
+	{
 		SHA_CTX sha1ctx;
 		unsigned char sha1[20];
 		int i = rand();
@@ -45,97 +64,41 @@ static void LoginHandler(void *data, char *params) {
 		SHA1_Update(&sha1ctx, &i, sizeof(i));
 		SHA1_Final(sha1, &sha1ctx);
 
-		timestamp = now;
+		context->login_timestamp = now;
 		for (i = 0; i < 20; i++)
-			sprintf(loginkey+i*2, "%02x", sha1[i]);
-		sprintf(ip, "%s", getenv("REMOTE_ADDR"));
-		FCGI_BeginJSON(200, "login");
-		FCGI_BuildJSON("key", loginkey);
+			sprintf(context->login_key + i * 2, "%02x", sha1[i]);
+		snprintf(context->login_ip, 16, "%s", getenv("REMOTE_ADDR"));
+		FCGI_BeginJSON(context, STATUS_OK);
+		FCGI_JSONPair("key", context->login_key);
 		FCGI_EndJSON();
 	} else {
 		char buf[128];
-		strftime(buf, 128, "%H:%M:%S %d-%m-%Y",localtime(&timestamp)); 
-		FCGI_BeginJSON(401, "login");
-		FCGI_BuildJSON("description", "Already logged in");
-		FCGI_BuildJSON("user", ip); 
-		FCGI_BuildJSON("time", buf);
+		strftime(buf, 128, "%H:%M:%S %d-%m-%Y",
+			localtime(&(context->login_timestamp))); 
+		FCGI_BeginJSON(context, STATUS_UNAUTHORIZED);
+		FCGI_JSONPair("description", "Already logged in");
+		FCGI_JSONPair("user", context->login_ip); 
+		FCGI_JSONPair("time", buf);
 		FCGI_EndJSON();
 	}
 }
 
 /**
- * Handle a request to the sensor module
- * @param data - Data to pass to module (?)
- * @param params - Parameters passed
+ * Given an FCGIContext, determines if the current user (as specified by
+ * the key) is authorized or not. If validated, the context login_timestamp is
+ * updated.
+ * @param context The context to work in
+ * @param key The login key to be validated.
+ * @return TRUE if authorized, FALSE if not.
  */
-static void SensorHandler(void * data, char * params)
-{
-	static DataPoint buffer[SENSOR_QUERYBUFSIZ];
-	StatusCodes status = STATUS_OK;
-	const char * key; const char * value;
-
-	int sensor_id = SENSOR_NONE;
-
-	while ((params = FCGI_KeyPair(params, &key, &value)) != NULL)
-	{
-		Log(LOGDEBUG, "Got key=%s and value=%s", key, value);
-		if (strcmp(key, "id") == 0)
-		{
-			if (sensor_id != SENSOR_NONE)
-			{
-				Log(LOGERR, "Only one sensor id should be specified");
-				status = STATUS_BADREQUEST;
-				break;
-			}
-			//TODO: Use human readable sensor identifier string for API?
-			sensor_id = atoi(value);
-			if (sensor_id == 0 && strcmp(value, "0") != 0)
-			{
-				Log(LOGERR, "Sensor id not an integer; %s", value);
-				status = STATUS_BADREQUEST;
-				break;
-			}
-		}
-		else
-		{
-			Log(LOGERR, "Unknown key \"%s\" (value = %s)", key, value);
-			status = STATUS_BADREQUEST;
-			break;
-		}		
+bool FCGI_Authorized(FCGIContext *context, const char *key) {
+	time_t now = time(NULL);
+	int result = (now - context->login_timestamp) <= LOGIN_TIMEOUT && 
+				 !strcmp(context->login_key, key);
+	if (result) {
+		context->login_timestamp = now; //Update the login_timestamp
 	}
-
-	if (sensor_id == SENSOR_NONE)
-	{
-		Log(LOGERR, "No sensor id specified");
-		status = STATUS_BADREQUEST;
-	}
-	else if (sensor_id >= NUMSENSORS || sensor_id < 0)
-	{
-		Log(LOGERR, "Invalid sensor id %d", sensor_id);
-		status = STATUS_BADREQUEST;
-	}
-
-	FCGI_BeginJSON(status, "sensor");
-	
-	if (status != STATUS_BADREQUEST)
-	{
-		FCGI_BuildJSON(key, value); // should spit back sensor ID
-		//Log(LOGDEBUG, "Call Sensor_Query...");
-		int amount_read = Sensor_Query(&(g_sensors[sensor_id]), buffer, SENSOR_QUERYBUFSIZ);
-		//Log(LOGDEBUG, "Read %d DataPoints", amount_read);
-		//Log(LOGDEBUG, "Produce JSON response");
-		printf(",\r\n\t\"data\" : [");
-		for (int i = 0; i < amount_read; ++i)
-		{
-			printf("[%f,%f]", buffer[i].time, buffer[i].value);
-			if (i+1 < amount_read)
-				printf(",");
-		}
-		printf("]");
-		//Log(LOGDEBUG, "Done producing JSON response");
-	}
-	FCGI_EndJSON();		
-	
+	return result;
 }
 
 /**
@@ -179,23 +142,15 @@ char *FCGI_KeyPair(char *in, const char **key, const char **value)
 
 /**
  * Begins a response to the client in JSON format.
- * @param status_code The HTTP status code to be returned.
- * @param module The name of the module that initiated the response.
+ * @param context The context to work in.
+ * @param status_code The status code to be returned.
  */
-void FCGI_BeginJSON(StatusCodes status_code, const char *module)
+void FCGI_BeginJSON(FCGIContext *context, StatusCodes status_code)
 {
-	switch (status_code) {
-		case STATUS_OK:
-			break;
-		case STATUS_UNAUTHORIZED:
-			printf("Status: 401 Unauthorized\r\n");
-			break;
-		default:
-			printf("Status: 400 Bad Request\r\n");
-	}
 	printf("Content-type: application/json; charset=utf-8\r\n\r\n");
 	printf("{\r\n");
-	printf("\t\"module\" : \"%s\"", module);
+	printf("\t\"module\" : \"%s\"", context->current_module);
+	FCGI_JSONLong("status", status_code);
 }
 
 /**
@@ -204,9 +159,52 @@ void FCGI_BeginJSON(StatusCodes status_code, const char *module)
  * @param key The key of the JSON entry
  * &param value The value associated with the key.
  */
-void FCGI_BuildJSON(const char *key, const char *value)
+void FCGI_JSONPair(const char *key, const char *value)
 {
 	printf(",\r\n\t\"%s\" : \"%s\"", key, value);
+}
+
+/**
+ * Similar to FCGI_JSONPair except for signed integer values.
+ * @param key The key of the JSON entry
+ * @param value The value associated with the key
+ */
+void FCGI_JSONLong(const char *key, long value)
+{
+	printf(",\r\n\t\"%s\" : %ld", key, value);
+}
+
+/**
+ * Similar to FCGI_JsonPair except for floating point values.
+ * @param key The key of the JSON entry
+ * @param value The value associated with the key
+ */
+void FCGI_JSONDouble(const char *key, double value)
+{
+	printf(",\r\n\t\"%s\" : %f", key, value);
+}
+
+/**
+ * Begins a JSON entry by writing the key. To be used in conjunction
+ * with FCGI_JsonValue.
+ * @param key The key of the JSON entry
+ */
+void FCGI_JSONKey(const char *key)
+{
+	printf(",\r\n\t\"%s\" : ", key);
+}
+
+/**
+ * Should be used to write out the value of a JSON key. This has
+ * the same format as the printf functions. Care should be taken to format
+ * the output in valid JSON. 
+ */
+void FCGI_JSONValue(const char *format, ...)
+{
+	va_list list;
+	va_start(list, format);
+	vprintf(format, list);
+	va_end(list);
 }
 
 /**
@@ -218,16 +216,38 @@ void FCGI_EndJSON()
 }
 
 /**
- * Main FCGI request loop that receives/responds to client requests.
- * @param data A data field to be passed to the selected module handler.
- */ 
-void FCGI_RequestLoop (void * data)
+ * To be used when the input parameters are invalid.
+ * Sends a response with HTTP status 400 Bad request, along with
+ * JSON data for debugging.
+ * @param context The context to work in
+ * @param params The parameters that the module handler received.
+ */
+void FCGI_RejectJSON(FCGIContext *context)
 {
-	int count = 0;
-	while (FCGI_Accept() >= 0)   {
+	printf("Status: 400 Bad Request\r\n");
+	
+	FCGI_BeginJSON(context, STATUS_ERROR);
+	FCGI_JSONPair("description", "Invalid request");
+	FCGI_JSONLong("responsenumber", context->response_number);
+	FCGI_JSONPair("params", getenv("DOCUMENT_URI_LOCAL"));
+	FCGI_JSONPair("host", getenv("SERVER_HOSTNAME"));
+	FCGI_JSONPair("user", getenv("REMOTE_USER"));
+	FCGI_JSONPair("ip", getenv("REMOTE_ADDR"));
+	FCGI_EndJSON();
+}
+
+/**
+ * Main FCGI request loop that receives/responds to client requests.
+ * @param data Reserved.
+ */ 
+void FCGI_RequestLoop (void *data)
+{
+	FCGIContext context = {0};
+	
+	while (FCGI_Accept() >= 0) {
 		ModuleHandler module_handler = NULL;
 		char module[BUFSIZ], params[BUFSIZ];
-
+		
 		//strncpy doesn't zero-truncate properly
 		snprintf(module, BUFSIZ, "%s", getenv("DOCUMENT_URI_LOCAL"));
 		snprintf(params, BUFSIZ, "%s", getenv("QUERY_STRING"));
@@ -238,30 +258,22 @@ void FCGI_RequestLoop (void * data)
 			module[lastchar] = 0;
 		
 
-		if (!strcmp("sensors", module)) {
-			module_handler = SensorHandler;
-		} else if (!strcmp("login", module)) {
+		if (!strcmp("login", module)) {
 			module_handler = LoginHandler;
+		} else if (!strcmp("sensors", module)) {
+			module_handler = Sensor_Handler;
 		} else if (!strcmp("actuators", module)) {
 			
 		}
 
+		context.current_module = module;
 		if (module_handler) {
-			module_handler(data, params);
+			module_handler(&context, params);
 		} else {
-			char buf[BUFSIZ];
-			
-			FCGI_BeginJSON(400, module);
-			FCGI_BuildJSON("description", "400 Invalid response");
-			snprintf(buf, BUFSIZ, "%d", count);
-			FCGI_BuildJSON("request-number", buf);
-			FCGI_BuildJSON("params", params);
-			FCGI_BuildJSON("host", getenv("SERVER_HOSTNAME"));
-			FCGI_BuildJSON("user", getenv("REMOTE_USER"));
-			FCGI_BuildJSON("userip", getenv("REMOTE_ADDR"));
-			FCGI_EndJSON();
+			strncat(module, " [unknown]", BUFSIZ);
+			FCGI_RejectJSON(&context);
 		}
-
-		count++;
+		
+		context.response_number++;
 	}
 }

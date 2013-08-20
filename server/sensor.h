@@ -5,15 +5,13 @@
  */
 
 
-
 #ifndef _SENSOR_H
 #define _SENSOR_H
-
-#include "common.h"
 
 /** Number of data points to keep in sensor buffers **/
 #define SENSOR_DATABUFSIZ 10
 
+#define SENSOR_QUERYBUFSIZ 10
 
 /** Number of sensors **/
 #define NUMSENSORS 1
@@ -55,6 +53,8 @@ extern void Sensor_Init(Sensor * s, int id); // Initialise sensor
 extern void * Sensor_Main(void * args); // main loop for sensor thread; pass a Sensor* cast to void*
 
 extern int Sensor_Query(Sensor * s, DataPoint * buffer, int bufsiz); // fill buffer with sensor data
+
+extern void Sensor_Handler(FCGIContext *context, char * params);
 
 
 #endif //_SENSOR_H

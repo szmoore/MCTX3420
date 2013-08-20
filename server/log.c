@@ -5,8 +5,10 @@
 
 
 #include <unistd.h>
+#include <stdarg.h>
 
 // --- Custom headers --- //
+#include "common.h"
 #include "log.h"
 #include "options.h"
 

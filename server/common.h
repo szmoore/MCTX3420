@@ -18,4 +18,7 @@
 #include <unistd.h>
 #include <assert.h>
 
+#include "log.h"
+#include "fastcgi.h"
+
 #endif //_COMMON_H
