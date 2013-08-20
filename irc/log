@@ -1158,3 +1158,55 @@
 12:04 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
 21:53 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 23.0.1/20130814063812]"]
 22:37 -!- Callum [~chatzilla@124-171-171-92.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 22.0/20130618035212]"]
+--- Day changed Mon Aug 19 2013
+08:51 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+11:43 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 23.0.1/20130814063812]"]
+12:52 -!- jtanx [~asfa@130.95.129.7] has joined #mctxuwa_softdev
+13:34 -!- jtanx [~asfa@130.95.129.7] has quit ["ChatZilla 0.9.89 [Firefox 23.0.1/20130814063812]"]
+17:42 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+20:07 < jtanx> just so you know, I'm changing the JSON functions
+21:04 < sam_moore> Ok, I already pushed some stuff to github
+21:05 < sam_moore> But we can get it to merge
+21:05 < sam_moore> I ended up just using printf to make part of the JSON in the SensorHandler anyway
+21:06 < jtanx> depending on where SensorHandler is
+21:06 < jtanx> that may or may not work
+21:06 < jtanx> inside of fastcgi.c it willwork
+21:06 < jtanx> outside it won't
+21:07 < jtanx> oh ok
+21:07 < jtanx> I see
+21:07 < jtanx> so that's fine
+21:08 < jtanx> it might be best not to use a do while loop 
+21:08 < jtanx> because if no arguments are passed
+21:08 < sam_moore> Ah, right
+21:08 < jtanx> then the keypair function will return null
+21:09 < jtanx> while ((params = FCGI_KeyPair(params, &key, &value)))
+21:09 < jtanx> will work fine
+21:10 < sam_moore> The KeyPair function looks like it can return an empty string though, in which case I was getting the sensor_id parsed twice when I was testing it
+21:10 < jtanx> what was your input string?
+21:11 < sam_moore> "http://localhost/api/sensors?id=0"
+21:11 < jtanx> looks fine from this end
+21:11 < jtanx> http://mctx.us.to:8080/api/sensors?id=0
+21:11 < jtanx> it might be because of your do while loop
+21:12 < jtanx> yeah it will be because of that
+21:12 < sam_moore> The do while loop causes problems when there is an empty string
+21:13 < sam_moore> ie: No parameters are passed
+21:13 < jtanx> ok let's just put it this way; FCGI_KeyPair was designed to use a while loop
+21:13 < sam_moore> Ok, sure
+21:13 < sam_moore> I had some problems with just a while loop, but I'll try again
+21:13 < jtanx> yeah about that JSON stuff
+21:13 < jtanx> I'm still trying to think of a good way to do that
+21:13 < jtanx> especially with the array stuff
+21:19 < sam_moore> I'm not sure what I did before, but a while loop seems ok now
+21:19 < jtanx> heh
+21:21 < sam_moore> Ok, I have to go now
+21:21 < sam_moore> I might not be able to do much tomorrow, we'll see
+21:22 < jtanx> ok yep
+21:35 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 23.0.1/20130814063812]"]
+21:55 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+22:15 -!- Callum [~Callum@124-171-171-92.dyn.iinet.net.au] has joined #mctxuwa_softdev
+22:46 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 23.0.1/20130814063812]"]
+23:08 -!- Callum [~Callum@124-171-171-92.dyn.iinet.net.au] has quit [EOF From client]
+23:11 -!- Callum [~chatzilla@124-171-171-92.dyn.iinet.net.au] has joined #mctxuwa_softdev
+23:14 -!- Callum [~chatzilla@124-171-171-92.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+23:17 -!- Callum [~chatzilla@124-171-171-92.dyn.iinet.net.au] has joined #mctxuwa_softdev
+23:35 -!- Callum [~chatzilla@124-171-171-92.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
