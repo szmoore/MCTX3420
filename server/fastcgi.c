@@ -83,6 +83,25 @@ static void LoginHandler(FCGIContext *context, char *params) {
 	}
 }
 
+/*TODO: Remove and replace with the actual actuator code*/
+static void ActuatorHandler(FCGIContext *context, char *params) {
+	const char *key, *value, *loginkey = NULL;
+	while ((params = FCGI_KeyPair(params, &key, &value))) {
+		if (!strcmp(key, "key")) {
+			loginkey = value;
+		}
+	}
+	if (!loginkey || !FCGI_Authorized(context, loginkey)) {
+		FCGI_BeginJSON(context, STATUS_UNAUTHORIZED);
+		FCGI_JSONPair("description", "Invalid key specified.");
+		FCGI_EndJSON();
+	} else {
+		FCGI_BeginJSON(context, STATUS_OK);
+		FCGI_JSONPair("description", "Logged in!");
+		FCGI_EndJSON();
+	}
+}
+
 /**
  * Given an FCGIContext, determines if the current user (as specified by
  * the key) is authorized or not. If validated, the context login_timestamp is
@@ -93,7 +112,7 @@ static void LoginHandler(FCGIContext *context, char *params) {
  */
 bool FCGI_Authorized(FCGIContext *context, const char *key) {
 	time_t now = time(NULL);
-	int result = (now - context->login_timestamp) <= LOGIN_TIMEOUT && 
+	int result = (now - context->login_timestamp) <= LOGIN_TIMEOUT &&
 				 !strcmp(context->login_key, key);
 	if (result) {
 		context->login_timestamp = now; //Update the login_timestamp
@@ -263,7 +282,7 @@ void FCGI_RequestLoop (void *data)
 		} else if (!strcmp("sensors", module)) {
 			module_handler = Sensor_Handler;
 		} else if (!strcmp("actuators", module)) {
-			
+			module_handler = ActuatorHandler;
 		}
 
 		context.current_module = module;
