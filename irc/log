@@ -1210,3 +1210,103 @@
 23:14 -!- Callum [~chatzilla@124-171-171-92.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
 23:17 -!- Callum [~chatzilla@124-171-171-92.dyn.iinet.net.au] has joined #mctxuwa_softdev
 23:35 -!- Callum [~chatzilla@124-171-171-92.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Tue Aug 20 2013
+07:44 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+08:11 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit [Ping timeout]
+09:03 -!- jtanx [~asfa@130.95.113.202] has joined #mctxuwa_softdev
+10:11 -!- jtanx [~asfa@130.95.113.202] has quit [Ping timeout]
+10:17 -!- jtanx [~asfa@130.95.113.202] has joined #mctxuwa_softdev
+13:11 -!- jtanx [~asfa@130.95.113.202] has quit [Ping timeout]
+14:28 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:06 -!- Callum [~chatzilla@124-171-171-92.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:06 < Callum> hey same
+15:06 < Callum> sam*
+15:20 < jtanx> :>
+15:22 < Callum> he literally set himself to away as soon as i said that
+15:45 < jtanx> urgh this json stuff is doing my head in
+15:57 < sam_moore> Callum: I've been set to away since last night
+15:57 < Callum> o.O not according to my client
+15:58 < sam_moore> Anyway, we are definitely using the Beaglebone, Electronics has ordered one, they seemed to think they'd have to program it but I corrected them
+15:58 < Callum> ...why would they have to program it? wtf did they think we were doing?
+15:59 < sam_moore> They probably thought all we had to do was the GUI and not any of the other software? I don't know. But the guy seemed relieved anyway.
+15:59 < Callum> and was gonna ask if you remembered anything about the pi meson decay question for physics (how do you get the anti-neutrinos momentum, or do you assume it to be 0 as well? but then it doesnt really make sense with conservation of momentum)
+16:00 < sam_moore> Woah, I don't remember the assignments in that much detail
+16:00 < Callum> was hoping you would :p
+16:00 < sam_moore> No, I just have vague memories of algebra
+16:01 < sam_moore> And looking through notes
+16:01 < Callum> hmm. i cant seem to find anything in the notes
+16:01 < Callum> because he says to assume the rest mass of the anti-neutrino is 0
+16:02 < Callum> and i don't really remember much in regards to energies and 0 rest mass ;/
+16:02 < jtanx> I talked to someone who did computer vision before
+16:02 < jtanx> and he's really doubtful that you can get accurate readings off a webcam
+16:02 < sam_moore> Callum: I don't think you can assume the momentum is zero, other than that, I don't have much to offer
+16:02 < Callum> the question also says to have it in terms of m(pi) m(e) and c
+16:03 < Callum> and yea thats what i thought. it doesnt make sense to do that. just cant remember how to do it D;
+16:03 < Callum> @jeremy yea well, its a pain but possible
+16:04 < Callum> really comes down to how good your camera is/sampling rate/how quickly you can process it. 
+16:04 < sam_moore> How about you do some experimenting with a webcam and see what you can do with it?
+16:04 < Callum> but you can get some pretty good webcams nowadays (but then again the better it is the longer it takes to process)
+16:04 < jtanx> personally, I don't think it will work
+16:04 < sam_moore> It looks like we might just end up streaming images diretly to a website
+16:04 < Callum> i don't have any
+16:04 < Callum> yea well even if thats all we do we still need the camera
+16:05 < Callum> spose i could use my laptop one but i doubt that would be very good
+16:05 < Callum> could run it through the canny algorithm and see what it produces
+16:06 < sam_moore> Sounds like an idea
+16:07 < sam_moore> A good idea specifically
+16:07 < jtanx> about the sensorhandler
+16:07 < sam_moore> Yes?
+16:07 < jtanx> do you envision leaving it in fastcgi.c permanently
+16:07 < jtanx> or for that matter any other handlers
+16:07 < sam_moore> I was kind of thinking there would be a "handlers.h" and "handlers.c"
+16:08 < sam_moore> Just to make things more organised
+16:08 < jtanx> yeah
+16:08 < jtanx> I'm trying to export enough of the functionality
+16:08 < jtanx> to do that
+16:08 < jtanx> but the json thing is annoying
+16:08 < jtanx> especially when you need to spit out arrays
+16:09 < jtanx> unless you have something like FCGI_Printf
+16:09 < jtanx> and it's up to you to format it correctly
+16:09 < Callum> bloody physics lecture video is laggy. gonna have to download it and hope for the best. fuck echo
+16:10 < jtanx> compared to lectopia you get 2x filesize with no visible benefit in quality
+16:10 < Callum> they're both shit.
+16:10 < sam_moore> You could have seperate "BuildJSON_Key" and "BuildJSON_Value" functions, with a "BuildJSON_ValueArray" maybe
+16:10 < Callum> haha
+16:11 < sam_moore> FCGI_Printf is Ok though, it's not too much formating
+16:11 < jtanx> the problem with the buildjson_* stuff
+16:11 < jtanx> is it gets very verbose
+16:12 < jtanx> and you can probably come up witha  situation that breaks it too
+16:12 < jtanx> and don't get me started on value types
+16:12 < sam_moore> Haha
+16:14 < sam_moore> We can always just send plain text and make James turn it into JSON :P
+16:14 < jtanx> ahaha
+16:14 < jtanx> yeah that could work
+16:15 < jtanx> mm 
+16:15 < jtanx> this is where java is good
+16:15 < jtanx> or any other higher level language
+16:21 < jtanx> ok so it's a bit of both, but how about: FCGI_JSONKey(key) and FCGI_JSONValue(format, ...)
+16:22 < sam_moore> That looks good
+16:25 < jtanx> I'm also adding long/double types for the BuildJSON function, just for convenience
+16:25 < jtanx> any preference to naming conventions?
+16:26 < jtanx>  FCGI_BuildJSONLong
+16:27 < sam_moore> Seems OK
+16:28 < sam_moore> I need to go do some ENSC1001 stuff (hooray)
+16:29 < jtanx> yuck
+16:30 < Callum> hhaha
+16:30 < Callum> have fun :p
+16:30 < Callum> although i cant really talk. about a days worth of physics and a days worth of ensc3016 shit i should get through, on top of mctx and geng4402 stuff. yay for being behind already
+16:38 < Callum> well iv got an answer for the first part (second part should be the same process). just hope its right :s
+16:46 < jtanx> ok, time to merge this into the server code
+19:47 < jtanx> hmm interesting - it crashes if compiled with clang but not with gcc
+19:49 < jtanx> probably just a bug in clang 3.2
+20:08 < jtanx> ok, just submitted a pull request to update the fastcgi stuff
+20:08 < jtanx> for now I moved Sensor_Handler to sensor.c
+20:09 < jtanx> the status codes have all changed
+20:09 < jtanx> If you absolutely cannot process anything given the input arguments, you call FCGI_RejectJSON
+20:10 < jtanx> If you fail for some other reason (e.g unauthorized access), you use FCGI_BeginJSON with the appropriate status code
+20:10 < jtanx> With RejectJSON, it sends a HTTP 400 code so any query through AJAX/jQuery will fail with no extra info
+20:11 < jtanx> With BeginJSON, the HTTP code is always 200 OK, so you are able to transmit extra info if it failed for another reason
+20:12 < jtanx> BeginJSON will automatically add the module handler name + the status code
+21:47 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Wed Aug 21 2013
+00:53 -!- Callum [~chatzilla@124-171-171-92.dyn.iinet.net.au] has quit [EOF From client]
