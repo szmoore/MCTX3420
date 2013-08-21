@@ -2,17 +2,14 @@
  * @file main.c
  * @purpose main and its helper functions, signal handling and cleanup functions
  */
-#include "common.h"
 
+// --- Custom headers --- //
+#include "common.h"
+#include "options.h"
+#include "sensor.h"
 
 // --- Standard headers --- //
 #include <signal.h> // for signal handling
-
-// --- Custom headers --- //
-#include "fastcgi.h"
-#include "log.h"
-#include "options.h"
-#include "sensor.h"
 
 // --- Variable definitions --- //
 Options g_options; // options passed to program through command line arguments
