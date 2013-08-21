@@ -248,7 +248,7 @@ void FCGI_RejectJSON(FCGIContext *context)
 	FCGI_BeginJSON(context, STATUS_ERROR);
 	FCGI_JSONPair("description", "Invalid request");
 	FCGI_JSONLong("responsenumber", context->response_number);
-	FCGI_JSONPair("params", getenv("DOCUMENT_URI_LOCAL"));
+	FCGI_JSONPair("params", getenv("QUERY_STRING"));
 	FCGI_JSONPair("host", getenv("SERVER_HOSTNAME"));
 	FCGI_JSONPair("user", getenv("REMOTE_USER"));
 	FCGI_JSONPair("ip", getenv("REMOTE_ADDR"));
