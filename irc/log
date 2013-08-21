@@ -1310,3 +1310,24 @@
 21:47 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 23.0.1/20130814063812]"]
 --- Day changed Wed Aug 21 2013
 00:53 -!- Callum [~chatzilla@124-171-171-92.dyn.iinet.net.au] has quit [EOF From client]
+07:45 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+11:57 < jtanx> hmm
+11:57 < jtanx> I just had a play with the sensor stuff
+11:57 < jtanx> and I trialled a 'double buffer' scheme
+11:57 < jtanx> instead of the binary file idea
+11:57 < jtanx> seems to work okay, and it guarantees that a point won't be returned to the user if they have already received it
+12:35 < jtanx> urgh
+12:35 < jtanx> just worked through some stupid bug
+12:37 < jtanx> I think it's because make didn't recompile something because it thought it hadn't changed
+12:38 < jtanx> probably the header files
+12:50 < jtanx> you can see the double buffer method in this branch: https://github.com/jtanx/MCTX3420/tree/doublebuffer
+12:58 < jtanx> one issue though is that writing out csv instead of binary file takes up a lot more space
+14:49 -!- james__ [~chatzilla@130.95.133.180] has joined #mctxuwa_softdev
+14:49 < james__> Hey
+14:50 -!- james__ [~chatzilla@130.95.133.180] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+18:32 -!- Callum [~chatzilla@124.149.92.17] has joined #mctxuwa_softdev
+19:48 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit [Ping timeout]
+19:51 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+23:12 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["･_･"]
+--- Day changed Thu Aug 22 2013
+00:46 -!- Callum [~chatzilla@124.149.92.17] has quit [EOF From client]
