@@ -5,9 +5,8 @@
  */
 
 
-
+#include "common.h"
 #include "sensor.h"
-#include "log.h"
 #include <math.h>
 
 /**
@@ -147,4 +146,87 @@ int Sensor_Query(Sensor * s, DataPoint * buffer, int bufsiz)
 	return amount_read;
 }
 
+/**
+ * Handle a request to the sensor module
+ * @param context - The context to work in
+ * @param params - Parameters passed
+ */
+void Sensor_Handler(FCGIContext *context, char * params)
+{
+	DataPoint buffer[SENSOR_QUERYBUFSIZ];
+	StatusCodes status = STATUS_OK;
+	const char * key; const char * value;
 
+	int sensor_id = SENSOR_NONE;
+
+	while ((params = FCGI_KeyPair(params, &key, &value)) != NULL)
+	{
+		Log(LOGDEBUG, "Got key=%s and value=%s", key, value);
+		if (strcmp(key, "id") == 0)
+		{
+			char *end;
+			if (sensor_id != SENSOR_NONE)
+			{
+				Log(LOGERR, "Only one sensor id should be specified");
+				status = STATUS_ERROR;
+				break;
+			}
+			if (*value == '\0')
+			{
+				Log(LOGERR, "No id specified.");
+				status = STATUS_ERROR;
+				break;
+			}
+			//TODO: Use human readable sensor identifier string for API?
+			sensor_id = strtol(value, &end, 10);
+			if (*end != '\0')
+			{
+				Log(LOGERR, "Sensor id not an integer; %s", value);
+				status = STATUS_ERROR;
+				break;
+			}
+		}
+		else
+		{
+			Log(LOGERR, "Unknown key \"%s\" (value = %s)", key, value);
+			status = STATUS_ERROR;
+			break;
+		}		
+	}
+
+	if (sensor_id == SENSOR_NONE)
+	{
+		Log(LOGERR, "No sensor id specified");
+		status = STATUS_ERROR;
+	}
+	else if (sensor_id >= NUMSENSORS || sensor_id < 0)
+	{
+		Log(LOGERR, "Invalid sensor id %d", sensor_id);
+		status = STATUS_ERROR;
+	}
+
+	if (status == STATUS_ERROR)
+	{
+		FCGI_RejectJSON(context);
+	}
+	else
+	{
+		FCGI_BeginJSON(context, status);	
+		FCGI_JSONPair(key, value); // should spit back sensor ID
+		//Log(LOGDEBUG, "Call Sensor_Query...");
+		int amount_read = Sensor_Query(&(g_sensors[sensor_id]), buffer, SENSOR_QUERYBUFSIZ);
+		//Log(LOGDEBUG, "Read %d DataPoints", amount_read);
+		//Log(LOGDEBUG, "Produce JSON response");
+		FCGI_JSONKey("data");
+		FCGI_JSONValue("[");
+		for (int i = 0; i < amount_read; ++i)
+		{
+			FCGI_JSONValue("[%f, %f]", buffer[i].time, buffer[i].value);
+			if (i+1 < amount_read)
+				FCGI_JSONValue(",");
+		}
+		FCGI_JSONValue("]");
+		//Log(LOGDEBUG, "Done producing JSON response");
+		FCGI_EndJSON();	
+	}
+}

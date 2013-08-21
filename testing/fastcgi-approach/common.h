@@ -14,7 +14,7 @@
 #include <pthread.h>
 #include <unistd.h>
 
-extern void Handler_Sensors(void *data, char *params);
+extern void Handler_Sensors(FCGIContext *data, char *params);
 
 #endif //_COMMON_H
 
