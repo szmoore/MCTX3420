@@ -1331,3 +1331,22 @@
 23:12 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["･_･"]
 --- Day changed Thu Aug 22 2013
 00:46 -!- Callum [~chatzilla@124.149.92.17] has quit [EOF From client]
+08:19 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+10:00 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has left #mctxuwa_softdev []
+13:19 -!- callum [~chatzilla@130.95.89.97] has joined #mctxuwa_softdev
+13:20 < callum> hey
+13:53 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has joined #mctxuwa_softdev
+14:35 -!- callum [~chatzilla@130.95.89.97] has quit [Ping timeout]
+15:07 -!- callum [~chatzilla@130.95.89.97] has joined #mctxuwa_softdev
+15:07 < callum> sam you still at uni?
+15:22 < callum> or jeremy if you remember what he used to compile the file. i'v managed to get it to recognise the header files but now its complaining about not being able to find the libraries.
+15:34 < jtanx> um
+15:34 < jtanx> I can't remember
+15:34 < jtanx> didn't you use pkg config to find out
+15:36 < jtanx> try this http://opencv.willowgarage.com/wiki/CompileOpenCVUsingLinux
+15:54 -!- callum [~chatzilla@130.95.89.97] has quit [EOF From client]
+21:43 -!- jtanx [~asfa@124-169-120-181.dyn.iinet.net.au] has quit ["._."]
+22:08 < sam_moore> gcc -o opencv opencv.c -I/usr/include/opencv -lopencv_core -lopencv_highgui -lopencv_imgproc
+22:08 -!- Irssi: #mctxuwa_softdev: Total of 1 nicks [0 ops, 0 halfops, 0 voices, 1 normal]
+22:08 < sam_moore> Oh... there's no one here
+22:08 < sam_moore> Well, if you read the IRC logs when they're commited to git, you'll see it. Good luck.
