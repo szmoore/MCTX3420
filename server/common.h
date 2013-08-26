@@ -17,8 +17,10 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <assert.h>
+#include <sys/time.h>
 
 #include "log.h"
 #include "fastcgi.h"
+#include "thread.h"
 
 #endif //_COMMON_H

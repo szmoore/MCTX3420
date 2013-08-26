@@ -20,7 +20,7 @@
 typedef struct
 {
 	/** Time at which data was taken **/
-	float time;
+	struct timeval time_stamp; //TODO: Consider; use float instead?
 	/** Value of data **/
 	float value;
 } DataPoint;
@@ -29,7 +29,7 @@ typedef struct
 typedef struct
 {
 	/** ID number of the sensor **/
-	enum {SENSOR_TEST0=0, SENSOR_TEST1=1, SENSOR_NONE} id;
+	enum {SENSOR_TEST0=0, SENSOR_TEST1=1} id;
 	/** Buffer to store data from the sensor **/
 	DataPoint buffer[SENSOR_DATABUFSIZ];
 	/** Index of last point written in the data buffer **/
@@ -46,10 +46,10 @@ typedef struct
 	
 } Sensor;
 
-/** Array of Sensors **/
-extern Sensor g_sensors[];
 
-extern void Sensor_Init(Sensor * s, int id); // Initialise sensor
+
+extern void Sensor_Spawn(); // Initialise sensor
+extern void Sensor_Join(); //Join sensor threads
 extern void * Sensor_Main(void * args); // main loop for sensor thread; pass a Sensor* cast to void*
 
 extern int Sensor_Query(Sensor * s, DataPoint * buffer, int bufsiz); // fill buffer with sensor data
