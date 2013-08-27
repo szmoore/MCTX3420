@@ -9,34 +9,44 @@
 #include "sensor.h"
 #include <math.h>
 
+/** Array of sensors, initialised by Sensor_Init **/
+static Sensor g_sensors[NUMSENSORS]; //global to this file
+
 /**
  * Read a data value from a sensor; block until value is read
  * @param sensor_id - The ID of the sensor
- * @returns The current value of the sensor
+ * @param d - DataPoint to set
+ * @returns NULL on error, otherwise d
  */
-DataPoint GetData(int sensor_id)
+DataPoint * GetData(int sensor_id, DataPoint * d)
 {
 	// switch based on the sensor_id at the moment for testing;
 	// might be able to just directly access ADC from sensor_id?
 	//TODO: Implement for real sensors
 
-	DataPoint d;
-	//TODO: Deal with time stamps properly
-	static int count = 0;
-	d.time = count++;
+	
+	//TODO: We should ensure the time is *never* allowed to change on the server if we use gettimeofday
+	//		Another way people might think of getting the time is to count CPU cycles with clock()
+	//		But this will not work because a) CPU clock speed may change on some devices (RPi?) and b) It counts cycles used by all threads
+	gettimeofday(&(d->time_stamp), NULL);
+	
 	switch (sensor_id)
 	{
 		case SENSOR_TEST0:
-			d.value = count;
+		{
+			static int count = 0;
+			d->value = count++;
 			break;
+		}
 		case SENSOR_TEST1:
-			d.value = (float)(rand() % 100) / 100;
+			d->value = (float)(rand() % 100) / 100;
 			break;
 		default:
 			Fatal("Unknown sensor id: %d", sensor_id);
 			break;
 	}	
 	usleep(100000); // simulate delay in sensor polling
+
 	return d;
 }
 
@@ -57,16 +67,15 @@ void Destroy(Sensor * s)
  * Initialise a sensor
  * @param s - Sensor to initialise
  */
-void Sensor_Init(Sensor * s, int id)
+void Init(Sensor * s, int id)
 {
 	s->write_index = 0;
 	s->read_offset = 0;
 	s->id = id;
 
-	#define FILENAMESIZE BUFSIZ
+	#define FILENAMESIZE 3
 	char filename[FILENAMESIZE];
-	//if (s->id >= pow(10, FILENAMESIZE))
-	if (false)
+	if (s->id >= pow(10, FILENAMESIZE))
 	{
 		Fatal("Too many sensors! FILENAMESIZE is %d; increase it and recompile.", FILENAMESIZE);
 	}
@@ -81,6 +90,9 @@ void Sensor_Init(Sensor * s, int id)
 }
 
 
+
+
+
 /**
  * Run the main sensor polling loop
  * @param arg - Cast to Sensor* - Sensor that the thread will handle
@@ -90,7 +102,7 @@ void * Sensor_Main(void * arg)
 {
 	Sensor * s = (Sensor*)(arg);
 
-	while (true) //TODO: Exit condition
+	while (Thread_Runstate() == RUNNING) //TODO: Exit condition
 	{
 		// The sensor will write data to a buffer until it is full
 		// Then it will open a file and dump the buffer to the end of it.
@@ -102,7 +114,11 @@ void * Sensor_Main(void * arg)
 
 		while (s->write_index < SENSOR_DATABUFSIZ)
 		{
-			s->buffer[s->write_index] = GetData(s->id);
+			DataPoint * d = &(s->buffer[s->write_index]);
+			if (GetData(s->id, d) == NULL)
+			{
+				Fatal("Error collecting data");
+			}
 			s->write_index += 1;
 		}
 
@@ -110,6 +126,8 @@ void * Sensor_Main(void * arg)
 
 		// CRITICAL SECTION (no threads should be able to read/write the file at the same time)
 		pthread_mutex_lock(&(s->mutex));
+			//TODO: Valgrind complains about this fseek: "Syscall param write(buf) points to uninitialised byte(s)"
+			//		Not sure why, but we should find out and fix it.
 			fseek(s->file, 0, SEEK_END);
 			int amount_written = fwrite(s->buffer, sizeof(DataPoint), SENSOR_DATABUFSIZ, s->file);
 			if (amount_written != SENSOR_DATABUFSIZ)
@@ -123,7 +141,8 @@ void * Sensor_Main(void * arg)
 		s->write_index = 0; // reset position in buffer
 		
 	}
-	return NULL;
+	Log(LOGDEBUG, "Thread for sensor %d exits", s->id);
+	return NULL; 
 }
 
 /**
@@ -147,6 +166,27 @@ int Sensor_Query(Sensor * s, DataPoint * buffer, int bufsiz)
 }
 
 /**
+ * Get a Sensor given an ID string
+ * @param id_str ID string
+ * @returns Sensor* identified by the string; NULL on error
+ */
+Sensor * Sensor_Identify(const char * id_str)
+{
+	char * end;
+	// Parse string as integer
+	int id = strtol(id_str, &end, 10);
+	if (*end != '\0')
+	{
+		return NULL;
+	}
+	// Bounds check
+	if (id < 0 || id > NUMSENSORS)
+		return NULL;
+
+	return g_sensors+id;
+}
+
+/**
  * Handle a request to the sensor module
  * @param context - The context to work in
  * @param params - Parameters passed
@@ -157,15 +197,14 @@ void Sensor_Handler(FCGIContext *context, char * params)
 	StatusCodes status = STATUS_OK;
 	const char * key; const char * value;
 
-	int sensor_id = SENSOR_NONE;
+	Sensor * sensor = NULL;
 
 	while ((params = FCGI_KeyPair(params, &key, &value)) != NULL)
 	{
 		Log(LOGDEBUG, "Got key=%s and value=%s", key, value);
 		if (strcmp(key, "id") == 0)
 		{
-			char *end;
-			if (sensor_id != SENSOR_NONE)
+			if (sensor != NULL)
 			{
 				Log(LOGERR, "Only one sensor id should be specified");
 				status = STATUS_ERROR;
@@ -177,11 +216,11 @@ void Sensor_Handler(FCGIContext *context, char * params)
 				status = STATUS_ERROR;
 				break;
 			}
-			//TODO: Use human readable sensor identifier string for API?
-			sensor_id = strtol(value, &end, 10);
-			if (*end != '\0')
+
+			sensor = Sensor_Identify(value);
+			if (sensor == NULL)
 			{
-				Log(LOGERR, "Sensor id not an integer; %s", value);
+				Log(LOGERR, "Invalid sensor id: %s", value);
 				status = STATUS_ERROR;
 				break;
 			}
@@ -194,14 +233,9 @@ void Sensor_Handler(FCGIContext *context, char * params)
 		}		
 	}
 
-	if (sensor_id == SENSOR_NONE)
+	if (status != STATUS_ERROR && sensor == NULL)
 	{
-		Log(LOGERR, "No sensor id specified");
-		status = STATUS_ERROR;
-	}
-	else if (sensor_id >= NUMSENSORS || sensor_id < 0)
-	{
-		Log(LOGERR, "Invalid sensor id %d", sensor_id);
+		Log(LOGERR, "No valid sensor id given");
 		status = STATUS_ERROR;
 	}
 
@@ -211,22 +245,55 @@ void Sensor_Handler(FCGIContext *context, char * params)
 	}
 	else
 	{
+
 		FCGI_BeginJSON(context, status);	
 		FCGI_JSONPair(key, value); // should spit back sensor ID
 		//Log(LOGDEBUG, "Call Sensor_Query...");
-		int amount_read = Sensor_Query(&(g_sensors[sensor_id]), buffer, SENSOR_QUERYBUFSIZ);
+		int amount_read = Sensor_Query(sensor, buffer, SENSOR_QUERYBUFSIZ);
 		//Log(LOGDEBUG, "Read %d DataPoints", amount_read);
 		//Log(LOGDEBUG, "Produce JSON response");
 		FCGI_JSONKey("data");
 		FCGI_JSONValue("[");
 		for (int i = 0; i < amount_read; ++i)
 		{
-			FCGI_JSONValue("[%f, %f]", buffer[i].time, buffer[i].value);
+			//TODO: Consider; is it better to give both tv_sec and tv_usec to the client seperately, instead of combining here?
+			//NOTE: Must always use doubles; floats get rounded!
+			double time = buffer[i].time_stamp.tv_sec + 1e-6*(buffer[i].time_stamp.tv_usec);
+			FCGI_JSONValue("[%f, %f]", time, buffer[i].value);
 			if (i+1 < amount_read)
 				FCGI_JSONValue(",");
 		}
 		FCGI_JSONValue("]");
 		//Log(LOGDEBUG, "Done producing JSON response");
 		FCGI_EndJSON();	
+	}
+}
+
+/**
+ * Setup Sensors, start Sensor polling thread(s)
+ */
+void Sensor_Spawn()
+{
+	// start sensor threads
+	for (int i = 0; i < NUMSENSORS; ++i)
+	{
+		Init(g_sensors+i, i);
+		pthread_create(&(g_sensors[i].thread), NULL, Sensor_Main, (void*)(g_sensors+i));
+	}
+}
+
+/**
+ * Quit Sensor loops
+ */
+void Sensor_Join()
+{
+	if (!Thread_Runstate())
+	{
+		Fatal("This function should not be called before Thread_QuitProgram");
+	}
+	for (int i = 0; i < NUMSENSORS; ++i)
+	{
+		pthread_join(g_sensors[i].thread, NULL);
+		Destroy(g_sensors+i);
 	}
 }

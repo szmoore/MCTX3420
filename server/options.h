@@ -14,6 +14,10 @@ typedef struct
 	const char * program;
 	/** Determines at what level log messages are shown **/
 	int verbosity;
+	/** Time at which program begins to run **/
+	struct timeval start_time;
+	/** Time at which program exits **/
+	struct timeval end_time;
 
 } Options;
 
