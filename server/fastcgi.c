@@ -214,6 +214,16 @@ void FCGI_JSONDouble(const char *key, double value)
 }
 
 /**
+ * Similar to FCGI_JsonPair except for boolean values.
+ * @param key The key of the JSON entry
+ * @param value The value associated with the key
+ */
+void FCGI_JSONBool(const char *key, bool value)
+{
+	printf(",\r\n\t\"%s\" : %s", key, value ? "true" : "false");
+}
+
+/**
  * Begins a JSON entry by writing the key. To be used in conjunction
  * with FCGI_JsonValue.
  * @param key The key of the JSON entry
