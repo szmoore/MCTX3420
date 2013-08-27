@@ -1,7 +1,7 @@
 # Makefile for server software
 CXX = gcc
 FLAGS = -std=c99 -Wall -Werror -pedantic -g
-LIB = -lpthread -lfcgi -lssl
+LIB = -lpthread -lfcgi -lssl -lcrypto
 OBJ = log.o sensor.o fastcgi.o thread.o main.o
 RM = rm -f
 
