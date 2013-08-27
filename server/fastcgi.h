@@ -22,6 +22,7 @@ extern void FCGI_BeginJSON(FCGIContext *context, StatusCodes status_code);
 extern void FCGI_JSONPair(const char *key, const char *value);
 extern void FCGI_JSONLong(const char *key, long value);
 extern void FCGI_JSONDouble(const char *key, double value);
+extern void FCGI_JSONBool(const char *key, bool value);
 extern void FCGI_JSONKey(const char *key);
 extern void FCGI_JSONValue(const char *format, ...);
 extern void FCGI_EndJSON();
