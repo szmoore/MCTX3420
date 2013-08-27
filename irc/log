@@ -1392,3 +1392,59 @@
 21:03 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit ["brb"]
 21:12 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has joined #mctxuwa_softdev
 22:46 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Tue Aug 27 2013
+07:40 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has joined #mctxuwa_softdev
+07:54 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 23.0.1/20130814063812]"]
+17:53 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has joined #mctxuwa_softdev
+19:11 < jtanx> lol
+19:11 < jtanx> the camera that we were using for the soldering lab inserted a bunch of wavy lines/static into the video
+19:12 < sam_moore> It's an effect
+19:14 < jtanx> nah
+19:14 < jtanx> the camera was actually broken
+19:15 < sam_moore> (I figured that)
+19:15 < sam_moore> You could pretend it's supposed to be an 80s style video?
+19:15 < jtanx> yeah that could work
+19:16 < jtanx> have you done it yet?
+19:18 < sam_moore> No :S
+19:20 < jtanx> well
+19:21 < jtanx> according to the manual, you need to connect a wire from R5 on the sensor board to the relay board
+19:21 < jtanx> problem was we already chopped off the lead on R5
+19:22 < jtanx> another group connected the wire to the LEd though
+19:22 < jtanx> seemed to work
+20:02 < jtanx> so are we using clock_gettime?
+20:08 < sam_moore> I think so, we can use CLOCK_MONOTONIC_RAW if we are paranoid about the system time getting changed
+20:08 < sam_moore> Or we can just use CLOCK_REALTIME if we aren't
+20:09 < jtanx> I thought CLOCK_MONOTONIC was supposed to be best, because the RAW version wasn't compensated for temp/other stuff
+20:10 < jtanx> http://stackoverflow.com/questions/3523442/difference-between-clock-realtime-and-clock-monotonic
+20:10 < jtanx> about the FCGI loop blocking
+20:10 < jtanx> you can switch to FCGX_ methods
+20:10 < jtanx> I think
+20:11 < jtanx> but is it really necessary
+20:20 < jtanx> about the valgrind comment in sensors.c
+20:20 < jtanx> this is probably it: http://stackoverflow.com/questions/5844242/valgrind-yells-about-an-uninitialised-bytes
+20:23 < sam_moore> It's probably not necessary to stop the FCGI loop blocking, don't worry about it
+20:25 < sam_moore> Yeah, I didn't initialise the buffers anywhere
+20:25 < jtanx> actually I can't reproduce that message
+20:25 < sam_moore> Hmm
+20:26 < jtanx> about the sensor times
+20:27 < jtanx> what about if you all reference it relative to some point
+20:27 < jtanx> eg
+20:27 < sam_moore> The epoch :P
+20:27 < jtanx> lol
+20:27 < jtanx> I mean
+20:28 < jtanx> when you get sensor data, you store the difference in time between the start of recording and now
+20:28 < sam_moore> Sure, that makes more sense
+20:29 < sam_moore> Just give the client the start of recording time and they can convert it to a time of day / day in the calendar themselves
+20:30 < jtanx> yeah
+20:30 < jtanx> you could have a specific request to return the starting time
+20:30 < jtanx> then it's implicit for all requests
+20:30 < jtanx> btw I submitted a pull request for the nginx configs
+20:32 < sam_moore> Ok
+20:32 < sam_moore> I've added you to collaborators so you can merge them yourself if you need to
+20:33 < jtanx> ok
+20:35 < jtanx> huh
+20:35 < jtanx> http://www.cnx-software.com/2011/09/26/beagleboard-emulator-in-ubuntu-with-qemu/
+20:41 < sam_moore> Nice
+20:42 < sam_moore> "Currently you can not access Ethernet" Not so nice
+20:42 < sam_moore> Although this is dated 2011
+21:18 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit ["bye"]
