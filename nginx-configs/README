@@ -1,0 +1,18 @@
+This folder represents the files that should be placed under:
+/etc/nginx
+
+To install:
+* Delete all files under /etc/nginx/sites-enabled
+* Either:
+  * Copy 'mctxconfig' (under sites-enabled) to /etc/nginx/sites-available/
+    and create a symlink to that file under /etc/nginx/sites-enabled/
+  * Create a symlink directly from 'mctxconfig' to 
+    /etc/etc/nginx/sites-enabled/
+* Replace /etc/nginx/fastcgi_params and /etc/nginx/mime.types with the
+  provided files (either by copying or symlinking)
+
+Note:
+To get the login functionality working, you need to place a .htpasswd file
+under /usr/share/nginx/access (create folder if it doesn't exist). To generate
+the htpasswd file, install the apache2-utils package and use the 'htpasswd'
+executable.
