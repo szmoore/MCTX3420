@@ -1448,3 +1448,140 @@
 20:42 < sam_moore> "Currently you can not access Ethernet" Not so nice
 20:42 < sam_moore> Although this is dated 2011
 21:18 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit ["bye"]
+--- Day changed Wed Aug 28 2013
+08:52 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has joined #mctxuwa_softdev
+10:08 -!- MctxBot [~twang@203-59-111-146.dyn.iinet.net.au] has quit [Connection reset by peer]
+10:11 -!- MctxBot [~twang@203-59-111-146.dyn.iinet.net.au] has joined #mctxuwa_softdev
+10:39 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 23.0.1/20130814063812]"]
+15:16 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:48 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has joined #mctxuwa_softdev
+16:31 < jtanx> huh
+16:31 < jtanx> firefox's javascript debugger is pretty cool
+16:31 < sam_moore> Firebug? Yeah
+16:35 < jtanx> nah the inbuilt one
+16:35 < jtanx> firebug's good for inspecting html though
+16:35 < jtanx> haven't used firebugs js debugger yet
+16:35 < sam_moore> Oh, I didn't know they had an inbuilt one
+16:36 < jtanx> Ctrl+Shift+K
+16:36 < sam_moore> Of course I normally use Iceweasel, which is currently built as firefox 10.0.2 with a different name
+16:36 < jtanx> well that's about 10 releases behind
+16:36 < sam_moore> That looks pretty similar to firebug anyway
+16:55 < jtanx> inline conditionals in javascript are whack
+16:55 -!- Callum_ [~chatzilla@124-149-92-17.dyn.iinet.net.au] has joined #mctxuwa_softdev
+16:55 < sam_moore> I haven't done much javascript, but a lot of it does seem whack
+16:56 < sam_moore> jtanx: What are you working on in JavaScript?
+16:56 < jtanx> unit tests
+16:57 < sam_moore> Cool
+17:01 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has quit [Ping timeout]
+17:01 -!- Callum_ is now known as Callum
+17:18 < jtanx> javascript in general is annoying me though
+17:25 < Callum> when exactly is this soldering lab due? fucking thing.
+17:27 < jtanx> next friday
+17:27 < Callum> it says week 5 on lms
+17:27 < jtanx> sept 6
+17:27 < Callum> where's it say this?
+17:27 < jtanx> yeah he made an announcement
+17:27 < jtanx> that it's wrong
+17:27 < jtanx> somewhere
+17:28 < Callum> sigh. this unit..i swear
+17:28 < Callum> if it really is next week then i'd be so relieved
+17:28 < Callum> wow
+17:28 < Callum> he made an announcement today..
+17:28 < Callum> wait yesterday
+17:29 < jtanx> still got that central plant fbd to do
+17:29 < Callum> why hasnt LMS emailed me a notification? (/end spam)
+17:29 < Callum> yea i know
+17:29 < Callum> which i think i have it pretty much done
+17:29 < Callum> not 100% sure on it though
+17:29 < Callum> and whether to add pumps and shit into it
+17:29 < jtanx> what did you have on it?
+17:30 < Callum> HA as i say that i check my phone and i have the message about the announcement
+17:30 < jtanx> and what did you call the chiller things?
+17:30 < Callum> pretty much just the 4 chillers, a line showing it can go back (they're literally called chillers ahha(
+17:31 < Callum> then i had another part to show the chillers (evaporation/condensor/compressor and cooling tower is connected to condenser) 
+17:31 < jtanx> ook
+17:31 < Callum> however
+17:32 < Callum> im not sure about the input/output of the chiller
+17:32 < Callum> because stuff online shows it to be the evaporator 
+17:32 < Callum> but isnt it water being pumped?
+17:32 < jtanx> I think there were pumps on the output
+17:33 < jtanx> were there three outputs?
+17:33 < Callum> also not sure if i should/wherte to add the tank (yea ofc theres pumps but not sure to put them in to the diagram, pretty much everything is pumped)
+17:33 < Callum> outputs where?
+17:33 < jtanx> North/Sout/East distribution things
+17:33 < jtanx> iirc
+17:33 < jtanx> yeah not sure whether to add tank or not
+17:34 < Callum> oh that, i didnt bother with that
+17:34 < Callum> just how did the chiller connect with the rest of the plant?
+17:34 < Callum> was the evaporator the input/output?
+17:34 < Callum> because the chiller feeds out to the water tower and the tower feeds back into the chiller (i think)
+17:36 < Callum> also what was the thing called? that allowed water to flow back and forth bypassing the chillers. back something?
+17:36 < Callum> really they should have told us before we went in we had to do this. some lazy fucks like me dont read the outline so i didnt take notes..or try to commit stuff to memory :po
+17:39 < jtanx> the bypass?
+17:39 < jtanx> I haven't gone into detail
+17:39 < jtanx> so I just have chiller
+17:39 < jtanx> and cooling tower
+17:39 < jtanx> maybe I should
+17:40 < Callum> remember how tehre was 4 chillers, and they would only run what was needed.
+17:40 < jtanx> yeah
+17:40 < jtanx> how many cooling towers?
+17:40 < Callum> and if they had more than they needed there was a pipe to flow back, or if they had some chilled water from the tanks or w.e it bypassed chillers
+17:40 < Callum> i dont know, but im not sure how to show it all
+17:40 < Callum> im sure what iv got is somewhat decent
+17:41 < jtanx> I used visio and I ended up spending so much time trying to get the lines rihgt
+17:41 < jtanx> probably would have been faster to hand draw it
+17:41 < jtanx> still not finished too
+17:41 < Callum> haha im fiarly sure i read somewhere it was hand drawn :p
+17:41 < jtanx> meh I suck at drawing
+17:42 < Callum> maybe not. "This is to be drawn and annotated on single A4 page"
+17:42 < Callum> i dont think they'll be picky
+17:42 < jtanx> and there's lines everywhere
+17:42 < Callum> really? how do you have lines everywhere?
+17:42 < jtanx> ok so chiller
+17:42 < Callum> it's a fairly simple system. unless i'v done it wrong :s
+17:43 < jtanx> has warm chilled water (1), chilled coolant (2), hot coolant (3), chilled chilled water(4), control line (5), (maybe) sensor back to controller (6)
+17:43 < jtanx> that's ~5 lines in/out of one box?
+17:44 < Callum> hmm. havent included coolant or control/sensor
+17:44 < Callum> maybe i should :S
+17:44 < jtanx> and an operator
+17:44 < jtanx> to the controller
+17:45 < Callum> thing is it asked for a high level FBD though
+17:45 < Callum> which means not very detailed
+17:45 < Callum> or maybe it didnt?
+17:45 < jtanx> yeah, so do you need to show condensor/evaporator
+17:45 < jtanx> I just have a chiller box
+17:46 < jtanx> anyway... afk ~10 mins
+17:46 < Callum> the condensor/evaporater is part of the chiller isnt it?
+17:46 < Callum> ok
+18:10 < Callum> anyone finished reading chapter 4 of the notes?
+18:11 < jtanx> what's that
+18:11 < Callum> sensors
+18:12 < Callum> so dull :l
+18:12 < Callum> and pretty much no chance to remember enough of it. quiz tomorrow is going to be fun.. 
+18:12 < jtanx> oh 
+18:13 < jtanx> shit
+18:13 < jtanx> have to study for that
+18:13 < Callum> rofl
+18:14 < jtanx> :/
+18:15 < Callum> gonna just have to wing most of them again like last time most likely. 
+18:15 < jtanx> probably
+18:15 < jtanx> Well, the unit testing thing works http://mctx.us.to:8080/unit-tests/
+18:15 < jtanx> now what unit tests should there be
+18:18 < Callum> not sure.
+18:25 < Callum> brilliant! the notes show a false colour image built from a black and white image...while printed in black and white.
+18:34 < jtanx> :P
+19:50 < jtanx> um
+19:50 < jtanx> did we get around to doing the sparkplus thing
+19:54 < jtanx> we need to do it before the end of the week
+19:54 < Callum> umm.
+19:54 < Callum> actually justin already set up the group
+19:54 < Callum> so you need to hurry up and join before we have to recreate the group :P
+19:54 < jtanx> nah it expired
+19:54 < Callum> wait already?
+19:54 < Callum> zzz
+19:55 < jtanx> 5 hr deadline
+19:55 < Callum> and adrian said it was 24Hr, whats with this 5 hour shit
+19:55 < jtanx> so... we need to try again
+19:55 < jtanx> when everyone's available
+20:11 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has quit [Ping timeout]
+20:49 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit ["ha"]
