@@ -12,7 +12,7 @@
 
 #include "common.h"
 #include "sensor.h"
-#include "log.h"
+#include "control.h"
 #include "options.h"
 
 #define LOGIN_TIMEOUT 180
@@ -29,32 +29,30 @@ struct FCGIContext {
 };
 
 /**
- * Handles user logins.
+ * Identifies current version info. Useful for testing that the API is running.
+ * TODO - Consider adding info about available sensors and actuators (eg capabilities)?
+ */ 
+static void IdentifyHandler(FCGIContext *context, char *params) {
+	FCGI_BeginJSON(context, STATUS_OK);
+	FCGI_JSONPair("description", "MCTX3420 Server API (2013)");
+	FCGI_JSONPair("build_date", __DATE__ " " __TIME__);
+	FCGI_EndJSON();
+}
+
+/**
+ * Gives the user an authorization key that determines who has control over
+ * the system at any one time. The key can be forcibly generated, revoking
+ * any previous control keys. To be used in conjunction with HTTP 
+ * basic authentication.
+ * This function will generate a JSON response that indicates success/failure.
  * @param context The context to work in
- * @param params User specified parameters
- */
-static void LoginHandler(FCGIContext *context, char *params) {
-	const char *key, *value;
-	bool force = 0, end = 0;
-
-	while ((params = FCGI_KeyPair(params, &key, &value))) {
-		if (!strcmp(key, "force"))
-			force = !force;
-		else if (!strcmp(key, "end"))
-			end = !end;
-	}
-
-	if (end) {
-		*(context->login_key) = 0;
-		FCGI_BeginJSON(context, STATUS_OK);
-		FCGI_EndJSON();
-		return;
-	}
-
+ * @param force Whether to force key generation or not.
+ */ 
+void FCGI_Authorize(FCGIContext *context, bool force) {
 	time_t now = time(NULL);
-	if (force || !*(context->login_key) || 
-	   (now - context->login_timestamp > LOGIN_TIMEOUT)) 
-	{
+	bool expired = now - context->login_timestamp > LOGIN_TIMEOUT;
+	
+	if (force || !*(context->login_key) || expired) {
 		SHA_CTX sha1ctx;
 		unsigned char sha1[20];
 		int i = rand();
@@ -70,36 +68,28 @@ static void LoginHandler(FCGIContext *context, char *params) {
 		snprintf(context->login_ip, 16, "%s", getenv("REMOTE_ADDR"));
 		FCGI_BeginJSON(context, STATUS_OK);
 		FCGI_JSONPair("key", context->login_key);
-		FCGI_EndJSON();
+		FCGI_EndJSON();		
 	} else {
 		char buf[128];
 		strftime(buf, 128, "%H:%M:%S %d-%m-%Y",
 			localtime(&(context->login_timestamp))); 
 		FCGI_BeginJSON(context, STATUS_UNAUTHORIZED);
 		FCGI_JSONPair("description", "Already logged in");
-		FCGI_JSONPair("user", context->login_ip); 
-		FCGI_JSONPair("time", buf);
+		FCGI_JSONPair("current_user", context->login_ip); 
+		FCGI_JSONPair("when", buf);
 		FCGI_EndJSON();
 	}
 }
 
-/*TODO: Remove and replace with the actual actuator code*/
-static void ActuatorHandler(FCGIContext *context, char *params) {
-	const char *key, *value, *loginkey = NULL;
-	while ((params = FCGI_KeyPair(params, &key, &value))) {
-		if (!strcmp(key, "key")) {
-			loginkey = value;
-		}
-	}
-	if (!loginkey || !FCGI_Authorized(context, loginkey)) {
-		FCGI_BeginJSON(context, STATUS_UNAUTHORIZED);
-		FCGI_JSONPair("description", "Invalid key specified.");
-		FCGI_EndJSON();
-	} else {
-		FCGI_BeginJSON(context, STATUS_OK);
-		FCGI_JSONPair("description", "Logged in!");
-		FCGI_EndJSON();
-	}
+/**
+ * Revokes the current authorization key, if present.
+ * @param context The context to work in
+ */
+void FCGI_AuthorizeEnd(FCGIContext *context) {
+	*(context->login_key) = 0;
+	FCGI_BeginJSON(context, STATUS_OK);
+	FCGI_EndJSON();
+	return;
 }
 
 /**
@@ -113,7 +103,7 @@ static void ActuatorHandler(FCGIContext *context, char *params) {
 bool FCGI_Authorized(FCGIContext *context, const char *key) {
 	time_t now = time(NULL);
 	int result = (now - context->login_timestamp) <= LOGIN_TIMEOUT &&
-				 !strcmp(context->login_key, key);
+				 key != NULL && !strcmp(context->login_key, key);
 	if (result) {
 		context->login_timestamp = now; //Update the login_timestamp
 	}
@@ -312,20 +302,19 @@ void * FCGI_RequestLoop (void *data)
 		if (lastchar > 0 && module[lastchar] == '/')
 			module[lastchar] = 0;
 		
-
-		if (!strcmp("login", module)) {
-			module_handler = LoginHandler;
+		if (!*module || !strcmp("identify", module)) {
+			module_handler = IdentifyHandler;
+		} else if (!strcmp("control", module)) {
+			module_handler = Control_Handler;
 		} else if (!strcmp("sensors", module)) {
 			module_handler = Sensor_Handler;
-		} else if (!strcmp("actuators", module)) {
-			module_handler = ActuatorHandler;
 		}
 
 		context.current_module = module;
 		if (module_handler) {
 			module_handler(&context, params);
 		} else {
-			strncat(module, " [unknown]", BUFSIZ);
+			strncat(module, " (unhandled)", BUFSIZ);
 			FCGI_RejectJSON(&context);
 		}
 		context.response_number++;

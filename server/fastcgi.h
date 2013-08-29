@@ -14,8 +14,10 @@ typedef enum StatusCodes {
 } StatusCodes;
 
 typedef struct FCGIContext FCGIContext;
-typedef void (*ModuleHandler) (FCGIContext *data, char *params);
+typedef void (*ModuleHandler) (FCGIContext *context, char *params);
 
+extern void FCGI_Authorize(FCGIContext *context, bool force);
+extern void FCGI_AuthorizeEnd(FCGIContext *context);
 extern bool FCGI_Authorized(FCGIContext *context, const char *key);
 extern char *FCGI_KeyPair(char *in, const char **key, const char **value);
 extern void FCGI_BeginJSON(FCGIContext *context, StatusCodes status_code);

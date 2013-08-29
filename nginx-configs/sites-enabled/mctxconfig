@@ -73,12 +73,12 @@ server {
 	#MCTX API
 	location /api {
 		#Login area
-		location ^~ /api/login {
+		location ^~ /api/control {
 			auth_basic "Restricted Access";
 			auth_basic_user_file /usr/share/nginx/access/.htpasswd;
 	
 			fastcgi_pass 127.0.0.1:9005;
-			fastcgi_param DOCUMENT_URI_LOCAL login;
+			fastcgi_param DOCUMENT_URI_LOCAL control;
 			include fastcgi_params;
 		}
 		location ~ ^/api/?([^?]*) {
