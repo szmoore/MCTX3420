@@ -6,11 +6,11 @@
 #ifndef _FASTCGI_H
 #define _FASTCGI_H
  
-/**Status codes that fcgi module handlers can return**/
+/**(HTTP) Status codes that fcgi module handlers can return**/
 typedef enum StatusCodes {
-	STATUS_OK = 0,
-	STATUS_ERROR = -1,
-	STATUS_UNAUTHORIZED = -2
+	STATUS_OK = 200,
+	STATUS_ERROR = 400,
+	STATUS_UNAUTHORIZED = 401
 } StatusCodes;
 
 typedef struct FCGIContext FCGIContext;
