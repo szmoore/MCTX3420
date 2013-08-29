@@ -1585,3 +1585,64 @@
 19:55 < jtanx> when everyone's available
 20:11 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has quit [Ping timeout]
 20:49 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit ["ha"]
+--- Day changed Thu Aug 29 2013
+07:47 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:16 < jtanx> firefox blocks ajax calls if you try to run the file locally :/
+09:45 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 23.0.1/20130814063812]"]
+13:33 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has joined #mctxuwa_softdev
+14:24 -!- james__ [~chatzilla@130.95.133.238] has joined #mctxuwa_softdev
+14:25 < james__> Hey Jeremy. Is there a way to find my login hash key if i am already logged into the api?
+14:28 < jtanx> um
+14:28 < jtanx> right now you should store it
+14:29 < jtanx> just declare a global variable and set it to the hash
+14:30 < jtanx> or if you have made a class
+14:30 < jtanx> just make it an element
+14:31 < james__> I'm still logged in from ages ago and i can't logout so i can get a different key that works
+14:31 < jtanx> that
+14:31 < jtanx> ok
+14:31 < james__> Possibly a bug that needs fixing? 
+14:31 < jtanx> so the way it works right now is there's a 3 minute timeout on the key
+14:31 < jtanx> no
+14:31 < jtanx> there's actually two layers
+14:32 < jtanx> the password that you enter first (mctxadmin) is what's called HTTP basic authentication
+14:32 < jtanx> this lets you gain access to /api/login
+14:32 < james__> Well i tried loging in again and its saying i am already logged in
+14:32 < jtanx> when you reach /api/login you get the access key
+14:32 < jtanx> there's a three minute timeout on the key
+14:32 < jtanx> if you wish to invalidate the key
+14:33 < jtanx> you call 
+14:33 < jtanx>  /api/login?end
+14:34 < jtanx> you can force getting a key by also calling /api/login?force
+14:34 < james__> right. well it worked this time
+14:34 < james__> Thats weird
+14:34 < jtanx> so the only thing that the key prevents is stopping accidental concurrent use
+14:34 < james__> Fair enough
+14:35 < jtanx> Calling /api/login?force will force a new key to be generated and the old one to be invalidated
+14:35 < james__> Okay
+14:35 < jtanx> btw as I was working on unit testing
+14:35 < jtanx> I did a function to retrieve the json data
+14:36 < jtanx> http://mctx.us.to:8080/unit-tests/unit-tests.js
+14:37 < james__> I will have a look.  I have some buttons working and stuff. Working on putting them in a seperate script file for easier editing etc
+14:37 < james__> They don't seem to be playing nice at the moment
+14:37 < jtanx> ok
+14:38 < jtanx> how come it takes so much effort to get some buttons working
+14:39 < james__> Getting the css to mesh with the js
+14:40 < james__> I have buttons fine 
+14:40 < james__> And they work
+14:40 < jtanx> maybe you should get the functionality to work first
+14:40 < jtanx> with the ajax queries
+14:40 < jtanx> before worrying about styling them
+14:40 < james__> I have the functionality pretty much working
+14:41 < jtanx> so the querying works?
+14:41 < james__> But i want the styling to work before we scale it up
+14:41 < james__> That way its less hassle to fix it later
+14:41 < jtanx> could you post it to git?
+14:41 < jtanx> it'd be cool to have a look
+14:45 < james__> The way i am thinking about having it set out is having a central index.html which just imports all the js. The js will contain all the functionlity seperated in to similar functions. Ie. all the buttons in one script
+14:46 < jtanx> right
+14:46 < james__> That should allow for ease of scaling and editing
+14:46 < james__> Also changing id's and stuff
+15:46 -!- james__ [~chatzilla@130.95.133.238] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+19:25 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:09 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 23.0.1/20130814063812]"]
+23:18 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
