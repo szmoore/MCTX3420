@@ -15,13 +15,13 @@
 #include "control.h"
 #include "options.h"
 
-#define LOGIN_TIMEOUT 180
+#define CONTROL_TIMEOUT 180
 
 struct FCGIContext {
-	/**The time of last valid logged-in user access*/
-	time_t login_timestamp;
-	char login_key[41];
-	char login_ip[16];
+	/**The time of last valid user access possessing the control key*/
+	time_t control_timestamp;
+	char control_key[41];
+	char control_ip[16];
 	/**The name of the current module**/
 	const char *current_module;
 	/**For debugging purposes?**/
@@ -40,7 +40,7 @@ static void IdentifyHandler(FCGIContext *context, char *params) {
 }
 
 /**
- * Gives the user an authorization key that determines who has control over
+ * Gives the user a key that determines who has control over
  * the system at any one time. The key can be forcibly generated, revoking
  * any previous control keys. To be used in conjunction with HTTP 
  * basic authentication.
@@ -48,11 +48,11 @@ static void IdentifyHandler(FCGIContext *context, char *params) {
  * @param context The context to work in
  * @param force Whether to force key generation or not.
  */ 
-void FCGI_Authorize(FCGIContext *context, bool force) {
+void FCGI_BeginControl(FCGIContext *context, bool force) {
 	time_t now = time(NULL);
-	bool expired = now - context->login_timestamp > LOGIN_TIMEOUT;
+	bool expired = now - context->control_timestamp > CONTROL_TIMEOUT;
 	
-	if (force || !*(context->login_key) || expired) {
+	if (force || !*(context->control_key) || expired) {
 		SHA_CTX sha1ctx;
 		unsigned char sha1[20];
 		int i = rand();
@@ -62,52 +62,53 @@ void FCGI_Authorize(FCGIContext *context, bool force) {
 		SHA1_Update(&sha1ctx, &i, sizeof(i));
 		SHA1_Final(sha1, &sha1ctx);
 
-		context->login_timestamp = now;
+		context->control_timestamp = now;
 		for (i = 0; i < 20; i++)
-			sprintf(context->login_key + i * 2, "%02x", sha1[i]);
-		snprintf(context->login_ip, 16, "%s", getenv("REMOTE_ADDR"));
+			sprintf(context->control_key + i * 2, "%02x", sha1[i]);
+		snprintf(context->control_ip, 16, "%s", getenv("REMOTE_ADDR"));
 		FCGI_BeginJSON(context, STATUS_OK);
-		FCGI_JSONPair("key", context->login_key);
+		FCGI_JSONPair("key", context->control_key);
 		FCGI_EndJSON();		
 	} else {
 		char buf[128];
 		strftime(buf, 128, "%H:%M:%S %d-%m-%Y",
-			localtime(&(context->login_timestamp))); 
+			localtime(&(context->control_timestamp))); 
 		FCGI_BeginJSON(context, STATUS_UNAUTHORIZED);
-		FCGI_JSONPair("description", "Already logged in");
-		FCGI_JSONPair("current_user", context->login_ip); 
+		FCGI_JSONPair("description", "Another user already has control");
+		FCGI_JSONPair("current_user", context->control_ip); 
 		FCGI_JSONPair("when", buf);
 		FCGI_EndJSON();
 	}
 }
 
 /**
- * Revokes the current authorization key, if present.
+ * Given an FCGIContext, determines if the current user (as specified by
+ * the key) has control or not. If validated, the context control_timestamp is
+ * updated.
+ * @param context The context to work in
+ * @param key The control key to be validated.
+ * @return TRUE if authorized, FALSE if not.
+ */
+bool FCGI_HasControl(FCGIContext *context, const char *key) {
+	time_t now = time(NULL);
+	int result = (now - context->control_timestamp) <= CONTROL_TIMEOUT &&
+				 key != NULL && !strcmp(context->control_key, key);
+	if (result) {
+		context->control_timestamp = now; //Update the control_timestamp
+	}
+	return result;
+}
+
+
+/**
+ * Revokes the current control key, if present.
  * @param context The context to work in
  */
-void FCGI_AuthorizeEnd(FCGIContext *context) {
-	*(context->login_key) = 0;
+void FCGI_EndControl(FCGIContext *context) {
+	*(context->control_key) = 0;
 	FCGI_BeginJSON(context, STATUS_OK);
 	FCGI_EndJSON();
 	return;
-}
-
-/**
- * Given an FCGIContext, determines if the current user (as specified by
- * the key) is authorized or not. If validated, the context login_timestamp is
- * updated.
- * @param context The context to work in
- * @param key The login key to be validated.
- * @return TRUE if authorized, FALSE if not.
- */
-bool FCGI_Authorized(FCGIContext *context, const char *key) {
-	time_t now = time(NULL);
-	int result = (now - context->login_timestamp) <= LOGIN_TIMEOUT &&
-				 key != NULL && !strcmp(context->login_key, key);
-	if (result) {
-		context->login_timestamp = now; //Update the login_timestamp
-	}
-	return result;
 }
 
 /**
@@ -245,18 +246,27 @@ void FCGI_EndJSON()
 }
 
 /**
- * To be used when the input parameters are invalid.
- * Sends a response with HTTP status 400 Bad request, along with
- * JSON data for debugging.
+ * To be used when the input parameters are invalid. The return data will
+ * have a status of STATUS_ERROR, along with other debugging information.
  * @param context The context to work in
- * @param params The parameters that the module handler received.
  */
 void FCGI_RejectJSON(FCGIContext *context)
 {
-	printf("Status: 400 Bad Request\r\n");
-	
-	FCGI_BeginJSON(context, STATUS_ERROR);
-	FCGI_JSONPair("description", "Invalid request");
+	FCGI_RejectJSONEx(context, STATUS_ERROR, "Invalid request");
+}
+
+/**
+ * To be used when the input parameters are rejected. The return data
+ * will also have debugging information provided.
+ * @param context The context to work in
+ * @param status The status the return data should have.
+ * @param description A short description of why the input was rejected.
+ * @param params The parameters that the module handler received.
+ */
+void FCGI_RejectJSONEx(FCGIContext *context, StatusCodes status, const char *description)
+{
+	FCGI_BeginJSON(context, status);
+	FCGI_JSONPair("description", description);
 	FCGI_JSONLong("responsenumber", context->response_number);
 	FCGI_JSONPair("params", getenv("QUERY_STRING"));
 	FCGI_JSONPair("host", getenv("SERVER_HOSTNAME"));
