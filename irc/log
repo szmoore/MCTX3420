@@ -1646,3 +1646,32 @@
 19:25 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has joined #mctxuwa_softdev
 21:09 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 23.0.1/20130814063812]"]
 23:18 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Fri Aug 30 2013
+09:03 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:16 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit [EOF From client]
+14:15 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has joined #mctxuwa_softdev
+17:06 < jtanx> say you want to perform a command
+17:06 < jtanx> eg move an actuator
+17:07 < jtanx> and suppose checks have to be made against other sensors to ensure that this command is good to go
+17:07 < jtanx> how are those checks going to be made?
+18:10 < sam_moore> The Actuator Handler will call some sanity check against the most recent sensor data
+18:11 < sam_moore> If they aren't, it will respond with some appropriate JSON or HTTP status code
+18:11 < sam_moore> eg: "Try again later when the pressure is in the right range", or "Don't do that you silly person"
+18:15 < jtanx> ._.
+18:21 < jtanx> I wonder if there's a way to pull from your git repository without creating the 'merge branch master from...' commits
+18:22 < sam_moore> I don't think so
+18:22 < jtanx> I tried playing with rebasing but it doesn't work out so well
+18:40 < jtanx> ok so I've committed some stuff to my repository that changes the handling of controls/actuators/login
+18:41 < jtanx> I'm not sure if it's the best way to do it
+18:41 < jtanx> though
+18:41 < jtanx> What I did was get rid of /api/login
+18:41 < jtanx> and instead have /api/control
+18:41 < jtanx> All of the control code (eg actuators but may be other controls? Start/stop the whole thing?) has been moved to controls.c
+18:42 < jtanx> You still need to supply username and password to access /api/control
+18:42 < jtanx> and what was previously called  the 'authorization key'  is now the control key (ie who has control)
+19:00 < sam_moore> Ok, I'll take a look at it later
+19:01 < sam_moore> Don't worry about the merge messages, it's not a big deal
+19:06 < jtanx> ok thanks
+20:27 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+22:21 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has joined #mctxuwa_softdev
+23:03 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
