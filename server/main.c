@@ -13,7 +13,6 @@
 
 // --- Variable definitions --- //
 Options g_options; // options passed to program through command line arguments
-Sensor g_sensors[NUMSENSORS]; // sensors array
 
 // --- Function definitions --- //
 
@@ -26,6 +25,7 @@ void ParseArguments(int argc, char ** argv)
 {
 	g_options.program = argv[0]; // program name
 	g_options.verbosity = LOGDEBUG; // default log level
+	gettimeofday(&(g_options.start_time), NULL); // Start time
 	Log(LOGDEBUG, "Called as %s with %d arguments.", g_options.program, argc);
 }
 
@@ -35,12 +35,14 @@ void ParseArguments(int argc, char ** argv)
  */
 //TODO: Something that gets massively annoying with threads is that you can't predict which one gets the signal
 // There are ways to deal with this, but I can't remember them
+// Probably sufficient to just call Thread_QuitProgram here
 void SignalHandler(int signal)
 {
 	// At the moment just always exit.
 	// Call `exit` so that Cleanup will be called to... clean up.
 	Log(LOGWARN, "Got signal %d (%s). Exiting.", signal, strsignal(signal));
-	exit(signal);
+	Thread_QuitProgram(false);
+	//exit(signal);
 }
 
 /**
@@ -58,20 +60,31 @@ void Cleanup()
  * @param argc - Num args
  * @param argv - Args
  * @returns 0 on success, error code on failure
+ * NOTE: NEVER USE exit(3)! Instead call Thread_QuitProgram
  */
 int main(int argc, char ** argv)
 {
 	ParseArguments(argc, argv);
 
-	// start sensor threads
-	for (int i = 0; i < NUMSENSORS; ++i)
+	// signal handler
+	//TODO: Make this work
+	/*
+	int signals[] = {SIGINT, SIGSEGV, SIGTERM};
+	for (int i = 0; i < sizeof(signals)/sizeof(int); ++i)
 	{
-		Sensor_Init(g_sensors+i, i);
-		pthread_create(&(g_sensors[i].thread), NULL, Sensor_Main, (void*)(g_sensors+i));
+		signal(signals[i], SignalHandler);
 	}
+	*/
+	Sensor_Spawn();
 
 	// run request thread in the main thread
 	FCGI_RequestLoop(NULL);
+
+	// Join the dark side, Luke
+	// *cough*
+	// Join the sensor threads
+	Sensor_Join();
+	Cleanup();
 	return 0;
 }
 

@@ -17,6 +17,9 @@ static const char * unspecified_funct = "???";
 
 // --- Function implementations --- //
 
+//TODO: Migrate to syslog (shouldn't be too hard; these functions basically do what syslog does)
+//		Note that we will want to have a seperate log as well as syslog; give the user the option to view the log using the GUI
+
 /**
  * Print a message to stderr
  * @param level - Specify how severe the message is.

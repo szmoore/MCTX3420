@@ -11,9 +11,9 @@
 #include <time.h>
 
 #include "common.h"
-#include "fastcgi.h"
 #include "sensor.h"
 #include "log.h"
+#include "options.h"
 
 #define LOGIN_TIMEOUT 180
 
@@ -170,6 +170,16 @@ void FCGI_BeginJSON(FCGIContext *context, StatusCodes status_code)
 	printf("{\r\n");
 	printf("\t\"module\" : \"%s\"", context->current_module);
 	FCGI_JSONLong("status", status_code);
+
+	// Jeremy: Should we include a timestamp in the JSON; something like this?
+	double start_time = g_options.start_time.tv_sec + 1e-6*(g_options.start_time.tv_usec);
+	struct timeval now;
+	gettimeofday(&now, NULL);
+	double current_time = now.tv_sec + 1e-6*(now.tv_usec);
+	FCGI_JSONDouble("start_time", start_time);
+	FCGI_JSONDouble("current_time", current_time);
+	FCGI_JSONDouble("running_time", current_time - start_time);
+	
 }
 
 /**
@@ -201,6 +211,16 @@ void FCGI_JSONLong(const char *key, long value)
 void FCGI_JSONDouble(const char *key, double value)
 {
 	printf(",\r\n\t\"%s\" : %f", key, value);
+}
+
+/**
+ * Similar to FCGI_JsonPair except for boolean values.
+ * @param key The key of the JSON entry
+ * @param value The value associated with the key
+ */
+void FCGI_JSONBool(const char *key, bool value)
+{
+	printf(",\r\n\t\"%s\" : %s", key, value ? "true" : "false");
 }
 
 /**
@@ -248,7 +268,7 @@ void FCGI_RejectJSON(FCGIContext *context)
 	FCGI_BeginJSON(context, STATUS_ERROR);
 	FCGI_JSONPair("description", "Invalid request");
 	FCGI_JSONLong("responsenumber", context->response_number);
-	FCGI_JSONPair("params", getenv("DOCUMENT_URI_LOCAL"));
+	FCGI_JSONPair("params", getenv("QUERY_STRING"));
 	FCGI_JSONPair("host", getenv("SERVER_HOSTNAME"));
 	FCGI_JSONPair("user", getenv("REMOTE_USER"));
 	FCGI_JSONPair("ip", getenv("REMOTE_ADDR"));
@@ -258,12 +278,28 @@ void FCGI_RejectJSON(FCGIContext *context)
 /**
  * Main FCGI request loop that receives/responds to client requests.
  * @param data Reserved.
+ * @returns NULL (void* required for consistency with pthreads, although at the moment this runs in the main thread anyway)
+ * TODO: Get this to exit with the rest of the program!
  */ 
-void FCGI_RequestLoop (void *data)
+void * FCGI_RequestLoop (void *data)
 {
 	FCGIContext context = {0};
 	
+	Log(LOGDEBUG, "First request...");
+	//TODO: The FCGI_Accept here is blocking. 
+	//		That means that if another thread terminates the program, this thread
+	//		 will not terminate until the next request is made.
 	while (FCGI_Accept() >= 0) {
+
+		if (Thread_Runstate() != RUNNING)
+		{
+			//TODO: Yeah... deal with this better :P
+			Log(LOGERR, "FIXME; FCGI gets request after other threads have finished.");
+			printf("Content-type: text/plain\r\n\r\n+++OUT OF CHEESE ERROR+++\n");
+			break;
+		}
+		
+		Log(LOGDEBUG, "Got request #%d", context.response_number);
 		ModuleHandler module_handler = NULL;
 		char module[BUFSIZ], params[BUFSIZ];
 		
@@ -292,7 +328,15 @@ void FCGI_RequestLoop (void *data)
 			strncat(module, " [unknown]", BUFSIZ);
 			FCGI_RejectJSON(&context);
 		}
-		
 		context.response_number++;
+
+		Log(LOGDEBUG, "Waiting for request #%d", context.response_number);
 	}
+
+	Log(LOGDEBUG, "Thread exiting.");
+	Thread_QuitProgram(false);
+	// NOTE: Don't call pthread_exit, because this runs in the main thread. Just return.
+	return NULL;
+
+	
 }
