@@ -22,7 +22,7 @@ int storeFrame( CvCapture* capture)
 	frame = cvQueryFrame(capture);
 	if( frame == NULL)
 		return 0;	//error
-	cvSaveImage("images/test.JPG",frame,p);
+	cvSaveImage("../web/images/test.JPG",frame,p);
 	return 1;
 }
 
