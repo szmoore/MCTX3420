@@ -10,6 +10,7 @@ $(document).ready(function()
 	g_sensors = []
 	g_numSensors = 2
 	g_storeTime = []
+	g_key = null
 
 	$.fn.pruneSensorData = function(id)
 	{
@@ -78,9 +79,18 @@ $(document).ready(function()
 		$.plot("#sensor"+String(id)+"_plot", [g_sensors[id]])
 	}
 
+	$.fn.setPressure = function()
+	{
+		var value = Number($("#control0_value").val())
+		$.ajax({url : "/api/control", data : {action : "set", value : String(value), id : 0, key : g_key}, success : function(json) {alert(json.description)}})
+	}
+
 	$.fn.LoadGUI = function()
 	{
 		//TODO: Get rid of g_numSensors; query the server for sensors?
+
+		$.ajax({url : "/api/control", data : {action : "start", force : "true"}, success : function(json) {g_key = String(json.key)}, async : false})
+		console.log("Key is " + g_key)
 
 		// Load the plots
 		plotsHTML = ""
@@ -101,6 +111,12 @@ $(document).ready(function()
 		}
 		$("#plots").html(plotsHTML)
 
+		controlHTML = "<h2 id=control0>Controls</h2>\n"
+		controlHTML += "<p> Pressure: <input type=text id=control0_value value=\"100\"/>"
+		controlHTML += "<button id=actuator0 onclick=\"$(document).setPressure()\">SET</button> </p>"
+		
+		$("#controls").html(controlHTML)
+
 	}
 
 
@@ -111,7 +127,7 @@ $(document).ready(function()
 
 	for (var i = 0; i < g_numSensors; ++i)
 	{
-		$.ajax({url : "/api/sensors", data : {id : i}, success : function(data) {$(this).updateSensor(data);}})
+	//	$.ajax({url : "/api/sensors", data : {id : i}, success : function(data) {$(this).updateSensor(data);}})
 
 	}
 });
