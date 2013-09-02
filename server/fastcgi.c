@@ -275,6 +275,7 @@ void FCGI_RejectJSON(FCGIContext *context)
 	FCGI_EndJSON();
 }
 
+
 /**
  * Main FCGI request loop that receives/responds to client requests.
  * @param data Reserved.

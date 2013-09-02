@@ -28,6 +28,7 @@ extern void FCGI_JSONValue(const char *format, ...);
 extern void FCGI_EndJSON();
 extern void FCGI_RejectJSON(FCGIContext *context);
 extern void * FCGI_RequestLoop (void *data);
+#define FCGI_PrintRaw FCGI_JSONValue // Functionality is identical
 
 #endif
 
