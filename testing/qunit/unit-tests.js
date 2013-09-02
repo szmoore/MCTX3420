@@ -11,31 +11,13 @@ var api = location.protocol + "//" +  location.host + "/api/";
 
 /**
  * Sends an AJAX query to the API
- * query(module, username, password, callback);
- * query(module, callback);
- * query(module, opts, callback);
- * query(module, opts, username, password, callback);
  * @param {string} module The name of the module to be queried
- * @param {Object} opts Object containing parameters to pass to module 
- * @param {string} username Optional
- * @param {string} password Required if username specified
- * @param {function} callback Function that receives JSON data
+ * @param {Object} opts Object holding the parameters, username, password and
+ *                 callback. The parameters should be an object of key/value
+ *                 pairs.
  * @returns JSON data
  */
-function query(module, opts, username, password, callback) {
-  if (typeof opts === 'string') {
-    callback = password;
-    password = username;
-    username = opts;
-    opts = undefined;
-  } else if (typeof opts === 'function') {
-    callback = opts;
-    opts = undefined;
-  } else if (typeof username === 'function') {
-    callback = username;
-    username = undefined;
-  }
-  
+function query(module, opts) {
   function buildQuery(opts) {
     var result = "?";
     var first = true;
@@ -46,20 +28,20 @@ function query(module, opts, username, password, callback) {
       else 
         first = false;
       result += encodeURIComponent(key) + 
-                (opts.key ? "=" + encodeURIComponent(opts.key) : "");
+                ((opts[key] !== undefined) ? "=" + encodeURIComponent(opts[key]) : "");
     }
     return result;
   }
   
   var queryurl = api + module;
-  if (opts)
-    queryurl += buildQuery(opts);
+  if (opts.params)
+    queryurl += buildQuery(opts.params);
   
   var authfunc;
-  if (username) {
+  if (opts.username) {
     authfunc = function(xhr) {
       xhr.setRequestHeader("Authorization",
-        "Basic " + btoa(username + ":" + password));
+        "Basic " + btoa(opts.username + ":" + opts.password));
     };
   }
   
@@ -68,45 +50,68 @@ function query(module, opts, username, password, callback) {
     type: 'GET',
     dataType: 'json',
     beforeSend: authfunc
-  }).done(callback)
+  }).done(opts.callback)
     .fail(function(jqXHR) {
-      //Note:Callback must be called so the QUnit test can run.
-      if (jqXHR.status !== 400) {
-        callback({"status" : jqXHR.status, "description" : jqXHR.statusText});
-      } else {
-        try {
-          callback($.parseJSON(jqXHR.responseText));
-        } catch (err) {
-          callback({"status" : jqXHR.status, "description" : jqXHR.statusText});
-        }
-      }
+      alert("Request Failed!");
+      ok(false, "Request failed: " + jqXHR.status.toString() + " " + jqXHR.statusText);
+      opts.callback(null);
     });
 }
 
-
-QUnit.asyncTest("API Existence", function () {
-  query("test", function(data) {
+QUnit.module("API basics");
+QUnit.asyncTest("Existence (identify)", function () {
+  query("identify", {callback : function(data) {
    start();
-   //TODO:Change fastcgi error codes
-   equal(parseInt(data.status, 10), 400, "Nonexistent module"); //Magic numbers!
-  });
+   ok(data.status >= 0, "Return status");
+   ok(data.description, data.description);
+   ok(data.build_date, data.build_date);
+  }});
 });
 
-QUnit.asyncTest("Login test", function() {
-  query("login", {"force" : true}, "mctxadmin", "admin", function(data) {
+QUnit.asyncTest("Invalid module", function () {
+  query("dontexist", {callback : function(data) {
    start();
-   equal(parseInt(data.status, 10), 200, "Login ok"); //Magic numbers!
-  });
+   ok(data.status < 0);
+  }});
 });
 
-QUnit.test("Sensors module", function() {
-  
+QUnit.module("Sensors");
+QUnit.asyncTest("Existence", function() {
+  query("sensors", {params : {id : 0}, callback : function(data) {
+   start();
+   ok(data.status >= 0, "Return status");
+   ok(data.data !== undefined, "Data field existence");
+   var result = "Data: ";
+   for (var i = 0; i < data.data.length; i++) {
+     result += data.data[i][0]  + ":" + data.data[i][1] + ", ";
+   }
+   ok(true, result);
+  }});  
 });
 
-/*QUnit.test("Login module", function () {
-  
-});*/
+QUnit.asyncTest("Invalid sensor id 1", function() {
+  query("sensors", {params : {id : 999}, callback : function(data) {
+   start();
+   ok(data.status < 0, "Return status");
+  }});  
+});
 
-QUnit.test("Access control", function () {
-  
+QUnit.asyncTest("Invalid sensor id 2", function() {
+  query("sensors", {params : {id : ""}, callback : function(data) {
+   start();
+   ok(data.status < 0, "Return status");
+  }});  
+});
+
+QUnit.module("Controls and access");
+QUnit.asyncTest("Gaining access", function() {
+  query("control", {params : {action : "start", force : true}, 
+                  username : "mctxadmin", password : "admin", 
+                  callback : function(data) {
+   start();
+   ok(data.status >= 0, "Return status");
+   
+   var key = data.key;
+   
+  }});
 });
