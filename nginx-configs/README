@@ -16,3 +16,8 @@ To get the login functionality working, you need to place a .htpasswd file
 under /usr/share/nginx/access (create folder if it doesn't exist). To generate
 the htpasswd file, install the apache2-utils package and use the 'htpasswd'
 executable.
+
+
+P.S: (I always forget these)
+Set file permissions to: 644
+Set folder permissions to: 755
