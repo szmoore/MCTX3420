@@ -6,17 +6,19 @@
 #ifndef _FASTCGI_H
 #define _FASTCGI_H
  
-/**Status codes that fcgi module handlers can return**/
+/**(HTTP) Status codes that fcgi module handlers can return**/
 typedef enum StatusCodes {
-	STATUS_OK = 0,
-	STATUS_ERROR = -1,
-	STATUS_UNAUTHORIZED = -2
+	STATUS_OK = 200,
+	STATUS_ERROR = 400,
+	STATUS_UNAUTHORIZED = 401
 } StatusCodes;
 
 typedef struct FCGIContext FCGIContext;
-typedef void (*ModuleHandler) (FCGIContext *data, char *params);
+typedef void (*ModuleHandler) (FCGIContext *context, char *params);
 
-extern bool FCGI_Authorized(FCGIContext *context, const char *key);
+extern void FCGI_BeginControl(FCGIContext *context, bool force);
+extern void FCGI_EndControl(FCGIContext *context);
+extern bool FCGI_HasControl(FCGIContext *context, const char *key);
 extern char *FCGI_KeyPair(char *in, const char **key, const char **value);
 extern void FCGI_BeginJSON(FCGIContext *context, StatusCodes status_code);
 extern void FCGI_JSONPair(const char *key, const char *value);
@@ -27,6 +29,7 @@ extern void FCGI_JSONKey(const char *key);
 extern void FCGI_JSONValue(const char *format, ...);
 extern void FCGI_EndJSON();
 extern void FCGI_RejectJSON(FCGIContext *context);
+extern void FCGI_RejectJSONEx(FCGIContext *context, StatusCodes status, const char *description);
 extern void * FCGI_RequestLoop (void *data);
 #define FCGI_PrintRaw FCGI_JSONValue // Functionality is identical
 
