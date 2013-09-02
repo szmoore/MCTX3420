@@ -31,6 +31,7 @@ extern void FCGI_EndJSON();
 extern void FCGI_RejectJSON(FCGIContext *context);
 extern void FCGI_RejectJSONEx(FCGIContext *context, StatusCodes status, const char *description);
 extern void * FCGI_RequestLoop (void *data);
+#define FCGI_PrintRaw FCGI_JSONValue // Functionality is identical
 
 #endif
 

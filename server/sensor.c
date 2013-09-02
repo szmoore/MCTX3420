@@ -7,16 +7,17 @@
 
 #include "common.h"
 #include "sensor.h"
+#include "options.h"
 #include <math.h>
 
 /** Array of sensors, initialised by Sensor_Init **/
 static Sensor g_sensors[NUMSENSORS]; //global to this file
-
+static const char * g_sensor_names[] = {"analog_test0","analog_test1","digital_test0"};
 /**
  * Read a data value from a sensor; block until value is read
  * @param sensor_id - The ID of the sensor
  * @param d - DataPoint to set
- * @returns NULL on error, otherwise d
+ * @returns NULL for digital sensors when data is unchanged, otherwise d
  */
 DataPoint * GetData(int sensor_id, DataPoint * d)
 {
@@ -28,18 +29,33 @@ DataPoint * GetData(int sensor_id, DataPoint * d)
 	//TODO: We should ensure the time is *never* allowed to change on the server if we use gettimeofday
 	//		Another way people might think of getting the time is to count CPU cycles with clock()
 	//		But this will not work because a) CPU clock speed may change on some devices (RPi?) and b) It counts cycles used by all threads
-	gettimeofday(&(d->time_stamp), NULL);
+	
+	struct timeval t;
+	gettimeofday(&t, NULL);
+	d->time_stamp = (t.tv_sec - g_options.start_time.tv_sec) + 1e-6*(t.tv_usec - g_options.start_time.tv_usec);
+
+	// Make time relative
+	//d->time_stamp.tv_sec -= g_options.start_time.tv_sec;
+	//d->time_stamp.tv_usec -= g_options.start_time.tv_usec;
 	
 	switch (sensor_id)
 	{
-		case SENSOR_TEST0:
+		case ANALOG_TEST0:
 		{
 			static int count = 0;
 			d->value = count++;
 			break;
 		}
-		case SENSOR_TEST1:
-			d->value = (float)(rand() % 100) / 100;
+		case ANALOG_TEST1:
+			d->value = (double)(rand() % 100) / 100;
+			break;
+	
+		//TODO: For digital sensors, consider only updating when sensor is actually changed
+		case DIGITAL_TEST0:
+			d->value = t.tv_sec % 2;
+			break;
+		case DIGITAL_TEST1:
+			d->value = (t.tv_sec+1)%2;
 			break;
 		default:
 			Fatal("Unknown sensor id: %d", sensor_id);
@@ -70,7 +86,6 @@ void Destroy(Sensor * s)
 void Init(Sensor * s, int id)
 {
 	s->write_index = 0;
-	s->read_offset = 0;
 	s->id = id;
 
 	#define FILENAMESIZE 3
@@ -183,6 +198,8 @@ Sensor * Sensor_Identify(const char * id_str)
 	if (id < 0 || id > NUMSENSORS)
 		return NULL;
 
+
+	Log(LOGDEBUG, "Sensor \"%s\" identified", g_sensor_names[id]);
 	return g_sensors+id;
 }
 
@@ -195,6 +212,9 @@ void Sensor_Handler(FCGIContext *context, char * params)
 {
 	DataPoint buffer[SENSOR_QUERYBUFSIZ];
 	StatusCodes status = STATUS_OK;
+
+	enum {DEFAULT, DUMP} operation = DEFAULT;
+
 	const char * key; const char * value;
 
 	Sensor * sensor = NULL;
@@ -225,6 +245,16 @@ void Sensor_Handler(FCGIContext *context, char * params)
 				break;
 			}
 		}
+		else if (strcmp(key, "dump") == 0)
+		{
+			if (operation != DEFAULT)
+			{
+				Log(LOGERR, "Operation already specified!");
+				status = STATUS_ERROR;
+				break;
+			}
+			operation = DUMP;
+		}
 		else
 		{
 			Log(LOGERR, "Unknown key \"%s\" (value = %s)", key, value);
@@ -242,30 +272,55 @@ void Sensor_Handler(FCGIContext *context, char * params)
 	if (status == STATUS_ERROR)
 	{
 		FCGI_RejectJSON(context);
+		return;
 	}
-	else
+	
+	switch (operation)
 	{
-
-		FCGI_BeginJSON(context, status);	
-		FCGI_JSONPair(key, value); // should spit back sensor ID
-		//Log(LOGDEBUG, "Call Sensor_Query...");
-		int amount_read = Sensor_Query(sensor, buffer, SENSOR_QUERYBUFSIZ);
-		//Log(LOGDEBUG, "Read %d DataPoints", amount_read);
-		//Log(LOGDEBUG, "Produce JSON response");
-		FCGI_JSONKey("data");
-		FCGI_JSONValue("[");
-		for (int i = 0; i < amount_read; ++i)
+		case DUMP:
 		{
-			//TODO: Consider; is it better to give both tv_sec and tv_usec to the client seperately, instead of combining here?
-			//NOTE: Must always use doubles; floats get rounded!
-			double time = buffer[i].time_stamp.tv_sec + 1e-6*(buffer[i].time_stamp.tv_usec);
-			FCGI_JSONValue("[%f, %f]", time, buffer[i].value);
-			if (i+1 < amount_read)
-				FCGI_JSONValue(",");
+			FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
+			//CRITICAL SECTION
+			pthread_mutex_lock(&(sensor->mutex));
+				fseek(sensor->file, 0, SEEK_SET);
+				int amount_read = 0;
+				do
+				{
+					amount_read = fread(buffer, sizeof(DataPoint), SENSOR_QUERYBUFSIZ, sensor->file);
+					for (int i = 0; i < amount_read; ++i)
+					{
+						FCGI_PrintRaw("%f\t%f\n", buffer[i].time_stamp, buffer[i].value);
+					}
+	
+				}
+				while (amount_read == SENSOR_QUERYBUFSIZ);
+			pthread_mutex_unlock(&(sensor->mutex));
+			// end critical section
+			break;
 		}
-		FCGI_JSONValue("]");
-		//Log(LOGDEBUG, "Done producing JSON response");
-		FCGI_EndJSON();	
+		default:
+		{
+			FCGI_BeginJSON(context, status);	
+			FCGI_JSONPair(key, value); // should spit back sensor ID
+			//Log(LOGDEBUG, "Call Sensor_Query...");
+			int amount_read = Sensor_Query(sensor, buffer, SENSOR_QUERYBUFSIZ);
+			//Log(LOGDEBUG, "Read %d DataPoints", amount_read);
+			//Log(LOGDEBUG, "Produce JSON response");
+			FCGI_JSONKey("data");
+			FCGI_JSONValue("[");
+			for (int i = 0; i < amount_read; ++i)
+			{
+				//TODO: Consider; is it better to give both tv_sec and tv_usec to the client seperately, instead of combining here?
+				
+				FCGI_JSONValue("[%f, %f]", buffer[i].time_stamp, buffer[i].value);
+				if (i+1 < amount_read)
+					FCGI_JSONValue(",");
+			}
+			FCGI_JSONValue("]");
+			//Log(LOGDEBUG, "Done producing JSON response");
+			FCGI_EndJSON();	
+			break;
+		}
 	}
 }
 

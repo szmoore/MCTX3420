@@ -7,6 +7,11 @@ RM = rm -f
 
 BIN = server
 
+all : $(BIN) stream
+
+stream : stream.c
+	$(CXX) -o stream stream.c -I/usr/include/opencv -I/usr/include/opencv2/highgui -L/usr/lib -lopencv_highgui -lopencv_core -lopencv_ml -lopencv_imgproc 
+
 
 $(BIN) : $(OBJ)
 	$(CXX) $(FLAGS) -o $(BIN) $(OBJ) $(LIB)

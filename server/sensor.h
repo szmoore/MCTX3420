@@ -14,28 +14,29 @@
 #define SENSOR_QUERYBUFSIZ 10
 
 /** Number of sensors **/
-#define NUMSENSORS 1
+#define NUMSENSORS 4
+
 
 /** Structure to represent data recorded by a sensor at an instant in time **/
 typedef struct
 {
 	/** Time at which data was taken **/
-	struct timeval time_stamp; //TODO: Consider; use float instead?
+	double time_stamp; 
 	/** Value of data **/
-	float value;
+	double value;
 } DataPoint;
 
 /** Structure to represent a sensor **/
 typedef struct
 {
 	/** ID number of the sensor **/
-	enum {SENSOR_TEST0=0, SENSOR_TEST1=1} id;
+	enum {ANALOG_TEST0=2, ANALOG_TEST1=0, DIGITAL_TEST0=1, DIGITAL_TEST1=3} id;
 	/** Buffer to store data from the sensor **/
 	DataPoint buffer[SENSOR_DATABUFSIZ];
 	/** Index of last point written in the data buffer **/
 	int write_index;
-	/** Offset position in binary file for query thread to read from**/
-	int read_offset;
+	/** Number of points read **/
+	long points_read;
 	/** Binary file to write data into when buffer is full **/
 	FILE * file;
 	/** Thread running the sensor **/
@@ -45,6 +46,7 @@ typedef struct
 
 	
 } Sensor;
+
 
 
 

@@ -275,6 +275,7 @@ void FCGI_RejectJSONEx(FCGIContext *context, StatusCodes status, const char *des
 	FCGI_EndJSON();
 }
 
+
 /**
  * Main FCGI request loop that receives/responds to client requests.
  * @param data Reserved.

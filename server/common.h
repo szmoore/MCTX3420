@@ -8,6 +8,7 @@
 
 #define _POSIX_C_SOURCE 200809L
 #define _BSD_SOURCE
+#define _XOPEN_SOURCE 600
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -18,6 +19,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <sys/time.h>
+#include <time.h>
 
 #include "log.h"
 #include "fastcgi.h"

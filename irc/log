@@ -1646,3 +1646,246 @@
 19:25 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has joined #mctxuwa_softdev
 21:09 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit ["ChatZilla 0.9.89 [Firefox 23.0.1/20130814063812]"]
 23:18 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Fri Aug 30 2013
+09:03 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:16 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit [EOF From client]
+14:15 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has joined #mctxuwa_softdev
+17:06 < jtanx> say you want to perform a command
+17:06 < jtanx> eg move an actuator
+17:07 < jtanx> and suppose checks have to be made against other sensors to ensure that this command is good to go
+17:07 < jtanx> how are those checks going to be made?
+18:10 < sam_moore> The Actuator Handler will call some sanity check against the most recent sensor data
+18:11 < sam_moore> If they aren't, it will respond with some appropriate JSON or HTTP status code
+18:11 < sam_moore> eg: "Try again later when the pressure is in the right range", or "Don't do that you silly person"
+18:15 < jtanx> ._.
+18:21 < jtanx> I wonder if there's a way to pull from your git repository without creating the 'merge branch master from...' commits
+18:22 < sam_moore> I don't think so
+18:22 < jtanx> I tried playing with rebasing but it doesn't work out so well
+18:40 < jtanx> ok so I've committed some stuff to my repository that changes the handling of controls/actuators/login
+18:41 < jtanx> I'm not sure if it's the best way to do it
+18:41 < jtanx> though
+18:41 < jtanx> What I did was get rid of /api/login
+18:41 < jtanx> and instead have /api/control
+18:41 < jtanx> All of the control code (eg actuators but may be other controls? Start/stop the whole thing?) has been moved to controls.c
+18:42 < jtanx> You still need to supply username and password to access /api/control
+18:42 < jtanx> and what was previously called  the 'authorization key'  is now the control key (ie who has control)
+19:00 < sam_moore> Ok, I'll take a look at it later
+19:01 < sam_moore> Don't worry about the merge messages, it's not a big deal
+19:06 < jtanx> ok thanks
+20:27 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+22:21 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has joined #mctxuwa_softdev
+23:03 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Sat Aug 31 2013
+09:09 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:30 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+17:40 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has joined #mctxuwa_softdev
+20:48 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Sun Sep 01 2013
+09:11 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has joined #mctxuwa_softdev
+14:07 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has joined #mctxuwa_softdev
+14:17 < jtanx> it'd have been cool to have written then server in python
+14:19 < Callum> gah havent done much for this project this week. not sure what i should do either 
+14:19 < jtanx> hmm
+14:19 < Callum> so far behind in one of my units too. haha joys of uni
+14:19 < jtanx> lol
+14:20 < jtanx> werent we meant to get the camera stuff working or something
+14:21 < Callum> well yea but thats more rosher getting stuff working on his end. still not really sure what's going on. need to find an efficient way to transfer data (which would be directly streaming but it seemed adrian wanted some sort of processing)
+14:21 < Callum> guess i could start working on edge detection
+14:21 < jtanx> james hasn't got much done afaik
+14:21 < Callum> nah dont think he ahs
+14:22 < jtanx> but man I was looking at the javascript stuff
+14:22 < jtanx> and it's really annoying
+14:22 < jtanx> everything in javascript is asynchronous
+14:22 < jtanx> so you have a callback for an AJAX query, and it gets executed some time in the future
+14:23 < jtanx> it's really hard to pass variables to the callback and then also retrieve them 
+14:23 < Callum> hmm
+14:23 < jtanx> i'm probably not doing it in the right fashion or something
+14:28 < Callum> not sure. don't really understand this stuff myself. havent done much/any
+14:45 < jtanx> flask is so cool
+15:01 < jtanx> oh
+15:02 < jtanx> maybe we can use cookies to store authorization
+15:02 < jtanx> instead of in javascript
+15:02 < jtanx> hmm
+15:02 < jtanx> http://stackoverflow.com/questions/15722795/how-to-create-a-cookie-with-fastcgi-nginx-in-c
+15:57 < sam_moore> Maybe a cookie is better, but couldn't you have a global variable that the JavaScript code sets in the callback?
+15:57 -!- Irssi: #mctxuwa_softdev: Total of 4 nicks [0 ops, 0 halfops, 0 voices, 4 normal]
+15:59 < sam_moore> Ok, I'll do the simulated "digital" sensor and actuator
+15:59 < sam_moore> We should make some kind of minimal gui in JavaScript
+16:00 < sam_moore> I'm not sure what James has done, but there's nothing under git
+16:02 < sam_moore> http://www.flotcharts.org/flot/examples/ajax/index.html is a good starting point for updating sensor graphs
+16:03 < sam_moore> jtanx: I wouldn't worry about the login/authentication too much for this week
+16:04 < jtanx> james said he got the buttons working but that's about it
+16:04 < jtanx> he's more concerned about issues with styling them than getting a fully fledged gui
+16:04 < sam_moore> I think actually having a gui is more important than having a pretty gui
+16:04 < sam_moore> At the moment anyway
+16:05 < jtanx> yeah
+16:05 < jtanx> it would be great to have *something*
+16:05 < jtanx> the problem with js
+16:05 < jtanx> is from what i've seen, the callback occurs in the jQuery file
+16:06 < jtanx> so you can't set global variables in say sensors.js
+16:06 < jtanx> and expect to be able to read/set them in the callback
+16:06 < sam_moore> Hmm, that's wierd
+16:06 < jtanx> what really shits me about javascript is variable handling
+16:06 < sam_moore> Hang on, let me have another look at the only project I ever used jQuery for... :P
+16:07 < jtanx> you can pass one/none/more than specified parameters
+16:07 < sam_moore> It was a chess game, so it should definietly be possible to modify variables in the callback function
+16:07 < jtanx> yeah there's probably a way, I just don't know it
+16:08 < jtanx> about the actuators
+16:08 < jtanx> I've already got something working in my repository
+16:08 < jtanx> but I don't really like how I've done it
+16:30 < sam_moore> I'm making a minimal gui (it will be able to plot something, and have a button); we can either ditch it or improve on it later
+16:31 < jtanx> sounds good
+16:35 < sam_moore> Callum: If you want to make a (really awful but possibly looking good enough at this stage for Adrian) "streaming" images thing
+16:35 < sam_moore> You can have your program continuously save to a file
+16:35 < sam_moore> And a html page that just has "<meta http-equiv="refresh" content="0">" in the header
+16:35 < sam_moore> With a link to the image
+16:36 < Callum> alright il look into it
+16:36 < sam_moore> It's absolutely aweful, but it will give the effect of a really laggy video
+16:36 < jtanx> nice :P
+16:36 < sam_moore> You can improve it (if you get time) by having 2 images instead of one, with a symbolic link to swap between them
+16:38 < sam_moore> I'll bring the raspberry pi with the webcam tomorrow and we'll put everything on it to show Adrian
+16:38 < jtanx> hehehe
+16:38 < jtanx> can you install ffserver on the raspi?
+16:39 < sam_moore> Probably
+16:40 < jtanx> actually
+16:41 < jtanx> does our code run on the raspi?
+16:50 < sam_moore> Yes, at the moment
+16:54 < Callum> how are we integrating my code into it?
+17:01 < sam_moore> Keep it as a seperate process for now
+17:01 < Callum> alright
+17:01 < sam_moore> I'll modify the "run.sh" script to start both of them
+17:01 < sam_moore> Sigh javascript
+17:01 < sam_moore> So useful and yet so horrible
+17:02 < sam_moore> Still, I think if we can get our heads around it it is actually a nice way to do this
+17:09 < jtanx> the camera thing or the api or both?
+17:24 < sam_moore> The API
+17:24 < Callum> ok so how do i link to the image? (
+17:24 < sam_moore> Just put a html file in the /server directory for now
+17:25 < sam_moore> With <img src="path_to_image"> in the body somewhere
+17:29 < Callum> where are we going to put the images?
+17:31 < sam_moore> /server/images (?)
+17:31 < sam_moore> Wherever it seems logical I guess
+17:33 < sam_moore> If either of you are available earlier on Monday, I'm free for pretty much the whole day
+17:33 < sam_moore> Do you want to meet earlier and actually do coding as a group?
+17:37 < sam_moore> Dammit why does javascript remove the [] brackets when printing string representations of arrays
+17:37 < sam_moore> How are you supposed to tell what dimensions the array has...
+17:37 < jtanx> if you want sample code of how I printed the array of sensor values
+17:37 < jtanx> see the unit tests
+17:37 < sam_moore> Ok, thanks
+17:37 < jtanx>    for (var i = 0; i < data.data.length; i++) {
+17:37 < jtanx>      result += data.data[i][0]  + ":" + data.data[i][1] + ", ";
+17:37 < jtanx>    }
+17:56 < Callum> ok well iv done trhat, i think. you should probably check it to make sure its right
+17:58 < Callum> sent pull request. and i'v got food so brb
+17:58 < sam_moore> Ok, thanks
+17:59 < sam_moore> jtanx: You're right, altering variables on a successful ajax call is a pain in the ass
+17:59 < jtanx> hehe
+17:59 < sam_moore> ... You can modify html attributes really easily though
+17:59 < jtanx> true
+17:59 < jtanx> that's what I was thinking
+17:59 < sam_moore> Must resist urge to store data in a comment
+17:59 < jtanx> have a hidden input field?
+18:01 < jtanx> I must say that the firebug debugger and inbuilt web console were both quite useful
+18:02 < sam_moore> Yes, I've got firebug running
+18:04 < jtanx> I was looking at flask and it was ridiculously easy to set up a similar API in python
+18:05 < sam_moore> Do you want to change to python then?
+18:06 < sam_moore> Don't we still have to do the javascript though?
+18:07 < sam_moore> The API we have at the moment isn't that terrible
+18:07 < jtanx> nah
+18:07 < jtanx> it's probably best to stick with what we have
+18:07 < jtanx> the javascript stuff would remain the same yeah
+18:09 < sam_moore> Ok
+18:26 < sam_moore> Right... you can update global variables on a successful AJAX request
+18:27 < sam_moore> If you put "var" in front of the variable in the global scope then the AJAX callback will just make a new local variable and modify that -_-
+18:27 < sam_moore> But if you Don't put the "var" there, it will work
+18:40 < jtanx> lol
+18:41 < jtanx> but using global variables in javascript can get.... messy
+18:41 < sam_moore> Mmm
+18:42 < sam_moore> But doing pretty much *anything* in javascript is messy
+18:42 < jtanx> yeah
+18:42 < jtanx> true that
+18:43 < sam_moore> I wonder...
+18:43 < sam_moore> Should we just have one html page for each sensor/actuator
+18:43 < sam_moore> And then the user can open multiple tabs?
+18:45 < sam_moore> That's probably not very nice though
+18:46 < sam_moore> I think we should return data about multiple sensors at a time
+18:51 < jtanx> you'd probably want it all on one page
+18:51 < sam_moore> Yeah
+18:51 < jtanx> how many sensors are we talking about again
+18:51 < sam_moore> 6 or 7 I think, + a camera
+18:51 < jtanx> oh yeah
+18:51 < sam_moore> Oh well, we can redesign it later
+18:51 < jtanx> I guess we can design for max 7
+18:52 < sam_moore> But it might be a good idea to query multiple sensors in one ajax request
+18:53 < jtanx> yep
+18:53 < jtanx> supply more than one id in a go?
+18:53 < jtanx> could have an array (max size 7) that holds all the sensors you want to get data for
+18:53 < jtanx> i guess
+18:55 < sam_moore> It's probably more flexible to just add a "getall" key to the sensor module
+18:57 < jtanx> oh yeah
+18:57 < jtanx> I'm free until 12 tomorrow
+18:57 < jtanx> do you want to work together before that?
+18:58 < sam_moore> Sure
+18:59 < sam_moore> Try G19 again, but if that doesn't work we can go to the physics lab, or the computer science labs
+19:01 < jtanx> yeah ok
+19:02 < jtanx> what time do you want to start?
+19:04 < sam_moore> I'll probably get in around 9 or 10, depending on how much sleep I get
+19:04 < sam_moore> Let's say 10:00
+19:05 < sam_moore> Got to go, I'll be back later
+19:05 < jtanx> ok
+21:35 < sam_moore> I'm just going to use the same Sensor stuff for digital sensors
+21:36 < sam_moore> Adding a second type of sensor seems needlessly complicated
+21:36 < sam_moore> 1 = on and 0 = off
+21:37 < sam_moore> Probably do the same for actuators (just have some sanity checks on the values you can set, both at the client and the server)
+21:38 < jtanx> usually I'd just say 0 is off and not 0 is on
+21:38 < sam_moore> Haha, fair enough
+21:39 < jtanx> I kinda hate over-checking stuff :P
+21:39 < sam_moore> The actual GetData function has to return something reasonably sane though
+21:39 < sam_moore> It's easy to just make it only return 0 or 1
+21:39 < jtanx> oh I was more talking about setting the value of the actuator 
+21:39 < sam_moore> Right
+21:40 < sam_moore> We should probably check for 0 or 1 anyway
+21:40 < sam_moore> In case the user does something dumb
+21:40 < jtanx> well
+21:40 < sam_moore> Like think they are setting an analog sensor and put in like "200"
+21:40 < jtanx> it should be the js code that's setting it
+21:41 < jtanx> so if you write the code properly it shoul be ok
+21:41 < sam_moore> "should be OK"...
+21:41 < jtanx> you shouldn't access the api directly
+21:41 < sam_moore> Alright, we'll see, but it's like, 1/2 a line of code to check :P
+21:41 < sam_moore> Redundancy and all that
+21:41 < jtanx> but even if they entered 200
+21:41 < jtanx> well so what
+21:41 < sam_moore> Yeah, but people *can* access the API directly
+21:41 < jtanx> it'd just represet 1
+21:42 < jtanx> represent
+21:42 < jtanx> *
+21:42 < sam_moore> How does the server know the difference between someone typing the URL and an AJAX request to the URL?
+21:42 < jtanx> yeah
+21:42 < sam_moore> Someone could go view source, "How can I break this... ah, what happens if I pass stupid values directly to the API"
+21:42 < jtanx> well if you define that 0 is off and not zero is on
+21:43 < jtanx> then it meets specs :P
+21:43 < sam_moore> Ok, I suppose it doesn't really matter
+21:44 < sam_moore> I respectfully disagree with the idea of having too many checks :P
+21:44 < sam_moore> Unless we went "while (true) DoCheck();" or something like that
+21:44 < sam_moore> That would be dumb
+21:44 < jtanx> hahaha
+21:45 < jtanx> but sometimes it gets really messy to maintain when you have that many checks
+21:45 < jtanx> and then when you want to modify something it's a real pain
+21:45 < jtanx> and really easy to break
+21:45 < sam_moore> True, but a bounds check isn't that bad
+21:46 < jtanx> yrue
+21:46 < sam_moore> I mean, you have to convert the value that isn't zero to an "on" anyway, which requires a check
+21:46 < jtanx> not really
+21:46 < sam_moore> Depends on the actuator
+21:46 < jtanx> you check if !value
+21:47 < sam_moore> Alright
+21:58 < jtanx> do you think there should be a stop/start method?
+21:58 < jtanx> eg start the experiment
+21:58 < jtanx> stop the experiment
+22:28 < sam_moore> Yes, probably
+22:28 < sam_moore> The stuff I wrote for Thread Exit conditions may actually help there...
+22:29 < sam_moore> Remove the bit where the FCGI loop exits though
+22:29 < jtanx> yeah 
+22:41 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has quit [EOF From client]
+23:09 -!- jtanx [~asfa@203-59-111-146.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
