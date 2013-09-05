@@ -253,7 +253,8 @@ void FCGI_RejectJSON(FCGIContext *context)
  */
 void FCGI_RejectJSONEx(FCGIContext *context, StatusCodes status, const char *description)
 {
-	description = !description ? "" : description;
+	if (description == NULL)
+		description = "Unknown";
 	
 	Log(LOGINFO, "%s: Rejected query with: %d: %s", context->current_module, status, description);
 	FCGI_BeginJSON(context, status);
