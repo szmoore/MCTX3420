@@ -1,6 +1,6 @@
 /**
  * @file options.h
- * @purpose Define the Options structure and the g_options variable
+ * @brief Define the Options structure and the g_options variable
  */
 
 #ifndef _OPTIONS_H

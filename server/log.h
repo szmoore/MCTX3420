@@ -1,6 +1,6 @@
 /**
  * @file log.h
- * @purpose Declaration of functions for printing log messages and/or terminating program after a fatal error
+ * @brief Declaration of functions for printing log messages and/or terminating program after a fatal error
  */
 
 #ifndef _LOG_H

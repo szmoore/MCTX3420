@@ -1,9 +1,8 @@
 /**
  * @file sensor.c
- * @purpose Implementation of sensor thread
+ * @brief Implementation of sensor thread
  * TODO: Finalise implementation
  */
-
 
 #include "common.h"
 #include "sensor.h"
@@ -12,7 +11,7 @@
 
 /** Array of sensors, initialised by Sensor_Init **/
 static Sensor g_sensors[NUMSENSORS]; //global to this file
-static const char * g_sensor_names[] = {"analog_test0","analog_test1","digital_test0","digital_test1"};
+static const char * g_sensor_names[] = {"analog_test0", "analog_test1", "digital_test0", "digital_test1"};
 /**
  * Read a data value from a sensor; block until value is read
  * @param sensor_id - The ID of the sensor
