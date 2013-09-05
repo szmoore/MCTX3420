@@ -1941,3 +1941,10 @@
 16:21 -!- jtanx [~asfa@130.95.113.99] has quit [Ping timeout]
 17:26 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
 20:49 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Thu Sep 05 2013
+08:19 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:34 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+13:22 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:51 < jtanx> hm, so to get clock_gettime to work, you need to use std=gnu99 instead of std=c99
+18:52 < jtanx> do you think we should just stick with gettimeofday?
+21:46 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit [":3"]
