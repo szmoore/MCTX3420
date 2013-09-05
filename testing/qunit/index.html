@@ -6,10 +6,36 @@
 		<link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.12.0.css">
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <script src="http://code.jquery.com/qunit/qunit-1.12.0.js"></script>
-    </head>
+        <!-- For IE support -->
+        <script src="base64.js"></script>
+    <style>
+      body {
+        font-family: Verdana, Arial, Sans;
+      }
+    </style>
+  </head>
 <body>
 	<div id="qunit"></div>
 	<div id="qunit-fixture"></div>
 	<script src="unit-tests.js"></script>
+
+  <div style="margin:1em auto; width: 20em;">
+    <h3>Access control</h3>
+    <form id="control" action="#">
+      <table>
+        <tr>
+          <td>Username:</td>
+          <td><input type="text" id="username"></td>
+        </tr>
+        <tr>
+          <td>Password:</td>
+          <td><input type="password" id="password"></td>
+        </tr>
+        <tr>
+          <td><input type="submit" value="Submit"></td>
+        </tr>
+      </table>
+    </form>
+  </div>
 </body>
 </html>

@@ -1,6 +1,6 @@
 /**
  * @file common.h
- * @purpose Common header includes
+ * @brief Common header includes
  */
 
 #ifndef _COMMON_H
