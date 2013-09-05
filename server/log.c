@@ -1,6 +1,6 @@
 /**
  * @file log.c
- * @purpose Implement logging and error handling functions
+ * @brief Implement logging and error handling functions
  */
 
 

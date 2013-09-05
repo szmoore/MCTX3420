@@ -1,6 +1,6 @@
 /**
  * @file main.c
- * @purpose main and its helper functions, signal handling and cleanup functions
+ * @brief main and its helper functions, signal handling and cleanup functions
  */
 
 // --- Custom headers --- //

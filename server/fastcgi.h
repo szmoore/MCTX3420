@@ -1,16 +1,22 @@
 /**
  * @file fastcgi.h
- * @purpose Headers for the fastcgi web interface
+ * @brief Headers for the fastcgi web interface
  */
  
 #ifndef _FASTCGI_H
 #define _FASTCGI_H
  
-/**(HTTP) Status codes that fcgi module handlers can return**/
+/**
+ * Status codes that fcgi module handlers can return
+ * Success status codes have values > 0
+ * Failure status codes have values <(=) 0 
+ * Note: 0 is counted as an error code to minimise confusion
+ * with in-browser JSON parsing error codes
+ */
 typedef enum StatusCodes {
-	STATUS_OK = 200,
-	STATUS_ERROR = 400,
-	STATUS_UNAUTHORIZED = 401
+	STATUS_OK = 1,
+	STATUS_ERROR = -1,
+	STATUS_UNAUTHORIZED = -2
 } StatusCodes;
 
 typedef struct FCGIContext FCGIContext;
@@ -26,12 +32,20 @@ extern void FCGI_JSONLong(const char *key, long value);
 extern void FCGI_JSONDouble(const char *key, double value);
 extern void FCGI_JSONBool(const char *key, bool value);
 extern void FCGI_JSONKey(const char *key);
-extern void FCGI_JSONValue(const char *format, ...);
+extern void FCGI_PrintRaw(const char *format, ...);
 extern void FCGI_EndJSON();
 extern void FCGI_RejectJSON(FCGIContext *context);
 extern void FCGI_RejectJSONEx(FCGIContext *context, StatusCodes status, const char *description);
 extern void * FCGI_RequestLoop (void *data);
-#define FCGI_PrintRaw FCGI_JSONValue // Functionality is identical
+
+/**
+ * Custom formatting function for the JSON value. To be used in 
+ * conjunction with FCGI_JSONKey. Care should be taken to ensure
+ * that valid JSON is produced.
+ * 
+ * @see FCGI_PrintRaw for calling syntax
+ */
+#define FCGI_JSONValue FCGI_PrintRaw
 
 #endif
 

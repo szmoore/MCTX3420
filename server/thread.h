@@ -1,6 +1,6 @@
 /**
  * @file thread.h
- * @purpose Declarations for thread control related functions and variables
+ * @brief Declarations for thread control related functions and variables
  */
 
 #ifndef _THREAD_H

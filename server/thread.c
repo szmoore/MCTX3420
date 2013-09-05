@@ -1,6 +1,6 @@
 /**
  * @file thread.c
- * @purpose Implementation of thread control
+ * @brief Implementation of thread control
  */
 
 #include "thread.h"

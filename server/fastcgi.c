@@ -1,6 +1,6 @@
 /**
  * @file fastcgi.c
- * @purpose Runs the FCGI request loop to handle web interface requests.
+ * @brief Runs the FCGI request loop to handle web interface requests.
  *
  * fcgi_stdio.h must be included before all else so the stdio function
  * redirection works ok.
@@ -15,8 +15,10 @@
 #include "control.h"
 #include "options.h"
 
+/**The time period (in seconds) before the control key expires @ */
 #define CONTROL_TIMEOUT 180
 
+/**Contextual information related to FCGI requests*/
 struct FCGIContext {
 	/**The time of last valid user access possessing the control key*/
 	time_t control_timestamp;
@@ -177,7 +179,7 @@ void FCGI_BeginJSON(FCGIContext *context, StatusCodes status_code)
  * Adds a key/value pair to a JSON response. The response must have already
  * been initiated by FCGI_BeginJSON. Note that characters are not escaped.
  * @param key The key of the JSON entry
- * &param value The value associated with the key.
+ * @param value The value associated with the key.
  */
 void FCGI_JSONPair(const char *key, const char *value)
 {
@@ -225,19 +227,6 @@ void FCGI_JSONKey(const char *key)
 }
 
 /**
- * Should be used to write out the value of a JSON key. This has
- * the same format as the printf functions. Care should be taken to format
- * the output in valid JSON. 
- */
-void FCGI_JSONValue(const char *format, ...)
-{
-	va_list list;
-	va_start(list, format);
-	vprintf(format, list);
-	va_end(list);
-}
-
-/**
  * Ends a JSON response that was initiated by FCGI_BeginJSON.
  */
 void FCGI_EndJSON() 
@@ -261,10 +250,13 @@ void FCGI_RejectJSON(FCGIContext *context)
  * @param context The context to work in
  * @param status The status the return data should have.
  * @param description A short description of why the input was rejected.
- * @param params The parameters that the module handler received.
  */
 void FCGI_RejectJSONEx(FCGIContext *context, StatusCodes status, const char *description)
 {
+	if (description == NULL)
+		description = "Unknown";
+	
+	Log(LOGINFO, "%s: Rejected query with: %d: %s", context->current_module, status, description);
 	FCGI_BeginJSON(context, status);
 	FCGI_JSONPair("description", description);
 	FCGI_JSONLong("responsenumber", context->response_number);
@@ -275,6 +267,21 @@ void FCGI_RejectJSONEx(FCGIContext *context, StatusCodes status, const char *des
 	FCGI_EndJSON();
 }
 
+/**
+ * Generates a response to the client as described by the format parameter and
+ * extra arguments (exactly like printf). To be used when none of the other
+ * predefined functions will work exactly as needed. Extra care should be taken
+ * to ensure the correctness of the output.
+ * @param format The format string
+ * @param ... Any extra arguments as required by the format string.
+ */
+void FCGI_PrintRaw(const char *format, ...)
+{
+	va_list list;
+	va_start(list, format);
+	vprintf(format, list);
+	va_end(list);
+}
 
 /**
  * Main FCGI request loop that receives/responds to client requests.
@@ -337,6 +344,4 @@ void * FCGI_RequestLoop (void *data)
 	Thread_QuitProgram(false);
 	// NOTE: Don't call pthread_exit, because this runs in the main thread. Just return.
 	return NULL;
-
-	
 }

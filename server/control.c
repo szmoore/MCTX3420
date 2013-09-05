@@ -1,3 +1,7 @@
+/**
+ * @file control.c
+ * @brief Handles all client control requests (admin/actuator related)
+ */
 #include "common.h"
 #include "control.h"
 

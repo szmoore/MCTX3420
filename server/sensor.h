@@ -1,7 +1,6 @@
-
 /**
  * @file sensor.h
- * @purpose Declarations for sensor thread related stuff
+ * @brief Declarations for sensor thread related stuff
  */
 
 
