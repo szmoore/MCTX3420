@@ -5,14 +5,18 @@
 #include "common.h"
 #include "control.h"
 
+const char * g_actuator_names[NUMACTUATORS] = {	
+	"Pressure regulator", "Solenoid 1" 
+};
+
 /**
  * Handles control of the actuators.
  */
-void ActuatorHandler(FCGIContext *context, int id, const char *set_value) {
+void ActuatorHandler(FCGIContext *context, ActuatorId id, const char *set_value) {
 	char *ptr;
 	
 	switch(id) { //Add new actuators here
-		case ACT_PREG: //Suppose is pressure regulator. 0-700 input (kPa)
+		case ACT_PRESSURE: //Suppose is pressure regulator. 0-700 input (kPa)
 		{
 			int value = strtol(set_value, &ptr, 10);
 			if (*ptr == '\0' && value >= 0 && value <= 700) {
@@ -37,7 +41,7 @@ void ActuatorHandler(FCGIContext *context, int id, const char *set_value) {
 				FCGI_JSONValue("\"Solenoid 1 turned %s!\"", state);
 				FCGI_EndJSON();
 			} else {
-				FCGI_RejectJSON(context);
+				FCGI_RejectJSON(context, "Invalid actuator value specified");
 			}
 		} break;
 		default:
@@ -57,7 +61,7 @@ void Control_Handler(FCGIContext *context, char *params) {
 	const char *action = NULL, *set_value = NULL;
 	bool force = false;
 	char *ptr;
-	int id = ACT_NONE;
+	int id = -1;
 	
 	while ((params = FCGI_KeyPair(params, &key, &value))) {
 		if (!strcmp(key, "action"))
@@ -77,7 +81,7 @@ void Control_Handler(FCGIContext *context, char *params) {
 	}
 	
 	if (action == NULL) { //Must have an action
-		FCGI_RejectJSON(context);
+		FCGI_RejectJSON(context, "No action specified");
 	} else if (!strcmp(action, "start")) {
 		FCGI_BeginControl(context, force);
 	} else if (!strcmp(action, "stop")) { //Don't require control key to stop...

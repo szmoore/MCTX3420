@@ -34,15 +34,22 @@ extern void FCGI_JSONBool(const char *key, bool value);
 extern void FCGI_JSONKey(const char *key);
 extern void FCGI_PrintRaw(const char *format, ...);
 extern void FCGI_EndJSON();
-extern void FCGI_RejectJSON(FCGIContext *context);
 extern void FCGI_RejectJSONEx(FCGIContext *context, StatusCodes status, const char *description);
-extern void * FCGI_RequestLoop (void *data);
+extern void *FCGI_RequestLoop (void *data);
+
+/**
+ * Shortcut to calling FCGI_RejectJSONEx. Sets the error code
+ * to STATUS_ERROR.
+ * @param context The context to work in
+ * @param description A short description of why the request was rejected.
+ * @see FCGI_RejectJSONEx
+ */
+#define FCGI_RejectJSON(context, description) FCGI_RejectJSONEx(context, STATUS_ERROR, description)
 
 /**
  * Custom formatting function for the JSON value. To be used in 
  * conjunction with FCGI_JSONKey. Care should be taken to ensure
  * that valid JSON is produced.
- * 
  * @see FCGI_PrintRaw for calling syntax
  */
 #define FCGI_JSONValue FCGI_PrintRaw
