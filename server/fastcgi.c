@@ -8,7 +8,6 @@
 
 #include <fcgi_stdio.h>
 #include <openssl/sha.h>
-#include <time.h>
 
 #include "common.h"
 #include "sensor.h"
@@ -31,13 +30,51 @@ struct FCGIContext {
 };
 
 /**
- * Identifies current version info. Useful for testing that the API is running.
- * TODO - Consider adding info about available sensors and actuators (eg capabilities)?
+ * Identifies build information and the current API version to the user.
+ * Also useful for testing that the API is running and identifying the 
+ * sensors and actuators present.
+ * @param context The context to work in
+ * @param params User specified paramters: [actuators, sensors]
  */ 
 static void IdentifyHandler(FCGIContext *context, char *params) {
+	bool identSensors = false, identActuators = false;
+	const char *key, *value;
+	int i;
+
+	while ((params = FCGI_KeyPair(params, &key, &value))) {
+		if (!strcmp(key, "sensors")) {
+			identSensors = !identSensors;
+		} else if (!strcmp(key, "actuators")) {
+			identActuators = !identActuators;
+		}
+	}
+
 	FCGI_BeginJSON(context, STATUS_OK);
 	FCGI_JSONPair("description", "MCTX3420 Server API (2013)");
 	FCGI_JSONPair("build_date", __DATE__ " " __TIME__);
+	FCGI_JSONLong("api_version", API_VERSION);
+	if (identSensors) {
+		FCGI_JSONKey("sensors");
+		FCGI_JSONValue("{\n\t\t");
+		for (i = 0; i < NUMSENSORS; i++) {
+			if (i > 0) {
+				FCGI_JSONValue(",\n\t\t");
+			}
+			FCGI_JSONValue("\"%d\" : \"%s\"", i, g_sensor_names[i]); 
+		}
+		FCGI_JSONValue("\n\t}");
+	}
+	if (identActuators) {
+		FCGI_JSONKey("actuators");
+		FCGI_JSONValue("{\n\t\t");
+		for (i = 0; i < NUMACTUATORS; i++) {
+			if (i > 0) {
+				FCGI_JSONValue(",\n\t\t");
+			}
+			FCGI_JSONValue("\"%d\" : \"%s\"", i, g_actuator_names[i]); 
+		}
+		FCGI_JSONValue("\n\t}");
+	}
 	FCGI_EndJSON();
 }
 
@@ -172,7 +209,6 @@ void FCGI_BeginJSON(FCGIContext *context, StatusCodes status_code)
 	FCGI_JSONDouble("start_time", start_time);
 	FCGI_JSONDouble("current_time", current_time);
 	FCGI_JSONDouble("running_time", current_time - start_time);
-	
 }
 
 /**
@@ -232,16 +268,6 @@ void FCGI_JSONKey(const char *key)
 void FCGI_EndJSON() 
 {
 	printf("\r\n}\r\n");
-}
-
-/**
- * To be used when the input parameters are invalid. The return data will
- * have a status of STATUS_ERROR, along with other debugging information.
- * @param context The context to work in
- */
-void FCGI_RejectJSON(FCGIContext *context)
-{
-	FCGI_RejectJSONEx(context, STATUS_ERROR, "Invalid request");
 }
 
 /**
@@ -319,8 +345,12 @@ void * FCGI_RequestLoop (void *data)
 		size_t lastchar = strlen(module) - 1;
 		if (lastchar > 0 && module[lastchar] == '/')
 			module[lastchar] = 0;
+
+		//Default to the 'identify' module if none specified
+		if (!*module) 
+			strcpy(module, "identify");
 		
-		if (!*module || !strcmp("identify", module)) {
+		if (!strcmp("identify", module)) {
 			module_handler = IdentifyHandler;
 		} else if (!strcmp("control", module)) {
 			module_handler = Control_Handler;
@@ -332,8 +362,7 @@ void * FCGI_RequestLoop (void *data)
 		if (module_handler) {
 			module_handler(&context, params);
 		} else {
-			strncat(module, " (unhandled)", BUFSIZ);
-			FCGI_RejectJSON(&context);
+			FCGI_RejectJSON(&context, "Unhandled module");
 		}
 		context.response_number++;
 

@@ -3,18 +3,26 @@
  * @brief Declarations for sensor thread related stuff
  */
 
-
 #ifndef _SENSOR_H
 #define _SENSOR_H
 
 /** Number of data points to keep in sensor buffers **/
 #define SENSOR_DATABUFSIZ 10
-
+/** Size of the query buffer. @see Sensor_Handler **/
 #define SENSOR_QUERYBUFSIZ 10
 
 /** Number of sensors **/
 #define NUMSENSORS 4
 
+typedef enum SensorId {
+	ANALOG_TEST0,
+	ANALOG_TEST1,
+	DIGITAL_TEST0,
+	DIGITAL_TEST1
+} SensorId;
+
+/** Human readable names for the sensors **/
+extern const char * g_sensor_names[NUMSENSORS];
 
 /** Structure to represent data recorded by a sensor at an instant in time **/
 typedef struct
@@ -29,7 +37,7 @@ typedef struct
 typedef struct
 {
 	/** ID number of the sensor **/
-	enum {ANALOG_TEST0=2, ANALOG_TEST1=0, DIGITAL_TEST0=1, DIGITAL_TEST1=3} id;
+	SensorId id;
 	/** Buffer to store data from the sensor **/
 	DataPoint buffer[SENSOR_DATABUFSIZ];
 	/** Index of last point written in the data buffer **/
@@ -56,7 +64,6 @@ extern void * Sensor_Main(void * args); // main loop for sensor thread; pass a S
 extern int Sensor_Query(Sensor * s, DataPoint * buffer, int bufsiz); // fill buffer with sensor data
 
 extern void Sensor_Handler(FCGIContext *context, char * params);
-
 
 #endif //_SENSOR_H
 
