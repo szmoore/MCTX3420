@@ -11,14 +11,18 @@
 
 /** Array of sensors, initialised by Sensor_Init **/
 static Sensor g_sensors[NUMSENSORS]; //global to this file
-static const char * g_sensor_names[] = {"analog_test0", "analog_test1", "digital_test0", "digital_test1"};
+const char * g_sensor_names[NUMSENSORS] = {	
+	"analog_test0", "analog_test1", 
+	"digital_test0", "digital_test1"
+};
+
 /**
  * Read a data value from a sensor; block until value is read
  * @param sensor_id - The ID of the sensor
  * @param d - DataPoint to set
  * @returns NULL for digital sensors when data is unchanged, otherwise d
  */
-DataPoint * GetData(int sensor_id, DataPoint * d)
+DataPoint * GetData(SensorId sensor_id, DataPoint * d)
 {
 	// switch based on the sensor_id at the moment for testing;
 	// might be able to just directly access ADC from sensor_id?
@@ -102,9 +106,6 @@ void Init(Sensor * s, int id)
 	s->file = fopen(filename, "a+b"); // open binary file
 	Log(LOGDEBUG, "Initialised sensor %d; binary file is \"%s\"", id, filename);
 }
-
-
-
 
 
 /**
@@ -278,7 +279,10 @@ void Sensor_Handler(FCGIContext *context, char * params)
 	{
 		case DUMP:
 		{
-			FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
+			//Force download with content-disposition
+			FCGI_PrintRaw("Content-type: text/plain\r\n"
+				"Content-disposition: attachment;filename=%d.csv\r\n\r\n",
+				sensor->id);
 			//CRITICAL SECTION
 			pthread_mutex_lock(&(sensor->mutex));
 				fseek(sensor->file, 0, SEEK_SET);
@@ -290,7 +294,7 @@ void Sensor_Handler(FCGIContext *context, char * params)
 					{
 						FCGI_PrintRaw("%f\t%f\n", buffer[i].time_stamp, buffer[i].value);
 					}
-	
+
 				}
 				while (amount_read == SENSOR_QUERYBUFSIZ);
 			pthread_mutex_unlock(&(sensor->mutex));

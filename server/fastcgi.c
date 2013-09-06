@@ -8,7 +8,6 @@
 
 #include <fcgi_stdio.h>
 #include <openssl/sha.h>
-#include <time.h>
 
 #include "common.h"
 #include "sensor.h"
@@ -35,9 +34,43 @@ struct FCGIContext {
  * TODO - Consider adding info about available sensors and actuators (eg capabilities)?
  */ 
 static void IdentifyHandler(FCGIContext *context, char *params) {
+	bool identSensors = false, identActuators = false;
+	const char *key, *value;
+	int i;
+
+	while ((params = FCGI_KeyPair(params, &key, &value))) {
+		if (!strcmp(key, "sensors")) {
+			identSensors = !identSensors;
+		} else if (!strcmp(key, "actuators")) {
+			identActuators = !identActuators;
+		}
+	}
+
 	FCGI_BeginJSON(context, STATUS_OK);
 	FCGI_JSONPair("description", "MCTX3420 Server API (2013)");
 	FCGI_JSONPair("build_date", __DATE__ " " __TIME__);
+	if (identSensors) {
+		FCGI_JSONKey("sensors");
+		FCGI_JSONValue("{\n\t\t");
+		for (i = 0; i < NUMSENSORS; i++) {
+			if (i > 0) {
+				FCGI_JSONValue(",\n\t\t");
+			}
+			FCGI_JSONValue("\"%d\" : \"%s\"", i, g_sensor_names[i]); 
+		}
+		FCGI_JSONValue("\n\t}");
+	}
+	if (identActuators) {
+		FCGI_JSONKey("actuators");
+		FCGI_JSONValue("{\n\t\t");
+		for (i = 0; i < NUMACTUATORS; i++) {
+			if (i > 0) {
+				FCGI_JSONValue(",\n\t\t");
+			}
+			FCGI_JSONValue("\"%d\" : \"%s\"", i, g_actuator_names[i]); 
+		}
+		FCGI_JSONValue("\n\t}");
+	}
 	FCGI_EndJSON();
 }
 
