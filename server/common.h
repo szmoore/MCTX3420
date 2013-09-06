@@ -10,6 +10,9 @@
 #define _BSD_SOURCE
 #define _XOPEN_SOURCE 600
 
+/** The current API version **/
+#define API_VERSION 0
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>

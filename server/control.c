@@ -7,7 +7,7 @@
 
 const char * g_actuator_names[NUMACTUATORS] = {	
 	"Pressure regulator", "Solenoid 1" 
-};											
+};
 
 /**
  * Handles control of the actuators.
@@ -41,7 +41,7 @@ void ActuatorHandler(FCGIContext *context, ActuatorId id, const char *set_value)
 				FCGI_JSONValue("\"Solenoid 1 turned %s!\"", state);
 				FCGI_EndJSON();
 			} else {
-				FCGI_RejectJSON(context);
+				FCGI_RejectJSON(context, "Invalid actuator value specified");
 			}
 		} break;
 		default:
@@ -81,7 +81,7 @@ void Control_Handler(FCGIContext *context, char *params) {
 	}
 	
 	if (action == NULL) { //Must have an action
-		FCGI_RejectJSON(context);
+		FCGI_RejectJSON(context, "No action specified");
 	} else if (!strcmp(action, "start")) {
 		FCGI_BeginControl(context, force);
 	} else if (!strcmp(action, "stop")) { //Don't require control key to stop...

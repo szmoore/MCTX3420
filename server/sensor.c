@@ -271,7 +271,7 @@ void Sensor_Handler(FCGIContext *context, char * params)
 
 	if (status == STATUS_ERROR)
 	{
-		FCGI_RejectJSON(context);
+		FCGI_RejectJSON(context, "Invalid input parameters");
 		return;
 	}
 	
@@ -296,7 +296,7 @@ void Sensor_Handler(FCGIContext *context, char * params)
 					}
 
 				}
-				while (amount_read == SENSOR_QUERYBUFSIZ);
+				while (amount_read > 0);
 			pthread_mutex_unlock(&(sensor->mutex));
 			// end critical section
 			break;

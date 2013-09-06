@@ -10,7 +10,7 @@
 
 /** List of actuator ids (should be of size NUMACTUATORS) **/
 typedef enum ActuatorId {
-	ACT_PRESSURE = 0,
+	ACT_PRESSURE,
 	ACT_SOLENOID1
 } ActuatorId;
 
