@@ -296,7 +296,7 @@ void Sensor_Handler(FCGIContext *context, char * params)
 					}
 
 				}
-				while (amount_read > 0);
+				while (amount_read == SENSOR_QUERYBUFSIZ);
 			pthread_mutex_unlock(&(sensor->mutex));
 			// end critical section
 			break;
