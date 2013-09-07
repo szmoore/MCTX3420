@@ -1970,3 +1970,29 @@
 20:04 < jtanx> FCGI_RejectJSON now requires that you give a description explaining why
 20:05 < jtanx> when RejectJSOn is called, it's always logged along with the description, so some of the current log messages within the handler functions may be redundant
 21:11 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Sat Sep 07 2013
+10:30 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:29 < jtanx> hmm
+18:29 < jtanx> what if you had two file pointers to the same file
+18:29 < jtanx> one read only, one write only
+18:29 < jtanx> then if you also kept track of how many points were written to the file
+18:29 < jtanx> you don't need to have mutexes anymore
+18:30 < jtanx> as long as you write the read/write calls carefully
+18:44 < jtanx> ahp, may have spoken too soon
+18:44 < jtanx> you'd still need a mutex around the read/write from/to the counter
+18:45 < jtanx> I think...
+19:07 < jtanx> but it might still be a good idea
+21:38 < jtanx> I went the simple route
+21:53 < jtanx> what I've got: /api/sensors?id=x&from=y&count=z
+21:54 < jtanx> In dump mode:
+21:54 < jtanx> If from < 0, then return from start, else from the given index (0-indexed)
+21:54 < jtanx> if count < 0, then return all points, else return /at most/ that many points
+21:55 < jtanx> in normal mode:
+21:55 < jtanx> if from < 0, then return from the end (return the most recent points)
+21:55 < jtanx> if count < 0, then return at most the default amount (SENSOR_QUERYBUFSIZ)
+21:56 < jtanx> otherwise return /at most/ that many points
+21:56 < jtanx> oh ya, if from >= 0 then return from that indicated index
+21:57 < jtanx> it's only in my git repository for now because I haven't tested it enough and I'm still not sure how I should go about integrating it with the current code
+21:58 < jtanx> (I basically rewrote Sensor_Handler and it has less error checks on the input; not sure if they're necessary or not)
+21:59 < jtanx> Since requesting a huge range could impact on sensor readings due to the mutex, it may be better to at least restrict dumps to when the experiment is not 'running'
+22:01 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["~ that's it for now! ~"]
