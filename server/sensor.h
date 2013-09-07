@@ -46,6 +46,8 @@ typedef struct
 	long points_read;
 	/** Binary file to write data into when buffer is full **/
 	FILE * file;
+	/** Number of data points stored in file **/
+	long points_stored;
 	/** Thread running the sensor **/
 	pthread_t thread;
 	/** Mutex to protect access to stuff **/
@@ -65,5 +67,6 @@ extern int Sensor_Query(Sensor * s, DataPoint * buffer, int bufsiz); // fill buf
 
 extern void Sensor_Handler(FCGIContext *context, char * params);
 
+extern void Sensor_Handler2(FCGIContext *context, char *params);
 #endif //_SENSOR_H
 

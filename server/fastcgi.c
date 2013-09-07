@@ -355,7 +355,7 @@ void * FCGI_RequestLoop (void *data)
 		} else if (!strcmp("control", module)) {
 			module_handler = Control_Handler;
 		} else if (!strcmp("sensors", module)) {
-			module_handler = Sensor_Handler;
+			module_handler = Sensor_Handler2;
 		}
 
 		context.current_module = module;

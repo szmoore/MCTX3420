@@ -135,6 +135,7 @@ void * Sensor_Main(void * arg)
 				Fatal("Error collecting data");
 			}
 			s->write_index += 1;
+			//TODO: s->points_read not used?
 		}
 
 		//Log(LOGDEBUG, "Filled buffer");
@@ -149,6 +150,7 @@ void * Sensor_Main(void * arg)
 			{
 				Fatal("Wrote %d data points and expected to write %d to \"%s\" - %s", amount_written, SENSOR_DATABUFSIZ, strerror(errno));
 			}
+			s->points_stored += amount_written;
 			//Log(LOGDEBUG, "Wrote %d data points for sensor %d", amount_written, s->id);
 		pthread_mutex_unlock(&(s->mutex));
 		// End of critical section
@@ -201,6 +203,99 @@ Sensor * Sensor_Identify(const char * id_str)
 
 	Log(LOGDEBUG, "Sensor \"%s\" identified", g_sensor_names[id]);
 	return g_sensors+id;
+}
+
+/*
+ * Behaviour: 
+ * Dump true:
+ * - from < 0: From beginning of file, else from that point onwards (0-indexed)
+ * - count < 0: All points available, else *at most* that many points
+ * Dump false:
+ * - from < 0: From the end of file (last available points), else from that point onwards (0-indexed)
+ * - count < 0: Default buffer size (SENSOR_QUERYBUFSIZ), else *at most* that many points
+ */
+void Sensor_Handler2(FCGIContext *context, char *params)
+{
+	const char *key, *value;
+	int id = -1, from = -1, count = -1;
+	bool dump = false;
+
+	//Lazy checking
+	while ((params = FCGI_KeyPair(params, &key, &value))) {
+		if (!strcmp(key, "id") && *value) {
+			char *end;
+			id = strtol(value, &end, 10);
+			if (*end != '\0')
+				id = -1;
+		} else if (!strcmp(key, "dump")) {
+			dump = !dump;
+		} else if (!strcmp(key, "from") && *value) {
+			from = strtol(value, NULL, 10);
+		} else if (!strcmp(key, "count") && *value) {
+			count = strtol(value, NULL, 10);
+		}
+	}
+
+	if (id < 0 || id >= NUMSENSORS) {
+		FCGI_RejectJSON(context, "Invalid sensor id specified.");
+		return;
+	}
+	
+	Sensor *sensor = &g_sensors[id];
+	DataPoint buffer[SENSOR_QUERYBUFSIZ];
+	int amount_read = 0, total = 0;
+	
+	//Critical section
+	pthread_mutex_lock(&(sensor->mutex));
+	if (from >= sensor->points_stored) {
+		FCGI_RejectJSONEx(context, STATUS_OUTOFRANGE, "Invalid range specified.");
+	} else if (dump) {
+		from =  (from < 0) ? 0 : from;
+		count = (count < 0) ? sensor->points_stored : count;
+
+		FCGI_PrintRaw("Content-type: text/plain\r\n"
+			"Content-disposition: attachment;filename=%d.csv\r\n\r\n", id);
+
+		fseek(sensor->file, sizeof(DataPoint) * from, SEEK_SET);
+		//Force download with content-disposition
+		do {
+			amount_read = fread(buffer, sizeof(DataPoint), SENSOR_QUERYBUFSIZ, sensor->file);
+			for (int i = 0; i < amount_read && total < count; i++, total++) {
+				FCGI_PrintRaw("%f\t%f\n", buffer[i].time_stamp, buffer[i].value);
+			}
+		} while (amount_read > 0 && total < count);
+	} else {
+		count = (count < 0) ? SENSOR_QUERYBUFSIZ : count;
+		if (from < 0) {
+			from = sensor->points_stored - count;
+			if (from < 0)
+				from = 0;
+		}
+		fseek(sensor->file, sizeof(DataPoint) * from, SEEK_SET);
+
+		FCGI_BeginJSON(context, STATUS_OK);	
+		FCGI_JSONLong("id", id); 
+		FCGI_JSONKey("data");
+		FCGI_JSONValue("[");
+		while (total < count) {
+			amount_read = fread(buffer, sizeof(DataPoint), SENSOR_QUERYBUFSIZ, sensor->file);
+			if (amount_read > 0) {
+				FCGI_JSONValue("[%f, %f]", buffer[0].time_stamp, buffer[0].value);
+				total++;
+				for (int i = 1; i < amount_read && total < count; i++, total++)
+					FCGI_JSONValue(", [%f, %f]", buffer[i].time_stamp, buffer[i].value);
+			} else {
+				break;
+			}
+		}
+		FCGI_JSONValue("]");
+
+		FCGI_JSONLong("total_points", sensor->points_stored);
+		FCGI_JSONLong("next_point", from + total);
+		FCGI_EndJSON();	
+	}
+	pthread_mutex_unlock(&(sensor->mutex));
+	//End critical section
 }
 
 /**

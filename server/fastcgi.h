@@ -16,7 +16,8 @@
 typedef enum StatusCodes {
 	STATUS_OK = 1,
 	STATUS_ERROR = -1,
-	STATUS_UNAUTHORIZED = -2
+	STATUS_UNAUTHORIZED = -2,
+	STATUS_OUTOFRANGE = -3
 } StatusCodes;
 
 typedef struct FCGIContext FCGIContext;
