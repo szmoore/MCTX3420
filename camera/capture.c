@@ -22,14 +22,14 @@ int storeFrame( CvCapture* capture)
 
 	/*int p[3];
 	p[0] = CV_IMWRITE_JPEG_QUALITY;
-  	p[1] = 10;
+  	p[1] = 10;	//quality value; 0->100
   	p[2] = 0;*/
 		
 	frame = cvQueryFrame(capture);
 	if( frame == NULL)
 		return 0;	//error
 	cvSaveImage(filepath,frame,0);
-	
+	cvReleaseImageHeader(&frame);
 	return 1;
 }
 
