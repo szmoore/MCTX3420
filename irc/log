@@ -1996,3 +1996,18 @@
 21:58 < jtanx> (I basically rewrote Sensor_Handler and it has less error checks on the input; not sure if they're necessary or not)
 21:59 < jtanx> Since requesting a huge range could impact on sensor readings due to the mutex, it may be better to at least restrict dumps to when the experiment is not 'running'
 22:01 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["~ that's it for now! ~"]
+--- Day changed Sun Sep 08 2013
+11:28 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+14:50 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has joined #mctxuwa_softdev
+17:55 -!- Callum_ [~chatzilla@124-149-92-17.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:06 < Callum_> what was the server stuff you said to install? also what packages do i need?
+18:07 -!- Callum_ [~chatzilla@124-149-92-17.dyn.iinet.net.au] has quit [EOF From client]
+18:07 -!- Callum_ [~chatzilla@124-149-92-17.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:09 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has quit [Ping timeout]
+18:09 -!- Callum_ is now known as Callum
+18:21 < jtanx> if you want to install the server, you need at least the 'nginx' and 'spawn-fcgi' packages
+18:21 < jtanx> one nginx is installed you need to copy the config files from the git repository in
+21:14 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+21:47 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+22:36 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+22:38 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
