@@ -14,6 +14,13 @@
 /** Number of sensors **/
 #define NUMSENSORS 4
 
+/** Safety Values for sensors **/
+#define ANALOG_TEST0_SAFETY 1000
+#define ANALOG_TEST1_SAFETY 1000
+#define DIGITAL_TEST0_SAFETY 1
+#define DIGITAL_TEST1_SAFETY 1
+
+
 typedef enum SensorId {
 	ANALOG_TEST0,
 	ANALOG_TEST1,
