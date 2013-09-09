@@ -16,13 +16,14 @@ int storeFrame( CvCapture* capture)
 	
 	int p[3];
 	p[0] = CV_IMWRITE_JPEG_QUALITY;
-  	p[1] = 10;	//quality value. 0-100
+  	p[1] = 50;	//quality value. 0-100
   	p[2] = 0;
 		
 	frame = cvQueryFrame(capture);
 	if( frame == NULL)
 		return 0;	//error
 	cvSaveImage("../web/images/test.JPG",frame,p);
+	cvReleaseImageHeader(&frame);
 	return 1;
 }
 

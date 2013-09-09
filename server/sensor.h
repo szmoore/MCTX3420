@@ -14,12 +14,26 @@
 /** Number of sensors **/
 #define NUMSENSORS 4
 
+/** Safety Values for sensors **/
+#define ANALOG_TEST0_SAFETY 1000
+#define ANALOG_TEST1_SAFETY 1000
+#define DIGITAL_TEST0_SAFETY 1
+#define DIGITAL_TEST1_SAFETY 1
+
+
 typedef enum SensorId {
 	ANALOG_TEST0,
 	ANALOG_TEST1,
 	DIGITAL_TEST0,
 	DIGITAL_TEST1
 } SensorId;
+
+typedef enum
+{
+	JSON, // JSON data
+	CSV, // Comma seperated vector
+	TSV // Tab seperated vector
+} OutputType;
 
 /** Human readable names for the sensors **/
 extern const char * g_sensor_names[NUMSENSORS];
@@ -44,6 +58,8 @@ typedef struct
 	int write_index;
 	/** Number of points read **/
 	long points_read;
+	/** Number of points written to file **/
+	long points_written;
 	/** Binary file to write data into when buffer is full **/
 	FILE * file;
 	/** Number of data points stored in file **/

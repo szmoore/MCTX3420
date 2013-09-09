@@ -1941,3 +1941,73 @@
 16:21 -!- jtanx [~asfa@130.95.113.99] has quit [Ping timeout]
 17:26 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
 20:49 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Thu Sep 05 2013
+08:19 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:34 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+13:22 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:51 < jtanx> hm, so to get clock_gettime to work, you need to use std=gnu99 instead of std=c99
+18:52 < jtanx> do you think we should just stick with gettimeofday?
+21:46 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit [":3"]
+--- Day changed Fri Sep 06 2013
+09:16 -!- jtanx [~asfa@130.95.133.183] has joined #mctxuwa_softdev
+12:05 -!- jtanx [~asfa@130.95.133.183] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+13:03 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+16:05 < jtanx> I was just thinking, what sort of identification information is needed from the server?
+16:05 < jtanx> The gui should have some understanding of what sort of sensors/actuators it needs to display
+16:10 < jtanx> it might be enough to say this is API version x
+16:10 < jtanx> and at version x, it's agreed that these id values correspond to these sensors/actuators etc?
+16:19 < jtanx> anyway, what I've done for now is if asked, the api will list the sensor/actuator ids and the corresponding human readable string
+16:19 < jtanx> api/?sensors&actuators
+18:06 < jtanx> also, what do you think of keeping track of the number of points stored
+18:07 < jtanx> then you can allow the user to request from where they want to retrieve data from and how many to retrieve
+18:08 < jtanx> the only problem is that it wouldn't be time based, but based on the number of data points recorded
+18:08 < jtanx> this method is simpler because you now the offset to use with fseek
+18:08 < jtanx> if it's time based you have to search the data for the correct point
+19:51 < sam_moore> All the above makes good sense
+19:52 < sam_moore> If we can make a working "request X number of points" first instead of "request from time T onwards", we might be able to convert the latter to the former if necessary
+20:04 < jtanx> ok I just submitted a pull request for some stuff
+20:04 < jtanx> mostly the identification stuff and some reordering
+20:04 < jtanx> FCGI_RejectJSON now requires that you give a description explaining why
+20:05 < jtanx> when RejectJSOn is called, it's always logged along with the description, so some of the current log messages within the handler functions may be redundant
+21:11 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Sat Sep 07 2013
+10:30 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:29 < jtanx> hmm
+18:29 < jtanx> what if you had two file pointers to the same file
+18:29 < jtanx> one read only, one write only
+18:29 < jtanx> then if you also kept track of how many points were written to the file
+18:29 < jtanx> you don't need to have mutexes anymore
+18:30 < jtanx> as long as you write the read/write calls carefully
+18:44 < jtanx> ahp, may have spoken too soon
+18:44 < jtanx> you'd still need a mutex around the read/write from/to the counter
+18:45 < jtanx> I think...
+19:07 < jtanx> but it might still be a good idea
+21:38 < jtanx> I went the simple route
+21:53 < jtanx> what I've got: /api/sensors?id=x&from=y&count=z
+21:54 < jtanx> In dump mode:
+21:54 < jtanx> If from < 0, then return from start, else from the given index (0-indexed)
+21:54 < jtanx> if count < 0, then return all points, else return /at most/ that many points
+21:55 < jtanx> in normal mode:
+21:55 < jtanx> if from < 0, then return from the end (return the most recent points)
+21:55 < jtanx> if count < 0, then return at most the default amount (SENSOR_QUERYBUFSIZ)
+21:56 < jtanx> otherwise return /at most/ that many points
+21:56 < jtanx> oh ya, if from >= 0 then return from that indicated index
+21:57 < jtanx> it's only in my git repository for now because I haven't tested it enough and I'm still not sure how I should go about integrating it with the current code
+21:58 < jtanx> (I basically rewrote Sensor_Handler and it has less error checks on the input; not sure if they're necessary or not)
+21:59 < jtanx> Since requesting a huge range could impact on sensor readings due to the mutex, it may be better to at least restrict dumps to when the experiment is not 'running'
+22:01 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["~ that's it for now! ~"]
+--- Day changed Sun Sep 08 2013
+11:28 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+14:50 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has joined #mctxuwa_softdev
+17:55 -!- Callum_ [~chatzilla@124-149-92-17.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:06 < Callum_> what was the server stuff you said to install? also what packages do i need?
+18:07 -!- Callum_ [~chatzilla@124-149-92-17.dyn.iinet.net.au] has quit [EOF From client]
+18:07 -!- Callum_ [~chatzilla@124-149-92-17.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:09 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has quit [Ping timeout]
+18:09 -!- Callum_ is now known as Callum
+18:21 < jtanx> if you want to install the server, you need at least the 'nginx' and 'spawn-fcgi' packages
+18:21 < jtanx> one nginx is installed you need to copy the config files from the git repository in
+21:14 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+21:47 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+22:36 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+22:38 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
