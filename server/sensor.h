@@ -28,6 +28,13 @@ typedef enum SensorId {
 	DIGITAL_TEST1
 } SensorId;
 
+typedef enum
+{
+	JSON, // JSON data
+	CSV, // Comma seperated vector
+	TSV // Tab seperated vector
+} OutputType;
+
 /** Human readable names for the sensors **/
 extern const char * g_sensor_names[NUMSENSORS];
 
@@ -51,6 +58,8 @@ typedef struct
 	int write_index;
 	/** Number of points read **/
 	long points_read;
+	/** Number of points written to file **/
+	long points_written;
 	/** Binary file to write data into when buffer is full **/
 	FILE * file;
 	/** Thread running the sensor **/
