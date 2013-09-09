@@ -45,6 +45,8 @@ DataPoint * GetData(SensorId sensor_id, DataPoint * d)
 	{
 		case ANALOG_TEST0:
 		{
+			//CheckSensor( sensor_id, *sensor value*); 
+		
 			static int count = 0;
 			d->value = count++;
 			break;
@@ -68,6 +70,33 @@ DataPoint * GetData(SensorId sensor_id, DataPoint * d)
 
 	return d;
 }
+
+/**
+ * Checks the sensor data for unsafe or unexpected results 
+ * @param sensor_id - The ID of the sensor
+ *
+*
+void CheckSensor( SensorId sensor_id)
+{
+	switch (sensor_id)
+	{
+		case ANALOG_TEST0:
+		{
+			if( *sensor value* > ANALOG_TEST0_SAFETY)
+			{
+				LogEx(LOGERR, GetData, Sensor analog_test0 is above the safe value);
+			//new log function that stops actuators?
+			}
+			//Also include a warning level?
+			else if( *sensor value* > ANALOG_TEST0_WARN)
+			{
+				LogEx(LOGWARN, GetData, Sensor analog_test0);	
+			}
+		}
+	}
+		
+	
+*/	
 
 
 /**
