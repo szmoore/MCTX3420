@@ -385,7 +385,9 @@ void Sensor_Handler(FCGIContext *context, char * params)
 
 	double start_time = -1;
 	double end_time = -1;
+	double current_time = (now.tv_sec - g_options.start_time.tv_sec) + 1e-6*(now.tv_usec - g_options.start_time.tv_usec);
 	bool seek_time = false;
+	bool points_specified = false;
 	int query_size = SENSOR_QUERYBUFSIZ;
 	int start_index = -1;
 	int end_index = -1;
@@ -428,6 +430,7 @@ void Sensor_Handler(FCGIContext *context, char * params)
 		}
 		else if (strcmp(key, "points") == 0)
 		{
+			points_specified = true;
 			if (strcmp(value, "all") == 0)
 			{
 				query_size = sensor->points_written;
@@ -456,6 +459,13 @@ void Sensor_Handler(FCGIContext *context, char * params)
 				status = STATUS_ERROR;
 				break;
 			}			
+
+			// Treat negative values as being relative to the current time
+			if (start_time < 0)
+			{
+				start_time = current_time + start_time;
+			}
+			start_time = floor(start_time);
 		}
 		else if (strcmp(key, "end_time") == 0)
 		{
@@ -467,7 +477,14 @@ void Sensor_Handler(FCGIContext *context, char * params)
 				Log(LOGERR, "Require a double: %s = %s", key, value);
 				status = STATUS_ERROR;
 				break;
-			}			
+			}	
+
+			// Treat negative values as being relative to the current time
+			if (end_time < 0)
+			{
+				end_time = current_time + end_time;
+			}		
+			end_time = ceil(end_time);
 		}
 		// For backward compatability:
 		else if (strcmp(key, "dump") == 0)
@@ -498,13 +515,13 @@ void Sensor_Handler(FCGIContext *context, char * params)
 
 	if (seek_time)
 	{
-		if (end_time < 0)
+		if (end_time < 0 && !points_specified)
 			end_index = sensor->points_written;
 		else
 		{
 			int count = 0; DataPoint d;
 			end_index = FindTime(sensor, end_time, &count, &d);
-			//Log(LOGDEBUG, "FindTime - Looked for %f; found [%f,%f] after %d iterations; sensor %d, position %d", end_time, d.time_stamp, d.value, count, sensor->id, end_index);
+			Log(LOGDEBUG, "FindTime - Looked for %f; found [%f,%f] after %d iterations; sensor %d, position %d", end_time, d.time_stamp, d.value, count, sensor->id, end_index);
 		}
 		if (start_time < 0)
 			start_time = 0;
@@ -512,8 +529,11 @@ void Sensor_Handler(FCGIContext *context, char * params)
 		{
 			int count = 0; DataPoint d;
 			start_index = FindTime(sensor, start_time, &count, &d);
-			//Log(LOGDEBUG, "FindTime - Looked for %f; found [%f,%f] after %d iterations; sensor %d, position %d", start_time, d.time_stamp, d.value, count, sensor->id, start_index);
+			Log(LOGDEBUG, "FindTime - Looked for %f; found [%f,%f] after %d iterations; sensor %d, position %d", start_time, d.time_stamp, d.value, count, sensor->id, start_index);
 		}
+
+		if (points_specified)
+			end_index = start_index + query_size;
 	}
 	else
 	{
