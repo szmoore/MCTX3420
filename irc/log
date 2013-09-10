@@ -2025,3 +2025,31 @@
 15:55 -!- jtanx [~asfa@130.95.123.28] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
 20:33 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
 21:01 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Tue Sep 10 2013
+17:16 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+17:25 < jtanx> it looks like we do need an sd card, at least to install the os onto it
+17:26 < jtanx> http://beagleboard.org/Getting%20Started#update
+17:41 < jtanx> http://avedo.net/653/flashing-ubuntu-13-04-or-debian-wheezy-to-the-beaglebone-black-emmc/
+17:42 < sam_moore> Ok, we should write a BOM for next week then
+17:42 < sam_moore> 1x SD Card
+17:44 < jtanx> from what I understand
+17:45 < jtanx> you write an image to the sd card
+17:45 < jtanx> boot off the sd card
+17:45 < jtanx> then you can write another image directly too the internal storage
+17:45 < jtanx> after that you don't need the sd card any more
+17:46 < sam_moore> Alright
+17:46 < jtanx> http://www.armhf.com/index.php/boards/beaglebone-black/
+17:47 < jtanx> any preference for ubuntu or debian?
+17:48 < sam_moore> As a debian user, I'd have to say debian :P
+17:49 < jtanx> hehe
+17:49 < sam_moore> If it works on debian stable, we know it will work for at least the next 6 years
+17:49 < jtanx> yup
+17:49 < jtanx> debian should be fine
+17:53 < jtanx> *correction; we need a microsd card
+17:56 < jtanx> that's at least 2GB in size
+17:57 < sam_moore> Ok
+18:04 < jtanx> haha it's cheaper to buy a 4gb one than a 2gb one
+18:35 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+19:11 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+20:15 < jtanx> Well I can confirm that angstrom doesn't have nginx precompiled - http://www.angstrom-distribution.org/repo/
+20:57 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
