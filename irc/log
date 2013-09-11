@@ -2053,3 +2053,18 @@
 19:11 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
 20:15 < jtanx> Well I can confirm that angstrom doesn't have nginx precompiled - http://www.angstrom-distribution.org/repo/
 20:57 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Wed Sep 11 2013
+10:41 -!- jtanx [~asfa@130.95.91.67] has joined #mctxuwa_softdev
+11:10 -!- jtanx [~asfa@130.95.91.67] has quit [Ping timeout]
+15:58 -!- jtanx [~asfa@130.95.254.246] has joined #mctxuwa_softdev
+15:58 < jtanx> urgh
+15:58 < jtanx> it took so long just getting internet access to the bbb
+16:01 < jtanx> dhcp/dns issues
+16:01 < jtanx> the debian image on the microsd is set to static ip 192.168.0.7
+16:02 < jtanx>  /etc/resolv.conf should have the uwa nameservers in it, but it may have been rewritten by resolvconf
+16:02 < jtanx> I've left it in g19
+16:51 -!- jtanx [~asfa@130.95.254.246] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+17:41 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+19:32 < jtanx> I've moved the 'current_time', 'start_time' and 'running_time' to the identify module instead of sticking it on every json response, because it's probably not information that will be required most of the time
+19:37 < jtanx> actually, we may have to rethink those, especially if we introduce start/stop control
+20:38 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
