@@ -12,20 +12,21 @@
 #define SENSOR_QUERYBUFSIZ 10
 
 /** Number of sensors **/
-#define NUMSENSORS 4
+#define NUMSENSORS 6
 
 /** Safety Values for sensors **/
-#define ANALOG_TEST0_SAFETY 1000
-#define ANALOG_TEST1_SAFETY 1000
-#define DIGITAL_TEST0_SAFETY 1
-#define DIGITAL_TEST1_SAFETY 1
-
+#define ANALOG_FAIL0_WARN 4
+#define ANALOG_FAIL0_SAFETY 5
+#define ANALOG_FAIL0_MIN_WARN -4
+#define ANALOG_FAIL0_MIN_SAFETY -5
 
 typedef enum SensorId {
 	ANALOG_TEST0,
 	ANALOG_TEST1,
+	ANALOG_FAIL0,
 	DIGITAL_TEST0,
-	DIGITAL_TEST1
+	DIGITAL_TEST1,
+	DIGITAL_FAIL0
 } SensorId;
 
 typedef enum
