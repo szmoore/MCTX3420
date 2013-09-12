@@ -40,7 +40,7 @@ struct FCGIContext {
 static void IdentifyHandler(FCGIContext *context, char *params) {
 	bool ident_sensors = false, ident_actuators = false;
 	//const char *key, *value;
-	struct timeval now;
+
 	int i;
 
 	FCGIValue values[2] = {{"sensors", &ident_sensors, FCGI_BOOL_T},
@@ -292,6 +292,7 @@ void FCGI_BeginJSON(FCGIContext *context, StatusCodes status_code)
 	printf("\t\"module\" : \"%s\"", context->current_module);
 	FCGI_JSONLong("status", status_code);
 	//Time and running statistics
+	struct timeval now;
 	gettimeofday(&now, NULL);
 	FCGI_JSONDouble("start_time", TIMEVAL_TO_DOUBLE(g_options.start_time));
 	FCGI_JSONDouble("current_time", TIMEVAL_TO_DOUBLE(now));
@@ -437,18 +438,8 @@ void * FCGI_RequestLoop (void *data)
 	FCGIContext context = {0};
 	
 	Log(LOGDEBUG, "First request...");
-	//TODO: The FCGI_Accept here is blocking. 
-	//		That means that if another thread terminates the program, this thread
-	//		 will not terminate until the next request is made.
 	while (FCGI_Accept() >= 0) {
 
-		if (Thread_Runstate() != RUNNING)
-		{
-			//TODO: Yeah... deal with this better :P
-			Log(LOGERR, "FIXME; FCGI gets request after other threads have finished.");
-			printf("Content-type: text/plain\r\n\r\n+++OUT OF CHEESE ERROR+++\n");
-			break;
-		}
 		
 		Log(LOGDEBUG, "Got request #%d", context.response_number);
 		ModuleHandler module_handler = NULL;
@@ -487,7 +478,6 @@ void * FCGI_RequestLoop (void *data)
 	}
 
 	Log(LOGDEBUG, "Thread exiting.");
-	Thread_QuitProgram(false);
 	// NOTE: Don't call pthread_exit, because this runs in the main thread. Just return.
 	return NULL;
 }
