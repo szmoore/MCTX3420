@@ -62,6 +62,8 @@ typedef struct
 	long points_written;
 	/** Binary file to write data into when buffer is full **/
 	FILE * file;
+	/** Number of data points stored in file **/
+	long points_stored;
 	/** Thread running the sensor **/
 	pthread_t thread;
 	/** Mutex to protect access to stuff **/

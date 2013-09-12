@@ -35,7 +35,7 @@ DataPoint * GetData(SensorId sensor_id, DataPoint * d)
 	
 	struct timeval t;
 	gettimeofday(&t, NULL);
-	d->time_stamp = (t.tv_sec - g_options.start_time.tv_sec) + 1e-6*(t.tv_usec - g_options.start_time.tv_usec);
+	d->time_stamp = TIMEVAL_DIFF(t, g_options.start_time);
 
 	// Make time relative
 	//d->time_stamp.tv_sec -= g_options.start_time.tv_sec;
@@ -385,13 +385,23 @@ void Sensor_Handler(FCGIContext *context, char * params)
 
 	double start_time = -1;
 	double end_time = -1;
-	double current_time = (now.tv_sec - g_options.start_time.tv_sec) + 1e-6*(now.tv_usec - g_options.start_time.tv_usec);
+	double current_time = TIMEVAL_DIFF(now, g_options.start_time)
 	bool seek_time = false;
 	bool points_specified = false;
 	int query_size = SENSOR_QUERYBUFSIZ;
 	int start_index = -1;
 	int end_index = -1;
 
+	/* //Possible use case?
+	FCGIValue values[5] = {
+		{"id", &id, FCGI_REQUIRED(FCGI_INT_T)},
+		{"format", &format, FCGI_STRING_T},
+		{"points", &points, FCGI_STRING_T},
+		{"start_time", &start_time, FCGI_DOUBLE_T},
+		{"end_time", &end_time, FCGI_DOUBLE_T}
+	};
+	if (!FCGI_ParseRequest(context, params, values, 5))
+		return;*/
 
 	while ((params = FCGI_KeyPair(params, &key, &value)) != NULL)
 	{
