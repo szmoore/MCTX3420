@@ -320,18 +320,8 @@ void * FCGI_RequestLoop (void *data)
 	FCGIContext context = {0};
 	
 	Log(LOGDEBUG, "First request...");
-	//TODO: The FCGI_Accept here is blocking. 
-	//		That means that if another thread terminates the program, this thread
-	//		 will not terminate until the next request is made.
 	while (FCGI_Accept() >= 0) {
 
-		if (Thread_Runstate() != RUNNING)
-		{
-			//TODO: Yeah... deal with this better :P
-			Log(LOGERR, "FIXME; FCGI gets request after other threads have finished.");
-			printf("Content-type: text/plain\r\n\r\n+++OUT OF CHEESE ERROR+++\n");
-			break;
-		}
 		
 		Log(LOGDEBUG, "Got request #%d", context.response_number);
 		ModuleHandler module_handler = NULL;
@@ -370,7 +360,6 @@ void * FCGI_RequestLoop (void *data)
 	}
 
 	Log(LOGDEBUG, "Thread exiting.");
-	Thread_QuitProgram(false);
 	// NOTE: Don't call pthread_exit, because this runs in the main thread. Just return.
 	return NULL;
 }

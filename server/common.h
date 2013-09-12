@@ -26,6 +26,10 @@
 
 #include "log.h"
 #include "fastcgi.h"
-#include "thread.h"
+
+/**Converts a timeval to a double**/
+#define TIMEVAL_TO_DOUBLE(tv) ((tv).tv_sec + 1e-6 * ((tv).tv_usec))
+/**Takes the tv1-tv2 between two timevals and returns the result as a double*/
+#define TIMEVAL_DIFF(tv1, tv2) ((tv1).tv_sec - (tv2).tv_sec + 1e-6 * ((tv1).tv_usec - (tv2).tv_usec))
 
 #endif //_COMMON_H
