@@ -37,7 +37,7 @@ typedef struct
 	FILE * read_file; // used for reading
 	FILE * write_file; // used for writing
 	int num_points; // Number of DataPoints in the file
-	const char * filename; // Name of the file
+	char * filename; // Name of the file
 	pthread_mutex_t mutex; // Mutex around num_points
 } DataFile;
 

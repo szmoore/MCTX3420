@@ -38,13 +38,20 @@ void Sensor_Init()
  */
 void Sensor_Start(Sensor * s, const char * experiment_name)
 {
+	// Set filename
 	char filename[BUFSIZ];
 	if (sprintf(filename, "%s_%d", experiment_name, s->id) >= BUFSIZ)
 	{
 		Fatal("Experiment name \"%s\" too long (>%d)", experiment_name, BUFSIZ);
 	}
+
+	Log(LOGDEBUG, "Sensor %d with DataFile \"%s\"", s->id, filename);
+	// Open DataFile
 	Data_Open(&(s->data_file), filename);
-		
+
+	s->record_data = true; // Don't forget this!
+
+	// Create the thread
 	pthread_create(&(s->thread), NULL, Sensor_Loop, (void*)(s));
 }
 
@@ -54,11 +61,14 @@ void Sensor_Start(Sensor * s, const char * experiment_name)
  */
 void Sensor_Stop(Sensor * s)
 {
+	// Stop
 	if (s->record_data)
 	{
 		s->record_data = false;
-		pthread_join(s->thread, NULL);
-		Data_Close(&(s->data_file));
+		pthread_join(s->thread, NULL); // Wait for thread to exit
+		Data_Close(&(s->data_file)); // Close DataFile
+		s->newest_data.time_stamp = 0;
+		s->newest_data.value = 0;
 	}
 }
 
@@ -127,6 +137,7 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 	if (result)
 	{
 		s->newest_data.time_stamp = d->time_stamp;
+		s->newest_data.value = d->value;
 	}
 	return result;
 }
@@ -168,18 +179,23 @@ void Sensor_CheckData(SensorId id, DataPoint * d)
 void * Sensor_Loop(void * arg)
 {
 	Sensor * s = (Sensor*)(arg);
+	Log(LOGDEBUG, "Sensor %d starts", s->id);
 
 	// Until the sensor is stopped, record data points
 	while (s->record_data)
 	{
 		DataPoint d;
+		//Log(LOGDEBUG, "Sensor %d reads data [%f,%f]", s->id, d.time_stamp, d.value);
 		if (Sensor_Read(s, &d)) // If new DataPoint is read:
 		{
+			//Log(LOGDEBUG, "Sensor %d saves data [%f,%f]", s->id, d.time_stamp, d.value);
 			Data_Save(&(s->data_file), &d, 1); // Record it
 		}
 	}
 	
 	// Needed to keep pthreads happy
+
+	Log(LOGDEBUG, "Sensor %d finished", s->id);
 	return NULL;
 }
 
@@ -280,17 +296,23 @@ void Sensor_Handler(FCGIContext *context, char * params)
 	} SensorParams;
 	
 	// Fill values appropriately
-	if (!FCGI_ParseRequest(context, params, values, sizeof(values)))
+	if (!FCGI_ParseRequest(context, params, values, sizeof(values)/sizeof(FCGIValue)))
 	{
 		// Error occured; FCGI_RejectJSON already called
 		return;
 	}
 
+	// Get Sensor
+	Sensor * s = NULL;
+
 	// Error checking on sensor id
 	if (id < 0 || id >= NUMSENSORS)
 	{
 		Log(LOGERR, "Invalid id %d", id);
-		FCGI_RejectJSON(context, "Invalid id"); // Whoops, I do still need this!
+	}
+	else
+	{
+		s = g_sensors+id;
 	}
 	
 	DataFormat format = JSON;
@@ -306,14 +328,13 @@ void Sensor_Handler(FCGIContext *context, char * params)
 			Log(LOGERR, "Unknown format type \"%s\"", fmt_str);
 	}
 
-	// Get Sensor
-	Sensor * s = g_sensors+id;
+	
 	
 	// Begin response
 	Sensor_BeginResponse(context, id, format);
 	
 	// If a time was specified
-	if (FCGI_RECEIVED(values[START_TIME].flags) || FCGI_RECEIVED(values[END_TIME].flags))
+	if ((s != NULL) && (FCGI_RECEIVED(values[START_TIME].flags) || FCGI_RECEIVED(values[END_TIME].flags)))
 	{
 		// Wrap times relative to the current time
 		if (start_time < 0)
@@ -325,14 +346,21 @@ void Sensor_Handler(FCGIContext *context, char * params)
 		Data_PrintByTimes(&(s->data_file), start_time, end_time, format);
 
 	}
-	else // No time was specified; just return a recent set of points
+	else if (s != NULL) // No time was specified; just return a recent set of points
 	{
 		pthread_mutex_lock(&(s->data_file.mutex));
 			int start_index = s->data_file.num_points-DATA_BUFSIZ;
 			int end_index = s->data_file.num_points-1;
 		pthread_mutex_unlock(&(s->data_file.mutex));
 
+		// Bounds check
+		if (start_index < 0)
+			start_index = 0;
+		if (end_index < 0)
+			end_index = 0;
+
 		// Print points by indexes
+		Log(LOGDEBUG, "Sensor %d file \"%s\" indexes %d->%d", s->id, s->data_file.filename, start_index, end_index);
 		Data_PrintByIndexes(&(s->data_file), start_index, end_index, format);
 	}
 	
