@@ -83,6 +83,5 @@ extern int Sensor_Query(Sensor * s, DataPoint * buffer, int bufsiz); // fill buf
 
 extern void Sensor_Handler(FCGIContext *context, char * params);
 
-extern void Sensor_Handler2(FCGIContext *context, char *params);
 #endif //_SENSOR_H
 

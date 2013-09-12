@@ -62,12 +62,6 @@ static void IdentifyHandler(FCGIContext *context, char *params) {
 	FCGI_JSONPair("build_date", __DATE__ " " __TIME__);
 	FCGI_JSONLong("api_version", API_VERSION);
 
-	//Time and running statistics
-	gettimeofday(&now, NULL);
-	FCGI_JSONDouble("start_time", TIMEVAL_TO_DOUBLE(g_options.start_time));
-	FCGI_JSONDouble("current_time", TIMEVAL_TO_DOUBLE(now));
-	FCGI_JSONDouble("running_time", TIMEVAL_DIFF(now, g_options.start_time));
-
 	//Sensor and actuator information
 	if (ident_sensors) {
 		FCGI_JSONKey("sensors");
@@ -297,6 +291,11 @@ void FCGI_BeginJSON(FCGIContext *context, StatusCodes status_code)
 	printf("{\r\n");
 	printf("\t\"module\" : \"%s\"", context->current_module);
 	FCGI_JSONLong("status", status_code);
+	//Time and running statistics
+	gettimeofday(&now, NULL);
+	FCGI_JSONDouble("start_time", TIMEVAL_TO_DOUBLE(g_options.start_time));
+	FCGI_JSONDouble("current_time", TIMEVAL_TO_DOUBLE(now));
+	FCGI_JSONDouble("running_time", TIMEVAL_DIFF(now, g_options.start_time));
 }
 
 /**
