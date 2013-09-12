@@ -6,12 +6,12 @@ OBJ = log.o control.o sensor.o fastcgi.o thread.o main.o
 RM = rm -f
 
 BIN = server
-BIN2 = stream
+#BIN2 = stream
 
 all : $(BIN) $(BIN2)
 
-stream : stream.c
-	$(CXX) -o stream stream.c -I/usr/include/opencv -I/usr/include/opencv2/highgui -L/usr/lib -lopencv_highgui -lopencv_core -lopencv_ml -lopencv_imgproc -lm
+#stream : stream.c
+#	$(CXX) -o stream stream.c -I/usr/include/opencv -I/usr/include/opencv2/highgui -L/usr/lib -lopencv_highgui -lopencv_core -lopencv_ml -lopencv_imgproc -lm
 
 
 $(BIN) : $(OBJ)
