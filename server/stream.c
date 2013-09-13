@@ -13,24 +13,37 @@ compile with:
 int storeFrame( CvCapture* capture)
 {
 	IplImage *frame;
+	CvMat* jpg;
 	
+	//FILE *fp = fopen ("test.jpg", "wb");
+
 	int p[3];
 	p[0] = CV_IMWRITE_JPEG_QUALITY;
-  	p[1] = 50;	//quality value. 0-100
+  	p[1] = 100;	//quality value. 0-100
   	p[2] = 0;
 		
 	frame = cvQueryFrame(capture);
 	if( frame == NULL)
 		return 0;	//error
-	cvSaveImage("../web/images/test.JPG",frame,p);
+	//cvSaveImage("../web/images/test.JPG",frame,p);
+	jpg = cvEncodeImage(".jpg", frame,p); 
+	/*pass buf to client, write to file on client*/
+	//fwrite(jpg->data.ptr,1,jpg->rows*jpg->cols, fp);
+	
+	//decjpg = cvDecodeImage(jpg, CV_LOAD_IMAGE_COLOR);
+   	//cvShowImage( "Display window", decjpg );  
+			
+	//cvWaitKey(0);
 	cvReleaseImageHeader(&frame);
+	cvReleaseMat(&jpg);
+	//fclose( fp);
 	return 1;
 }
 
 int main (int argc, char** argv)
 {
 	CvCapture* capture;
-	
+	//cvNamedWindow( "Display window", CV_WINDOW_AUTOSIZE );// Create a window for display.
 	//Get capture structure for camera, -1 refers to any camera device.
 	//If multiple cameras used, need to use specific camera ID
 	capture = cvCreateCameraCapture(-1);
@@ -46,7 +59,6 @@ int main (int argc, char** argv)
 	}
 	
 	//Need to determine how the function is called in respect to system. just leave it running with a while loop? will something turn it on and off? will the function be called once from elsewhere?
-
 	cvReleaseCapture( &capture);
 }
 
