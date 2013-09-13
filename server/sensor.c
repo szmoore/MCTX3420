@@ -15,7 +15,8 @@ static Sensor g_sensors[NUMSENSORS]; //global to this file
 /** Human readable names for the sensors **/
 const char * g_sensor_names[NUMSENSORS] = {	
 	"analog_test0", "analog_test1", 
-	"digital_test0", "digital_test1"
+	"analog_fail0",	"digital_test0", 
+	"digital_test1", "digital_fail0"
 };
 
 /**
@@ -27,7 +28,7 @@ void Sensor_Init()
 	{
 		g_sensors[i].id = i;
 		Data_Init(&(g_sensors[i].data_file));
-		g_sensors[i].record_data = false;
+		g_sensors[i].record_data = false;	
 	}
 }
 
@@ -90,6 +91,45 @@ void Sensor_StartAll(const char * experiment_name)
 		Sensor_Start(g_sensors+i, experiment_name);
 }
 
+
+/**
+ * Checks the sensor data for unsafe or unexpected results 
+ * @param sensor_id - The ID of the sensor
+ * @param value - The value from the sensor to test
+ */
+void Sensor_CheckData(SensorId id, double value)
+{
+	switch (sensor_id)
+	{
+		case ANALOG_FAIL0:
+		{
+			if( value > ANALOG_FAIL0_SAFETY || value < ANALOG_FAIL0_MIN_SAFETY)
+			{
+				Log(LOGERR, "Sensor analog_fail0 is above or below its safety value of %d or %d\n", ANALOG_FAIL0_SAFETY, ANALOG_FAIL0_MIN_SAFETY);
+			//new function that stops actuators?
+			}
+			else if( value > ANALOG_FAIL0_WARN || value < ANALOG_FAIL0_MIN_WARN)
+			{
+				Log(LOGWARN, "Sensor analog_test0 is above or below its warning value of %d or %d\n", ANALOG_FAIL0_WARN, ANALOG_FAIL0_MIN_WARN);	
+			}
+			break;
+		}
+		case DIGITAL_FAIL0:
+		{	
+			if( value != 0 && value != 1)
+			{
+				Log(LOGERR, "Sensor digital_fail0 is not 0 or 1\n");
+			}
+			break;
+		}
+		default:
+		{
+		//So it doesn't complain about the missing cases - in practice we will need all sensors to be checked as above, no need to include a default as we should only pass valid sensor_id's; unless for some reason we have a sensor we don't need to check (but then why would you pass to this function in the first place :P)
+		}
+	}
+}
+
+
 /**
  * Read a DataPoint from a Sensor; block until value is read
  * @param id - The ID of the sensor
@@ -117,11 +157,23 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 			d->value = count++;
 			break;
 		}
+		case ANALOG_FAIL0:
+			d->value = (double)(rand() % 6) * -( rand() % 2) / ( rand() % 100 + 1);
+			//Gives a value between -5 and 5
+			CheckSensor(sensor_id, d->value);
+			break;
 		case DIGITAL_TEST0:
 			d->value = t.tv_sec % 2;
 			break;
 		case DIGITAL_TEST1:
 			d->value = (t.tv_sec+1)%2;
+			break;
+		case DIGITAL_FAIL0:
+			if( rand() % 100 > 98)
+				d->value = 2;
+			d->value = rand() % 2; 
+			//Gives 0 or 1 or a 2 every 1/100 times
+			CheckSensor(sensor_id, d->value);
 			break;
 		default:
 			Fatal("Unknown sensor id: %d", s->id);
@@ -141,35 +193,6 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 	}
 	return result;
 }
-
-/**
- * Checks the sensor data for unsafe or unexpected results 
- * @param sensor_id - The ID of the sensor
- * @param d - DataPoint to check
- */
-void Sensor_CheckData(SensorId id, DataPoint * d)
-{
-	//TODO: Implement
-	/*
-	switch (sensor_id)
-	{
-		case ANALOG_TEST0:
-		{
-			if( *sensor value* > ANALOG_TEST0_SAFETY)
-			{
-				LogEx(LOGERR, GetData, Sensor analog_test0 is above the safe value);
-			//new log function that stops actuators?
-			}
-			//Also include a warning level?
-			else if( *sensor value* > ANALOG_TEST0_WARN)
-			{
-				LogEx(LOGWARN, GetData, Sensor analog_test0);	
-			}
-		}
-	}
-	*/
-}
-		
 
 /**
  * Record data from a single Sensor; to be run in a seperate thread
@@ -362,5 +385,6 @@ void Sensor_Handler(FCGIContext *context, char * params)
 	Sensor_EndResponse(context, id, format);
 	
 }
+
 
 
