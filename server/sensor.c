@@ -225,8 +225,8 @@ Sensor * Sensor_Identify(const char * id_str)
 /**
  * Helper: Begin sensor response in a given format
  * @param context - the FCGIContext
- * @param format - Format
  * @param id - ID of sensor
+ * @param format - Format
  */
 void Sensor_BeginResponse(FCGIContext * context, SensorId id, DataFormat format)
 {
@@ -277,11 +277,11 @@ void Sensor_Handler(FCGIContext *context, char * params)
 	int id = 0;
 	double start_time = 0;
 	double end_time = current_time;
-	char * fmt_str;
+	const char * fmt_str;
 
 	// key/value pairs
 	FCGIValue values[] = {
-		{"id", &id, FCGI_REQUIRED(FCGI_LONG_T)}, 
+		{"id", &id, FCGI_REQUIRED(FCGI_INT_T)}, 
 		{"format", &fmt_str, FCGI_STRING_T}, 
 		{"start_time", &start_time, FCGI_DOUBLE_T}, 
 		{"end_time", &end_time, FCGI_DOUBLE_T},
@@ -301,20 +301,14 @@ void Sensor_Handler(FCGIContext *context, char * params)
 		// Error occured; FCGI_RejectJSON already called
 		return;
 	}
-
-	// Get Sensor
-	Sensor * s = NULL;
-
-	// Error checking on sensor id
-	if (id < 0 || id >= NUMSENSORS)
+	else if (id < 0 || id >= NUMSENSORS)
 	{
-		Log(LOGERR, "Invalid id %d", id);
+		FCGI_RejectJSON(context, "Invalid sensor id specified");
+		return;
 	}
-	else
-	{
-		s = g_sensors+id;
-	}
-	
+
+	// Get Sensor and format
+	Sensor * s = g_sensors+id;
 	DataFormat format = JSON;
 
 	// Check if format type was specified
@@ -324,17 +318,18 @@ void Sensor_Handler(FCGIContext *context, char * params)
 			format = JSON;
 		else if (strcmp(fmt_str, "tsv") == 0)
 			format = TSV;
-		else
-			Log(LOGERR, "Unknown format type \"%s\"", fmt_str);
+		else 
+		{
+			FCGI_RejectJSON(context, "Unknown format type specified.");
+			return;
+		}
 	}
 
-	
-	
 	// Begin response
 	Sensor_BeginResponse(context, id, format);
 	
 	// If a time was specified
-	if ((s != NULL) && (FCGI_RECEIVED(values[START_TIME].flags) || FCGI_RECEIVED(values[END_TIME].flags)))
+	if (FCGI_RECEIVED(values[START_TIME].flags) || FCGI_RECEIVED(values[END_TIME].flags))
 	{
 		// Wrap times relative to the current time
 		if (start_time < 0)
@@ -344,13 +339,12 @@ void Sensor_Handler(FCGIContext *context, char * params)
 
 		// Print points by time range
 		Data_PrintByTimes(&(s->data_file), start_time, end_time, format);
-
 	}
-	else if (s != NULL) // No time was specified; just return a recent set of points
+	else // No time was specified; just return a recent set of points
 	{
 		pthread_mutex_lock(&(s->data_file.mutex));
 			int start_index = s->data_file.num_points-DATA_BUFSIZ;
-			int end_index = s->data_file.num_points-1;
+			int end_index = s->data_file.num_points;
 		pthread_mutex_unlock(&(s->data_file.mutex));
 
 		// Bounds check
