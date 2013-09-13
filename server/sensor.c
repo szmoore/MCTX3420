@@ -12,10 +12,22 @@
 /** Array of sensors, initialised by Sensor_Init **/
 static Sensor g_sensors[NUMSENSORS]; //global to this file
 
+/** Array of sensor threshold structures defining the safety values of each sensor**/
+const SensorThreshold thresholds[NUMSENSORS]= {
+	//Max Safety, Min safety, Max warning, Min warning
+	{1,-1,1,-1},		// ANALOG_TEST0
+	{500,0,499,0},		// ANALOG_TEST1
+	{5,-5,4,-4},		// ANALOG_FAIL0
+	{1,0,1,0},		// DIGITAL_TEST0
+	{1,0,1,0},		// DIGITAL_TEST1
+	{1,0,1,0}		// DIGITAL_FAIL0
+};
+
 /** Human readable names for the sensors **/
 const char * g_sensor_names[NUMSENSORS] = {	
 	"analog_test0", "analog_test1", 
-	"digital_test0", "digital_test1"
+	"analog_fail0",	"digital_test0", 
+	"digital_test1", "digital_fail0"
 };
 
 /**
@@ -27,7 +39,7 @@ void Sensor_Init()
 	{
 		g_sensors[i].id = i;
 		Data_Init(&(g_sensors[i].data_file));
-		g_sensors[i].record_data = false;
+		g_sensors[i].record_data = false;	
 	}
 }
 
@@ -90,6 +102,26 @@ void Sensor_StartAll(const char * experiment_name)
 		Sensor_Start(g_sensors+i, experiment_name);
 }
 
+
+/**
+ * Checks the sensor data for unsafe or unexpected results 
+ * @param sensor_id - The ID of the sensor
+ * @param value - The value from the sensor to test
+ */
+void Sensor_CheckData(SensorId id, double value)
+{
+	if( value > thresholds[id].max_error || value < thresholds[id].min_error)
+	{
+		Log(LOGERR, "Sensor %s is above or below its safety value of %f or %f\n", g_sensor_names[id],thresholds[id].max_error, thresholds[id].min_error);
+		//new function that stops actuators?
+	}
+	else if( value > thresholds[id].max_warn || value < thresholds[id].min_warn)
+	{
+		Log(LOGWARN, "Sensor %s is above or below its warning value of %f or %f\n", g_sensor_names[id],thresholds[id].max_warn, thresholds[id].min_warn);	
+	}
+}
+
+
 /**
  * Read a DataPoint from a Sensor; block until value is read
  * @param id - The ID of the sensor
@@ -110,18 +142,28 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 		case ANALOG_TEST0:
 			d->value = (double)(rand() % 100) / 100;
 			break;
-
 		case ANALOG_TEST1:
 		{
 			static int count = 0;
+			count %= 500;
 			d->value = count++;
 			break;
 		}
+		case ANALOG_FAIL0:
+			d->value = (double)(rand() % 6) * -( rand() % 2) / ( rand() % 100 + 1);
+			//Gives a value between -5 and 5
+			break;
 		case DIGITAL_TEST0:
 			d->value = t.tv_sec % 2;
 			break;
 		case DIGITAL_TEST1:
 			d->value = (t.tv_sec+1)%2;
+			break;
+		case DIGITAL_FAIL0:
+			if( rand() % 100 > 98)
+				d->value = 2;
+			d->value = rand() % 2; 
+			//Gives 0 or 1 or a 2 every 1/100 times
 			break;
 		default:
 			Fatal("Unknown sensor id: %d", s->id);
@@ -130,7 +172,7 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 	usleep(100000); // simulate delay in sensor polling
 
 	// Perform sanity check based on Sensor's ID and the DataPoint
-	Sensor_CheckData(s->id, d);
+	Sensor_CheckData(s->id, d->value);
 
 	// Update latest DataPoint if necessary
 	bool result = (d->value != s->newest_data.value);
@@ -141,35 +183,6 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 	}
 	return result;
 }
-
-/**
- * Checks the sensor data for unsafe or unexpected results 
- * @param sensor_id - The ID of the sensor
- * @param d - DataPoint to check
- */
-void Sensor_CheckData(SensorId id, DataPoint * d)
-{
-	//TODO: Implement
-	/*
-	switch (sensor_id)
-	{
-		case ANALOG_TEST0:
-		{
-			if( *sensor value* > ANALOG_TEST0_SAFETY)
-			{
-				LogEx(LOGERR, GetData, Sensor analog_test0 is above the safe value);
-			//new log function that stops actuators?
-			}
-			//Also include a warning level?
-			else if( *sensor value* > ANALOG_TEST0_WARN)
-			{
-				LogEx(LOGWARN, GetData, Sensor analog_test0);	
-			}
-		}
-	}
-	*/
-}
-		
 
 /**
  * Record data from a single Sensor; to be run in a seperate thread
@@ -225,8 +238,8 @@ Sensor * Sensor_Identify(const char * id_str)
 /**
  * Helper: Begin sensor response in a given format
  * @param context - the FCGIContext
- * @param format - Format
  * @param id - ID of sensor
+ * @param format - Format
  */
 void Sensor_BeginResponse(FCGIContext * context, SensorId id, DataFormat format)
 {
@@ -276,11 +289,11 @@ void Sensor_Handler(FCGIContext *context, char * params)
 	int id = 0;
 	double start_time = 0;
 	double end_time = current_time;
-	char * fmt_str;
+	const char * fmt_str;
 
 	// key/value pairs
 	FCGIValue values[] = {
-		{"id", &id, FCGI_REQUIRED(FCGI_LONG_T)}, 
+		{"id", &id, FCGI_REQUIRED(FCGI_INT_T)}, 
 		{"format", &fmt_str, FCGI_STRING_T}, 
 		{"start_time", &start_time, FCGI_DOUBLE_T}, 
 		{"end_time", &end_time, FCGI_DOUBLE_T},
@@ -300,7 +313,6 @@ void Sensor_Handler(FCGIContext *context, char * params)
 		// Error occured; FCGI_RejectJSON already called
 		return;
 	}
-
 
 	// Error checking on sensor id
 	if (id < 0 || id >= NUMSENSORS)
@@ -322,5 +334,6 @@ void Sensor_Handler(FCGIContext *context, char * params)
 	Sensor_EndResponse(context, id, format);
 	
 }
+
 
 

@@ -238,14 +238,19 @@ bool FCGI_ParseRequest(FCGIContext *context, char *params, FCGIValue values[], s
 					case FCGI_BOOL_T:
 						*((bool*) val->value) = true;
 						break;
-					case FCGI_LONG_T:
-						*((long*) val->value) = strtol(value, &ptr, 10);
+					case FCGI_INT_T: case FCGI_LONG_T: {
+						long parsed = strtol(value, &ptr, 10);
 						if (!*value || *ptr) {
 							snprintf(buf, BUFSIZ, "Expected int for '%s' but got '%s'", key, value);
 							FCGI_RejectJSON(context, FCGI_EscapeJSON(buf));
 							return false;
 						}
-						break;
+
+						if (FCGI_TYPE(val->flags) == FCGI_INT_T)
+							*((int*) val->value) = parsed;
+						else
+							*((long*) val->value) = parsed;
+					}	break;
 					case FCGI_DOUBLE_T:
 						*((double*) val->value) = strtod(value, &ptr);
 						if (!*value || *ptr) {
@@ -440,8 +445,6 @@ void * FCGI_RequestLoop (void *data)
 	
 	Log(LOGDEBUG, "First request...");
 	while (FCGI_Accept() >= 0) {
-
-		
 		Log(LOGDEBUG, "Got request #%d", context.response_number);
 		ModuleHandler module_handler = NULL;
 		char module[BUFSIZ], params[BUFSIZ];

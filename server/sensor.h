@@ -9,22 +9,16 @@
 #include "data.h"
 
 /** Number of sensors **/
-#define NUMSENSORS 4
-
-/** Safety Values for sensors **/
-//TODO: Probably better to use an array instead
-#define ANALOG_TEST0_SAFETY 1000
-#define ANALOG_TEST1_SAFETY 1000
-#define DIGITAL_TEST0_SAFETY 1
-#define DIGITAL_TEST1_SAFETY 1
-
+#define NUMSENSORS 6 
 
 typedef enum SensorId 
 {
 	ANALOG_TEST0,
 	ANALOG_TEST1,
+	ANALOG_FAIL0,
 	DIGITAL_TEST0,
-	DIGITAL_TEST1
+	DIGITAL_TEST1,
+	DIGITAL_FAIL0
 } SensorId;
 
 
@@ -49,6 +43,14 @@ typedef struct
 
 } Sensor;
 
+// Structure to define the warning and error thresholds of the sensors
+typedef struct
+{
+	double max_error;
+	double min_error;
+	double max_warn;
+	double min_warn;
+} SensorThreshold;
 
 extern void Sensor_Init(); // One off initialisation of *all* sensors
 
@@ -60,12 +62,11 @@ extern void Sensor_Stop(Sensor * s); // Stop a Sensor from recording data
 
 extern void * Sensor_Loop(void * args); // Main loop for a thread that handles a Sensor
 extern bool Sensor_Read(Sensor * s, DataPoint * d); // Read a single DataPoint, indicating if it has changed since the last one
-extern void Sensor_CheckData(SensorId id, DataPoint * d); // Check a DataPoint
+extern void Sensor_CheckData(SensorId id, double value); // Check a DataPoint
 extern Sensor * Sensor_Identify(const char * str); // Identify a Sensor from a string Id
 
 extern void Sensor_Handler(FCGIContext *context, char * params); // Handle a FCGI request for Sensor data
 
-
-
 #endif //_SENSOR_H
+
 

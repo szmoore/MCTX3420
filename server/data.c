@@ -14,9 +14,8 @@ void Data_Init(DataFile * df)
 {
 	// Everything is NULL
 	df->filename = NULL;
-	df->read_file = NULL;
-	df->write_file = NULL;
 	pthread_mutex_init(&(df->mutex), NULL);
+	df->file = NULL;
 }
 
 /**
@@ -35,26 +34,12 @@ void Data_Open(DataFile * df, const char * filename)
 	// Set number of DataPoints
  	df->num_points = 0; 
 
-	// Set write FILE*
-	df->write_file = fopen(filename, "wb+");
-	if (df->write_file == NULL)
+	// Set file pointer
+	df->file = fopen(filename, "wb+");
+	if (df->file == NULL)
 	{
 		Fatal("Error opening DataFile %s - %s", filename, strerror(errno));
 	}
-	
-	// Set read FILE*
-	df->read_file = df->write_file;
-
-	//NOTE: Opening the same file in read mode gives funny results; fread generally reads less than expected
-	// The strerror is: "Transport endpoint is not connected"
-	/*
-	df->read_file = fopen(filename, "rb");
-	if (df->read_file == NULL)
-	{
-		Fatal("Error opening DataFile %s - %s", filename, strerror(errno));
-	}
-	*/
-
 }
 
 /**
@@ -67,11 +52,10 @@ void Data_Close(DataFile * df)
 
 	//TODO: Write data to TSV?
 
-	// Clear the FILE*s
-	df->read_file = NULL;
-	df->write_file = NULL;
+	fclose(df->file);
 
-	fclose(df->write_file);
+	// Clear the FILE*s
+	df->file = NULL;
 
 	// Clear the filename
 	free(df->filename);
@@ -86,19 +70,19 @@ void Data_Close(DataFile * df)
  */
 void Data_Save(DataFile * df, DataPoint * buffer, int amount)
 {
-	pthread_mutex_unlock(&(df->mutex));
+	pthread_mutex_lock(&(df->mutex));
 	assert(df != NULL);
 	assert(buffer != NULL);
 	assert(amount >= 0);
 
 	// Go to the end of the file
-	if (fseek(df->write_file, 0, SEEK_END) < 0)
+	if (fseek(df->file, 0, SEEK_END) < 0)
 	{
 		Fatal("Error seeking to end of DataFile %s - %s", df->filename, strerror(errno));
 	}
 
 	// Attempt to write the DataPoints
-	int amount_written = fwrite(buffer, sizeof(DataPoint), amount, df->write_file);
+	int amount_written = fwrite(buffer, sizeof(DataPoint), amount, df->file);
 	
 	// Check if the correct number of points were written
 	if (amount_written != amount)
@@ -110,7 +94,6 @@ void Data_Save(DataFile * df, DataPoint * buffer, int amount)
 	df->num_points += amount_written;
 
 	pthread_mutex_unlock(&(df->mutex));
-	
 }
 
 /**
@@ -132,21 +115,21 @@ int Data_Read(DataFile * df, DataPoint * buffer, int index, int amount)
 	
 	// If we would read past the end of the file, reduce the amount	of points to read
 	
-		if (index + amount > df->num_points)
-		{
-			Log(LOGDEBUG, "Requested %d points but will only read %d to get to EOF (%d)", amount, df->num_points - index, df->num_points);
-			amount = df->num_points - index;
-		}
+	if (index + amount > df->num_points)
+	{
+		Log(LOGDEBUG, "Requested %d points but will only read %d to get to EOF (%d)", amount, df->num_points - index, df->num_points);
+		amount = df->num_points - index;
+	}
 	
 
 	// Go to position in file
-	if (fseek(df->read_file, index*sizeof(DataPoint), SEEK_SET))
+	if (fseek(df->file, index*sizeof(DataPoint), SEEK_SET))
 	{
 		Fatal("Error seeking to position %d in DataFile %s - %s", index, df->filename, strerror(errno));
 	}
 
 	// Attempt to read the DataPoints
-	int amount_read = fread(buffer, sizeof(DataPoint), amount, df->read_file);
+	int amount_read = fread(buffer, sizeof(DataPoint), amount, df->file);
 
 	// Check if correct number of points were read
 	if (amount_read != amount)
@@ -162,7 +145,7 @@ int Data_Read(DataFile * df, DataPoint * buffer, int index, int amount)
  * Print data points between two indexes using a given format
  * @param df - DataFile to print
  * @param start_index - Index to start at (inclusive)
- * @param end_index - Index to end at (inclusive)
+ * @param end_index - Index to end at (exclusive)
  * @param format - The format to use
  */
 void Data_PrintByIndexes(DataFile * df, int start_index, int end_index, DataFormat format)
@@ -170,53 +153,47 @@ void Data_PrintByIndexes(DataFile * df, int start_index, int end_index, DataForm
 	assert(df != NULL);
 	assert(start_index >= 0);
 	assert(end_index >= 0);
-	assert(end_index <= df->num_points-1 || df->num_points == 0);
+	assert(end_index <= df->num_points || df->num_points == 0);
 
 	const char * fmt_string; // Format for each data point
-	char seperator; // Character used to seperate successive data points
+	char separator; // Character used to seperate successive data points
 	
-	// Determine what format string and seperator character to use
+	// Determine what format string and separator character to use
 	switch (format)
 	{
 		case JSON:
 			fmt_string = "[%f,%f]";
-			seperator = ',';
+			separator = ',';
 			// For JSON we need an opening bracket
 			FCGI_PrintRaw("["); 
 			break;
 		case TSV:
 			fmt_string = "%f\t%f";
-			seperator = '\n';
+			separator = '\n';
 			break;
 	}
 
-	DataPoint buffer[DATA_BUFSIZ]; // Buffer
-	// initialise buffer to stop stuff complaining
-	memset(buffer, 0, sizeof(DataPoint)*DATA_BUFSIZ);
-	
-	if (start_index < end_index)
-	{
+	DataPoint buffer[DATA_BUFSIZ] = {{0}}; // Buffer
+	int index = start_index;
 
-		int index = start_index;
-		// Repeat until all DataPoints are printed
-		while (index <= end_index)
+	// Repeat until all DataPoints are printed
+	while (index < end_index)
+	{
+		// Fill the buffer from the DataFile
+		int amount_read = Data_Read(df, buffer, index, DATA_BUFSIZ);
+
+		// Print all points in the buffer
+		for (int i = 0; i < amount_read && index < end_index; ++i)
 		{
-			// Fill the buffer from the DataFile
-			int amount_read = Data_Read(df, buffer, index, DATA_BUFSIZ);
-	
-			// Print all points in the buffer
-			for (int i = 0; i < amount_read && index <= end_index; ++i)
-			{
-				// Print individual DataPoint
-				FCGI_PrintRaw(fmt_string, buffer[i].time_stamp, buffer[i].value);
-				
-				// Last seperator is not required
-				if (index+1 <= end_index)
-					FCGI_PrintRaw("%c", seperator);
-	
-				// Advance the position in the DataFile
-				++index;
-			}
+			// Print individual DataPoint
+			FCGI_PrintRaw(fmt_string, buffer[i].time_stamp, buffer[i].value);
+			
+			// Last separator is not required
+			if (index+1 < end_index)
+				FCGI_PrintRaw("%c", separator);
+
+			// Advance the position in the DataFile
+			++index;
 		}
 	}
 	
@@ -236,35 +213,25 @@ void Data_PrintByIndexes(DataFile * df, int start_index, int end_index, DataForm
  * Prints nothing if the time stamp
  * @param df - DataFile to print
  * @param start_time - Time to start from (inclusive)
- * @param end_time - Time to end at (inclusive)
+ * @param end_time - Time to end at (exclusive)
  * @param format - The format to use
  */
 void Data_PrintByTimes(DataFile * df, double start_time, double end_time, DataFormat format)
 {
 	assert(df != NULL);
-	assert(start_time >= 0);
-	assert(end_time >= 0);
-	assert(end_time >= start_time);
-	
-	DataPoint closest;
+	//Clamp boundaries
+	if (start_time < 0)
+		start_time = 0;
+	if (end_time < 0)
+		end_time = 0;
 
-	// Get starting index
-	int start_index = Data_FindByTime(df, start_time, &closest);
-
-	// Start time is greater than most recent time stamp
-	if (start_index >= df->num_points-1)
+	int start_index = 0, end_index = 0;
+	if (start_time < end_time)
 	{
-		if (start_index == 0 || closest.time_stamp < start_time)
-		{
-			Data_PrintByIndexes(df, 0, 0, format); // Will print "empty" dataset
-			return;
-		}
+		start_index = Data_FindByTime(df, start_time, NULL);
+		end_index = Data_FindByTime(df, end_time, NULL);
 	}
 
-	// Get finishing index
-	int end_index = Data_FindByTime(df, end_time, &closest);
-
-	// Print data between the indexes
 	Data_PrintByIndexes(df, start_index, end_index, format);
 }
 
@@ -279,7 +246,7 @@ int Data_FindByTime(DataFile * df, double time_stamp, DataPoint * closest)
 {
 	assert(df != NULL);
 	assert(time_stamp >= 0);
-	assert(closest != NULL);
+	//assert(closest != NULL);
 
 	DataPoint tmp; // Current DataPoint in binary search
 
