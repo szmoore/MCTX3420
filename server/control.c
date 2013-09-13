@@ -57,51 +57,47 @@ void ActuatorHandler(FCGIContext *context, ActuatorId id, const char *set_value)
  * @param params The input parameters
  */
 void Control_Handler(FCGIContext *context, char *params) {
-	const char *key, *value, *control_key = NULL;
-	const char *action = NULL, *set_value = NULL;
+	const char *action, *key = "", *mode = "", *name = "";
 	bool force = false;
-	char *ptr;
-	int id = -1;
-	
-	while ((params = FCGI_KeyPair(params, &key, &value))) {
-		if (!strcmp(key, "action"))
-			action = value;
-		else if (!strcmp(key, "key"))
-			control_key = value;
-		else if (!strcmp(key, "force"))
-			force = !force;
-		else if (!strcmp(key, "id") && *value) { //Ensure non-empty value
-			int parsed = strtol(value, &ptr, 10);
-			if (*ptr == '\0') {
-				id = parsed;
-			}
-		} else if (!strcmp(key, "value")) {
-			set_value = value;
-		}
-	}
-	
-	if (action == NULL) { //Must have an action
-		FCGI_RejectJSON(context, "No action specified");
-	} else if (!strcmp(action, "start")) {
+
+	FCGIValue values[5] = {
+		{"action", &action, FCGI_REQUIRED(FCGI_STRING_T)},
+		{"key", &key, FCGI_STRING_T},
+		{"force", &force, FCGI_BOOL_T},
+		{"mode", &mode, FCGI_STRING_T},
+		{"name", &name, FCGI_STRING_T}
+	};
+
+	if (!FCGI_ParseRequest(context, params, values, 5))
+		return;
+
+	if (!strcmp(action, "gain")) {
 		FCGI_BeginControl(context, force);
-	} else if (!strcmp(action, "stop")) { //Don't require control key to stop...
-		//EMERGENCY STOP!! TODO - replace!
-		FCGI_BeginJSON(context, STATUS_OK);
-		FCGI_JSONPair("description", "stopped! (not)");
-		FCGI_EndJSON();
-	} else { //Under this section, the user must have the current control key.
-		if (!FCGI_HasControl(context, control_key)) {
+	} else { 
+		if (!FCGI_HasControl(context, key)) {
 			FCGI_RejectJSONEx(context, 
 				STATUS_UNAUTHORIZED, "Invalid control key specified.");
-		} else if (!strcmp(action, "end")) {
+			
+		} else if (!strcmp(action, "release")) {
 			FCGI_EndControl(context);
-		} else if (!strcmp(action, "set")) {
-			if (set_value == NULL || *set_value == '\0') {
-				FCGI_RejectJSONEx(context, 
-					STATUS_ERROR, "Set called but no value specified.");
+		} else if (!strcmp(action, "experiment")) {
+			if (!strcmp(mode, "start")) {
+				FCGI_BeginJSON(context, STATUS_OK);
+				FCGI_JSONPair("description", mode);
+				FCGI_EndJSON();
+			} else if (!strcmp(mode, "pause")) {
+				FCGI_BeginJSON(context, STATUS_OK);
+				FCGI_JSONPair("description", mode);
+				FCGI_EndJSON();
+			} else if (!strcmp(mode, "stop")) {
+				FCGI_BeginJSON(context, STATUS_OK);
+				FCGI_JSONPair("description", mode);
+				FCGI_EndJSON();
 			} else {
-				ActuatorHandler(context, id, set_value);
+				FCGI_RejectJSON(context, "Unknown experiment mode specified");
 			}
+		} else {
+			FCGI_RejectJSON(context, "Unknown action specified");
 		}
 	}
 }

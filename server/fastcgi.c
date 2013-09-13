@@ -39,23 +39,13 @@ struct FCGIContext {
  */ 
 static void IdentifyHandler(FCGIContext *context, char *params) {
 	bool ident_sensors = false, ident_actuators = false;
-	//const char *key, *value;
 
 	int i;
 
 	FCGIValue values[2] = {{"sensors", &ident_sensors, FCGI_BOOL_T},
 					 {"actuators", &ident_actuators, FCGI_BOOL_T}};
-
 	if (!FCGI_ParseRequest(context, params, values, 2))
 		return;
-
-	/*while ((params = FCGI_KeyPair(params, &key, &value))) {
-		if (!strcmp(key, "sensors")) {
-			ident_sensors = !ident_sensors;
-		} else if (!strcmp(key, "actuators")) {
-			ident_actuators = !ident_actuators;
-		}
-	}*/
 
 	FCGI_BeginJSON(context, STATUS_OK);
 	FCGI_JSONPair("description", "MCTX3420 Server API (2013)");
