@@ -13,6 +13,7 @@
 #define START    0x44e00000    // see datasheet of AM335x
 #define LENGTH   1024
 #define OFFSET_1 0xcc          // offset of PWM1 clock (see datasheet of AM335x p.1018)
+#define FREQ	 50			   //50Hz pwm frequency for pressure regulator
 
 void pwm_init(void);
 void pwm_start(void);
