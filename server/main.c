@@ -7,6 +7,7 @@
 #include "common.h"
 #include "options.h"
 #include "sensor.h"
+#include "actuator.h"
 
 // --- Standard headers --- //
 #include <signal.h> // for signal handling
@@ -76,12 +77,15 @@ int main(int argc, char ** argv)
 	}
 	*/
 	Sensor_Init();
+	Actuator_Init();
 	Sensor_StartAll("test");
+	Actuator_StartAll("test");
 
 	// run request thread in the main thread
 	FCGI_RequestLoop(NULL);
 
 	Sensor_StopAll();
+	Actuator_StopAll();
 
 	Cleanup();
 	return 0;

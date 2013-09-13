@@ -51,4 +51,7 @@ extern void Data_PrintByIndexes(DataFile * df, int start_index, int end_index, D
 extern void Data_PrintByTimes(DataFile * df, double start_time, double end_time, DataFormat format); // Print data between time values
 extern int Data_FindByTime(DataFile * df, double time_stamp, DataPoint * closest); // Find index of DataPoint with the closest timestamp to that given
 
+extern void Data_Handler(DataFile * df, FCGIValue * start, FCGIValue * end, DataFormat format, double current_time); // Helper; given FCGI params print data
+extern DataFormat Data_GetFormat(FCGIValue * fmt); // Helper; convert human readable format string to DataFormat
+
 #endif //_DATAPOINT_H

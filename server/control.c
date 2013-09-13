@@ -5,13 +5,10 @@
 #include "common.h"
 #include "control.h"
 
-const char * g_actuator_names[NUMACTUATORS] = {	
-	"Pressure regulator", "Solenoid 1" 
-};
 
 /**
  * Handles control of the actuators.
- */
+ *
 void ActuatorHandler(FCGIContext *context, ActuatorId id, const char *set_value) {
 	char *ptr;
 	
@@ -49,6 +46,7 @@ void ActuatorHandler(FCGIContext *context, ActuatorId id, const char *set_value)
 				STATUS_ERROR, "Invalid actuator id specified.");
 	}
 }
+*/
 
 /**
  * System control handler. This covers control over all aspects of the system.
@@ -79,6 +77,7 @@ void Control_Handler(FCGIContext *context, char *params) {
 			set_value = value;
 		}
 	}
+	Log(LOGDEBUG, "Id %d", id); // to stop compiler complaining for now
 	
 	if (action == NULL) { //Must have an action
 		FCGI_RejectJSON(context, "No action specified");
@@ -99,8 +98,9 @@ void Control_Handler(FCGIContext *context, char *params) {
 			if (set_value == NULL || *set_value == '\0') {
 				FCGI_RejectJSONEx(context, 
 					STATUS_ERROR, "Set called but no value specified.");
-			} else {
-				ActuatorHandler(context, id, set_value);
+			} else 
+			{
+//				ActuatorHandler(context, id, set_value);
 			}
 		}
 	}
