@@ -41,7 +41,7 @@ void SignalHandler(int signal)
 	// At the moment just always exit.
 	// Call `exit` so that Cleanup will be called to... clean up.
 	Log(LOGWARN, "Got signal %d (%s). Exiting.", signal, strsignal(signal));
-	Thread_QuitProgram(false);
+
 	//exit(signal);
 }
 
@@ -75,15 +75,14 @@ int main(int argc, char ** argv)
 		signal(signals[i], SignalHandler);
 	}
 	*/
-	Sensor_Spawn();
+	Sensor_Init();
+	Sensor_StartAll("test");
 
 	// run request thread in the main thread
 	FCGI_RequestLoop(NULL);
 
-	// Join the dark side, Luke
-	// *cough*
-	// Join the sensor threads
-	Sensor_Join();
+	Sensor_StopAll();
+
 	Cleanup();
 	return 0;
 }

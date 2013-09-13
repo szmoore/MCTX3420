@@ -8,6 +8,7 @@
 
 #include <fcgi_stdio.h>
 #include <openssl/sha.h>
+#include <stdarg.h>
 
 #include "common.h"
 #include "sensor.h"
@@ -37,23 +38,32 @@ struct FCGIContext {
  * @param params User specified paramters: [actuators, sensors]
  */ 
 static void IdentifyHandler(FCGIContext *context, char *params) {
-	bool identSensors = false, identActuators = false;
-	const char *key, *value;
+	bool ident_sensors = false, ident_actuators = false;
+	//const char *key, *value;
+
 	int i;
 
-	while ((params = FCGI_KeyPair(params, &key, &value))) {
+	FCGIValue values[2] = {{"sensors", &ident_sensors, FCGI_BOOL_T},
+					 {"actuators", &ident_actuators, FCGI_BOOL_T}};
+
+	if (!FCGI_ParseRequest(context, params, values, 2))
+		return;
+
+	/*while ((params = FCGI_KeyPair(params, &key, &value))) {
 		if (!strcmp(key, "sensors")) {
-			identSensors = !identSensors;
+			ident_sensors = !ident_sensors;
 		} else if (!strcmp(key, "actuators")) {
-			identActuators = !identActuators;
+			ident_actuators = !ident_actuators;
 		}
-	}
+	}*/
 
 	FCGI_BeginJSON(context, STATUS_OK);
 	FCGI_JSONPair("description", "MCTX3420 Server API (2013)");
 	FCGI_JSONPair("build_date", __DATE__ " " __TIME__);
 	FCGI_JSONLong("api_version", API_VERSION);
-	if (identSensors) {
+
+	//Sensor and actuator information
+	if (ident_sensors) {
 		FCGI_JSONKey("sensors");
 		FCGI_JSONValue("{\n\t\t");
 		for (i = 0; i < NUMSENSORS; i++) {
@@ -64,7 +74,7 @@ static void IdentifyHandler(FCGIContext *context, char *params) {
 		}
 		FCGI_JSONValue("\n\t}");
 	}
-	if (identActuators) {
+	if (ident_actuators) {
 		FCGI_JSONKey("actuators");
 		FCGI_JSONValue("{\n\t\t");
 		for (i = 0; i < NUMACTUATORS; i++) {
@@ -190,6 +200,87 @@ char *FCGI_KeyPair(char *in, const char **key, const char **value)
 }
 
 /**
+ * Aids in parsing request parameters. Expected keys along with their type
+ * and whether or not they're required are provided. This function will then
+ * parse the parameter string to find these keys.
+ * @param context The context to work in
+ * @param params The parameter string to be parsed
+ * @param values An array of FCGIValue's that specify expected keys
+ * @param count The number of elements in 'values'.
+ * @return true If the parameter string was parsed successfully, false otherwise.
+ *         Modes of failure include: Invalid a parsing error on the value,
+ *                                   an unknown key is specified,
+ *                                   a key/value pair is specified more than once, or
+ *                                   not all required keys were present.
+ *         If this function returns false, it is guaranteed that FCGI_RejectJSON
+ *         has already been called with the appropriate description message.
+ */
+bool FCGI_ParseRequest(FCGIContext *context, char *params, FCGIValue values[], size_t count)
+{
+	const char *key, *value;
+	char buf[BUFSIZ], *ptr;
+	size_t i;
+	
+	while ((params = FCGI_KeyPair(params, &key, &value))) {
+		for (i = 0; i < count; i++) {
+			if (!strcmp(key, values[i].key)) {
+				FCGIValue *val = &values[i];
+
+				if (FCGI_RECEIVED(val->flags)) {
+					snprintf(buf, BUFSIZ, "Value already specified for '%s'.", key);
+					FCGI_RejectJSON(context, buf);
+					return false;
+				}
+				val->flags |= FCGI_PARAM_RECEIVED;
+
+				switch(FCGI_TYPE(val->flags)) {
+					case FCGI_BOOL_T:
+						*((bool*) val->value) = true;
+						break;
+					case FCGI_LONG_T:
+						*((long*) val->value) = strtol(value, &ptr, 10);
+						if (!*value || *ptr) {
+							snprintf(buf, BUFSIZ, "Expected int for '%s' but got '%s'", key, value);
+							FCGI_RejectJSON(context, FCGI_EscapeJSON(buf));
+							return false;
+						}
+						break;
+					case FCGI_DOUBLE_T:
+						*((double*) val->value) = strtod(value, &ptr);
+						if (!*value || *ptr) {
+							snprintf(buf, BUFSIZ, "Expected float for '%s' but got '%s'", key, value);
+							FCGI_RejectJSON(context, FCGI_EscapeJSON(buf));
+							return false;
+						}
+						break;
+					case FCGI_STRING_T:
+						*((const char**) val->value) = value;
+						break;
+					default:
+						Fatal("Invalid type %d given", FCGI_TYPE(val->flags));
+				}
+				break; //No need to search any more
+			}
+		} //End for loop
+		if (i == count) {
+			snprintf(buf, BUFSIZ, "Unknown key '%s' specified", key);
+			FCGI_RejectJSON(context, FCGI_EscapeJSON(buf));
+			return false;
+		}
+	}
+
+	//Check that required parameters are received
+	for (i = 0; i < count; i++) {
+		if (FCGI_IS_REQUIRED(values[i].flags) && !FCGI_RECEIVED(values[i].flags)) {
+			snprintf(buf, BUFSIZ, "Key '%s' required, but was not given.", values[i].key);
+			FCGI_RejectJSON(context, buf);
+			return false;
+		}
+	}
+	return true;
+}
+
+/**
  * Begins a response to the client in JSON format.
  * @param context The context to work in.
  * @param status_code The status code to be returned.
@@ -200,20 +291,17 @@ void FCGI_BeginJSON(FCGIContext *context, StatusCodes status_code)
 	printf("{\r\n");
 	printf("\t\"module\" : \"%s\"", context->current_module);
 	FCGI_JSONLong("status", status_code);
-
-	// Jeremy: Should we include a timestamp in the JSON; something like this?
-	double start_time = g_options.start_time.tv_sec + 1e-6*(g_options.start_time.tv_usec);
+	//Time and running statistics
 	struct timeval now;
 	gettimeofday(&now, NULL);
-	double current_time = now.tv_sec + 1e-6*(now.tv_usec);
-	FCGI_JSONDouble("start_time", start_time);
-	FCGI_JSONDouble("current_time", current_time);
-	FCGI_JSONDouble("running_time", current_time - start_time);
+	FCGI_JSONDouble("start_time", TIMEVAL_TO_DOUBLE(g_options.start_time));
+	FCGI_JSONDouble("current_time", TIMEVAL_TO_DOUBLE(now));
+	FCGI_JSONDouble("running_time", TIMEVAL_DIFF(now, g_options.start_time));
 }
 
 /**
  * Adds a key/value pair to a JSON response. The response must have already
- * been initiated by FCGI_BeginJSON. Note that characters are not escaped.
+ * been initiated by FCGI_BeginJSON. Special characters are not escaped.
  * @param key The key of the JSON entry
  * @param value The value associated with the key.
  */
@@ -271,6 +359,36 @@ void FCGI_EndJSON()
 }
 
 /**
+ * Escapes a string so it can be used as a JSON string value.
+ * Does not support unicode specifiers in the form of \uXXXX.
+ * @param buf The string to be escaped
+ * @return The escaped string (return value == buf)
+ */
+char *FCGI_EscapeJSON(char *buf)
+{
+	int length, i;
+	length = strlen(buf);
+	
+	//Escape special characters. Must count down to escape properly
+	for (i = length - 1; i >= 0; i--) {
+		if (buf[i] < 0x20) { //Control characters
+			buf[i] = ' ';
+		} else if (buf[i] == '"') {
+			if (i-1 >= 0 && buf[i-1] == '\\') 
+				i--;
+			else
+				buf[i] = '\'';
+		} else if (buf[i] == '\\') {
+			if (i-1 >= 0 && buf[i-1] == '\'')
+				i--;
+			else
+				buf[i] = ' ';
+		}
+	}
+	return buf;
+}
+
+/**
  * To be used when the input parameters are rejected. The return data
  * will also have debugging information provided.
  * @param context The context to work in
@@ -320,18 +438,8 @@ void * FCGI_RequestLoop (void *data)
 	FCGIContext context = {0};
 	
 	Log(LOGDEBUG, "First request...");
-	//TODO: The FCGI_Accept here is blocking. 
-	//		That means that if another thread terminates the program, this thread
-	//		 will not terminate until the next request is made.
 	while (FCGI_Accept() >= 0) {
 
-		if (Thread_Runstate() != RUNNING)
-		{
-			//TODO: Yeah... deal with this better :P
-			Log(LOGERR, "FIXME; FCGI gets request after other threads have finished.");
-			printf("Content-type: text/plain\r\n\r\n+++OUT OF CHEESE ERROR+++\n");
-			break;
-		}
 		
 		Log(LOGDEBUG, "Got request #%d", context.response_number);
 		ModuleHandler module_handler = NULL;
@@ -370,7 +478,6 @@ void * FCGI_RequestLoop (void *data)
 	}
 
 	Log(LOGDEBUG, "Thread exiting.");
-	Thread_QuitProgram(false);
 	// NOTE: Don't call pthread_exit, because this runs in the main thread. Just return.
 	return NULL;
 }

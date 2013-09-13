@@ -1,2 +1,2 @@
 #!/bin/bash
-valgrind --leak-check=full ./server
+valgrind --leak-check=full --track-origins=yes ./server

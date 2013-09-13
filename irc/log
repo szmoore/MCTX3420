@@ -2068,3 +2068,264 @@
 19:32 < jtanx> I've moved the 'current_time', 'start_time' and 'running_time' to the identify module instead of sticking it on every json response, because it's probably not information that will be required most of the time
 19:37 < jtanx> actually, we may have to rethink those, especially if we introduce start/stop control
 20:38 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Thu Sep 12 2013
+08:49 -!- MctxBot [~twang@203-59-42-232.dyn.iinet.net.au] has quit [Connection reset by peer]
+09:16 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:36 < sam_moore> I think I have some time after the tutorial today to work on stuff
+09:36 < sam_moore> I take it we have the bbb now?
+09:37 < sam_moore> I'll bring that crappy webcam
+09:37 < sam_moore> Maybe look into sending images as part of the API, see if it's feasable to do it that way
+09:38 < sam_moore> I think we can introduce start/stop control fairly easily
+09:40 < sam_moore> "Mush Mush"
+09:40 < sam_moore> Heh
+09:41 < sam_moore> To reduce the load on the client, we might be able to send averaged data points instead of every data point
+09:41 < sam_moore> You specify "averages per point"
+09:42 < sam_moore> So each [time, value] pair is actually an average of X recordings
+09:42 < sam_moore> In fact it's better to send [mean_time, mean_value, std_dev]
+09:42 < sam_moore> The std_dev gives you an idea of noise and/or if the value is changing a lot
+09:43 < sam_moore> And of course you can always specify a single average and it becomes equivelant to what we currently do
+09:50 < jtanx> yeah
+09:50 < jtanx> I'm free after the tute
+09:50 < jtanx> I'm bringing in a router to make it easier
+09:50 < jtanx> to work on the bbb together
+09:51 < jtanx> yesterday it was so painful trying to get shit working 
+09:51 < jtanx> dhcp issues, dns issues, internet connection sharing issues...
+09:51 < jtanx> (mostly the fault of my own computer though)
+09:51 < jtanx> btw I'm working on adding an extra function to FCGI to makeit easier to parse parameters
+09:51 < jtanx> (hoepfully)
+09:55 < jtanx> gtg see you at the tute
+09:55 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+18:24 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:26 < Callum> would be easier to talk here...if everyone was on
+18:35 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:41 < jtanx> did you bring the bbb home?
+18:43 < sam_moore> Yep
+18:44 < sam_moore> I'll put it back tomorrow morning
+18:49 < jtanx> ok
+19:15 -!- Callum_ [~chatzilla@124-149-92-17.dyn.iinet.net.au] has joined #mctxuwa_softdev
+19:28 -!- Callum [~chatzilla@124-149-92-17.dyn.iinet.net.au] has quit [Ping timeout]
+19:47 < jtanx> I'm so tempted to use bitflags for that request function
+19:52 < jtanx> one thing that I need to do is to sanitise json string fields
+20:18 < sam_moore> Sanitise? As in "make sane" or "make clean"?
+20:18 < sam_moore> Um... if you think bitflags are necessary, I fully support you :P
+20:19 < jtanx> as in
+20:19 < jtanx> If I allow FCGI_JSONPair to also be passed a format string
+20:19 < jtanx> then having stuff like \ or " or newline characters for eg in the string
+20:20 < jtanx> is not a good idea
+20:20 < sam_moore> Hmm
+20:20 < jtanx> it's sorta like this:
+20:20 < sam_moore> Well, writing the function to print out data (either as TSV or JSON)
+20:20 < sam_moore> I've only been using FCGI_PrintRaw
+20:20 < jtanx> yeah
+20:20 < jtanx> but right now, you're logging messages in Server_handler
+20:20 < jtanx> about invalid values
+20:21 < sam_moore> Yes, I'm not sure how to deal with that
+20:21 < jtanx> Sensor_handler*
+20:21 < jtanx> so
+20:21 < jtanx> eg Log(LOGERR, "Require \"all\" or an integer value: %s = %s", key, value);
+20:21 < sam_moore> Yes
+20:21 < jtanx> if I wanted to send that back to the client in FCGI_RejectJSON
+20:21 < jtanx> there's the potential (...) that the user could hvae included a " in the value
+20:22 < jtanx> so if you return it as part of your json response, then suddenly it's broken
+20:22 < sam_moore> Oh, that sucks
+20:23 < sam_moore> Perhaps treat Log messages seperately from JSON responses?
+20:23 < jtanx> eg:  "description":" required an id, got 'blah-stray"'"
+20:23 < jtanx> yeah
+20:24 < jtanx> What I could do is just replace any special characters with space 
+20:24 < jtanx> and return that in description
+20:24 < jtanx> but keep the actual value in log
+20:24 < sam_moore> Maybe
+20:24 < sam_moore> You could also call FCGI_RejectJSON as soon as you get a special character
+20:25 < sam_moore> Since we shouldn't have any key/values that use them
+20:25 < sam_moore> (I think :P)
+20:25 < jtanx> lol
+20:25 < sam_moore> Whatever seems best
+20:25 < jtanx> let me think about it some more
+20:25 < sam_moore> Yeah, fair enough
+20:25 < sam_moore> Um, another thing (sorry) is error messages that you might get independent of any request
+20:26 < sam_moore> Like you suddenly have an I/O error on a file
+20:26 < sam_moore> Currently we handle that with Fatal
+20:26 < sam_moore> Which it would be convenient to keep; but instead of terminating the whole program, we need to notify the client somehow
+20:26 < jtanx> that won't happen until the next request
+20:27 < jtanx> what you could do is keep it exiting
+20:27 < jtanx> when that happens, nginx sends 502 bad gateway
+20:27 < jtanx> then if that's detected, send a link to the log file
+20:27 < sam_moore> Yeah, that seems good
+20:27 < jtanx> and a method to restart the software
+20:28 < sam_moore> Do we want to notify the client of non-fatal errors or warnings though?
+20:28 < sam_moore> Hmm
+20:29 < jtanx> hmm
+20:29 < jtanx> probably a good idea
+20:29 < jtanx> but how
+20:29 < sam_moore> The client could periodically request the log file and deal with messages?
+20:30 < jtanx> It could just display it I guess
+20:30 < jtanx> onus on the user to take action if required
+20:30 < sam_moore> Sure, an alert might be nice though
+20:30 < sam_moore> Perhaps have an extra log file that just has the most recent message in it (with a timestamp)
+20:31 < jtanx> you could perform a regex on the text and highlight lines with warning or something
+20:31 < sam_moore> The client just periodically looks at that and if it's a new message can alert
+20:31 < sam_moore> Yeah that would work, as long as the file doesn't get too big
+20:31 < sam_moore> It probably won't
+20:31 < jtanx> well you could autoscroll it anyway
+20:32 < jtanx> but ok maybe that's getting a bit ahead of ourselves
+20:32 < sam_moore> Yeah, sure
+20:32 < sam_moore> I'll get back to rewriting 90% of the sensor code :P
+20:32 < jtanx> haha
+20:32 < jtanx> currently, I've got
+20:32 < jtanx> bool FCGI_ParseRequest(FCGIContext *context, char *params, FCGIValue values[], size_t count);
+20:32 < jtanx> (any better suggestion for FCGIValue?)
+20:32 < jtanx> (the name that is)
+20:33 < jtanx> with 
+20:33 < sam_moore> That's probably fine
+20:33 < jtanx> typedef struct FCGIValue {
+20:33 < jtanx> 	const char *key;
+20:33 < jtanx> 	void *value;
+20:33 < jtanx> 	unsigned flags;
+20:33 < jtanx> } FCGIValue;
+20:33 < jtanx> you then do
+20:33 < jtanx> something like:
+20:33 < jtanx> FCGIValue values[2] = {{"sensors", &ident_sensors, FCGI_REQUIRED(FCGI_BOOL_T)},
+20:33 < jtanx> 					 {"actuators", &ident_actuators, FCGI_BOOL_T}};
+20:33 < sam_moore> Looks good
+20:33 < jtanx> although I'm open to suggestions on those type names too
+20:34 < jtanx> if you really have to
+20:34 < jtanx> you can do something like FCGI_RECEIVED(values[0].flags)
+20:34 < jtanx> to check if you received the argument or not
+20:34 < sam_moore> If it's not too hard to implement, then OK
+20:35 < jtanx> ?
+20:35 < sam_moore> That looks reasonably nice
+20:35 < jtanx> the #defines look less so:
+20:35 < jtanx> #define FCGI_PARAM_REQUIRED (1 << 0)
+20:35 < jtanx> #define FCGI_PARAM_RECEIVED (1 << 1)
+20:35 < jtanx> #define FCGI_BOOL_T (1 << 2)
+20:35 < jtanx> #define FCGI_LONG_T (1 << 3)
+20:35 < jtanx> #define FCGI_DOUBLE_T (1 << 4)
+20:35 < jtanx> #define FCGI_STRING_T (1 << 5)
+20:35 < jtanx> #define FCGI_REQUIRED(x) ((x) | FCGI_PARAM_REQUIRED)
+20:35 < jtanx> #define FCGI_IS_REQUIRED(x) ((x) & FCGI_PARAM_REQUIRED)
+20:35 < jtanx> #define FCGI_RECEIVED(x) ((x) & FCGI_PARAM_RECEIVED)
+20:35 < jtanx> #define FCGI_TYPE(x) ((x) & ~(FCGI_PARAM_REQUIRED | FCGI_PARAM_RECEIVED))
+20:35 < sam_moore> In fact it's similar to how you use select(2)
+20:35 < sam_moore> Wow, macros
+20:35 < jtanx> :P
+20:35 < jtanx> makes life easier
+20:36 < sam_moore> Alright, this is C
+20:36 < sam_moore> Yeah, FCGI_RECEIVED(values[i].flags) looks nice (from the point of view of actually using it anyway)
+20:37 < jtanx> yeah it's ok
+20:37 < jtanx> the only stickler is that hardcoded index
+20:37 < jtanx> can't really do much about that though
+20:37 < sam_moore> I can put an enum in the function
+20:38 < jtanx> if you want; it might be more work to maintain the enum than anything though
+20:39 < jtanx> but yeah, essentially if you require a parameter, you surround the type in FCGI_REQUIRED()
+20:39 < jtanx> hopefully that part was clear
+20:39 < sam_moore> Yep, I'm happy with that
+20:39 < jtanx> cool
+20:43 < jtanx> for the bool value, what behaviour do you think is better
+20:43 < jtanx> always set the value to true, or invert the current value
+20:44 < jtanx> right now it's set to always be true
+21:06 < sam_moore> Um... always set to true?
+21:09 < jtanx> yeah
+21:29 < jtanx> oh
+21:30 < jtanx> well I didn't need to escape after all
+21:30 < jtanx> If you do something like this: http://mctx.us.to:8080/api?afa%22%22%22%22
+21:30 < jtanx> it gets url encoded
+21:30 < jtanx> http://mctx.us.to:8080/api?afa""""
+21:30 < jtanx> I wonder if that's guaranteed
+21:32 < jtanx> well, apparently it's not because IE doesn't escape it for you
+21:32 < jtanx> so I did need to escape 
+21:33 < sam_moore> There's no escape
+21:46 < jtanx> wait wat
+21:59 < sam_moore> (It's a pun)
+22:00 < sam_moore> So I've made a DataFile structure to isolate it a bit more from the higher level Sensor related stuff
+22:00 < sam_moore> Hopefully things make more sense
+22:00 < sam_moore> I put in 2 seperate FILE* as well
+22:00 < sam_moore> And got rid of the confusing "fill a buffer then dump the buffer to a file" loop
+22:01 < sam_moore> Now it just writes each point to a file
+22:01 < sam_moore> Hopefully it's thread safe enough
+22:01 < sam_moore> Now... I just need to simplify the Sensor_Handler function...
+22:02 < jtanx> > (It's a pun) 
+22:02  * jtanx facepalm
+22:03 < jtanx> hoho
+22:03 < jtanx> ok 
+22:03 < jtanx> I'll submit what I've done so far to git
+22:08 < jtanx> callum
+22:08 < jtanx> that code you submitted
+22:08 < jtanx> I don't think it's right
+22:08 -!- Irssi: #mctxuwa_softdev: Total of 3 nicks [0 ops, 0 halfops, 0 voices, 3 normal]
+22:09 < jtanx> the stuff with g_sensor_names, that's the human readable name of each sensor
+22:10 < sam_moore> I've changed the name and how the sanity check gets called, but I've left the body unimplemented for now
+22:12 < jtanx> it's with the pull request he submitted ~30mins ago
+22:12 < sam_moore> Oh, ok
+22:13 < sam_moore> Good thing I made a new branch for my changes
+22:14 < jtanx> the pull request isn't merged yet
+22:15 < sam_moore> Yeah, I don't think we should merge that, sorry Callum
+22:17 < jtanx> ok just submitted the pull request
+22:17 < sam_moore> I never put documentation on g_sensor_names I guess, sorry
+22:17 < jtanx> I think I did though
+22:17 < jtanx> but in the header file
+22:18 < jtanx> which is annoying :/
+22:18 < jtanx> (as in there's more than one spot to put documentation)
+22:19 < sam_moore> Yeah... does one overwrite another?
+22:19 < sam_moore> I'll just copy paste the same thing into the .c file
+22:19 < jtanx> No idea how doxygen handles that
+22:20 < sam_moore> I wonder how much fun I'll have merging these branches...
+22:20 < jtanx> hehe
+22:20 < jtanx> I'm not really sure if FCGI_ParseRequest will be that helpful or not
+22:20 < jtanx> if you find it doesn't really help then we can scrap it
+22:21 < sam_moore> Well it makes sense to seperate the code for getting key,value pairs from the code that does stuff with them
+22:23 < jtanx> I guess
+22:23 < sam_moore> I've basically moved a lot of functionality from sensor.c into a new file data.c under functions with the prefix "Data_"
+22:24 < jtanx> ok
+22:24 < sam_moore> data.c doesn't care anything about what the data is or where it came from, it just wraps around saving/reading/selecting ranges of DataPoints
+22:25 < jtanx> sounds like a good idea
+22:25 < jtanx> it might be of use in actuator code I guess
+22:25 < sam_moore> Yeah, there's a DataFile structure that basically wraps around the binary file
+22:25 < sam_moore> Yes, I was thinking that too
+22:25 < sam_moore> Because we'll probably want to store DataPoints when an actuator gets changed
+22:26 < jtanx> yeah true
+22:27 < sam_moore> If the idea about using 2 FILE* is right... I don't think we really need any mutexes?
+22:28 < sam_moore> There is an index that gets incremented, but since only one thread can write to it, the worst that can happen is you return one (maybe two at the extreme) less point than actually exists
+22:29 < sam_moore> If you had 2 threads incrementing the index you'd need a mutex though
+22:29 < jtanx> the problem is that setting a value is not guaranteed to be atomic
+22:29 < jtanx>  i think
+22:29 < sam_moore> Yes, sure
+22:29 < jtanx> so while setting and you read it it could be indeterminate
+22:29 < sam_moore> Mmm
+22:30 < jtanx> I think you need mutexes around reading/writing the points_written(?)
+22:30 < jtanx> index
+22:30 < jtanx> but that's it
+22:31 < jtanx> http://stackoverflow.com/questions/54188/are-c-reads-and-writes-of-an-int-atomic
+22:31 < sam_moore> I'm not sure you do if you are writing in one thread and reading in another
+22:31 < sam_moore> Ah, stackoverflow, OK
+22:32 < jtanx> it's actually very architecture specific
+22:32 < sam_moore> Yeah "Yes, no, hmmm, well it depends" is probably right
+22:32 < jtanx> haha
+22:32 < sam_moore> Well... there are no mutexes at the moment, but maybe I should get around to putting them in
+22:32 < sam_moore> I think I had one thread writing and another reading in my parallel programming assignment and got full marks :S
+22:33 < sam_moore> Threads are strange and magical
+22:33 < jtanx> hey well it probably works 99% of the time
+22:34 < sam_moore> Ah, it probably works if the size of the integer is smaller than the bus
+22:34 < sam_moore> smaller or equal
+22:34 < jtanx> too bad linux doesn't have something like InterlockedExchange
+22:35 < sam_moore> I'll add mutexes in later then
+22:35 < jtanx> One thing I liked about C++ was auto locks
+22:36 < jtanx> (you could call some lock function and once that scope ended the lock ended too)
+22:36 < sam_moore> That's nice
+22:40 < jtanx> Ok, that's all I'm probably going to get done today
+22:41 < sam_moore> Yeah, thanks
+22:42 < jtanx> what's with the meeting tomorrow though
+22:43 < sam_moore> I'm busy from 2:00pm until at least 4:00pm (maybe later)
+22:43 < sam_moore> But I think I should be preparing for something before 2:00pm
+22:44 < jtanx> ok, I'll probably come in around 1.30pm so I can work with Callum, and I'll stay on until whatever time
+22:44 < sam_moore> Alright
+22:45 < sam_moore> Check github in the morning, I'll push all my changes
+22:45 < jtanx> ok I'll do that
+22:45 < sam_moore> Hopefully they make sense, otherwise you can change everything back :P
+22:45 < sam_moore> The wonders of git
+22:45 < jtanx> haha I'm sure it'll make sense
+22:46 < jtanx> after staring for a while
+22:46 < sam_moore> Yeah it should be a bit simpler
+22:46 < jtanx> thanks
+22:47 < jtanx> see you tomorrow (probably)
+22:48 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+23:28 -!- Callum_ [~chatzilla@124-149-92-17.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]

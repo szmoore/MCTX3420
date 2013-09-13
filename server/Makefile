@@ -2,7 +2,7 @@
 CXX = gcc
 FLAGS = -std=c99 -Wall -Werror -pedantic -g
 LIB = -lfcgi -lssl -lcrypto -lpthread -lm
-OBJ = log.o control.o sensor.o fastcgi.o thread.o main.o
+OBJ = log.o control.o data.o fastcgi.o main.o sensor.o
 RM = rm -f
 
 BIN = server
