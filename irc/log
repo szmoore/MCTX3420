@@ -2329,3 +2329,154 @@
 22:47 < jtanx> see you tomorrow (probably)
 22:48 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
 23:28 -!- Callum_ [~chatzilla@124-149-92-17.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Fri Sep 13 2013
+08:17 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+08:31 < jtanx> oh yeah, I forgot to restart the bot :P
+08:31 -!- MctxBot [~twang@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+08:53 < sam_moore> So, using 2 FILE* causes some problems, I recommend we just use 1
+08:54 < sam_moore> In theory the operating system is supposed to use locks when multiple processes have access to the same file
+08:54 < sam_moore> But... 
+08:54 < sam_moore> It probably doesn't work with threads
+08:55 < sam_moore> I'm not sure exactly what goes wrong, but using 1 works and isn't really going to be slower (if the OS uses locks then that probably has a similar overhead to using a mutex)
+08:59 < jtanx> yeah, let's stick to one then
+09:00 < jtanx> there's still a few bugs around I think
+09:00 < sam_moore> Probably
+09:01 < sam_moore> I put valgrind back in, I got rid of a lot last night
+09:01 < jtanx> nice
+09:01 < sam_moore> Although I probably introduced them in the first place
+09:01 < jtanx> what was with that mem leak in fastcgi code?
+09:03 < sam_moore> Oh, that wasn't a memory leak, it was an uninitialised value
+09:04 < sam_moore> I thought I'd be clever and use sizeof() on the FCGIValue array
+09:04 < sam_moore> But I forgot that the actual number of elements is not just sizeof()
+09:04 < sam_moore> It's sizeof(array) / sizeof(element)
+09:04 < jtanx> oh right haha
+09:05 < sam_moore> So the refactored code basically does the same thing
+09:05 < sam_moore> But hopefully it's a bit cleaner
+09:05 < jtanx> yep
+09:05 < jtanx> it's pretty good
+09:06 < jtanx> when you get an invalid id or format, do you want to reject that? 
+09:07 < sam_moore> Yeah, I wasn't sure what I should do there, but I think Sensor_Handler is the only place you can really deal with that
+09:07 < jtanx> yeah
+09:07 < sam_moore> I did have it calling FCGI_RejectJSON if the sensor id was invalid
+09:08 < jtanx> the current code on git just calls Log
+09:08 < sam_moore> But I must have done something wrong, because the normal JSON was getting printed just after that
+09:08 < sam_moore> So I removed it
+09:08 < jtanx> oh yeah
+09:08 < jtanx> you have to return after FCGI_RejectJSON
+09:08 < sam_moore> Ah
+09:08 < sam_moore> Durr
+09:08 < jtanx> :P
+09:09 < jtanx> anyways I'll look through and see if I can fix stuff up
+09:09 < jtanx> then I'll try and do that start/stop stuf
+09:10 < sam_moore> Ok
+09:10 < sam_moore> I put in Sensor_Start and Sensor_Stop which might help
+09:10 < sam_moore> I thought you might want to pause data collection without actually "stopping" the experiment?
+09:11 < jtanx> ok
+09:11 < jtanx> that might be a good idea
+09:11 < sam_moore> And also it should be fairly easy to implement a Sensor_Load if we want to be able to load previous experiments
+09:11 < jtanx> yeah
+09:38 < jtanx> those issues with fread
+09:38 < jtanx> it could be because you didn't specify the 'b' flag in fopen
+09:38 < jtanx> ?
+09:39 < jtanx> 	// Clear the FILE*s
+09:39 < jtanx> 	df->read_file = NULL;
+09:39 < jtanx> 	df->write_file = NULL;
+09:39 < jtanx> 	fclose(df->write_file);
+09:52 < sam_moore> Oh... hurdur
+09:52 < sam_moore> Wait how is it working at all
+09:52 < sam_moore> The write file is mode "w+" which should make it plain text
+09:53 < jtanx> so it's no longer a binary file?
+09:53 < jtanx> I think i may not be experiencing the same issues as you just because I'm running everything on single core processors
+09:53 < sam_moore> Well... it certainly looks like a binary file when you try and cat it
+09:53 < jtanx> ok
+09:53 < jtanx> it's probably a good idea to stick to one file pointer and use mutexes
+09:53 < sam_moore> Yeah
+09:53 < sam_moore> But also make sure that file is binary
+09:53 < jtanx> yeah
+09:54 < sam_moore> It's probably compiler specific what happens when you use fwrite and fread on a plain text file
+09:54 < jtanx> probably
+09:54 < sam_moore> But it looks like a binary file to me, so I'm not sure that's related to the problems with fread
+09:54 < sam_moore> I can investigate this by changing like 4 characters...
+09:55 < jtanx> one thing I did notice on linux
+09:55 < jtanx> if it wasn't a binary file you'd have to use fflush to explicitly write out text and have it appear when you used cat
+09:56 < jtanx> but overall I think it's not due to it being a binary file or not
+09:56 < sam_moore> Yep
+09:56 < sam_moore> I just put the second FILE* for read_file back in
+09:56 < sam_moore> Made them both binary
+09:56 < sam_moore> Still get the "Transport endpoint is not connected" errors
+09:57 < sam_moore> So there should be a "b" in the file mode, but that's unrelated to having multiple FILE*
+09:57 < jtanx> yep then I think that's due to you running it on a multicore processor
+09:57 < jtanx> maybe
+09:57 < sam_moore> I think the OS locks around file access are based on PID
+09:58 < jtanx> on linux all file locks are advisory only
+09:58 < sam_moore> Can
+09:58 < sam_moore> Anyway, it's clearly safest to just have one FILE*
+09:58 < jtanx> yeah
+09:58 < jtanx> I'm changing it now
+10:09 < jtanx> oh ffs that's the second time it's crashed simply because I didn't do make clean before make
+10:16 < sam_moore> haha
+10:17 < sam_moore> Modify the make file to always run make clean?
+10:28 < jtanx> haha that's one option
+10:28 < jtanx> it's because make doesn't consider changes to the header files
+10:28 < jtanx> there's a way to make it detect those, but *effort*
+10:40 < sam_moore> Regarding Actuators, I think if we design for a thread to control (one or more) actuators that will make it easy to add more advanced control later
+10:42 < sam_moore> eg: The Actuator_Handler just sets some kind of formula or says "Every time sensor 0 is stable for Xs (within a range) change actuator by Y" and the thread watches the sensor data and changes the actuator when necessary
+10:43 < sam_moore> You could also add feedback that way too
+10:44 < sam_moore> "Set this actuator so that sensor 0 has value X"
+10:46 < jtanx> hmm
+10:47 < jtanx> about the sensor stuff
+10:47 < jtanx> there were a few things I noticed
+10:48 < jtanx> the time wrapping 
+10:48 < jtanx> could still give a negative start_time or end_time
+10:48 < jtanx> if the user specified a very negative start_time/end_time
+10:49 < jtanx> (eg specifies a negative time greater than the total running time)
+10:49 < sam_moore> Oh yeah
+10:49 < jtanx> so in data_printbytimes
+10:49 < jtanx> I just clamped it to zero
+10:49 < jtanx> instead of asserting
+10:49 < sam_moore> Fair enough
+10:49 < jtanx> strangely this code seems to work pretty good:
+10:49 < jtanx> void Data_PrintByTimes(DataFile * df, double start_time, double end_time, DataFormat format)
+10:49 < jtanx> {
+10:49 < jtanx> 	assert(df != NULL);
+10:49 < jtanx> 	//Clamp boundaries
+10:49 < jtanx> 	if (start_time < 0)
+10:49 < jtanx> 		start_time = 0;
+10:50 < jtanx> 	if (end_time < 0)
+10:50 < jtanx> 		end_time = 0;
+10:50 < jtanx> 	int start_index = 0, end_index = 0;
+10:50 < jtanx> 	if (start_time < end_time)
+10:50 < jtanx> 	{
+10:50 < jtanx> 		start_index = Data_FindByTime(df, start_time, NULL);
+10:50 < jtanx> 		end_index = Data_FindByTime(df, end_time, NULL);
+10:50 < jtanx> 	}
+10:50 < jtanx> 	Data_PrintByIndexes(df, start_index, end_index, format);
+10:50 < jtanx> }
+10:50 < jtanx> oh but that was the other ting
+10:50 < jtanx> it works better if you have exclusive end index/time
+10:50 < sam_moore> Ok
+10:50 < sam_moore> I have to go now
+10:50 < jtanx> ok
+10:50 < sam_moore> See you this afternoon if you're still there
+10:50 < jtanx> yep see you then
+10:51 < jtanx> probably
+10:58 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit [Connection reset by peer]
+13:41 -!- jtanx [~asfa@130.95.54.13] has joined #mctxuwa_softdev
+13:44 -!- callum [~chatzilla@130.95.135.82] has joined #mctxuwa_softdev
+13:44 < callum> should i just add the sensor threshold values to the sensor struct?
+13:47 < jtanx> probably not
+13:47 < jtanx> I think you have to create a new struct
+13:48 < jtanx> are you at uni?
+13:49 < callum> yea. why is a new struct necessary? 
+13:49 < jtanx> come to g19
+13:49 < jtanx> the bbb is setup too
+14:03 -!- callum [~chatzilla@130.95.135.82] has quit [Connection reset by peer]
+16:17 < sam_moore> Are you guys still in G19?
+16:17 < sam_moore> On my way now
+17:30 -!- jtanx [~asfa@130.95.54.13] has quit [Ping timeout]
+18:20 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:42 < jtanx> lol you need to use a transistor to turn on an led from the gpio pins
+19:56 < jtanx> ok I think I'll just escape all input parameters from within the request loop
+19:56 < jtanx> then at least you're guaranteed that user input won't stuff up anything
+19:56 < jtanx> (as in making it generate invalid JSON)
+20:53 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
