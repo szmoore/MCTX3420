@@ -12,6 +12,17 @@
 /** Array of sensors, initialised by Sensor_Init **/
 static Sensor g_sensors[NUMSENSORS]; //global to this file
 
+/** Array of sensor threshold structures defining the safety values of each sensor**/
+const SensorThreshold thresholds[NUMSENSORS]= {
+	//Max Safety, Min safety, Max warning, Min warning
+	{1,-1,1,-1},		// ANALOG_TEST0
+	{500,0,499,0},		// ANALOG_TEST1
+	{5,-5,4,-4},		// ANALOG_FAIL0
+	{1,0,1,0},		// DIGITAL_TEST0
+	{1,0,1,0},		// DIGITAL_TEST1
+	{1,0,1,0}		// DIGITAL_FAIL0
+};
+
 /** Human readable names for the sensors **/
 const char * g_sensor_names[NUMSENSORS] = {	
 	"analog_test0", "analog_test1", 
@@ -99,33 +110,14 @@ void Sensor_StartAll(const char * experiment_name)
  */
 void Sensor_CheckData(SensorId id, double value)
 {
-	switch (sensor_id)
+	if( value > thresholds[id].max_error || value < thresholds[id].min_error)
 	{
-		case ANALOG_FAIL0:
-		{
-			if( value > ANALOG_FAIL0_SAFETY || value < ANALOG_FAIL0_MIN_SAFETY)
-			{
-				Log(LOGERR, "Sensor analog_fail0 is above or below its safety value of %d or %d\n", ANALOG_FAIL0_SAFETY, ANALOG_FAIL0_MIN_SAFETY);
-			//new function that stops actuators?
-			}
-			else if( value > ANALOG_FAIL0_WARN || value < ANALOG_FAIL0_MIN_WARN)
-			{
-				Log(LOGWARN, "Sensor analog_test0 is above or below its warning value of %d or %d\n", ANALOG_FAIL0_WARN, ANALOG_FAIL0_MIN_WARN);	
-			}
-			break;
-		}
-		case DIGITAL_FAIL0:
-		{	
-			if( value != 0 && value != 1)
-			{
-				Log(LOGERR, "Sensor digital_fail0 is not 0 or 1\n");
-			}
-			break;
-		}
-		default:
-		{
-		//So it doesn't complain about the missing cases - in practice we will need all sensors to be checked as above, no need to include a default as we should only pass valid sensor_id's; unless for some reason we have a sensor we don't need to check (but then why would you pass to this function in the first place :P)
-		}
+		Log(LOGERR, "Sensor %s is above or below its safety value of %f or %f\n", g_sensor_names[id],thresholds[id].max_error, thresholds[id].min_error);
+		//new function that stops actuators?
+	}
+	else if( value > thresholds[id].max_warn || value < thresholds[id].min_warn)
+	{
+		Log(LOGWARN, "Sensor %s is above or below its warning value of %f or %f\n", g_sensor_names[id],thresholds[id].max_warn, thresholds[id].min_warn);	
 	}
 }
 
@@ -150,17 +142,16 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 		case ANALOG_TEST0:
 			d->value = (double)(rand() % 100) / 100;
 			break;
-
 		case ANALOG_TEST1:
 		{
 			static int count = 0;
+			count %= 500;
 			d->value = count++;
 			break;
 		}
 		case ANALOG_FAIL0:
 			d->value = (double)(rand() % 6) * -( rand() % 2) / ( rand() % 100 + 1);
 			//Gives a value between -5 and 5
-			CheckSensor(sensor_id, d->value);
 			break;
 		case DIGITAL_TEST0:
 			d->value = t.tv_sec % 2;
@@ -173,7 +164,6 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 				d->value = 2;
 			d->value = rand() % 2; 
 			//Gives 0 or 1 or a 2 every 1/100 times
-			CheckSensor(sensor_id, d->value);
 			break;
 		default:
 			Fatal("Unknown sensor id: %d", s->id);
@@ -182,7 +172,7 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 	usleep(100000); // simulate delay in sensor polling
 
 	// Perform sanity check based on Sensor's ID and the DataPoint
-	Sensor_CheckData(s->id, d);
+	Sensor_CheckData(s->id, d->value);
 
 	// Update latest DataPoint if necessary
 	bool result = (d->value != s->newest_data.value);
