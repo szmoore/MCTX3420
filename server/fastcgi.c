@@ -191,9 +191,9 @@ char *FCGI_KeyPair(char *in, const char **key, const char **value)
 }
 
 /**
- * Aids in parsing request parameters. Expected keys along with their type
- * and whether or not they're required are provided. This function will then
- * parse the parameter string to find these keys.
+ * Aids in parsing request parameters. 
+ * Input: The expected keys along with their type and whether or not
+ * they're required.
  * @param context The context to work in
  * @param params The parameter string to be parsed
  * @param values An array of FCGIValue's that specify expected keys
@@ -237,7 +237,7 @@ bool FCGI_ParseRequest(FCGIContext *context, char *params, FCGIValue values[], s
 						}
 
 						if (FCGI_TYPE(val->flags) == FCGI_INT_T)
-							*((int*) val->value) = parsed;
+							*((int*) val->value) = (int) parsed;
 						else
 							*((long*) val->value) = parsed;
 					}	break;

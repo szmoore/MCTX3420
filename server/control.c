@@ -4,50 +4,8 @@
  */
 #include "common.h"
 #include "control.h"
-
-
-const char * g_actuator_names[NUMACTUATORS] = {	
-	"Pressure regulator", "Solenoid 1" 
-};
-
-/*
-void ActuatorHandler(FCGIContext *context, ActuatorId id, const char *set_value) {
-	char *ptr;
-	
-	switch(id) { //Add new actuators here
-		case ACT_PRESSURE: //Suppose is pressure regulator. 0-700 input (kPa)
-		{
-			int value = strtol(set_value, &ptr, 10);
-			if (*ptr == '\0' && value >= 0 && value <= 700) {
-				FCGI_BeginJSON(context, STATUS_OK);
-				FCGI_JSONKey("description");
-				FCGI_JSONValue("\"Set pressure to %d kPa!\"", value);
-				FCGI_EndJSON();
-			} else {
-				FCGI_RejectJSONEx(context, 
-					STATUS_ERROR, "Invalid pressure specified.");
-			}
-		} break;
-		case ACT_SOLENOID1:
-		{
-			int value = strtol(set_value, &ptr, 10);
-			if (*ptr == '\0') {
-				const char *state = "off";
-				if (value)
-					state = "on";
-				FCGI_BeginJSON(context, STATUS_OK);
-				FCGI_JSONKey("description");
-				FCGI_JSONValue("\"Solenoid 1 turned %s!\"", state);
-				FCGI_EndJSON();
-			} else {
-				FCGI_RejectJSON(context, "Invalid actuator value specified");
-			}
-		} break;
-		default:
-			FCGI_RejectJSONEx(context, 
-				STATUS_ERROR, "Invalid actuator id specified.");
-	}
-}*/
+#include "sensor.h"
+#include "actuator.h"
 
 typedef enum ControlState {
 	STATE_STOPPED,
@@ -110,33 +68,48 @@ void Control_Handler(FCGIContext *context, char *params) {
 }
 
 bool Control_Start(const char *experiment_name) {
+	bool ret = false;
+
 	pthread_mutex_lock(&(g_controls.mutex));
 	if (g_controls.state == STATE_STOPPED) {
 		gettimeofday(&(g_controls.start_time), NULL);
 		Sensor_StartAll(experiment_name);
+		Actuator_StartAll(experiment_name);
 		g_controls.state = STATE_RUNNING;
-
-		pthread_mutex_unlock(&(g_controls.mutex));
-		return true;
+		ret = true;
 	}
-	return false;
 	pthread_mutex_unlock(&(g_controls.mutex));
+	return ret;
 }
+
 
 void Control_Pause() {
 	pthread_mutex_lock(&(g_controls.mutex));
 	pthread_mutex_unlock(&(g_controls.mutex));
 }
 
-bool Control_End() {
+bool Control_Stop() {
+	bool ret = false;
+
 	pthread_mutex_lock(&(g_controls.mutex));
 	if (g_controls.state != STATE_STOPPED) {
+		Actuator_StopAll();
 		Sensor_StopAll();
 		g_controls.state = STATE_STOPPED;
-
-		pthread_mutex_unlock(&(g_controls.mutex));	
-		return true;
+		ret = true;
 	}
 	pthread_mutex_unlock(&(g_controls.mutex));	
+	return ret;
+}
+
+bool Control_Lock() {
+	pthread_mutex_lock(&(g_controls.mutex));
+	if (g_controls.state == STATE_RUNNING)
+		return true;
+	pthread_mutex_unlock(&(g_controls.mutex));
 	return false;
+}
+
+void Control_Unlock() {
+	pthread_mutex_unlock(&(g_controls.mutex));
 }

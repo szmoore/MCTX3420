@@ -5,6 +5,7 @@
  */
 
 #include "common.h"
+#include "control.h"
 #include "sensor.h"
 #include "options.h"
 #include <math.h>
@@ -18,9 +19,9 @@ const SensorThreshold thresholds[NUMSENSORS]= {
 	{1,-1,1,-1},		// ANALOG_TEST0
 	{500,0,499,0},		// ANALOG_TEST1
 	{5,-5,4,-4},		// ANALOG_FAIL0
-	{1,0,1,0},		// DIGITAL_TEST0
-	{1,0,1,0},		// DIGITAL_TEST1
-	{1,0,1,0}		// DIGITAL_FAIL0
+	{1,0,1,0},			// DIGITAL_TEST0
+	{1,0,1,0},			// DIGITAL_TEST1
+	{1,0,1,0}			// DIGITAL_FAIL0
 };
 
 /** Human readable names for the sensors **/
@@ -321,18 +322,26 @@ void Sensor_Handler(FCGIContext *context, char * params)
 		return;
 	}
 	Sensor * s = g_sensors+id;
-	
+
 	DataFormat format = Data_GetFormat(&(values[FORMAT]));
 
-	// Begin response
-	Sensor_BeginResponse(context, id, format);
+	if (Control_Lock())
+	{
+		// Begin response
+		Sensor_BeginResponse(context, id, format);
 
-	// Print Data
-	Data_Handler(&(s->data_file), &(values[START_TIME]), &(values[END_TIME]), format, current_time);
-	
-	// Finish response
-	Sensor_EndResponse(context, id, format);
-	
+		// Print Data
+		Data_Handler(&(s->data_file), &(values[START_TIME]), &(values[END_TIME]), format, current_time);
+		
+		// Finish response
+		Sensor_EndResponse(context, id, format);
+
+		Control_Unlock();
+	}
+	else
+	{
+		FCGI_RejectJSON(context, "Experiment is not running.");
+	}
 }
 
 

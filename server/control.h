@@ -9,6 +9,8 @@
 extern void Control_Handler(FCGIContext *context, char *params);
 extern bool Control_Start(const char *experiment_name);
 extern void Control_Pause();
-extern bool Control_End();
+extern bool Control_Stop();
+extern bool Control_Lock();
+extern void Control_Unlock();
 
 #endif

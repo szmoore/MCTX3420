@@ -4,6 +4,7 @@
  */
 
 #include "actuator.h"
+#include "control.h"
 #include "options.h"
 
 /** Array of Actuators (global to this file) initialised by Actuator_Init **/
@@ -255,24 +256,33 @@ void Actuator_Handler(FCGIContext * context, char * params)
 
 	DataFormat format = Data_GetFormat(&(values[FORMAT]));
 
-	// Begin response
-	Actuator_BeginResponse(context, id, format);
-
-	// Set?
-	if (FCGI_RECEIVED(values[SET].flags))
+	if (Control_Lock())
 	{
-		if (format == JSON)
-			FCGI_JSONDouble("set", set);
-	
-		ActuatorControl c;
-		c.value = set;
+		// Begin response
+		Actuator_BeginResponse(context, id, format);
 
-		Actuator_SetControl(a, &c);
+		// Set?
+		if (FCGI_RECEIVED(values[SET].flags))
+		{
+			if (format == JSON)
+				FCGI_JSONDouble("set", set);
+		
+			ActuatorControl c;
+			c.value = set;
+
+			Actuator_SetControl(a, &c);
+		}
+
+		// Print Data
+		Data_Handler(&(a->data_file), &(values[START_TIME]), &(values[END_TIME]), format, current_time);
+		
+		// Finish response
+		Actuator_EndResponse(context, id, format);
+
+		Control_Unlock();
 	}
-
-	// Print Data
-	Data_Handler(&(a->data_file), &(values[START_TIME]), &(values[END_TIME]), format, current_time);
-	
-	// Finish response
-	Actuator_EndResponse(context, id, format);
+	else
+	{
+		FCGI_RejectJSON(context, "Experiment is not running.");
+	}
 }
