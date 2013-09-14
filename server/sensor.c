@@ -52,7 +52,7 @@ void Sensor_Start(Sensor * s, const char * experiment_name)
 {
 	// Set filename
 	char filename[BUFSIZ];
-	if (sprintf(filename, "%s_%d", experiment_name, s->id) >= BUFSIZ)
+	if (sprintf(filename, "%s_s%d", experiment_name, s->id) >= BUFSIZ)
 	{
 		Fatal("Experiment name \"%s\" too long (>%d)", experiment_name, BUFSIZ);
 	}
@@ -249,7 +249,6 @@ void Sensor_BeginResponse(FCGIContext * context, SensorId id, DataFormat format)
 		case JSON:
 			FCGI_BeginJSON(context, STATUS_OK);
 			FCGI_JSONLong("id", id);
-			FCGI_JSONKey("data");
 			break;
 		default:
 			FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
@@ -314,62 +313,22 @@ void Sensor_Handler(FCGIContext *context, char * params)
 		// Error occured; FCGI_RejectJSON already called
 		return;
 	}
-	else if (id < 0 || id >= NUMSENSORS)
+
+	// Error checking on sensor id
+	if (id < 0 || id >= NUMSENSORS)
 	{
-		FCGI_RejectJSON(context, "Invalid sensor id specified");
+		FCGI_RejectJSON(context, "Invalid sensor id");
 		return;
 	}
-
-	// Get Sensor and format
 	Sensor * s = g_sensors+id;
-	DataFormat format = JSON;
-
-	// Check if format type was specified
-	if (FCGI_RECEIVED(values[FORMAT].flags))
-	{
-		if (strcmp(fmt_str, "json") == 0)
-			format = JSON;
-		else if (strcmp(fmt_str, "tsv") == 0)
-			format = TSV;
-		else 
-		{
-			FCGI_RejectJSON(context, "Unknown format type specified.");
-			return;
-		}
-	}
+	
+	DataFormat format = Data_GetFormat(&(values[FORMAT]));
 
 	// Begin response
 	Sensor_BeginResponse(context, id, format);
-	
-	// If a time was specified
-	if (FCGI_RECEIVED(values[START_TIME].flags) || FCGI_RECEIVED(values[END_TIME].flags))
-	{
-		// Wrap times relative to the current time
-		if (start_time < 0)
-			start_time += current_time;
-		if (end_time < 0)
-			end_time += current_time;
 
-		// Print points by time range
-		Data_PrintByTimes(&(s->data_file), start_time, end_time, format);
-	}
-	else // No time was specified; just return a recent set of points
-	{
-		pthread_mutex_lock(&(s->data_file.mutex));
-			int start_index = s->data_file.num_points-DATA_BUFSIZ;
-			int end_index = s->data_file.num_points;
-		pthread_mutex_unlock(&(s->data_file.mutex));
-
-		// Bounds check
-		if (start_index < 0)
-			start_index = 0;
-		if (end_index < 0)
-			end_index = 0;
-
-		// Print points by indexes
-		Log(LOGDEBUG, "Sensor %d file \"%s\" indexes %d->%d", s->id, s->data_file.filename, start_index, end_index);
-		Data_PrintByIndexes(&(s->data_file), start_index, end_index, format);
-	}
+	// Print Data
+	Data_Handler(&(s->data_file), &(values[START_TIME]), &(values[END_TIME]), format, current_time);
 	
 	// Finish response
 	Sensor_EndResponse(context, id, format);

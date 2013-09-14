@@ -14,6 +14,7 @@ void Data_Init(DataFile * df)
 {
 	// Everything is NULL
 	df->filename = NULL;
+	pthread_mutex_init(&(df->mutex), NULL);
 	df->file = NULL;
 }
 
@@ -284,4 +285,75 @@ int Data_FindByTime(DataFile * df, double time_stamp, DataPoint * closest)
 	
 	return index;
 	
+}
+
+/**
+ * Helper; handle FCGI response that requires data
+ * Should be called first.
+ * @param df - DataFile to access
+ * @param start - Info about start_time param 
+ * @param end - Info about end_time param
+ * @param fmt - Info about format param
+ * @param current_time - Current time
+ */
+void Data_Handler(DataFile * df, FCGIValue * start, FCGIValue * end, DataFormat format, double current_time)
+{
+	double start_time = *(double*)(start->value);
+	double end_time = *(double*)(end->value);
+
+	if (format == JSON)
+	{
+		FCGI_JSONKey("data");
+	}
+
+	// If a time was specified
+	if (FCGI_RECEIVED(start->flags) || FCGI_RECEIVED(end->flags))
+	{
+		// Wrap times relative to the current time
+		if (start_time < 0)
+			start_time += current_time;
+		if (end_time < 0)
+			end_time += current_time;
+
+		// Print points by time range
+		Data_PrintByTimes(df, start_time, end_time, format);
+
+	}
+	else // No time was specified; just return a recent set of points
+	{
+		pthread_mutex_lock(&(df->mutex));
+			int start_index = df->num_points-DATA_BUFSIZ;
+			int end_index = df->num_points-1;
+		pthread_mutex_unlock(&(df->mutex));
+
+		// Bounds check
+		if (start_index < 0)
+			start_index = 0;
+		if (end_index < 0)
+			end_index = 0;
+
+		// Print points by indexes
+		Data_PrintByIndexes(df, start_index, end_index, format);
+	}
+
+}
+
+/**
+ * Helper - Convert human readable format string to DataFormat
+ * @param fmt - FCGIValue to use
+ */
+DataFormat Data_GetFormat(FCGIValue * fmt)
+{
+	char * fmt_str = *(char**)(fmt->value);
+	// Check if format type was specified
+	if (FCGI_RECEIVED(fmt->flags))
+	{
+		if (strcmp(fmt_str, "json") == 0)
+			return JSON;
+		else if (strcmp(fmt_str, "tsv") == 0)
+			return TSV;
+		else
+			Log(LOGERR, "Unknown format type \"%s\"", fmt_str);
+	}
+	return JSON;
 }

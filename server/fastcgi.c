@@ -12,6 +12,7 @@
 
 #include "common.h"
 #include "sensor.h"
+#include "actuator.h"
 #include "control.h"
 #include "options.h"
 
@@ -457,6 +458,8 @@ void * FCGI_RequestLoop (void *data)
 			module_handler = Control_Handler;
 		} else if (!strcmp("sensors", module)) {
 			module_handler = Sensor_Handler;
+		} else if (!strcmp("actuators", module)) {
+			module_handler = Actuator_Handler;
 		}
 
 		context.current_module = module;
