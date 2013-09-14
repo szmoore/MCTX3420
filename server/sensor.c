@@ -69,20 +69,41 @@ void Sensor_Start(Sensor * s, const char * experiment_name)
 }
 
 /**
+ * Pause a sensor from recording DataPoints. Blocks until it is paused.
+ * @param s - The Sensor to pause
+ */
+void Sensor_Pause(Sensor *s)
+{
+	if (s->record_data)
+	{
+		s->record_data = false;
+		pthread_join(s->thread, NULL);
+	}
+}
+
+/**
+ * Resumes a paused sensor.
+ * @param s - The Sensor to resume
+ */
+void Sensor_Resume(Sensor *s)
+{
+	if (!s->record_data)
+	{
+		s->record_data = true;
+		pthread_create(&(s->thread), NULL, Sensor_Loop, (void*)(s));
+	}
+}
+
+/**
  * Stop a Sensor from recording DataPoints. Blocks until it has stopped.
  * @param s - The Sensor to stop
  */
 void Sensor_Stop(Sensor * s)
 {
-	// Stop
-	if (s->record_data)
-	{
-		s->record_data = false;
-		pthread_join(s->thread, NULL); // Wait for thread to exit
-		Data_Close(&(s->data_file)); // Close DataFile
-		s->newest_data.time_stamp = 0;
-		s->newest_data.value = 0;
-	}
+	Sensor_Pause(s);
+	Data_Close(&(s->data_file)); // Close DataFile
+	s->newest_data.time_stamp = 0;
+	s->newest_data.value = 0;
 }
 
 /**
@@ -92,6 +113,18 @@ void Sensor_StopAll()
 {
 	for (int i = 0; i < NUMSENSORS; ++i)
 		Sensor_Stop(g_sensors+i);
+}
+
+void Sensor_PauseAll()
+{
+	for (int i = 0; i < NUMSENSORS; ++i)
+		Sensor_Pause(g_sensors+i);
+}
+
+void Sensor_ResumeAll()
+{
+	for (int i = 0; i < NUMSENSORS; ++i)
+		Sensor_Resume(g_sensors+i);
 }
 
 /**
@@ -325,23 +358,14 @@ void Sensor_Handler(FCGIContext *context, char * params)
 
 	DataFormat format = Data_GetFormat(&(values[FORMAT]));
 
-	if (Control_Lock())
-	{
-		// Begin response
-		Sensor_BeginResponse(context, id, format);
+	// Begin response
+	Sensor_BeginResponse(context, id, format);
 
-		// Print Data
-		Data_Handler(&(s->data_file), &(values[START_TIME]), &(values[END_TIME]), format, current_time);
-		
-		// Finish response
-		Sensor_EndResponse(context, id, format);
-
-		Control_Unlock();
-	}
-	else
-	{
-		FCGI_RejectJSON(context, "Experiment is not running.");
-	}
+	// Print Data
+	Data_Handler(&(s->data_file), &(values[START_TIME]), &(values[END_TIME]), format, current_time);
+	
+	// Finish response
+	Sensor_EndResponse(context, id, format);
 }
 
 

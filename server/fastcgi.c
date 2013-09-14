@@ -439,6 +439,7 @@ void * FCGI_RequestLoop (void *data)
 		Log(LOGDEBUG, "Got request #%d", context.response_number);
 		ModuleHandler module_handler = NULL;
 		char module[BUFSIZ], params[BUFSIZ];
+		bool lock_required = false;
 		
 		//strncpy doesn't zero-truncate properly
 		snprintf(module, BUFSIZ, "%s", getenv("DOCUMENT_URI_LOCAL"));
@@ -462,13 +463,21 @@ void * FCGI_RequestLoop (void *data)
 			module_handler = Control_Handler;
 		} else if (!strcmp("sensors", module)) {
 			module_handler = Sensor_Handler;
+			lock_required = true;
 		} else if (!strcmp("actuators", module)) {
 			module_handler = Actuator_Handler;
+			lock_required = true;
 		}
 
 		context.current_module = module;
 		if (module_handler) {
-			module_handler(&context, params);
+			if (lock_required && !Control_Lock()) {
+				FCGI_RejectJSONEx(&context, STATUS_NOTRUNNING, "Experiment is not running.");
+			} else {
+				module_handler(&context, params);
+				if (lock_required)
+					Control_Unlock();
+			}
 		} else {
 			FCGI_RejectJSON(&context, "Unhandled module");
 		}

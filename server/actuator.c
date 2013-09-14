@@ -54,6 +54,25 @@ void Actuator_Start(Actuator * a, const char * experiment_name)
 	pthread_create(&(a->thread), NULL, Actuator_Loop, (void*)(a));
 }
 
+void Actuator_Pause(Actuator *a)
+{
+	if (a->activated)
+	{
+		a->activated = false;
+		Actuator_SetControl(a, NULL);
+		pthread_join(a->thread, NULL); // Wait for thread to exit	
+	}
+}
+
+void Actuator_Resume(Actuator *a)
+{
+	if (!a->activated)
+	{
+		a->activated = true; 
+		pthread_create(&(a->thread), NULL, Actuator_Loop, (void*)(a));
+	}
+}
+
 /**
  * Stop an Actuator
  * @param s - The Actuator to stop
@@ -61,11 +80,21 @@ void Actuator_Start(Actuator * a, const char * experiment_name)
 void Actuator_Stop(Actuator * a)
 {
 	// Stop
-	a->activated = false;
-	Actuator_SetControl(a, NULL);
-	pthread_join(a->thread, NULL); // Wait for thread to exit
+	Actuator_Pause(a);
 	Data_Close(&(a->data_file)); // Close DataFile
 
+}
+
+void Actuator_PauseAll()
+{
+	for (int i = 0; i < NUMACTUATORS; ++i)
+		Actuator_Pause(g_actuators+i);	
+}
+
+void Actuator_ResumeAll()
+{
+	for (int i = 0; i < NUMACTUATORS; ++i)
+		Actuator_Resume(g_actuators+i);	
 }
 
 /**
@@ -256,33 +285,24 @@ void Actuator_Handler(FCGIContext * context, char * params)
 
 	DataFormat format = Data_GetFormat(&(values[FORMAT]));
 
-	if (Control_Lock())
+	// Begin response
+	Actuator_BeginResponse(context, id, format);
+
+	// Set?
+	if (FCGI_RECEIVED(values[SET].flags))
 	{
-		// Begin response
-		Actuator_BeginResponse(context, id, format);
+		if (format == JSON)
+			FCGI_JSONDouble("set", set);
+	
+		ActuatorControl c;
+		c.value = set;
 
-		// Set?
-		if (FCGI_RECEIVED(values[SET].flags))
-		{
-			if (format == JSON)
-				FCGI_JSONDouble("set", set);
-		
-			ActuatorControl c;
-			c.value = set;
-
-			Actuator_SetControl(a, &c);
-		}
-
-		// Print Data
-		Data_Handler(&(a->data_file), &(values[START_TIME]), &(values[END_TIME]), format, current_time);
-		
-		// Finish response
-		Actuator_EndResponse(context, id, format);
-
-		Control_Unlock();
+		Actuator_SetControl(a, &c);
 	}
-	else
-	{
-		FCGI_RejectJSON(context, "Experiment is not running.");
-	}
+
+	// Print Data
+	Data_Handler(&(a->data_file), &(values[START_TIME]), &(values[END_TIME]), format, current_time);
+	
+	// Finish response
+	Actuator_EndResponse(context, id, format);
 }

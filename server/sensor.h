@@ -55,7 +55,10 @@ extern void Sensor_StartAll(const char * experiment_name); // Start all Sensors 
 extern void Sensor_StopAll(); // Stop all Sensors recording data
 extern void Sensor_Start(Sensor * s, const char * experiment_name); // Start a sensor recording datas
 extern void Sensor_Stop(Sensor * s); // Stop a Sensor from recording data
-
+extern void Sensor_Pause(Sensor *s);
+extern void Sensor_Resume(Sensor *s);
+extern void Sensor_PauseAll();
+extern void Sensor_ResumeAll();
 
 extern void * Sensor_Loop(void * args); // Main loop for a thread that handles a Sensor
 extern bool Sensor_Read(Sensor * s, DataPoint * d); // Read a single DataPoint, indicating if it has changed since the last one

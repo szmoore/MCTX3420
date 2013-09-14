@@ -61,6 +61,9 @@ extern void Actuator_Init(); // One off initialisation of *all* Actuators
 extern void Actuator_StartAll(const char * experiment_name); // Start all Actuators
 extern void Actuator_StopAll(); // Stop all Actuators
 
+extern void Actuator_PauseAll();
+extern void Actuator_ResumeAll();
+
 extern void Actuator_Start(Actuator * a, const char * experiment_name); // Start a Actuator
 extern void Actuator_Stop(Actuator * a); // Stop an Actuator
 

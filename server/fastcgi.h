@@ -17,7 +17,8 @@ typedef enum StatusCodes {
 	STATUS_OK = 1,
 	STATUS_ERROR = -1,
 	STATUS_UNAUTHORIZED = -2,
-	STATUS_OUTOFRANGE = -3
+	STATUS_NOTRUNNING = -3,
+	STATUS_ALREADYEXISTS = -4
 } StatusCodes;
 
 #define FCGI_PARAM_REQUIRED (1 << 0)
