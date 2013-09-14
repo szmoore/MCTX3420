@@ -135,7 +135,7 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 	// Set time stamp
 	struct timeval t;
 	gettimeofday(&t, NULL);
-	d->time_stamp = TIMEVAL_DIFF(t, g_options.start_time);
+	d->time_stamp = TIMEVAL_DIFF(t, *Control_GetStartTime());
 
 	// Read value based on Sensor Id
 	switch (s->id)
@@ -285,7 +285,7 @@ void Sensor_Handler(FCGIContext *context, char * params)
 {
 	struct timeval now;
 	gettimeofday(&now, NULL);
-	double current_time = TIMEVAL_DIFF(now, g_options.start_time);
+	double current_time = TIMEVAL_DIFF(now, *Control_GetStartTime());
 
 	int id = 0;
 	double start_time = 0;

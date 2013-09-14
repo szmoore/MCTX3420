@@ -113,3 +113,7 @@ bool Control_Lock() {
 void Control_Unlock() {
 	pthread_mutex_unlock(&(g_controls.mutex));
 }
+
+const struct timeval* Control_GetStartTime() {
+	return &g_controls.start_time;
+}

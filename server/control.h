@@ -12,5 +12,6 @@ extern void Control_Pause();
 extern bool Control_Stop();
 extern bool Control_Lock();
 extern void Control_Unlock();
+extern const struct timeval* Control_GetStartTime();
 
 #endif

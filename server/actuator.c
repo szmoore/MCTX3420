@@ -144,7 +144,7 @@ void Actuator_SetValue(Actuator * a, double value)
 	struct timeval t;
 	gettimeofday(&t, NULL);
 
-	DataPoint d = {TIMEVAL_DIFF(t, g_options.start_time), value};
+	DataPoint d = {TIMEVAL_DIFF(t, *Control_GetStartTime()), value};
 	//TODO: Set actuator
 	switch (a->id)
 	{
@@ -212,7 +212,7 @@ void Actuator_Handler(FCGIContext * context, char * params)
 {
 	struct timeval now;
 	gettimeofday(&now, NULL);
-	double current_time = TIMEVAL_DIFF(now, g_options.start_time);
+	double current_time = TIMEVAL_DIFF(now, *Control_GetStartTime());
 	int id = 0;
 	double set = 0;
 	double start_time = 0;
