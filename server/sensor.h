@@ -11,6 +11,7 @@
 /** Number of sensors **/
 #define NUMSENSORS 6 
 
+/** Sensor ids - there should be correspondence with the names in g_sensor_names **/
 typedef enum SensorId 
 {
 	ANALOG_TEST0,
@@ -21,11 +22,8 @@ typedef enum SensorId
 	DIGITAL_FAIL0
 } SensorId;
 
-
-
 /** Human readable names for the sensors **/
 extern const char * g_sensor_names[NUMSENSORS];
-
 
 /** Structure to represent a sensor **/
 typedef struct
@@ -40,7 +38,6 @@ typedef struct
 	pthread_t thread;
 	/** Most recently recorded data **/
 	DataPoint newest_data;
-
 } Sensor;
 
 // Structure to define the warning and error thresholds of the sensors
