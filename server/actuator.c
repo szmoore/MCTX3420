@@ -220,7 +220,7 @@ void Actuator_Handler(FCGIContext * context, char * params)
 
 	// key/value pairs
 	FCGIValue values[] = {
-		{"id", &id, FCGI_REQUIRED(FCGI_LONG_T)}, 
+		{"id", &id, FCGI_REQUIRED(FCGI_INT_T)}, 
 		{"set", &set, FCGI_DOUBLE_T},
 		{"start_time", &start_time, FCGI_DOUBLE_T},
 		{"end_time", &end_time, FCGI_DOUBLE_T},
