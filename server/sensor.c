@@ -5,7 +5,6 @@
  */
 
 #include "common.h"
-#include "control.h"
 #include "sensor.h"
 #include "options.h"
 #include <math.h>
@@ -45,95 +44,76 @@ void Sensor_Init()
 }
 
 /**
- * Start a Sensor recording DataPoints
- * @param s - The Sensor to start
- * @param experiment_name - Prepended to DataFile filename
+ * Sets the sensor to the desired control mode. No checks are
+ * done to see if setting to the desired mode will conflict with
+ * the current mode - the caller must guarantee this itself.
+ * @param s The sensor whose mode is to be changed
+ * @param mode The mode to be changed to
+ * @param arg An argument specific to the mode to be set. 
+ *            e.g for CONTROL_START it represents the experiment name.
  */
-void Sensor_Start(Sensor * s, const char * experiment_name)
+void Sensor_SetMode(Sensor * s, ControlModes mode, void * arg)
 {
-	// Set filename
-	char filename[BUFSIZ];
-	if (sprintf(filename, "%s_s%d", experiment_name, s->id) >= BUFSIZ)
+	switch(mode)
 	{
-		Fatal("Experiment name \"%s\" too long (>%d)", experiment_name, BUFSIZ);
+		case CONTROL_START:
+			{
+				// Set filename
+				char filename[BUFSIZ];
+				const char *experiment_name = (const char*) arg;
+				int ret;
+
+				if (snprintf(filename, BUFSIZ, "%s_s%d", experiment_name, s->id) >= BUFSIZ)
+				{
+					Fatal("Experiment name \"%s\" too long (>%d)", experiment_name, BUFSIZ);
+				}
+
+				Log(LOGDEBUG, "Sensor %d with DataFile \"%s\"", s->id, filename);
+				// Open DataFile
+				Data_Open(&(s->data_file), filename);
+
+				s->activated = true;
+				s->record_data = true; // Don't forget this!
+
+				// Create the thread
+				ret = pthread_create(&(s->thread), NULL, Sensor_Loop, (void*)(s));
+				if (ret != 0)
+				{
+					Fatal("Failed to create Sensor_Loop for Sensor %d", s->id);
+				}
+			}
+			break;
+		case CONTROL_EMERGENCY:
+		case CONTROL_PAUSE:
+			s->record_data = false;
+		break;
+		case CONTROL_RESUME:
+			s->record_data = true;
+		break;
+		case CONTROL_STOP:
+			s->activated = false;
+			s->record_data = false;
+			pthread_join(s->thread, NULL);
+
+			Data_Close(&(s->data_file)); // Close DataFile
+			s->newest_data.time_stamp = 0;
+			s->newest_data.value = 0;
+		break;
+		default:
+			Fatal("Unknown control mode: %d", mode);
 	}
-
-	Log(LOGDEBUG, "Sensor %d with DataFile \"%s\"", s->id, filename);
-	// Open DataFile
-	Data_Open(&(s->data_file), filename);
-
-	s->record_data = true; // Don't forget this!
-
-	// Create the thread
-	pthread_create(&(s->thread), NULL, Sensor_Loop, (void*)(s));
 }
 
 /**
- * Pause a sensor from recording DataPoints. Blocks until it is paused.
- * @param s - The Sensor to pause
+ * Sets all sensors to the desired mode. 
+ * @see Sensor_SetMode for more information.
+ * @param mode The mode to be changed to
+ * @param arg An argument specific to the mode to be set.
  */
-void Sensor_Pause(Sensor *s)
+void Sensor_SetModeAll(ControlModes mode, void * arg)
 {
-	if (s->record_data)
-	{
-		s->record_data = false;
-		pthread_join(s->thread, NULL);
-	}
-}
-
-/**
- * Resumes a paused sensor.
- * @param s - The Sensor to resume
- */
-void Sensor_Resume(Sensor *s)
-{
-	if (!s->record_data)
-	{
-		s->record_data = true;
-		pthread_create(&(s->thread), NULL, Sensor_Loop, (void*)(s));
-	}
-}
-
-/**
- * Stop a Sensor from recording DataPoints. Blocks until it has stopped.
- * @param s - The Sensor to stop
- */
-void Sensor_Stop(Sensor * s)
-{
-	Sensor_Pause(s);
-	Data_Close(&(s->data_file)); // Close DataFile
-	s->newest_data.time_stamp = 0;
-	s->newest_data.value = 0;
-}
-
-/**
- * Stop all Sensors
- */
-void Sensor_StopAll()
-{
-	for (int i = 0; i < NUMSENSORS; ++i)
-		Sensor_Stop(g_sensors+i);
-}
-
-void Sensor_PauseAll()
-{
-	for (int i = 0; i < NUMSENSORS; ++i)
-		Sensor_Pause(g_sensors+i);
-}
-
-void Sensor_ResumeAll()
-{
-	for (int i = 0; i < NUMSENSORS; ++i)
-		Sensor_Resume(g_sensors+i);
-}
-
-/**
- * Start all Sensors
- */
-void Sensor_StartAll(const char * experiment_name)
-{
-	for (int i = 0; i < NUMSENSORS; ++i)
-		Sensor_Start(g_sensors+i, experiment_name);
+	for (int i = 0; i < NUMSENSORS; i++)
+		Sensor_SetMode(&g_sensors[i], mode, arg);
 }
 
 
@@ -229,14 +209,22 @@ void * Sensor_Loop(void * arg)
 	Log(LOGDEBUG, "Sensor %d starts", s->id);
 
 	// Until the sensor is stopped, record data points
-	while (s->record_data)
+	while (s->activated)
 	{
-		DataPoint d;
-		//Log(LOGDEBUG, "Sensor %d reads data [%f,%f]", s->id, d.time_stamp, d.value);
-		if (Sensor_Read(s, &d)) // If new DataPoint is read:
+		if (s->record_data)
 		{
-			//Log(LOGDEBUG, "Sensor %d saves data [%f,%f]", s->id, d.time_stamp, d.value);
-			Data_Save(&(s->data_file), &d, 1); // Record it
+			DataPoint d;
+			//Log(LOGDEBUG, "Sensor %d reads data [%f,%f]", s->id, d.time_stamp, d.value);
+			if (Sensor_Read(s, &d)) // If new DataPoint is read:
+			{
+				//Log(LOGDEBUG, "Sensor %d saves data [%f,%f]", s->id, d.time_stamp, d.value);
+				Data_Save(&(s->data_file), &d, 1); // Record it
+			}
+		}
+		else
+		{
+			//Do something? wait?
+			usleep(100000);
 		}
 	}
 	

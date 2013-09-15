@@ -7,26 +7,13 @@
 #include "sensor.h"
 #include "actuator.h"
 
-typedef enum ControlState {
-	STATE_STOPPED,
-	STATE_PAUSED,
-	STATE_RUNNING
-} ControlState;
-
-typedef enum Mode {
-	START,
-	PAUSE,
-	RESUME,
-	STOP
-} Mode;
-
 typedef struct ControlData {
-	ControlState state;
+	ControlModes current_mode;
 	pthread_mutex_t mutex;
 	struct timeval start_time;
 } ControlData;
 
-ControlData g_controls = {STATE_STOPPED, PTHREAD_MUTEX_INITIALIZER, {0}};
+ControlData g_controls = {CONTROL_STOP, PTHREAD_MUTEX_INITIALIZER, {0}};
 
 static bool ExperimentExists(const char *experiment_name) {
 	FILE *fp = fopen(experiment_name, "r");
@@ -45,7 +32,7 @@ static bool ExperimentExists(const char *experiment_name) {
 void Control_Handler(FCGIContext *context, char *params) {
 	const char *action, *key = "", *name = "";
 	bool force = false;
-	Mode mode;
+	ControlModes desired_mode;
 
 	FCGIValue values[4] = {
 		{"action", &action, FCGI_REQUIRED(FCGI_STRING_T)},
@@ -60,17 +47,19 @@ void Control_Handler(FCGIContext *context, char *params) {
 	if (!strcmp(action, "lock")) {
 		FCGI_LockControl(context, force);
 		return;
+	} else if (!strcmp(action, "emergency")) {
+		desired_mode = CONTROL_EMERGENCY;
 	} else if (FCGI_HasControl(context, key)) {
 		if (!strcmp(action, "release")) {
 			FCGI_ReleaseControl(context);
 		} else if (!strcmp(action, "start")) {
-			mode = START;
+			desired_mode = CONTROL_START;
 		} else if (!strcmp(action, "pause")) {
-			mode = PAUSE;
+			desired_mode = CONTROL_PAUSE;
 		} else if (!strcmp(action, "resume")) {
-			mode = RESUME;
+			desired_mode = CONTROL_RESUME;
 		} else if (!strcmp(action, "stop")) {
-			mode = STOP;
+			desired_mode = CONTROL_STOP;
 		} else {
 			FCGI_RejectJSON(context, "Unknown action specified.");
 			return;
@@ -81,107 +70,83 @@ void Control_Handler(FCGIContext *context, char *params) {
 		return;
 	}
 
-	switch(mode) {
-		case START:
-			if (!*name) {
-				FCGI_RejectJSON(context, "An experiment name must be provided");
-			} else if (ExperimentExists(name) && !force) {
-				FCGI_RejectJSONEx(context, STATUS_ALREADYEXISTS,
-					"An experiment with the specified name already exists.");
-			} else if (!Control_Start(name)) {
-				FCGI_RejectJSON(context, "An experiment is already running.");
-			} else {
-				FCGI_BeginJSON(context, STATUS_OK);
-				FCGI_EndJSON();
-			}
-			break;
-		case PAUSE:
-			if (!Control_Pause()) {
-				FCGI_RejectJSON(context, "No experiment to pause.");
-			} else {
-				FCGI_BeginJSON(context, STATUS_OK);
-				FCGI_EndJSON();
-			}
-			break;
-		case RESUME:
-			if (!Control_Resume()) {
-				FCGI_RejectJSON(context, "No experiment to resume.");
-			} else {
-				FCGI_BeginJSON(context, STATUS_OK);
-				FCGI_EndJSON();				
-			}
-			break;
-		case STOP:
-			if (!Control_Stop()) {
-				FCGI_RejectJSON(context, "No experiment to stop.");
-			} else {
-				FCGI_BeginJSON(context, STATUS_OK);
-				FCGI_EndJSON();
-			}
-			break;
-	}
-}
-
-bool Control_Start(const char *experiment_name) {
-	bool ret = false;
-
-	pthread_mutex_lock(&(g_controls.mutex));
-	if (g_controls.state == STATE_STOPPED) {
-		FILE *fp = fopen(experiment_name, "a");
-		if (fp) {
-			fclose(fp);
-			gettimeofday(&(g_controls.start_time), NULL);
-			Sensor_StartAll(experiment_name);
-			Actuator_StartAll(experiment_name);
-			g_controls.state = STATE_RUNNING;
-			ret = true;
+	void *arg = NULL;
+	if (desired_mode == CONTROL_START) {
+		int len = strlen(name);
+		if (len <= 0) {
+			FCGI_RejectJSON(context, "An experiment name must be specified.");
+			return;
+		} else if (ExperimentExists(name) && !force) {
+			FCGI_RejectJSON(context, "An experiment with that name already exists.");
+			return;
 		}
+		arg = (void*)name;
+	}
+
+	const char *ret;
+	if ((ret = Control_SetMode(desired_mode, arg)) != NULL) {
+		FCGI_RejectJSON(context, ret);
+	} else {
+		FCGI_BeginJSON(context, STATUS_OK);
+		FCGI_JSONPair("description", "ok");
+		FCGI_EndJSON();
+	}
+}
+
+/**
+ * Sets the mode to the desired mode, if possible.
+ * @param desired_mode The mode to be set to
+ * @param arg An argument specific to the mode to be set. 
+ * @return NULL on success, an error message on failure.
+ */
+const char* Control_SetMode(ControlModes desired_mode, void * arg)
+{
+	const char *ret = NULL;
+
+	pthread_mutex_lock(&(g_controls.mutex));
+	if (g_controls.current_mode == CONTROL_EMERGENCY) {
+		ret = "In emergency mode. Restart software.";
+	} else if (g_controls.current_mode == desired_mode) {
+		ret = "Already in desired mode.";
+	} else if (desired_mode == CONTROL_START) {
+		if (g_controls.current_mode == CONTROL_STOP) {
+			FILE *fp = fopen((const char*) arg, "a");
+			if (fp) {
+				fclose(fp);
+				gettimeofday(&(g_controls.start_time), NULL);
+			} else {
+				ret = "Failed to create experiment placeholder";
+			}
+		} else {
+			ret = "Cannot start when not in a stopped state.";
+		}
+	} else if (desired_mode == CONTROL_RESUME) {
+		if (g_controls.current_mode != CONTROL_PAUSE)
+			ret = "Cannot resume when not in a paused state.";
+	}
+	
+	if (ret == NULL) {
+		Actuator_SetModeAll(desired_mode, arg);
+		Sensor_SetModeAll(desired_mode, arg);
+		g_controls.current_mode = desired_mode;
 	}
 	pthread_mutex_unlock(&(g_controls.mutex));
 	return ret;
 }
 
-
-bool Control_Pause() {
-	bool ret = false;
+/**
+ * Gets the current mode.
+ * @return The current mode
+ */
+ControlModes Control_GetMode() {
+	ControlModes ret;
 	pthread_mutex_lock(&(g_controls.mutex));
-	if (g_controls.state == STATE_RUNNING) {
-		Actuator_PauseAll();
-		Sensor_PauseAll();
-		g_controls.state = STATE_PAUSED;
-		ret = true;
-	}
+	ret = g_controls.current_mode;
 	pthread_mutex_unlock(&(g_controls.mutex));
 	return ret;
 }
 
-bool Control_Resume() {
-	bool ret = false;
-	pthread_mutex_lock(&(g_controls.mutex));
-	if (g_controls.state == STATE_PAUSED) {
-		Actuator_ResumeAll();
-		Sensor_ResumeAll();
-		g_controls.state = STATE_RUNNING;
-		ret = true;
-	}
-	pthread_mutex_unlock(&(g_controls.mutex));
-	return ret;
-}
-
-bool Control_Stop() {
-	bool ret = false;
-
-	pthread_mutex_lock(&(g_controls.mutex));
-	if (g_controls.state != STATE_STOPPED) {
-		Actuator_StopAll();
-		Sensor_StopAll();
-		g_controls.state = STATE_STOPPED;
-		ret = true;
-	}
-	pthread_mutex_unlock(&(g_controls.mutex));	
-	return ret;
-}
-
+/*
 bool Control_Lock() {
 	pthread_mutex_lock(&(g_controls.mutex));
 	if (g_controls.state == STATE_RUNNING || g_controls.state == STATE_PAUSED)
@@ -192,8 +157,12 @@ bool Control_Lock() {
 
 void Control_Unlock() {
 	pthread_mutex_unlock(&(g_controls.mutex));
-}
+}*/
 
+/**
+ * Gets the start time for the current experiment
+ * @return the start time
+ */
 const struct timeval* Control_GetStartTime() {
 	return &g_controls.start_time;
 }

@@ -5,14 +5,20 @@
 #ifndef _CONTROL_H
 #define _CONTROL_H
 
+typedef enum ControlModes {
+	CONTROL_START,
+	CONTROL_PAUSE,
+	CONTROL_RESUME,
+	CONTROL_STOP,
+	CONTROL_EMERGENCY
+} ControlModes;
+
 /** ID codes for all the actuators **/
 extern void Control_Handler(FCGIContext *context, char *params);
-extern bool Control_Start(const char *experiment_name);
-extern bool Control_Pause();
-extern bool Control_Resume();
-extern bool Control_Stop();
-extern bool Control_Lock();
-extern void Control_Unlock();
+extern const char* Control_SetMode(ControlModes desired_mode, void * arg);
+extern ControlModes Control_GetMode();
+//extern bool Control_Lock();
+//extern void Control_Unlock();
 extern const struct timeval* Control_GetStartTime();
 
 #endif

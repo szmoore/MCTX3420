@@ -32,6 +32,8 @@ typedef struct
 	SensorId id;
 	/** DataFile to store sensor values in **/
 	DataFile data_file;
+	/** Indicates whether the Sensor is not stopped **/
+	bool activated;
 	/** Indicates whether the Sensor should record data **/
 	bool record_data;
 	/** Thread the Sensor is running in **/
@@ -51,14 +53,8 @@ typedef struct
 
 extern void Sensor_Init(); // One off initialisation of *all* sensors
 
-extern void Sensor_StartAll(const char * experiment_name); // Start all Sensors recording data
-extern void Sensor_StopAll(); // Stop all Sensors recording data
-extern void Sensor_Start(Sensor * s, const char * experiment_name); // Start a sensor recording datas
-extern void Sensor_Stop(Sensor * s); // Stop a Sensor from recording data
-extern void Sensor_Pause(Sensor *s);
-extern void Sensor_Resume(Sensor *s);
-extern void Sensor_PauseAll();
-extern void Sensor_ResumeAll();
+extern void Sensor_SetModeAll(ControlModes mode, void * arg);
+extern void Sensor_SetMode(Sensor * s, ControlModes mode, void * arg);
 
 extern void * Sensor_Loop(void * args); // Main loop for a thread that handles a Sensor
 extern bool Sensor_Read(Sensor * s, DataPoint * d); // Read a single DataPoint, indicating if it has changed since the last one

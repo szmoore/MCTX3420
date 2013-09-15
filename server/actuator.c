@@ -1,10 +1,9 @@
 /**
  * @file actuator.c
- * @purpose Implementation of Actuator related functionality
+ * @brief Implementation of Actuator related functionality
  */
 
 #include "actuator.h"
-#include "control.h"
 #include "options.h"
 
 /** Array of Actuators (global to this file) initialised by Actuator_Init **/
@@ -29,90 +28,76 @@ void Actuator_Init()
 }
 
 /**
- * Start an Actuator
- * @param a - The Actuator to start
- * @param experiment_name - Prepended to DataFile filename
+ * Sets the actuator to the desired mode. No checks are
+ * done to see if setting to the desired mode will conflict with
+ * the current mode - the caller must guarantee this itself.
+ * @param a The actuator whose mode is to be changed
+ * @param mode The mode to be changed to
+ * @param arg An argument specific to the mode to be set. 
+ *            e.g for CONTROL_START it represents the experiment name.
  */
-void Actuator_Start(Actuator * a, const char * experiment_name)
+void Actuator_SetMode(Actuator * a, ControlModes mode, void *arg)
 {
-	// Set filename
-	char filename[BUFSIZ];
-	if (sprintf(filename, "%s_a%d", experiment_name, a->id) >= BUFSIZ)
+	switch (mode)
 	{
-		Fatal("Experiment name \"%s\" too long (>%d)", experiment_name, BUFSIZ);
-	}
+		case CONTROL_START:
+			{
+				char filename[BUFSIZ];
+				const char *experiment_name = (const char*) arg;
+				int ret;
 
-	Log(LOGDEBUG, "Actuator %d with DataFile \"%s\"", a->id, filename);
-	// Open DataFile
-	Data_Open(&(a->data_file), filename);
+				if (snprintf(filename, BUFSIZ, "%s_a%d", experiment_name, a->id) >= BUFSIZ)
+				{
+					Fatal("Experiment name \"%s\" too long (>%d)", experiment_name, BUFSIZ);
+				}
 
-	a->activated = true; // Don't forget this
-	
-	a->control_changed = false;
+				Log(LOGDEBUG, "Actuator %d with DataFile \"%s\"", a->id, filename);
+				// Open DataFile
+				Data_Open(&(a->data_file), filename);
 
-	// Create the thread
-	pthread_create(&(a->thread), NULL, Actuator_Loop, (void*)(a));
-}
+				a->activated = true; // Don't forget this
+				a->allow_actuation = true;
 
-void Actuator_Pause(Actuator *a)
-{
-	if (a->activated)
-	{
-		a->activated = false;
-		Actuator_SetControl(a, NULL);
-		pthread_join(a->thread, NULL); // Wait for thread to exit	
-	}
-}
+				a->control_changed = false;
 
-void Actuator_Resume(Actuator *a)
-{
-	if (!a->activated)
-	{
-		a->activated = true; 
-		pthread_create(&(a->thread), NULL, Actuator_Loop, (void*)(a));
+				// Create the thread
+				ret = pthread_create(&(a->thread), NULL, Actuator_Loop, (void*)(a));
+				if (ret != 0)
+				{
+					Fatal("Failed to create Actuator_Loop for Actuator %d", a->id);
+				}
+			}
+		break;
+
+		case CONTROL_EMERGENCY: //TODO add proper case for emergency
+		case CONTROL_PAUSE:
+			a->allow_actuation = false;
+		break;
+		case CONTROL_RESUME:
+			a->allow_actuation = true;
+		break;
+		case CONTROL_STOP:
+			a->allow_actuation = false;
+			a->activated = false;
+			Actuator_SetControl(a, NULL);
+			pthread_join(a->thread, NULL); // Wait for thread to exit	
+			Data_Close(&(a->data_file)); // Close DataFile
+		break;
+		default:
+			Fatal("Unknown control mode: %d", mode);
 	}
 }
 
 /**
- * Stop an Actuator
- * @param s - The Actuator to stop
+ * Sets all actuators to the desired mode. 
+ * @see Actuator_SetMode for more information.
+ * @param mode The mode to be changed to
+ * @param arg An argument specific to the mode to be set.
  */
-void Actuator_Stop(Actuator * a)
+void Actuator_SetModeAll(ControlModes mode, void * arg)
 {
-	// Stop
-	Actuator_Pause(a);
-	Data_Close(&(a->data_file)); // Close DataFile
-
-}
-
-void Actuator_PauseAll()
-{
-	for (int i = 0; i < NUMACTUATORS; ++i)
-		Actuator_Pause(g_actuators+i);	
-}
-
-void Actuator_ResumeAll()
-{
-	for (int i = 0; i < NUMACTUATORS; ++i)
-		Actuator_Resume(g_actuators+i);	
-}
-
-/**
- * Stop all Actuators
- */
-void Actuator_StopAll()
-{
-	for (int i = 0; i < NUMACTUATORS; ++i)
-		Actuator_Stop(g_actuators+i);
-}
-
-/**
- * Start all Actuators
- */
-void Actuator_StartAll(const char * experiment_name)
-{
-	for (int i = 0; i < NUMACTUATORS; ++i)
-		Actuator_Start(g_actuators+i, experiment_name);
+	for (int i = 0; i < NUMACTUATORS; i++)
+		Actuator_SetMode(&g_actuators[i], mode, arg);
 }
 
 /**
@@ -136,6 +121,8 @@ void * Actuator_Loop(void * arg)
 		pthread_mutex_unlock(&(a->mutex));
 		if (!a->activated)
 			break;
+		else if (!a->allow_actuation)
+			continue;
 
 		Actuator_SetValue(a, a->control.value);
 	}

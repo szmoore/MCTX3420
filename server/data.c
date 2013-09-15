@@ -1,6 +1,6 @@
 /**
  * @file data.c
- * @purpose Implementation of data handling functions; saving, loading, displaying, selecting.
+ * @brief Implementation of data handling functions; saving, loading, displaying, selecting.
  */
 
 #include "data.h"
