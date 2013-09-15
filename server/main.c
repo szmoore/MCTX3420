@@ -11,6 +11,7 @@
 #include "control.h"
 
 // --- Standard headers --- //
+#include <syslog.h> // for system logging
 #include <signal.h> // for signal handling
 
 // --- Variable definitions --- //
@@ -68,6 +69,9 @@ int main(int argc, char ** argv)
 {
 	ParseArguments(argc, argv);
 
+	//Open the system log
+	openlog("mctxserv", LOG_PID | LOG_PERROR, LOG_USER);
+	Log(LOGINFO, "Server started");
 	// signal handler
 	//TODO: Make this work
 	/*
