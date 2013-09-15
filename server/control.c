@@ -15,12 +15,13 @@ typedef struct ControlData {
 
 ControlData g_controls = {CONTROL_STOP, PTHREAD_MUTEX_INITIALIZER, {0}};
 
-static bool ExperimentExists(const char *experiment_name) {
-	FILE *fp = fopen(experiment_name, "r");
-	if (!fp)
-		return false;
-	fclose(fp);
-	return true;
+static bool PathExists(const char *path) {
+	FILE *fp = fopen(path, "r");
+	if (fp) {
+		fclose(fp);
+		return true;
+	}
+	return false;
 }
 
 /**
@@ -49,6 +50,11 @@ void Control_Handler(FCGIContext *context, char *params) {
 		return;
 	} else if (!strcmp(action, "emergency")) {
 		desired_mode = CONTROL_EMERGENCY;
+	} else if (!strcmp(action, "query")) {
+		FCGI_BeginJSON(context, STATUS_OK);
+		FCGI_JSONPair("state", Control_GetModeName(Control_GetMode()));
+		FCGI_EndJSON();
+		return;
 	} else if (FCGI_HasControl(context, key)) {
 		if (!strcmp(action, "release")) {
 			FCGI_ReleaseControl(context);
@@ -76,10 +82,11 @@ void Control_Handler(FCGIContext *context, char *params) {
 		if (len <= 0) {
 			FCGI_RejectJSON(context, "An experiment name must be specified.");
 			return;
-		} else if (ExperimentExists(name) && !force) {
+		} else if (PathExists(name) && !force) {
 			FCGI_RejectJSON(context, "An experiment with that name already exists.");
 			return;
 		}
+
 		arg = (void*)name;
 	}
 
@@ -104,18 +111,19 @@ const char* Control_SetMode(ControlModes desired_mode, void * arg)
 	const char *ret = NULL;
 
 	pthread_mutex_lock(&(g_controls.mutex));
-	if (g_controls.current_mode == CONTROL_EMERGENCY) {
-		ret = "In emergency mode. Restart software.";
+	if (g_controls.current_mode == CONTROL_EMERGENCY && desired_mode != CONTROL_STOP) {
+		ret = "In emergency mode. Stop before doing anything else.";
 	} else if (g_controls.current_mode == desired_mode) {
 		ret = "Already in desired mode.";
 	} else if (desired_mode == CONTROL_START) {
 		if (g_controls.current_mode == CONTROL_STOP) {
+			//TODO Sanitise name (ensure it contains no special chars eg \ / .. . 
 			FILE *fp = fopen((const char*) arg, "a");
 			if (fp) {
 				fclose(fp);
 				gettimeofday(&(g_controls.start_time), NULL);
 			} else {
-				ret = "Failed to create experiment placeholder";
+				ret = "Cannot open experiment name marker";
 			}
 		} else {
 			ret = "Cannot start when not in a stopped state.";
@@ -128,7 +136,10 @@ const char* Control_SetMode(ControlModes desired_mode, void * arg)
 	if (ret == NULL) {
 		Actuator_SetModeAll(desired_mode, arg);
 		Sensor_SetModeAll(desired_mode, arg);
-		g_controls.current_mode = desired_mode;
+		if (desired_mode != CONTROL_RESUME)
+			g_controls.current_mode = desired_mode;
+		else
+			g_controls.current_mode = CONTROL_START;
 	}
 	pthread_mutex_unlock(&(g_controls.mutex));
 	return ret;
@@ -139,10 +150,24 @@ const char* Control_SetMode(ControlModes desired_mode, void * arg)
  * @return The current mode
  */
 ControlModes Control_GetMode() {
-	ControlModes ret;
-	pthread_mutex_lock(&(g_controls.mutex));
-	ret = g_controls.current_mode;
-	pthread_mutex_unlock(&(g_controls.mutex));
+	return g_controls.current_mode;
+}
+
+/**
+ * Gets a string representation of a mode
+ * @param mode The mode to get a string representation of
+ * @return The string representation of the mode
+ */
+const char * Control_GetModeName(ControlModes mode) {
+	const char * ret = "Unknown";
+
+	switch (mode) {
+		case CONTROL_START: ret = "Running"; break;
+		case CONTROL_PAUSE: ret = "Paused"; break;
+		case CONTROL_RESUME: ret = "Resumed"; break;
+		case CONTROL_STOP: ret = "Stopped"; break;
+		case CONTROL_EMERGENCY: ret = "Emergency mode"; break;
+	}
 	return ret;
 }
 

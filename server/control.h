@@ -17,6 +17,7 @@ typedef enum ControlModes {
 extern void Control_Handler(FCGIContext *context, char *params);
 extern const char* Control_SetMode(ControlModes desired_mode, void * arg);
 extern ControlModes Control_GetMode();
+extern const char * Control_GetModeName(ControlModes mode);
 //extern bool Control_Lock();
 //extern void Control_Unlock();
 extern const struct timeval* Control_GetStartTime();
