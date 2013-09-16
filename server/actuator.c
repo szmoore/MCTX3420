@@ -106,7 +106,7 @@ void * Actuator_Loop(void * arg)
 		pthread_mutex_unlock(&(a->mutex));
 		if (!a->activated)
 			break;
-
+		Log(LOGDEBUG, "About to Setvalue");
 		Actuator_SetValue(a, a->control.value);
 	}
 
@@ -127,6 +127,7 @@ void Actuator_SetControl(Actuator * a, ActuatorControl * c)
 	if (c != NULL)
 		a->control = *c;
 	a->control_changed = true;
+	Log(LOGDEBUG, "About to broadcast");
 	pthread_cond_broadcast(&(a->cond));
 	pthread_mutex_unlock(&(a->mutex));
 	
@@ -144,23 +145,30 @@ void Actuator_SetValue(Actuator * a, double value)
 	gettimeofday(&t, NULL);
 
 	DataPoint d = {TIMEVAL_DIFF(t, g_options.start_time), value};
+	Log(LOGDEBUG, "id: %d", a->id);
 	//TODO: Set actuator
 	switch (a->id)
 	{
-		case ACTUATOR_TEST0:			//LED actuator test code, should blink onboard LED next to Ethernet port
-			FILE *LEDHandle = NULL;		//code reference: http://learnbuildshare.wordpress.com/2013/05/19/beaglebone-black-controlling-user-leds-using-c/
-			char *LEDBrightness = "/sys/class/leds/beaglebone\:green\:usr0/brightness";
-			if(value == 1) {
-				if((LEDHandle = fopen(LEDBrightness, "r+")) != NULL) {
-					fwrite("1", sizeof(char), 1, LEDHandle);
-					fclose(LEDHandle);
+		case ACTUATOR_TEST0:	
+			{//LED actuator test code, should blink onboard LED next to Ethernet port
+				FILE *LEDHandle = NULL;		//code reference: http://learnbuildshare.wordpress.com/2013/05/19/beaglebone-black-controlling-user-leds-using-c/
+				char *LEDBrightness = "/sys/class/leds/beaglebone:green:usr3/brightness";
+				int val = (!!(int)value);
+				Log(LOGDEBUG, "Val: %d", val);
+				if(val == 1) {
+					if((LEDHandle = fopen(LEDBrightness, "r+")) != NULL) {
+						fwrite("1", sizeof(char), 1, LEDHandle);
+						fclose(LEDHandle);
+					} else perror("fail");
 				}
-			else if(value == 0) {
-				if((LEDHandle = fopen(LEDBrightness, "r+")) != NULL) {
-					fwrite("0", sizeof(char), 1, LEDHandle);
-					fclose(LEDHandle);
+				else if(val == 0) {
+					if((LEDHandle = fopen(LEDBrightness, "r+")) != NULL) {
+						fwrite("0", sizeof(char), 1, LEDHandle);
+						fclose(LEDHandle);
+					}
+				}
+				else perror("Pin value should be 1 or 0");
 			}
-			else perror("Pin value should be 1 or 0");
 			break;
 		case ACTUATOR_TEST1:
 			break;
@@ -171,6 +179,7 @@ void Actuator_SetValue(Actuator * a, double value)
 	// Record the value
 	Data_Save(&(a->data_file), &d, 1);
 }
+
 
 /**
  * Helper: Begin Actuator response in a given format

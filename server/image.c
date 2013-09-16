@@ -8,7 +8,7 @@ void Image_Handler(FCGIContext * context, const char * params)
 {
 	static CvCapture * capture = NULL;
 	if (capture == NULL)
-		capture = cvCreateCameraCapture(-1);
+		capture = cvCreateCameraCapture(0);
 	
 	static int p[] = {CV_IMWRITE_JPEG_QUALITY, 100, 0};
 

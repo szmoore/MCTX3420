@@ -442,7 +442,7 @@ void FCGI_PrintRaw(const char *format, ...)
 void FCGI_WriteBinary(void * data, size_t size, size_t num_elem)
 {
 	Log(LOGDEBUG,"Writing!");
-	FCGI_fwrite(data, size, num_elem, FCGI_stdout);
+	fwrite(data, size, num_elem, stdout);
 }
 
 /**

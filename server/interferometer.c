@@ -6,7 +6,6 @@
 #include "cv.h"
 #include "highgui_c.h"
 #include "interferometer.h"
-#include "analysis.h"
 #include <math.h>
 
 /** Buffer for storing image data. Stored as a single intensity value for the laser light **/
