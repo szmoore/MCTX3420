@@ -147,7 +147,20 @@ void Actuator_SetValue(Actuator * a, double value)
 	//TODO: Set actuator
 	switch (a->id)
 	{
-		case ACTUATOR_TEST0:
+		case ACTUATOR_TEST0:			//LED actuator test code, should blink onboard LED next to Ethernet port
+			FILE *LEDHandle = NULL;		//code reference: http://learnbuildshare.wordpress.com/2013/05/19/beaglebone-black-controlling-user-leds-using-c/
+			char *LEDBrightness = "/sys/class/leds/beaglebone\:green\:usr0/brightness";
+			if(value == 1) {
+				if((LEDHandle = fopen(LEDBrightness, "r+")) != NULL) {
+					fwrite("1", sizeof(char), 1, LEDHandle);
+					fclose(LEDHandle);
+				}
+			else if(value == 0) {
+				if((LEDHandle = fopen(LEDBrightness, "r+")) != NULL) {
+					fwrite("0", sizeof(char), 1, LEDHandle);
+					fclose(LEDHandle);
+			}
+			else perror("Pin value should be 1 or 0");
 			break;
 		case ACTUATOR_TEST1:
 			break;
