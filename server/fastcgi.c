@@ -15,6 +15,7 @@
 #include "actuator.h"
 #include "control.h"
 #include "options.h"
+#include "image.h"
 
 /**The time period (in seconds) before the control key expires */
 #define CONTROL_TIMEOUT 180
@@ -393,6 +394,17 @@ void FCGI_PrintRaw(const char *format, ...)
 	va_end(list);
 }
 
+
+/**
+ * Write binary data
+ * See fwrite
+ */
+void FCGI_WriteBinary(void * data, size_t size, size_t num_elem)
+{
+	Log(LOGDEBUG,"Writing!");
+	fwrite(data, size, num_elem, stdout);
+}
+
 /**
  * Escapes a string so it can be used safely.
  * Currently escapes to ensure the validity for use as a JSON string
@@ -464,6 +476,8 @@ void * FCGI_RequestLoop (void *data)
 			module_handler = Sensor_Handler;
 		} else if (!strcmp("actuators", module)) {
 			module_handler = Actuator_Handler;
+		} else if (!strcmp("image", module)) {
+			module_handler = Image_Handler;
 		}
 
 		context.current_module = module;

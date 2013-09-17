@@ -1,0 +1,51 @@
+Electronics
+ - What inputs will be provided
+   - 2x ADC channels, USB Hub (2 webcams?)
+ - What outputs are required
+   - 2x digital out for controlling multiplexers on ADCs
+     - Switch time for multiplexer? Affects sample rate
+   - 1x PWM to control DAC -> Analogue pressure regulator (?)
+   - 3x digital out for controlling solenoids
+ - Need to meet this week to work out sampling rate / antialiasing stuff
+   - Friday 12:00pm -> 2:00pm
+   - Wednesday 10:00am -> 11:00am
+ - Antialiasing: Need to sample at 2x rate we are interested in
+   - Accuracy of timestamps in software uncertain; should do some physical tests 
+   - Estimates of BBB sampling rates vary, but from Jeremy's searches, the worst case:
+     - 34KHz for GPIO
+     - 100KHz for ADC
+
+Pneumatics
+ - What is being controlled -> Electronics
+   - Analogue controlled pressure regulator 0-5V
+   - 3 solenoids (on/off)
+     - Master valve (safety)
+      - 1 valve for each can (mutually exclusive, never allow both to be on at the same time) - need 12V for on, 20ms switch time, max freq 10Hz
+       - Electronics will probably use a multiplexer
+       - Will dump air when no power
+	   - Diode protection needed
+ - When can fails, major drop in pressure will happen
+   - Should stop air supply when this is detected
+ - What is sensed?
+   - 3 x pressure sensors; 1 on main supply, 1 before each can
+ - Pressure limit of 100KPa on non-exploding can
+   - Safety threshold if sensor after this records > 100KPa
+ - No limit on exploding can
+ - Forgot to ask about *minimum* pressure values; use atmosphere (because if things fall below atmosphere they are probably broken)?
+
+Sensors
+ - Sensors -> Electronics -> Us
+ - Currently having argument with Adrian about use of interferometer or dilatometer
+   - Adrian will probably win the argument
+   - Image processing will be low priority for software until there is more certainty
+     - From a software point of view, interferometer and dilatometer are about the same difficulty
+       - Interferometer: Look for nodes (maximum change in intensity at laser wavelength)
+       - Dilatometer: Look for edge of can (maximum change in intensity of can colour)
+     - Laser light might be easier to process (larger intensity and larger intensity changes against dark background)
+     - But laser interferometer kit will definitely be harder to set up and align and position
+ - Sampling rate of images (stream only) - 20FPS (using Logicrap(TM) camera)
+     
+
+Case
+ - The software will fit
+ - There will be a hole for an ethernet cable
