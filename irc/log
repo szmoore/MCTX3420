@@ -2699,3 +2699,45 @@
 20:00 -!- MctxBot [~twang@203-59-42-232.dyn.iinet.net.au] has quit [Ping timeout]
 21:26 -!- MctxBot [~twang@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
 22:58 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Tue Sep 17 2013
+08:14 -!- jtanx [~asfa@130.95.101.14] has joined #mctxuwa_softdev
+09:50 -!- jtanx [~asfa@130.95.101.14] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+15:34 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:34 < jtanx> to run the software not as root, we need to at least add it to the 'video' group so it can access the webcam
+15:34 < jtanx> not sure about the sensors
+15:34 < jtanx> eg sudo usermod -a -G video debian
+15:38 < sam_moore> Ah, cool
+15:39 < sam_moore> I think I worked out how to get around the camera crashing without killing the rest of the program, won't implement it for a while though
+15:40 -!- MctxBot [~twang@203-59-42-232.dyn.iinet.net.au] has quit [EOF From client]
+15:43 -!- jtanx_ [~asfa@220-253-203-124.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:48 -!- MctxBot [~twang@220-253-203-124.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:53 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit [Ping timeout]
+15:57 -!- jtanx_ is now known as jtanx
+16:41 -!- jtanx [~asfa@220-253-203-124.dyn.iinet.net.au] has quit [Ping timeout]
+16:46 -!- jtanx_ [~asfa@220-253-203-124.dyn.iinet.net.au] has joined #mctxuwa_softdev
+16:46 -!- jtanx_ is now known as jtanx
+18:02 -!- jtanx [~asfa@220-253-203-124.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+18:16 -!- jtanx [~asfa@220-253-203-124.dyn.iinet.net.au] has joined #mctxuwa_softdev
+19:31 -!- MctxBot [~twang@220-253-203-124.dyn.iinet.net.au] has quit [Ping timeout]
+22:38 -!- MctxBot [~twang@220-253-203-124.dyn.iinet.net.au] has joined #mctxuwa_softdev
+22:49 -!- jtanx [~asfa@220-253-203-124.dyn.iinet.net.au] has quit [Ping timeout]
+23:17 -!- Callum [~chatzilla@124-169-175-15.dyn.iinet.net.au] has joined #mctxuwa_softdev
+23:18 < Callum> hey
+23:23 < sam_moore> Hi
+23:24 < Callum> do you know how to do the second question of that assignment?
+23:24 < Callum> https://docs.google.com/file/d/0B241H5liqVlnbHZETXRZX1Mwd1k/edit?usp=sharing
+23:25 < Callum> rather remember
+23:35 < sam_moore> Well, you can eliminate any epsilon^2 when you substitute those formulae for v into the formula for gamma
+23:35 < sam_moore> Then it has a really simple taylor expansion
+23:35 < Callum> i might have to hunt you down tomorrow to show me. or maybe il be able to think straight tomorrow.
+23:38 < sam_moore> You can express one of the epsilons in terms of the other one after that
+23:40 < sam_moore> I'm pretty busy tomorrow
+23:42 < Callum> mhmm. so no free time at all? coz im fairly free
+23:49 < sam_moore> Not from 8:00am until 5:00pm
+23:49 < Callum> ohwow. you are busy
+23:49 < Callum> im still unsure what im meant to be applyign the taylor expansion to
+23:53 < sam_moore> Substitute in the suggested formulae to gamma, simplify it, then apply a taylor expansion
+23:53 < sam_moore> Anyway, goodnight, good luck
+23:53 < Callum> night
+--- Day changed Wed Sep 18 2013
+00:07 -!- Callum [~chatzilla@124-169-175-15.dyn.iinet.net.au] has quit [EOF From client]
