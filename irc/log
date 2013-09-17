@@ -2480,3 +2480,222 @@
 19:56 < jtanx> then at least you're guaranteed that user input won't stuff up anything
 19:56 < jtanx> (as in making it generate invalid JSON)
 20:53 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Sat Sep 14 2013
+09:58 -!- MctxBot [~twang@203-59-42-232.dyn.iinet.net.au] has quit [Ping timeout]
+11:08 -!- MctxBot [~twang@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+11:32 < sam_moore> blergh, too many different versions of OpenCV
+11:32 < sam_moore> Also too many different data types
+11:33 < sam_moore> "Getting a digital image into numbers can be very handy for your image processing. In this post i will brief just that."
+11:34 < sam_moore> Thank god, finally a tutorial that makes sense
+11:34 -!- Irssi: #mctxuwa_softdev: Total of 2 nicks [0 ops, 0 halfops, 0 voices, 2 normal]
+11:34 < sam_moore> ... no one else is in the channel
+11:34 < sam_moore> :S
+11:37 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+12:36 < jtanx> on start/stop/pausing an experiment
+12:36 < jtanx> currently everything is relative to g_options.start_time
+12:42 < sam_moore> Yeah
+12:43 < sam_moore> Perhaps make an ExperimentTime function and that leaves us free to change what the time stamps are relative to?
+12:43 < sam_moore> Looking into this interferometer stuff...
+12:43 < jtanx> ok, maybe as part of the Control_ module then
+12:43 < sam_moore> Interesting problem, I think I've worked out an algorithm that isn't too terrible
+12:44 < jtanx> yeah?
+12:44 < jtanx> how does it work
+12:45 < sam_moore> If you have a sinusoidal wave, find the x intercepts, and that lets you calculate the phase and frequency
+12:45 < sam_moore> That's the simple version
+12:46 < jtanx> haha alright
+12:46 < sam_moore> I have 3 pages of notes that I can show Adrian/Adam if I can't get it working
+12:46 < jtanx> wow
+12:46 < jtanx> nice work
+12:47 < sam_moore> Fortran would be good for the array operations
+12:47 < sam_moore> If fortran were able to do anything *other* than array operations it would be a nice language...
+12:47 < jtanx> have you ever used Fortan before?
+12:48 < sam_moore> Yes
+12:48 < sam_moore> I'm going to keep it in C though
+12:48 < sam_moore> It took long enough to get OpenCV working
+12:48 < sam_moore> I'm sure there's some kind of convoluted Fortran library
+12:49 < sam_moore> But a seperate fortran program won't talk to our server
+12:49 < jtanx> can you compile the code as a library with C interop
+12:49 < sam_moore> Erm..
+12:49 < sam_moore> Probably more effort than just doing it in C
+12:49 < jtanx> probably
+12:51 < jtanx> I think a separate mutex is needed around the *_Stop() functions
+12:51 < jtanx> because if a client sends in a request
+12:51 < sam_moore> Oh, good point
+12:52 < jtanx> although that's only going to be a problem if our own software calls the stop function because of the sanity checks
+12:52 < sam_moore> If there are 2 requests?
+12:52 < sam_moore> No wait, the FCGI stuff is serial
+12:52 < jtanx> the request loop is single threaded
+12:52 < sam_moore> It has to finish processing one request to respond to the next
+12:52 < sam_moore> That's fine
+12:56 < sam_moore> Put a mutex in the Sensor struct, use the same one that's already in the Actuator struct, put critical sections around setting the "s->record_data" or "a->activated" variables (or whatever you choose to use as a "is thing running" flag)
+12:56 < sam_moore> And check the flag hasn't already been set before doing anything
+12:57 < sam_moore> Similar to how the Thread_Running() and Thread_QuitProgram() functions used to work
+12:57 < sam_moore> .... Before I deleted them
+12:57 < sam_moore> Any thread could call Thread_QuitProgram, and repeated calls would have no effect
+13:01 < jtanx> ok I'll try that
+13:51 < jtanx> actually, what about this:
+13:51 < jtanx> in control.c, it maintains its own mutex
+13:51 < jtanx> so
+13:52 < jtanx> and it's the only place where Sensor_Start/Stop Actuator_Start/Stop is called
+13:53 < jtanx> You then have Control_Lock/Unlock that's placed around the responses in the handler functions
+13:53 < jtanx> those functions internally lock/unlock the mutex held in control.c
+13:53 < jtanx> ah stuff it
+13:53 < jtanx> I'll commit it to my git repo
+13:54 < jtanx> I still don't know how the pause functionality should be done though
+13:54 < jtanx> especially with the time discontinuities
+14:01 < jtanx> oh yeah, just a reminder that you have to be careful using FCGI_LONG_T vs FCGI_INT_T
+14:02 < jtanx> if your variable is of type int but you give FCGI_LONG_T, and where sizeof(int) != sizeof(long) then there could be a buffer overflow
+14:13 < sam_moore> Right
+14:14 < sam_moore> If you want to commit to the main repo you can use a new branch
+14:14 < sam_moore> Having a single mutex in control.c instead of one per sensor/actuator is probably better
+14:15 < sam_moore> With the pause functionality... I think if you just don't call Data_Close() (and don't call Data_Open on resuming) but otherwise stop the threads running Sensor_Loop in the same way
+14:15 < sam_moore> That should do most of it
+14:16 < sam_moore> Don't reset the experiment start time
+14:17 < sam_moore> Perhaps the experiment start time needs to be stored somewhere though
+14:18 < sam_moore> Anyway, I'll let you solve the problem :P
+14:48 < jtanx> ._.
+15:45 < jtanx> well I think I got something semi-working
+15:45 < jtanx> it involved adding on Sensor_PauseAll/ResumeAll + Acuator_PauseAll/ResmueAll (plus the individual Pause/Resume) functions
+15:46 < sam_moore> Cool
+15:46 < sam_moore> I think I'm starting to get my head around OpenCV
+15:46 < sam_moore> The documentation for it is a bit crap
+15:46 < jtanx> oh don't get me started on opencv documentation
+15:47 < jtanx> yesterday it took me and callum around 30  mins to figure out that CvMat structure
+15:47 < sam_moore> Haha
+15:47 < sam_moore> It probably took me a bit longer :S
+15:47 < jtanx> the problem is that most of it's geared towards c++ usage
+15:49 < jtanx> back on that control stuff, basically those Sensor/Actuator_[Start|Stop|Pause|Resume] functions can only be called via the Control_[Start|Stop|Pause|Resume] functions
+15:50 < jtanx> partly because of threading issues but also because it's the only place where the current state is currently kept track of
+15:51 < jtanx> (e.g if you call Sensor_Start twice then...
+15:53 < sam_moore> Seems sensible
+15:53 < jtanx> anyway, I'm taking a break from this stuff for a while
+15:53 < sam_moore> Yeah, fair enough
+15:54 < jtanx> If you want to see what I've done so far, it's on my git repo (haven't added comments yet)
+15:54 < sam_moore> Cool
+16:50 < sam_moore> The IplImage vs CvMat conversion is dumb
+16:50 < sam_moore> In fact I don't think you even need to do it?
+16:51 < sam_moore> Well at least to display an image you can just pass a CvMat
+16:51 < sam_moore> Maybe you still need the IplImage to capture from a camera
+16:51 < sam_moore> I worked out how to convert from IplImage to CvMat anyway
+16:53 < sam_moore> Other than that, OpenCV doesn't actually seem horrible to use
+16:53 < sam_moore> Just... contradictory documentation
+16:55 < sam_moore> Anyway... I've created a moving sinusoidal image!
+16:56 < sam_moore> Now to work out why the algorithm keeps returning -nan :S
+16:56 < sam_moore> Also for some reason the image is blue instead of red
+16:56 < sam_moore> But whatever
+16:57 < jtanx> :S
+16:57 < jtanx> BGR vs RGB?
+17:02 < sam_moore> Looks like it
+17:03 < sam_moore> Doing this with an actual camera is going to suck
+17:04 < sam_moore> See, I've worked out an algorithm to cope with changing background light conditions
+17:04 < sam_moore> Because differentiating a sinusoid gives you another sinusoid with the same phase (offset by pi/2)
+17:05 < sam_moore> Buut... differentiating with finite differences adds more noise
+17:05 < sam_moore> Or rather it makes the noise more pronounced
+17:07 < sam_moore> Hopefully sensors is considering this
+17:07 < sam_moore> If they want to shoot a laser into a camera, they should really do it in a way that keeps out background light
+17:07 < sam_moore> Buuut
+17:07 < sam_moore> I think they mentioned using one camera to do both the interferometer and look at the can
+17:07 < sam_moore> :S
+17:08 < sam_moore> Oh well, the optics is their problem
+17:09 < sam_moore> I suppose I will prepare a report or something about the algorithm and what conditions the image needs to satisfy
+17:12 < jtanx> um
+17:12 < jtanx> there's going to be two cameras
+17:12 < jtanx> because it was too much hassle moving it
+17:12 < sam_moore> Yes... but one was meant to be looking at each can?
+17:13 < jtanx> oh
+17:13 < jtanx> hmm
+17:13 < sam_moore> We should ask them
+17:13 < jtanx> I just thought that one would be for the interferometer (no need to look at can) and the other would be for the can to be blown up
+17:13 < sam_moore> Probably
+17:15 < jtanx> but I was thinking for the one to be blown up
+17:16 < jtanx> you could possibly just stream it using something like ffserver
+17:16 < jtanx> instead of passing it through opencv
+17:16 < sam_moore> Yeah, that seems like it's probably easier
+17:23 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["my antivirus is pestering me to restart"]
+17:41 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:19 < sam_moore> So... when you take an image with a camera the pixels are stored as rgb with 0->255 values
+18:20 < sam_moore> You can convert the IplImage to a CvMat and it keeps the values ordered as rgb with 0->255 values
+18:20 < sam_moore> And then...
+18:20 < sam_moore> If you try and display it...
+18:20 < sam_moore> The display function treats it as having values in bgr order with 0->1 values
+18:20 < sam_moore> -_-
+18:21 < sam_moore> (So unless you manually adjust all the values you'll just get a white picture in the display)
+18:54 < jtanx> hahaha
+18:54 < jtanx> what
+18:56 < jtanx> for cvShowImage:
+18:56 < jtanx>         If the image is 8-bit unsigned, it is displayed as is.
+18:56 < jtanx>         If the image is 16-bit unsigned or 32-bit integer, the pixels are divided by 256. That is, the value range [0,255*256] is mapped to [0,255].
+18:56 < jtanx>         If the image is 32-bit floating-point, the pixel values are multiplied by 255. That is, the value range [0,1] is mapped to [0,255].
+18:57 < jtanx> so it's treating it as 32-bit floating point?
+19:49 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit [Ping timeout]
+19:56 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+20:41 < sam_moore> I think it's because of how I converted the IplImage to a CvMat
+20:42 < sam_moore> My algorithm is almost working
+20:43 < sam_moore> The fact that angles wrap around every 2*pi is giving me a headache though
+20:43 < sam_moore> This is pretty fun
+20:45 < sam_moore> Hopefully I can do Computer Vision as an optional, I think its in the list
+20:45 < sam_moore> Maybe I shouldn't make all my optionals CS units, but meh
+21:20 < jtanx> :P
+21:20 < jtanx> the computer vision unit sounds interesting, but a lot of maths/theory involved
+22:02 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Sun Sep 15 2013
+09:13 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+11:02 < sam_moore> I'm really glad I put the IRC logs under git
+11:02 < sam_moore> It's very helpful for keeping my diary up to date
+11:40 < jtanx> hehe
+11:40 < jtanx> I'm gladful for git
+11:48 < jtanx> about the bbb
+11:48 < jtanx> it's probably best to just install debian to the internal memory
+11:54 < jtanx> on the controls
+11:54 < jtanx> maybe we can have the following states: start/pause/resume/stop/close
+11:56 < jtanx> actually, maybe just start/pause/resume/close
+11:56 < jtanx> when an 'emergency stop' due to the sanity checks occurs
+11:57 < jtanx> actually, start/pause/resume/close/emergency
+11:57 < jtanx> start/pause/resume/close can only be initiated by the client
+11:58 < jtanx> emergency can be initiated by client/server
+11:58 < jtanx> in emergency, actuators are set as necessary then deactivated
+11:58 < jtanx> but importantly, the data files remain open, which hopefully removes the need for mutexes
+12:26 < sam_moore> That seems sensible
+13:20 < sam_moore> Hey
+13:20 < sam_moore> It's actually quite simple to stream an image through FastCGI
+13:21 < jtanx> yeah
+13:21 < jtanx> you just fwrite the image buffer
+13:21 < sam_moore> Yep
+13:21 < jtanx> I had some test code for that but could never test it
+13:22 < jtanx> no webcam
+13:22 < sam_moore> Ah, damn
+13:22 < sam_moore> I've written some code, it works pretty brilliantly
+13:22 < jtanx> nice
+13:22 < jtanx> this control code is really annoying me
+13:23 < jtanx> just all the considerations of if you need a mutex here or not and 'what happens if...'
+13:23 < sam_moore> Ah, sorry to hear that
+13:23 < jtanx> yeah nah its ok
+13:24 < jtanx> but that interferometer stuff you did looks really cool
+13:26 < sam_moore> Yeah, it worked surprisingly well
+13:26 < sam_moore> It can cope with a fair bit of background light, even without all the improvements I was thinking about
+13:27 < sam_moore> If I add 2 or 3 more columns to scan, and use the fact that we actually know the spatial frequency to eliminate nodes that are too close together
+13:27 < sam_moore> It should be pretty good
+13:27 < sam_moore> I'm not sure what the laser intensity will be, but the generated image looks similar to ones you can find on the internet
+13:28 < sam_moore> One possible problem is if the mirrors aren't flat enough
+13:28 < sam_moore> But hopefully it won't be a big issue (since they've pretty much just specified an expensive pre-built kit which presumably has flat mirrors)
+13:29 < jtanx> yeah
+13:30 < jtanx> here's to hoping 'it just works'
+13:30 < sam_moore> Yep :P
+13:31 < sam_moore> Got to go, bye
+13:32 < jtanx> ok cya
+15:50 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit [Ping timeout]
+15:56 -!- jtanx_ [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:56 -!- jtanx_ is now known as jtanx
+21:48 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Mon Sep 16 2013
+07:28 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+08:27 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit [Ping timeout]
+12:51 -!- jtanx [~asfa@130.95.54.13] has joined #mctxuwa_softdev
+16:05 -!- jtanx_ [~asfa@130.95.125.48] has joined #mctxuwa_softdev
+16:05 -!- jtanx_ [~asfa@130.95.125.48] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+16:10 -!- jtanx [~asfa@130.95.54.13] has quit [Ping timeout]
+19:34 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+19:44 < jtanx> no mctxbot while I work on my f# project
+20:00 -!- MctxBot [~twang@203-59-42-232.dyn.iinet.net.au] has quit [Ping timeout]
+21:26 -!- MctxBot [~twang@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+22:58 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]

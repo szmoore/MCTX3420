@@ -1,8 +1,8 @@
 # Makefile for server software
 CXX = gcc
-FLAGS = -std=c99 -Wall -Werror -pedantic -g
-LIB = -lfcgi -lssl -lcrypto -lpthread -lm
-OBJ = log.o control.o data.o fastcgi.o main.o sensor.o actuator.o
+FLAGS = -std=c99 -Wall -pedantic -g -I/usr/include/opencv -I/usr/include/opencv2/highgui -L/usr/lib
+LIB = -lfcgi -lssl -lcrypto -lpthread -lm -lopencv_highgui -lopencv_core -lopencv_ml -lopencv_imgproc
+OBJ = log.o control.o data.o fastcgi.o main.o sensor.o actuator.o image.o
 RM = rm -f
 
 BIN = server
@@ -10,8 +10,11 @@ BIN = server
 
 all : $(BIN) $(BIN2)
 
-#stream : stream.c
-#	$(CXX) -o stream stream.c -I/usr/include/opencv -I/usr/include/opencv2/highgui -L/usr/lib -lopencv_highgui -lopencv_core -lopencv_ml -lopencv_imgproc -lm
+stream : stream.c
+	$(CXX) $(FLAGS) -o stream stream.c $(LIB)
+
+intertest : interferometer.c
+	$(CXX) $(FLAGS) -o intertest interferometer.c $(LIB)
 
 
 $(BIN) : $(OBJ)

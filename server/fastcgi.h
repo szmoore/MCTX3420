@@ -59,6 +59,8 @@ extern void FCGI_RejectJSONEx(FCGIContext *context, StatusCodes status, const ch
 extern char *FCGI_EscapeText(char *buf);
 extern void *FCGI_RequestLoop (void *data);
 
+extern void FCGI_WriteBinary(void * data, size_t size, size_t num_elem);
+
 /**
  * Shortcut to calling FCGI_RejectJSONEx. Sets the error code
  * to STATUS_ERROR.
