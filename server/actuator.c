@@ -5,13 +5,16 @@
 
 #include "actuator.h"
 #include "options.h"
+// Files containing GPIO and PWM definitions
+#include "gpio.h"
+#include "pwm.h"
 
 /** Array of Actuators (global to this file) initialised by Actuator_Init **/
 static Actuator g_actuators[NUMACTUATORS];
 
 /** Human readable names for the Actuators **/
 const char * g_actuator_names[NUMACTUATORS] = {	
-	"actuator_test0", "actuator_test1"
+	"actuator_test0", "actuator_test1", "actuator_test2"
 };
 
 /**
@@ -166,6 +169,7 @@ void Actuator_SetValue(Actuator * a, double value)
 	{
 		case ACTUATOR_TEST0: 
 			{
+			// Onboard LEDs test actuator
 				FILE *led_handle = NULL;	//code reference: http://learnbuildshare.wordpress.com/2013/05/19/beaglebone-black-controlling-user-leds-using-c/
 				const char *led_format = "/sys/class/leds/beaglebone:green:usr%d/brightness";
 				char buf[50];
@@ -188,6 +192,33 @@ void Actuator_SetValue(Actuator * a, double value)
 			}
 			break;
 		case ACTUATOR_TEST1:
+			// GPIO pin digital actuator
+			{
+				// Quick actuator function for testing pins
+				// GPIOPin can be passed as argument, but is just defined here for testing purposes
+				int GPIOPin = 13;
+				// Modify this to only export on first run, only unexport on shutdown
+				pinExport(setValue, GPIOString);
+				pinDirection(GPIODirection, setValue);
+				pinSet(value, GPIOValue, setValue);
+				pinUnexport(setValue, GPIOString);
+			}
+			break;
+		case ACTUATOR_TEST2:
+			// PWM analogue actuator (currently generates one PWM signal with first PWM module)
+			{
+				if (pwminit == 0) {						// If inactive, start the pwm module
+					pwm_init();
+				}
+				if (pwmstart == 0) {
+					pwm_start();
+					pwm_set_period(FREQ);				// Frequency is 50Hz defined in pwm header file
+				}
+				if(value >= 0 && value <= 1000) {
+					double duty = value/1000 * 100; 	// Convert pressure to duty percentage
+					pwm_set_duty((int)duty);			// Set duty percentage for actuator (0-100%)
+				}
+			}
 			break;
 	}
 
