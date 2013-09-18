@@ -1,6 +1,6 @@
 /**
  * @file actuator.h
- * @purpose Declarations for actuator control
+ * @brief Declarations for actuator control
  */
 
 #ifndef _ACTUATOR_H
@@ -52,18 +52,15 @@ typedef struct
 	pthread_cond_t cond;
 	/** Indicates whether the Actuator is running **/
 	bool activated;
+	/** Indicates whether the Actuator can be actuated or not **/
+	bool allow_actuation;
 
 } Actuator;
 
 extern void Actuator_Init(); // One off initialisation of *all* Actuators
 
-
-extern void Actuator_StartAll(const char * experiment_name); // Start all Actuators
-extern void Actuator_StopAll(); // Stop all Actuators
-
-extern void Actuator_Start(Actuator * a, const char * experiment_name); // Start a Actuator
-extern void Actuator_Stop(Actuator * a); // Stop an Actuator
-
+extern void Actuator_SetModeAll(ControlModes mode, void *arg);
+extern void Actuator_SetMode(Actuator * a, ControlModes mode, void *arg);
 
 extern void * Actuator_Loop(void * args); // Main loop for a thread that handles an Actuator
 extern void Actuator_SetValue(Actuator * a, double value); // Set an actuator by value
