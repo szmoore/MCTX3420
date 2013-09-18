@@ -1,6 +1,6 @@
 /**
  * @file actuator.c
- * @purpose Implementation of Actuator related functionality
+ * @brief Implementation of Actuator related functionality
  */
 
 #include "actuator.h"
@@ -28,61 +28,76 @@ void Actuator_Init()
 }
 
 /**
- * Start an Actuator
- * @param a - The Actuator to start
- * @param experiment_name - Prepended to DataFile filename
+ * Sets the actuator to the desired mode. No checks are
+ * done to see if setting to the desired mode will conflict with
+ * the current mode - the caller must guarantee this itself.
+ * @param a The actuator whose mode is to be changed
+ * @param mode The mode to be changed to
+ * @param arg An argument specific to the mode to be set. 
+ *            e.g for CONTROL_START it represents the experiment name.
  */
-void Actuator_Start(Actuator * a, const char * experiment_name)
+void Actuator_SetMode(Actuator * a, ControlModes mode, void *arg)
 {
-	// Set filename
-	char filename[BUFSIZ];
-	if (sprintf(filename, "%s_a%d", experiment_name, a->id) >= BUFSIZ)
+	switch (mode)
 	{
-		Fatal("Experiment name \"%s\" too long (>%d)", experiment_name, BUFSIZ);
+		case CONTROL_START:
+			{
+				char filename[BUFSIZ];
+				const char *experiment_name = (const char*) arg;
+				int ret;
+
+				if (snprintf(filename, BUFSIZ, "%s_a%d", experiment_name, a->id) >= BUFSIZ)
+				{
+					Fatal("Experiment name \"%s\" too long (>%d)", experiment_name, BUFSIZ);
+				}
+
+				Log(LOGDEBUG, "Actuator %d with DataFile \"%s\"", a->id, filename);
+				// Open DataFile
+				Data_Open(&(a->data_file), filename);
+
+				a->activated = true; // Don't forget this
+				a->allow_actuation = true;
+
+				a->control_changed = false;
+
+				// Create the thread
+				ret = pthread_create(&(a->thread), NULL, Actuator_Loop, (void*)(a));
+				if (ret != 0)
+				{
+					Fatal("Failed to create Actuator_Loop for Actuator %d", a->id);
+				}
+			}
+		break;
+
+		case CONTROL_EMERGENCY: //TODO add proper case for emergency
+		case CONTROL_PAUSE:
+			a->allow_actuation = false;
+		break;
+		case CONTROL_RESUME:
+			a->allow_actuation = true;
+		break;
+		case CONTROL_STOP:
+			a->allow_actuation = false;
+			a->activated = false;
+			Actuator_SetControl(a, NULL);
+			pthread_join(a->thread, NULL); // Wait for thread to exit	
+			Data_Close(&(a->data_file)); // Close DataFile
+		break;
+		default:
+			Fatal("Unknown control mode: %d", mode);
 	}
-
-	Log(LOGDEBUG, "Actuator %d with DataFile \"%s\"", a->id, filename);
-	// Open DataFile
-	Data_Open(&(a->data_file), filename);
-
-	a->activated = true; // Don't forget this
-	
-	a->control_changed = false;
-
-	// Create the thread
-	pthread_create(&(a->thread), NULL, Actuator_Loop, (void*)(a));
 }
 
 /**
- * Stop an Actuator
- * @param s - The Actuator to stop
+ * Sets all actuators to the desired mode. 
+ * @see Actuator_SetMode for more information.
+ * @param mode The mode to be changed to
+ * @param arg An argument specific to the mode to be set.
  */
-void Actuator_Stop(Actuator * a)
+void Actuator_SetModeAll(ControlModes mode, void * arg)
 {
-	// Stop
-	a->activated = false;
-	Actuator_SetControl(a, NULL);
-	pthread_join(a->thread, NULL); // Wait for thread to exit
-	Data_Close(&(a->data_file)); // Close DataFile
-
-}
-
-/**
- * Stop all Actuators
- */
-void Actuator_StopAll()
-{
-	for (int i = 0; i < NUMACTUATORS; ++i)
-		Actuator_Stop(g_actuators+i);
-}
-
-/**
- * Start all Actuators
- */
-void Actuator_StartAll(const char * experiment_name)
-{
-	for (int i = 0; i < NUMACTUATORS; ++i)
-		Actuator_Start(g_actuators+i, experiment_name);
+	for (int i = 0; i < NUMACTUATORS; i++)
+		Actuator_SetMode(&g_actuators[i], mode, arg);
 }
 
 /**
@@ -106,7 +121,9 @@ void * Actuator_Loop(void * arg)
 		pthread_mutex_unlock(&(a->mutex));
 		if (!a->activated)
 			break;
-		Log(LOGDEBUG, "About to Setvalue");
+		else if (!a->allow_actuation)
+			continue;
+
 		Actuator_SetValue(a, a->control.value);
 	}
 
@@ -127,7 +144,6 @@ void Actuator_SetControl(Actuator * a, ActuatorControl * c)
 	if (c != NULL)
 		a->control = *c;
 	a->control_changed = true;
-	Log(LOGDEBUG, "About to broadcast");
 	pthread_cond_broadcast(&(a->cond));
 	pthread_mutex_unlock(&(a->mutex));
 	
@@ -144,30 +160,31 @@ void Actuator_SetValue(Actuator * a, double value)
 	struct timeval t;
 	gettimeofday(&t, NULL);
 
-	DataPoint d = {TIMEVAL_DIFF(t, g_options.start_time), value};
-	Log(LOGDEBUG, "id: %d", a->id);
+	DataPoint d = {TIMEVAL_DIFF(t, *Control_GetStartTime()), value};
 	//TODO: Set actuator
 	switch (a->id)
 	{
-		case ACTUATOR_TEST0:	
-			{//LED actuator test code, should blink onboard LED next to Ethernet port
-				FILE *LEDHandle = NULL;		//code reference: http://learnbuildshare.wordpress.com/2013/05/19/beaglebone-black-controlling-user-leds-using-c/
-				char *LEDBrightness = "/sys/class/leds/beaglebone:green:usr3/brightness";
-				int val = (!!(int)value);
-				Log(LOGDEBUG, "Val: %d", val);
-				if(val == 1) {
-					if((LEDHandle = fopen(LEDBrightness, "r+")) != NULL) {
-						fwrite("1", sizeof(char), 1, LEDHandle);
-						fclose(LEDHandle);
-					} else perror("fail");
-				}
-				else if(val == 0) {
-					if((LEDHandle = fopen(LEDBrightness, "r+")) != NULL) {
-						fwrite("0", sizeof(char), 1, LEDHandle);
-						fclose(LEDHandle);
+		case ACTUATOR_TEST0: 
+			{
+				FILE *led_handle = NULL;	//code reference: http://learnbuildshare.wordpress.com/2013/05/19/beaglebone-black-controlling-user-leds-using-c/
+				const char *led_format = "/sys/class/leds/beaglebone:green:usr%d/brightness";
+				char buf[50];
+				bool turn_on = value;
+
+				for (int i = 0; i < 4; i++) 
+				{
+					snprintf(buf, 50, led_format, i);
+					if ((led_handle = fopen(buf, "w")) != NULL)
+					{
+						if (turn_on)
+							fwrite("1", sizeof(char), 1, led_handle);
+						else
+							fwrite("0", sizeof(char), 1, led_handle);
+						fclose(led_handle);
 					}
+					else
+						Log(LOGDEBUG, "LED fopen failed: %s", strerror(errno)); 
 				}
-				else perror("Pin value should be 1 or 0");
 			}
 			break;
 		case ACTUATOR_TEST1:
@@ -179,7 +196,6 @@ void Actuator_SetValue(Actuator * a, double value)
 	// Record the value
 	Data_Save(&(a->data_file), &d, 1);
 }
-
 
 /**
  * Helper: Begin Actuator response in a given format
@@ -233,7 +249,7 @@ void Actuator_Handler(FCGIContext * context, char * params)
 {
 	struct timeval now;
 	gettimeofday(&now, NULL);
-	double current_time = TIMEVAL_DIFF(now, g_options.start_time);
+	double current_time = TIMEVAL_DIFF(now, *Control_GetStartTime());
 	int id = 0;
 	double set = 0;
 	double start_time = 0;

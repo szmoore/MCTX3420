@@ -1,6 +1,6 @@
 /**
  * @file data.c
- * @purpose Implementation of data handling functions; saving, loading, displaying, selecting.
+ * @brief Implementation of data handling functions; saving, loading, displaying, selecting.
  */
 
 #include "data.h"
@@ -344,7 +344,7 @@ void Data_Handler(DataFile * df, FCGIValue * start, FCGIValue * end, DataFormat 
  */
 DataFormat Data_GetFormat(FCGIValue * fmt)
 {
-	char * fmt_str = *(char**)(fmt->value);
+	const char * fmt_str = *(const char**)(fmt->value);
 	// Check if format type was specified
 	if (FCGI_RECEIVED(fmt->flags))
 	{

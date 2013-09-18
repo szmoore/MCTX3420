@@ -17,7 +17,7 @@
 #include "options.h"
 #include "image.h"
 
-/**The time period (in seconds) before the control key expires @ */
+/**The time period (in seconds) before the control key expires */
 #define CONTROL_TIMEOUT 180
 
 /**Contextual information related to FCGI requests*/
@@ -41,23 +41,13 @@ struct FCGIContext {
  */ 
 static void IdentifyHandler(FCGIContext *context, char *params) {
 	bool ident_sensors = false, ident_actuators = false;
-	//const char *key, *value;
 
 	int i;
 
 	FCGIValue values[2] = {{"sensors", &ident_sensors, FCGI_BOOL_T},
 					 {"actuators", &ident_actuators, FCGI_BOOL_T}};
-
 	if (!FCGI_ParseRequest(context, params, values, 2))
 		return;
-
-	/*while ((params = FCGI_KeyPair(params, &key, &value))) {
-		if (!strcmp(key, "sensors")) {
-			ident_sensors = !ident_sensors;
-		} else if (!strcmp(key, "actuators")) {
-			ident_actuators = !ident_actuators;
-		}
-	}*/
 
 	FCGI_BeginJSON(context, STATUS_OK);
 	FCGI_JSONPair("description", "MCTX3420 Server API (2013)");
@@ -99,7 +89,7 @@ static void IdentifyHandler(FCGIContext *context, char *params) {
  * @param context The context to work in
  * @param force Whether to force key generation or not.
  */ 
-void FCGI_BeginControl(FCGIContext *context, bool force) {
+void FCGI_LockControl(FCGIContext *context, bool force) {
 	time_t now = time(NULL);
 	bool expired = now - context->control_timestamp > CONTROL_TIMEOUT;
 	
@@ -155,7 +145,7 @@ bool FCGI_HasControl(FCGIContext *context, const char *key) {
  * Revokes the current control key, if present.
  * @param context The context to work in
  */
-void FCGI_EndControl(FCGIContext *context) {
+void FCGI_ReleaseControl(FCGIContext *context) {
 	*(context->control_key) = 0;
 	FCGI_BeginJSON(context, STATUS_OK);
 	FCGI_EndJSON();
@@ -202,9 +192,9 @@ char *FCGI_KeyPair(char *in, const char **key, const char **value)
 }
 
 /**
- * Aids in parsing request parameters. Expected keys along with their type
- * and whether or not they're required are provided. This function will then
- * parse the parameter string to find these keys.
+ * Aids in parsing request parameters. 
+ * Input: The expected keys along with their type and whether or not
+ * they're required.
  * @param context The context to work in
  * @param params The parameter string to be parsed
  * @param values An array of FCGIValue's that specify expected keys
@@ -243,12 +233,12 @@ bool FCGI_ParseRequest(FCGIContext *context, char *params, FCGIValue values[], s
 						long parsed = strtol(value, &ptr, 10);
 						if (!*value || *ptr) {
 							snprintf(buf, BUFSIZ, "Expected int for '%s' but got '%s'", key, value);
-							FCGI_RejectJSON(context, FCGI_EscapeJSON(buf));
+							FCGI_RejectJSON(context, buf);
 							return false;
 						}
 
 						if (FCGI_TYPE(val->flags) == FCGI_INT_T)
-							*((int*) val->value) = parsed;
+							*((int*) val->value) = (int) parsed;
 						else
 							*((long*) val->value) = parsed;
 					}	break;
@@ -256,7 +246,7 @@ bool FCGI_ParseRequest(FCGIContext *context, char *params, FCGIValue values[], s
 						*((double*) val->value) = strtod(value, &ptr);
 						if (!*value || *ptr) {
 							snprintf(buf, BUFSIZ, "Expected float for '%s' but got '%s'", key, value);
-							FCGI_RejectJSON(context, FCGI_EscapeJSON(buf));
+							FCGI_RejectJSON(context, buf);
 							return false;
 						}
 						break;
@@ -271,7 +261,7 @@ bool FCGI_ParseRequest(FCGIContext *context, char *params, FCGIValue values[], s
 		} //End for loop
 		if (i == count) {
 			snprintf(buf, BUFSIZ, "Unknown key '%s' specified", key);
-			FCGI_RejectJSON(context, FCGI_EscapeJSON(buf));
+			FCGI_RejectJSON(context, buf);
 			return false;
 		}
 	}
@@ -366,36 +356,6 @@ void FCGI_EndJSON()
 }
 
 /**
- * Escapes a string so it can be used as a JSON string value.
- * Does not support unicode specifiers in the form of \uXXXX.
- * @param buf The string to be escaped
- * @return The escaped string (return value == buf)
- */
-char *FCGI_EscapeJSON(char *buf)
-{
-	int length, i;
-	length = strlen(buf);
-	
-	//Escape special characters. Must count down to escape properly
-	for (i = length - 1; i >= 0; i--) {
-		if (buf[i] < 0x20) { //Control characters
-			buf[i] = ' ';
-		} else if (buf[i] == '"') {
-			if (i-1 >= 0 && buf[i-1] == '\\') 
-				i--;
-			else
-				buf[i] = '\'';
-		} else if (buf[i] == '\\') {
-			if (i-1 >= 0 && buf[i-1] == '\'')
-				i--;
-			else
-				buf[i] = ' ';
-		}
-	}
-	return buf;
-}
-
-/**
  * To be used when the input parameters are rejected. The return data
  * will also have debugging information provided.
  * @param context The context to work in
@@ -411,7 +371,7 @@ void FCGI_RejectJSONEx(FCGIContext *context, StatusCodes status, const char *des
 	FCGI_BeginJSON(context, status);
 	FCGI_JSONPair("description", description);
 	FCGI_JSONLong("responsenumber", context->response_number);
-	FCGI_JSONPair("params", getenv("QUERY_STRING"));
+	//FCGI_JSONPair("params", getenv("QUERY_STRING"));
 	FCGI_JSONPair("host", getenv("SERVER_HOSTNAME"));
 	FCGI_JSONPair("user", getenv("REMOTE_USER"));
 	FCGI_JSONPair("ip", getenv("REMOTE_ADDR"));
@@ -446,6 +406,37 @@ void FCGI_WriteBinary(void * data, size_t size, size_t num_elem)
 }
 
 /**
+ * Escapes a string so it can be used safely.
+ * Currently escapes to ensure the validity for use as a JSON string
+ * Does not support unicode specifiers in the form of \uXXXX.
+ * @param buf The string to be escaped
+ * @return The escaped string (return value == buf)
+ */
+char *FCGI_EscapeText(char *buf)
+{
+	int length, i;
+	length = strlen(buf);
+	
+	//Escape special characters. Must count down to escape properly
+	for (i = length - 1; i >= 0; i--) {
+		if (buf[i] < 0x20) { //Control characters
+			buf[i] = ' ';
+		} else if (buf[i] == '"') {
+			if (i-1 >= 0 && buf[i-1] == '\\') 
+				i--;
+			else
+				buf[i] = '\'';
+		} else if (buf[i] == '\\') {
+			if (i-1 >= 0 && buf[i-1] == '\'')
+				i--;
+			else
+				buf[i] = ' ';
+		}
+	}
+	return buf;
+}
+
+/**
  * Main FCGI request loop that receives/responds to client requests.
  * @param data Reserved.
  * @returns NULL (void* required for consistency with pthreads, although at the moment this runs in the main thread anyway)
@@ -469,6 +460,9 @@ void * FCGI_RequestLoop (void *data)
 		size_t lastchar = strlen(module) - 1;
 		if (lastchar > 0 && module[lastchar] == '/')
 			module[lastchar] = 0;
+
+		//Escape all special characters
+		FCGI_EscapeText(params);
 
 		//Default to the 'identify' module if none specified
 		if (!*module) 

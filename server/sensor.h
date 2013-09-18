@@ -11,6 +11,7 @@
 /** Number of sensors **/
 #define NUMSENSORS 6 
 
+/** Sensor ids - there should be correspondence with the names in g_sensor_names **/
 typedef enum SensorId 
 {
 	ANALOG_TEST0,
@@ -21,11 +22,8 @@ typedef enum SensorId
 	DIGITAL_FAIL0
 } SensorId;
 
-
-
 /** Human readable names for the sensors **/
 extern const char * g_sensor_names[NUMSENSORS];
-
 
 /** Structure to represent a sensor **/
 typedef struct
@@ -34,13 +32,14 @@ typedef struct
 	SensorId id;
 	/** DataFile to store sensor values in **/
 	DataFile data_file;
+	/** Indicates whether the Sensor is not stopped **/
+	bool activated;
 	/** Indicates whether the Sensor should record data **/
 	bool record_data;
 	/** Thread the Sensor is running in **/
 	pthread_t thread;
 	/** Most recently recorded data **/
 	DataPoint newest_data;
-
 } Sensor;
 
 // Structure to define the warning and error thresholds of the sensors
@@ -54,11 +53,8 @@ typedef struct
 
 extern void Sensor_Init(); // One off initialisation of *all* sensors
 
-extern void Sensor_StartAll(const char * experiment_name); // Start all Sensors recording data
-extern void Sensor_StopAll(); // Stop all Sensors recording data
-extern void Sensor_Start(Sensor * s, const char * experiment_name); // Start a sensor recording datas
-extern void Sensor_Stop(Sensor * s); // Stop a Sensor from recording data
-
+extern void Sensor_SetModeAll(ControlModes mode, void * arg);
+extern void Sensor_SetMode(Sensor * s, ControlModes mode, void * arg);
 
 extern void * Sensor_Loop(void * args); // Main loop for a thread that handles a Sensor
 extern bool Sensor_Read(Sensor * s, DataPoint * d); // Read a single DataPoint, indicating if it has changed since the last one
