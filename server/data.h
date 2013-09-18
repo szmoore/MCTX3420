@@ -1,6 +1,6 @@
 /**
- * @file datapoint.h
- * @purpose Declaration of data handling functions; saving, loading, displaying, selecting.
+ * @file data.h
+ * @brief Declaration of data handling functions; saving, loading, displaying, selecting.
  */
 
 #ifndef _DATAPOINT_H

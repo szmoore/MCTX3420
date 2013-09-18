@@ -26,6 +26,7 @@
 
 #include "log.h"
 #include "fastcgi.h"
+#include "control.h"
 
 /**Converts a timeval to a double**/
 #define TIMEVAL_TO_DOUBLE(tv) ((tv).tv_sec + 1e-6 * ((tv).tv_usec))

@@ -8,8 +8,10 @@
 #include "options.h"
 #include "sensor.h"
 #include "actuator.h"
+#include "control.h"
 
 // --- Standard headers --- //
+#include <syslog.h> // for system logging
 #include <signal.h> // for signal handling
 
 // --- Variable definitions --- //
@@ -67,6 +69,9 @@ int main(int argc, char ** argv)
 {
 	ParseArguments(argc, argv);
 
+	//Open the system log
+	openlog("mctxserv", LOG_PID | LOG_PERROR, LOG_USER);
+	Log(LOGINFO, "Server started");
 	// signal handler
 	//TODO: Make this work
 	/*
@@ -78,14 +83,19 @@ int main(int argc, char ** argv)
 	*/
 	Sensor_Init();
 	Actuator_Init();
-	Sensor_StartAll("test");
-	Actuator_StartAll("test");
+	//Sensor_StartAll("test");
+	//Actuator_StartAll("test");
+	const char *ret;
+	if ((ret = Control_SetMode(CONTROL_START, "test")) != NULL)
+		Fatal("Control_SetMode failed with '%s'", ret);
 
 	// run request thread in the main thread
 	FCGI_RequestLoop(NULL);
 
-	Sensor_StopAll();
-	Actuator_StopAll();
+	if ((ret = Control_SetMode(CONTROL_STOP, "test")) != NULL)
+		Fatal("Control_SetMode failed with '%s'", ret);
+	//Sensor_StopAll();
+	//Actuator_StopAll();
 
 	Cleanup();
 	return 0;

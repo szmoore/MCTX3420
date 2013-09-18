@@ -17,7 +17,8 @@ typedef enum StatusCodes {
 	STATUS_OK = 1,
 	STATUS_ERROR = -1,
 	STATUS_UNAUTHORIZED = -2,
-	STATUS_OUTOFRANGE = -3
+	STATUS_NOTRUNNING = -3,
+	STATUS_ALREADYEXISTS = -4
 } StatusCodes;
 
 #define FCGI_PARAM_REQUIRED (1 << 0)
@@ -41,8 +42,8 @@ typedef struct FCGIValue {
 typedef struct FCGIContext FCGIContext;
 typedef void (*ModuleHandler) (FCGIContext *context, char *params);
 
-extern void FCGI_BeginControl(FCGIContext *context, bool force);
-extern void FCGI_EndControl(FCGIContext *context);
+extern void FCGI_LockControl(FCGIContext *context, bool force);
+extern void FCGI_ReleaseControl(FCGIContext *context);
 extern bool FCGI_HasControl(FCGIContext *context, const char *key);
 extern char *FCGI_KeyPair(char *in, const char **key, const char **value);
 extern bool FCGI_ParseRequest(FCGIContext *context, char *params, FCGIValue values[], size_t count);
@@ -54,8 +55,8 @@ extern void FCGI_JSONBool(const char *key, bool value);
 extern void FCGI_JSONKey(const char *key);
 extern void FCGI_PrintRaw(const char *format, ...);
 extern void FCGI_EndJSON();
-extern char *FCGI_EscapeJSON(char *buf);
 extern void FCGI_RejectJSONEx(FCGIContext *context, StatusCodes status, const char *description);
+extern char *FCGI_EscapeText(char *buf);
 extern void *FCGI_RequestLoop (void *data);
 
 extern void FCGI_WriteBinary(void * data, size_t size, size_t num_elem);
