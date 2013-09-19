@@ -2747,3 +2747,23 @@
 19:04 -!- MctxBot [~twang@220-253-203-124.dyn.iinet.net.au] has quit [Ping timeout]
 21:03 -!- jtanx [~asfa@220-253-203-124.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
 21:39 -!- MctxBot [~twang@220-253-203-124.dyn.iinet.net.au] has joined #mctxuwa_softdev
+--- Day changed Thu Sep 19 2013
+16:07 -!- jtanx [~asfa@220-253-203-124.dyn.iinet.net.au] has joined #mctxuwa_softdev
+16:08 < jtanx> one thing I forgot to mention - the latest version on git uses syslog
+16:08 < jtanx> if you copy the config file (server-configs/rsyslog.d/* ??) to /etc/
+16:09 < jtanx> it will log to /var/log/mctx[something I can't remember].log
+16:10 < jtanx> i'm pretty sure you can also create a log file specifically for warning level and above (so it logs in three places, stderr, the normal log, and a special 'error' log), but I haven't set this up yet
+18:15 -!- MctxBot_ [~twang@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:17 -!- jtanx_ [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:17 < jtanx_> :0
+18:22 < sam_moore> ?
+18:30 -!- MctxBot [~twang@220-253-203-124.dyn.iinet.net.au] has quit [Ping timeout]
+18:31 -!- jtanx [~asfa@220-253-203-124.dyn.iinet.net.au] has quit [Ping timeout]
+18:50 -!- jtanx_ is now known as jtanx
+19:11 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
+19:51 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+19:52 -!- MctxBot_ is now known as MctxBot
+20:24 < jtanx> I got the camera image to be updated in javascript instead: http://mctx.us.to:8080/test/
+20:25 < jtanx> right now it's updated around every ~400ms because my webcam is running through a usb1.1 link which seriously limits how fast it can update
+20:36 < jtanx> (its running on a pentium 3 computer)
+21:35 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
