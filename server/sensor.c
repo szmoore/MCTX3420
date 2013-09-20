@@ -171,11 +171,12 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 		}
 		case ANALOG_REALTEST:
 		{
-			d->value = ADCRead(0);	//ADC #0 on the Beaglebone
+			//d->value = ADCRead(0);	//ADC #0 on the Beaglebone
 			break;
 		}
 		case ANALOG_FAIL0:
-			d->value = (double)(rand() % 6) * -( rand() % 2) / ( rand() % 100 + 1);
+			d->value = 250;
+			//d->value = (double)(rand() % 6) * -( rand() % 2) / ( rand() % 100 + 1);
 			//Gives a value between -5 and 5
 			break;
 		case DIGITAL_TEST0:
@@ -188,7 +189,7 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 		{
 		// Can pass pin as argument, just using 20 as an example here
 		// Although since pins will be fixed, can just define it here if we need to
-			d->value = pinRead(20);	//Pin 20 on the Beaglebone
+			//d->value = pinRead(20);	//Pin 20 on the Beaglebone
 			break;
 		}
 		case DIGITAL_FAIL0:

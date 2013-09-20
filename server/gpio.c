@@ -1,11 +1,14 @@
 #include "gpio.h"
 
 void pinExport(int GPIOPin) {
-	FILE *myOutputHandle = NULL;
+	
 	char GPIOString[4];
 	char setValue[4];
 	sprintf(GPIOString, "%d", GPIOPin);
-	if ((myOutputHandle = fopen(exportPath, "ab")) == NULL){
+
+	FILE * myOutputHandle = fopen(exportPath, "ab");
+	if (myOutputHandle == NULL)
+	{
 		Log(LOGERR, "Unable to export GPIO pin %f\n", GPIOPin);
 	}
 	strcpy(setValue, GPIOString);
@@ -21,12 +24,16 @@ void pinDirection(int GPIOPin, int io) {
 	if ((myOutputHandle = fopen(GPIODirection, "rb+")) == NULL){
 		Log(LOGERR, "Unable to open direction handle for pin %f\n", GPIOPin);
 	}
-	if (io == 1) {
+	if (io == 1) 
+	{
 		strcpy(setValue,"out");
 		fwrite(&setValue, sizeof(char), 3, myOutputHandle);
-	else if (io == 0) {
+	}
+	else if (io == 0) 
+	{
 		strcpy(setValue,"in");
 		fwrite(&setValue, sizeof(char), 2, myOutputHandle);
+	}
 	else Log(LOGERR, "GPIO direction must be 1 or 0\n");
 	fclose(myOutputHandle);
 }
@@ -69,9 +76,9 @@ int ADCRead(int adc_num)
 	snprintf(adc_path, sizeof(adc_path), "%s%d", ADCPath, adc_num);		// Construct ADC path
 	int sensor = open(adc_path, O_RDONLY);								
 	char buffer[64];													// I think ADCs are only 12 bits (0-4096), buffer can probably be smaller
-	int read = read(sensor, buffer, sizeof(buffer);
-	if (read != -1) {
-		buffer[read] = NULL;
+	int r = read(sensor, buffer, sizeof(buffer));
+	if (r != -1) {
+		buffer[r] = '\0';
 		int value = atoi(buffer);
 		double convert = (value/4096) * 1000;							// Random conversion factor, will be different for each sensor (get from datasheets)
 		// lseek(sensor, 0, 0); (I think this is uneeded as we are reopening the file on each sensor read; if sensor is read continously we'll need this
@@ -96,9 +103,10 @@ int pinRead(int GPIOPin)
 	snprintf(GPIOValue, sizeof(GPIOValue), "%s%d%s", valuePath, GPIOPin, "/value");	//construct pin path
 	int pin = open(GPIOValue, O_RDONLY);
 	char ch;
-	lseek(fd, 0, SEEK_SET);
-	int read = read(pin, &ch, sizeof(ch);
-	if (read != -1) {
+	lseek(pin, 0, SEEK_SET);
+	int r = read(pin, &ch, sizeof(ch));
+	if (r != -1) 
+	{
 		if (ch != '0') {
 			close(pin);
 			return 1;
@@ -107,7 +115,9 @@ int pinRead(int GPIOPin)
 			close(pin);
 			return 0;
 		}
-	else {
+	}
+	else 
+	{
 		Log(LOGERR, "Failed to get value from pin %f\n", GPIOPin);
 		close(pin);
 		return -1;
