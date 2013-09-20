@@ -7,6 +7,7 @@
 #include "common.h"
 #include "sensor.h"
 #include "options.h"
+#include "gpio.h"
 #include <math.h>
 
 /** Array of sensors, initialised by Sensor_Init **/
@@ -18,16 +19,19 @@ const SensorThreshold thresholds[NUMSENSORS]= {
 	{1,-1,1,-1},		// ANALOG_TEST0
 	{500,0,499,0},		// ANALOG_TEST1
 	{5,-5,4,-4},		// ANALOG_FAIL0
+	{500,0,499,0},		// ANALOG_REALTEST
 	{1,0,1,0},			// DIGITAL_TEST0
 	{1,0,1,0},			// DIGITAL_TEST1
+	{1,0,1,0},			// DIGITAL_REALTEST
 	{1,0,1,0}			// DIGITAL_FAIL0
 };
 
 /** Human readable names for the sensors **/
 const char * g_sensor_names[NUMSENSORS] = {	
 	"analog_test0", "analog_test1", 
-	"analog_fail0",	"digital_test0", 
-	"digital_test1", "digital_fail0"
+	"analog_realtest", "analog_fail0",
+	"digital_test0", "digital_test1", 
+	"digital_realtest", "digital_fail0"
 };
 
 /**
@@ -154,13 +158,20 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 	switch (s->id)
 	{
 		case ANALOG_TEST0:
+		{
 			d->value = (double)(rand() % 100) / 100;
 			break;
+		}
 		case ANALOG_TEST1:
 		{
 			static int count = 0;
 			count %= 500;
 			d->value = count++;
+			break;
+		}
+		case ANALOG_REALTEST:
+		{
+			d->value = ADCRead(0);	//ADC #0 on the Beaglebone
 			break;
 		}
 		case ANALOG_FAIL0:
@@ -173,6 +184,13 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 		case DIGITAL_TEST1:
 			d->value = (t.tv_sec+1)%2;
 			break;
+		case DIGITAL_REALTEST:
+		{
+		// Can pass pin as argument, just using 20 as an example here
+		// Although since pins will be fixed, can just define it here if we need to
+			d->value = pinRead(20);	//Pin 20 on the Beaglebone
+			break;
+		}
 		case DIGITAL_FAIL0:
 			if( rand() % 100 > 98)
 				d->value = 2;
