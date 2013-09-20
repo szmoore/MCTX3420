@@ -7,7 +7,7 @@
 #include "options.h"
 // Files containing GPIO and PWM definitions
 #include "gpio.h"
-#include "pwm.h"
+
 
 /** Array of Actuators (global to this file) initialised by Actuator_Init **/
 static Actuator g_actuators[NUMACTUATORS];
@@ -196,16 +196,16 @@ void Actuator_SetValue(Actuator * a, double value)
 			{
 				// Quick actuator function for testing pins
 				// GPIOPin can be passed as argument, but is just defined here for testing purposes
-				int GPIOPin = 13;
 				// Modify this to only export on first run, only unexport on shutdown
-				pinExport(setValue, GPIOString);
-				pinDirection(GPIODirection, setValue);
-				pinSet(value, GPIOValue, setValue);
-				pinUnexport(setValue, GPIOString);
+				pinExport(60);
+				pinDirection(60, 1);
+				pinSet(value, 60);
+				pinUnexport(60);
 			}
 			break;
 		case ACTUATOR_TEST2:
 			// PWM analogue actuator (currently generates one PWM signal with first PWM module)
+			/*
 			{
 				if (pwminit == 0) {						// If inactive, start the pwm module
 					pwm_init();
@@ -219,6 +219,7 @@ void Actuator_SetValue(Actuator * a, double value)
 					pwm_set_duty((int)duty);			// Set duty percentage for actuator (0-100%)
 				}
 			}
+			*/
 			break;
 	}
 

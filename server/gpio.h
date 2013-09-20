@@ -10,11 +10,13 @@
 #include <sched.h>
 #include <stdint.h>
 
-#define exportPath 		"/sys/class/gpio/export";
-#define unexportPath	"/sys/class/gpio/unexport";
-#define valuePath	 	"/sys/class/gpio/gpio";
-#define directionPath	"/sys/class/gpio/gpio";
-#define ADCPath 		"/sys/devices/platform/tsc/ain";
+#include "common.h"
+
+#define exportPath 		"/sys/class/gpio/export"
+#define unexportPath	"/sys/class/gpio/unexport"
+#define valuePath	 	"/sys/class/gpio/gpio"
+#define directionPath	"/sys/class/gpio/gpio"
+#define ADCPath 		"/sys/devices/platform/tsc/ain"
 
 void pinExport(int GPIOPin);
 void pinDirection(int GPIOPin, int io);
