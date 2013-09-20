@@ -2767,3 +2767,176 @@
 20:25 < jtanx> right now it's updated around every ~400ms because my webcam is running through a usb1.1 link which seriously limits how fast it can update
 20:36 < jtanx> (its running on a pentium 3 computer)
 21:35 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Fri Sep 20 2013
+15:38 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:53 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
+18:02 < jtanx> this seems like an interesting option, at least for the cam that just shows the can explode:http://sourceforge.net/apps/mediawiki/mjpg-streamer/index.php?title=Main_Page
+18:51 < sam_moore> Cool
+18:51 < sam_moore> It, ah
+18:52 < sam_moore> Looks like we might have to recompile the kernel to get PWM working
+18:52 < sam_moore> Hooray
+18:52 < sam_moore> Kernel compiling
+18:52 < sam_moore> What could possibly go wrong?
+19:02 < jtanx> really??
+19:02 < jtanx> why....
+19:03 < jtanx> no am33xx_pwm module?
+19:04 < sam_moore> Not that I can tell
+19:05 < jtanx> well crap
+19:06 < sam_moore> Well... surely I can find a precompiled kernel somewhere
+19:06 < jtanx> it seems that stuff for the BBB is at a really premature stage
+19:07 < sam_moore> Yeah, RPi is much nicer
+19:07 < jtanx> the BBB is just too new..
+19:07 < sam_moore> What's the point of having fancy things like ADC and PWM...
+19:07 < sam_moore> If you can't actually use them without jumping through hoops
+19:07 < jtanx> hahaha
+19:07 < jtanx> were you referencing this, when you said we might have to recompile the kernel? https://groups.google.com/d/msg/beagleboard/wjbOVE6ItNg/AGYVRhYbTX8J
+19:08 < sam_moore> Yeah
+19:08 < sam_moore> ...
+19:08 < sam_moore> I wonder if I can take the kernel used by Angstrom and stick it in /boot
+19:08 < sam_moore> on the SD card
+19:09 < jtanx> ._.
+19:10 < jtanx> what about kernels from here
+19:10 < jtanx> http://rcn-ee.net/deb/precise-armhf/
+19:10 < jtanx> sorry
+19:10 < jtanx> http://rcn-ee.net/deb/wheezy-armhf/
+19:11 < jtanx> what's it currently running
+19:12 < sam_moore> 3.8.13-bone20
+19:13 < sam_moore> Try 3.8.13-bone28 ?
+19:15 < jtanx> what about v3.8.9-bone15
+19:15 < jtanx> oh wait
+19:15 < jtanx> ~.~
+19:15 < sam_moore> I wonder why the BBB developers didn't go with debian...
+19:15 < jtanx> v3.11.0-bone5
+19:15 < jtanx> yeah
+19:15 < jtanx> why angstrom, of all things
+19:15 < sam_moore> Is angstrom used anywhere else?
+19:16 < jtanx> dunno
+19:16 < sam_moore> Other embedded devices, heh
+19:16 < sam_moore> Everyone just has to use their own distro :P
+19:17 < sam_moore> I didn't see the .11 kernels, I'll try the latest one
+19:17 < jtanx> want to try the rc version? lol
+19:18 < jtanx> oh the rc versions are older than .11
+19:19 < jtanx> how does it work?
+19:19 < jtanx> do you just download from http://rcn-ee.net/deb/wheezy-armhf/v3.11.0-bone5/
+19:19 < jtanx> the .sh script and run it from the BBB?
+19:24 < sam_moore> I think so
+19:25 < sam_moore> Well... here goes nothing
+19:26 < sam_moore> Hopefully between 3.8 and 3.11 they actually enabled PWM by default...
+19:27 < sam_moore> It looks like install-me.sh downloads all the .deb files appropriately
+19:29 < sam_moore> It's creating files like: /lib/firmware/bone_pwm_P8_36-00
+19:29 < sam_moore> Which looks promising
+19:29 < sam_moore> Snoopy is not yet on fire
+19:29 < sam_moore> Which is promising
+19:29 < sam_moore> Rebooting and praying
+19:31 < sam_moore> And... it booted into 3.8.13-bone20 -_-
+19:31 < sam_moore> Tempted to just symlink that filename to the new kernel
+19:34 < sam_moore> The new kernel exists in /boot, but obviously there's some boot config that needs to get set
+19:39 < sam_moore> Ok, screw this, I'm making a symlink just to see if it works
+19:40 < jtanx> lol
+19:41 < jtanx> no grub
+19:43 < jtanx> did update-initramfs run?
+19:46 < jtanx> or maybe we need mkimage
+19:47 < jtanx> yeah probably need mkimage
+19:50 < sam_moore> Um, zImage is a symlink to the kernel
+19:50 < sam_moore> But regardless, the new one won't boot
+19:50 < sam_moore> Such a pain
+19:50 < sam_moore> I wonder if we can just toggle the GPIO pin fast enough to implement PWM
+19:56 < sam_moore> Using a decent oscilloscope, I read a 6us period when switching GPIO1_28 on/off as fast as possible
+19:59 < sam_moore> That
+19:59 < sam_moore> s like 166KHz
+19:59 < sam_moore> Heh
+19:59 < sam_moore> Maybe the sources you found were closing the file and reopening it?
+20:01 < sam_moore> Yeah, wow
+20:02 < sam_moore> Using fopen, fprintf and fclose each time takes the period to 224us
+20:02 < sam_moore> Or 4KHz
+20:03 < sam_moore> Also for future reference, that CRO in G19 is definitely broken; it's always a lovely square wave on the modern oscilloscope I'm testing with now
+20:12 < jtanx> haha ok
+20:13 < jtanx> but without kernel support your pwm signal won't be very accurate
+20:13 < sam_moore> Yeah, I suppose
+20:13 < jtanx> how come the new kernel won't boot?
+20:14 < sam_moore> No idea
+20:14 < jtanx> Hmm
+20:14 < jtanx> this lack of documentation on how you do such procedures is pretty crap
+20:15 < sam_moore> Yeah, kernel developers aren't great on documentation
+20:15 < jtanx> is the mkimage package present?
+20:15 < jtanx> if not, install it and try running the install-me script again
+20:16 < jtanx> from this: http://www.jeremycole.com/blog/2011/03/09/beagleboard-upgrading-from-debian-5-to-debian-6/
+20:16 < jtanx> it should be just running that install script and rebooting
+20:16 < sam_moore> Alright, uboot-mkimage I presume?
+20:16 < jtanx> i guess
+20:17 < jtanx> and update-initramfs?
+20:18 < jtanx> (just looking at what the install-me.sh script uses)
+20:18 < sam_moore> Oh, does the script not fail if packages it needs don't exist...
+20:18 < sam_moore> -_-
+20:19 < jtanx> a quick scan says nup
+20:24 < sam_moore> Already had initramfs-tools but not mkimage, so I'll try again
+20:27 < sam_moore> I should probably have focused on the ADC reading before PWM
+20:27 < sam_moore> We're definitely going to get asked about aliasing again
+20:28 < jtanx> urgh yeah
+20:28 < sam_moore> I don't have a signal generator here though
+20:28 < jtanx> this BBB has definitely not been designed with 'plug n play' in mind
+20:28 < sam_moore> Mmm
+20:29 < sam_moore> The Angstrom image would work for this stuff, but obviously has limitations in terms of the webserver stuff
+20:29 < sam_moore> But even with Angstrom you still have to go through a similar convoluted process to control pins
+20:30 < sam_moore> From what I can tell there are two ways to do it
+20:30 < sam_moore> SYSFS, which I can't find much documentation on
+20:30 < sam_moore> Which is the /sys/class/gpio/ stuff
+20:30 < sam_moore> Which actually seems more intuitive than the other way
+20:31 < sam_moore> That involves echoing a bunch of cruft to /sys/devices/cape-manager/slots/ or something similar
+20:31 < jtanx> hmm
+20:32 < sam_moore> There is a /sys/class/pwm
+20:32 < sam_moore> But unfortunately whatever you export it complains about
+20:32 < sam_moore> Probably because the kernel wasn't compiled with it enabled
+20:32 < jtanx> is this with the old kernel?
+20:32 < sam_moore> Yeah
+20:33 < sam_moore> Hangon, the new one's probably finished building by now
+20:34 < jtanx> we don't know if the new one has been compiled with pwm support though
+20:34 < sam_moore> Yeah
+20:36 < sam_moore> The diff between the config options for the kernels shows that the old one has a comment "CONFIG_EHRPWM_TEST is not set" and the newer one has no reference to it
+20:37 < sam_moore> ...
+20:37 < sam_moore> Someone at some point
+20:37 < sam_moore> Has realised that PWM was not enabled
+20:37 < sam_moore> And commented that it isn't enabled
+20:37 < sam_moore> WHY THE HELL DIDN'T THEY JUST ENABLE IT
+20:37 < jtanx> :P
+20:37 < sam_moore> Anyway it still booted off the old kernel
+20:37 < sam_moore> Dinner time
+20:38 < jtanx> ok
+20:57 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:15 < sam_moore> http://www.eewiki.net/display/linuxonarm/BeagleBone+Black#BeagleBoneBlack-LinuxKernel
+21:15 < sam_moore> Looks promising
+21:16 < sam_moore> Hmm...
+21:17 < sam_moore> I'll try using 3.8 but building with the PWM
+21:18 < jtanx> building from source - fun fun :P
+21:19 < sam_moore> Well in theory I just change a config option
+21:19 < jtanx> yeah
+21:19 < sam_moore> When that doesn't work and I have to modify the source, that's when the fun begins
+21:19 < jtanx> let's just hope it works
+21:19 < sam_moore> Yeah, if it doesn't we're (beagle) boned
+21:19 < jtanx> oh while you're at it, figure out how to enable the ethernet-over-usb feature
+21:19 < sam_moore> Haha
+21:20 < jtanx> loljk
+21:25 < sam_moore> Hmmm... compiling a kernel is going to take a while
+21:26 < sam_moore> Ergh, why am I running it on this Pentium D
+21:30 < sam_moore> Hmmm, more troubling... why does a debian wheezy server have OpenSUSE sources in sources.list
+21:30 < sam_moore> Oh well, not my problem
+21:33 < jtanx> heh
+21:33 < sam_moore> How the hell are we going to explain this in the progress report...
+21:34 < sam_moore> Also, I didn't fully understand, why can't you use the same image for multiple BBB?
+21:34 < sam_moore> Are we going to have to do this all again for the other BBB?
+21:34 < sam_moore> Spike I mean
+21:37 < jtanx> no idea
+21:38 < jtanx> without some sort of debugging cable to see what happens when it boots, who knows
+21:38 < sam_moore> :S
+21:39 < sam_moore> I love how git gets to the head of the branch
+21:39 < sam_moore> By starting at the initial commit
+21:39 < sam_moore> And going through every commit and changing the file
+21:42 < sam_moore> It hasn't started building yet
+21:42 < sam_moore> And the way you customise the build...
+21:42 < sam_moore> Is to build it with the defaults, so that the options file exists, then change the options, then build it again -_-
+21:43 < jtanx> ಠ ಠ
+21:43 < sam_moore> Oh well, I have to go home, I'll try finish this tomorrow
+21:43 < sam_moore> Bye
+21:43 < jtanx> ok
+21:43 < jtanx> bye
+23:20 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
