@@ -11,8 +11,10 @@ can modify pwm variables through virtual filesystem:
 pwm drivers reference:
 http://processors.wiki.ti.com/index.php/AM335x_PWM_Driver%27s_Guide */
 
-void pwm_init(void)
-{
+static int pwminit = 0;
+static int pwmstart = 0;
+
+void pwm_init(void) {
     FILE *pwm_mux;
     int i;
     volatile uint32_t *epwmss1;
@@ -36,8 +38,8 @@ void pwm_init(void)
 		epwmss1[OFFSET_1 / sizeof(uint32_t)] = 0x2;
 		}
     close(fd);
-    
-    pwm_mux = fopen("/sys/kernel/debug/omap_mux/gpmc_a2", "w");
+    pwminit = 1;
+    pwm_mux = fopen(PWMMuxPath, "w");
     fprintf(pwm_mux, "6");                                                      // pwm is mux mode 6
     fclose(pwm_mux);
 }
@@ -46,41 +48,36 @@ void pwm_init(void)
 //depends how many pwm modules we have to run
 //TODO:
 
-void pwm_start(void)
-{
+void pwm_start(void) {
     FILE *pwm_run;
-    pwm_run = fopen("/sys/class/pwm/ehrpwm.1:0/run", "w");
+    pwm_run = fopen(PWMRunPath, "w");
     fprintf(pwm_run, "1");
     fclose(pwm_run);
+	pwmstart = 1;
 }
 
-void pwm_stop(void)
-{
+void pwm_stop(void) {
     FILE *pwm_run;
-    
-    pwm_run = fopen("/sys/class/pwm/ehrpwm.1:0/run", "w");
+    pwm_run = fopen(PWMRunPath, "w");
     fprintf(pwm_run, "0");
     fclose(pwm_run);
+	pwmstart = 0;
 }
 
 //duty_percent is just a regular percentage (i.e. 50 = 50%)
 
-void pwm_set_duty(int duty_percent)
-{
+void pwm_set_duty(int duty_percent) {
     FILE *pwm_duty;
-    
-    pwm_duty = fopen("/sys/class/pwm/ehrpwm.1:0/duty_percent", "w"); 
+    pwm_duty = fopen(PWMDutyPath, "w"); 
     fprintf(pwm_duty, "%d", duty_percent);
     fclose(pwm_duty);
 }
 
 //freq is just normal frequency (i.e. 100 = 100Hz)
 
-void pwm_set_period(int freq)
-{
+void pwm_set_period(int freq) {
     FILE *pwm_period;
-    
-    pwm_period = fopen("/sys/class/pwm/ehrpwm.1:0/period_freq", "w");
+    pwm_period = fopen(PWMFreqPath, "w");
     fprintf(pwm_period, "%d", freq);
     fclose(pwm_period);
 }

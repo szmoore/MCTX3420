@@ -8,7 +8,7 @@ $(document).ready(function()
 {
 
 	g_sensors = []
-	g_numSensors = 2
+	g_numSensors = 1
 	g_storeTime = []
 	g_key = null
 
@@ -44,7 +44,7 @@ $(document).ready(function()
 	$.fn.updateSensor = function(json)
 	{
 		//console.log(json.data)
-		var sensor = g_sensors[json.id]
+		var sensor = g_sensors[0]
 		var most_recent = null
 		if (sensor.length > 0)
 			most_recent = sensor[sensor.length-1][0]
@@ -62,7 +62,7 @@ $(document).ready(function()
 		
 		//console.log("Plot:")
 		//console.log(g_sensors[json.id])
-		$.plot("#sensor"+String(json.id)+"_plot", [g_sensors[json.id]])
+		$.plot("#sensor"+String(0)+"_plot", [g_sensors[0]])
 		$.ajax({url : "/api/sensors", data : {id : json.id}, success : function(data) {$(this).updateSensor(data);}});
 		
 		//
@@ -127,7 +127,7 @@ $(document).ready(function()
 
 	for (var i = 0; i < g_numSensors; ++i)
 	{
-	//	$.ajax({url : "/api/sensors", data : {id : i}, success : function(data) {$(this).updateSensor(data);}})
+	  $.ajax({url : "/api/sensors", data : {id : 2}, success : function(data) {$(this).updateSensor(data);}})
 
 	}
 });

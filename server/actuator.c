@@ -5,13 +5,16 @@
 
 #include "actuator.h"
 #include "options.h"
+// Files containing GPIO and PWM definitions
+#include "bbb_pin.h"
+
 
 /** Array of Actuators (global to this file) initialised by Actuator_Init **/
 static Actuator g_actuators[NUMACTUATORS];
 
 /** Human readable names for the Actuators **/
 const char * g_actuator_names[NUMACTUATORS] = {	
-	"actuator_test0", "actuator_test1"
+	"actuator_test0", "gpio1_16", "EHRPWM0A_duty@60Hz"
 };
 
 /**
@@ -25,6 +28,11 @@ void Actuator_Init()
 		Data_Init(&(g_actuators[i].data_file));
 		pthread_mutex_init(&(g_actuators[i].mutex), NULL);
 	}
+
+	// Initialise pins used
+	GPIO_Export(GPIO1_16);
+	PWM_Export(EHRPWM0A);
+	
 }
 
 /**
@@ -166,6 +174,7 @@ void Actuator_SetValue(Actuator * a, double value)
 	{
 		case ACTUATOR_TEST0: 
 			{
+			// Onboard LEDs test actuator
 				FILE *led_handle = NULL;	//code reference: http://learnbuildshare.wordpress.com/2013/05/19/beaglebone-black-controlling-user-leds-using-c/
 				const char *led_format = "/sys/class/leds/beaglebone:green:usr%d/brightness";
 				char buf[50];
@@ -188,7 +197,15 @@ void Actuator_SetValue(Actuator * a, double value)
 			}
 			break;
 		case ACTUATOR_TEST1:
+			GPIO_Set(GPIO1_16, (bool)(value));
 			break;
+		case ACTUATOR_TEST2:
+		{
+			// PWM analogue actuator (currently generates one PWM signal with first PWM module)
+			static long freq = 16666666; // This is 60Hz
+			PWM_Set(EHRPWM0A, true, freq, value * freq); // Set the duty cycle
+			break;
+		}
 	}
 
 	Log(LOGDEBUG, "Actuator %s set to %f", g_actuator_names[a->id], value);
@@ -211,6 +228,7 @@ void Actuator_BeginResponse(FCGIContext * context, ActuatorId id, DataFormat for
 		case JSON:
 			FCGI_BeginJSON(context, STATUS_OK);
 			FCGI_JSONLong("id", id);
+			FCGI_JSONPair("name", g_actuator_names[id]);
 			break;
 		default:
 			FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
