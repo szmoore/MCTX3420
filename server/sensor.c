@@ -7,7 +7,7 @@
 #include "common.h"
 #include "sensor.h"
 #include "options.h"
-#include "gpio.h"
+#include "bbb_pin.h"
 #include <math.h>
 
 /** Array of sensors, initialised by Sensor_Init **/
@@ -18,8 +18,8 @@ const SensorThreshold thresholds[NUMSENSORS]= {
 	//Max Safety, Min safety, Max warning, Min warning
 	{1,-1,1,-1},		// ANALOG_TEST0
 	{500,0,499,0},		// ANALOG_TEST1
+	{5000,0,5000,0},		// ANALOG_REALTEST
 	{5,-5,4,-4},		// ANALOG_FAIL0
-	{500,0,499,0},		// ANALOG_REALTEST
 	{1,0,1,0},			// DIGITAL_TEST0
 	{1,0,1,0},			// DIGITAL_TEST1
 	{1,0,1,0},			// DIGITAL_REALTEST
@@ -45,6 +45,14 @@ void Sensor_Init()
 		Data_Init(&(g_sensors[i].data_file));
 		g_sensors[i].record_data = false;	
 	}
+
+	// Get the ADCs
+	ADC_Export();
+
+	// GPIO1_28 used as a pulse for sampling
+	GPIO_Export(GPIO1_28);
+	// GPIO0_30 toggled during sampling
+	GPIO_Export(GPIO0_30);
 }
 
 /**
@@ -154,9 +162,32 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 	gettimeofday(&t, NULL);
 	d->time_stamp = TIMEVAL_DIFF(t, *Control_GetStartTime());
 
+	static bool result = true;
+	
+	
 	// Read value based on Sensor Id
 	switch (s->id)
 	{
+		case ANALOG_REALTEST:
+		{
+			static bool set = false;
+			
+			GPIO_Set(GPIO0_30, true);
+			d->value = (double)ADC_Read(ADC0);	//ADC #0 on the Beaglebone
+			//Log(LOGDEBUG, "Got value %f from ADC0", d->value);
+			GPIO_Set(GPIO0_30, false);
+			set = !set;
+			GPIO_Set(GPIO1_28, set);
+			
+			break;
+		}
+		
+		default:
+			d->value = rand() % 2;
+			usleep(1000000);
+			break;
+		
+
 		case ANALOG_TEST0:
 		{
 			d->value = (double)(rand() % 100) / 100;
@@ -169,18 +200,15 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 			d->value = count++;
 			break;
 		}
-		case ANALOG_REALTEST:
-		{
-			//d->value = ADCRead(0);	//ADC #0 on the Beaglebone
-			break;
-		}
+
 		case ANALOG_FAIL0:
-			d->value = 250;
+			d->value = 0;
 			//d->value = (double)(rand() % 6) * -( rand() % 2) / ( rand() % 100 + 1);
 			//Gives a value between -5 and 5
 			break;
 		case DIGITAL_TEST0:
 			d->value = t.tv_sec % 2;
+
 			break;
 		case DIGITAL_TEST1:
 			d->value = (t.tv_sec+1)%2;
@@ -198,17 +226,17 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 			d->value = rand() % 2; 
 			//Gives 0 or 1 or a 2 every 1/100 times
 			break;
-		default:
-			Fatal("Unknown sensor id: %d", s->id);
-			break;
+		//default:
+		//	Fatal("Unknown sensor id: %d", s->id);
+		//	break;
 	}	
-	usleep(100000); // simulate delay in sensor polling
+	
 
 	// Perform sanity check based on Sensor's ID and the DataPoint
 	Sensor_CheckData(s->id, d->value);
 
 	// Update latest DataPoint if necessary
-	bool result = (d->value != s->newest_data.value);
+	
 	if (result)
 	{
 		s->newest_data.time_stamp = d->time_stamp;
@@ -290,6 +318,7 @@ void Sensor_BeginResponse(FCGIContext * context, SensorId id, DataFormat format)
 		case JSON:
 			FCGI_BeginJSON(context, STATUS_OK);
 			FCGI_JSONLong("id", id);
+			FCGI_JSONPair("name", g_sensor_names[id]);
 			break;
 		default:
 			FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
