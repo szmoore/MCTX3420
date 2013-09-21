@@ -294,6 +294,7 @@ void FCGI_BeginJSON(FCGIContext *context, StatusCodes status_code)
 	FCGI_JSONDouble("start_time", TIMEVAL_TO_DOUBLE(g_options.start_time));
 	FCGI_JSONDouble("current_time", TIMEVAL_TO_DOUBLE(now));
 	FCGI_JSONDouble("running_time", TIMEVAL_DIFF(now, g_options.start_time));
+	FCGI_JSONPair("control_state", Control_GetModeName());
 }
 
 /**

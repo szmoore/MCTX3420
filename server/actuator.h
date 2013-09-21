@@ -52,8 +52,6 @@ typedef struct
 	pthread_cond_t cond;
 	/** Indicates whether the Actuator is running **/
 	bool activated;
-	/** Indicates whether the Actuator can be actuated or not **/
-	bool allow_actuation;
 
 } Actuator;
 
