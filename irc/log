@@ -2940,3 +2940,174 @@
 21:43 < jtanx> ok
 21:43 < jtanx> bye
 23:20 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Sat Sep 21 2013
+08:42 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+11:23 < sam_moore> http://hipstercircuits.com/enable-pwm-on-beaglebone-with-device-tree-overlays/
+11:23 < sam_moore> So... according to this I should add pwm_test as a kernel module
+11:24 < sam_moore> "This is it. It is now three o’clock in the morning and I have not slept or eaten in two days. My neck is sore, my ass has fallen asleep and my organs are screaming “slow down, man”. I no longer see [CC]s, [LD]s and [AS]s, I only see blondes, brunettes and redheads flashing before my eyes. With my last ounce of energy I barely manage to type in “reboot” as my face hits the keyboard. And that is when it happens.."
+11:25 < sam_moore> Ummm
+11:25 < sam_moore> It's awesome that this guy has solved the problem (I think)
+11:26 < sam_moore> But a bit depressing that it still isn't in the official kernel
+11:29 < sam_moore> I think most people just give up and use Angstrom, which is tempting
+11:30 < sam_moore> I still have that HTTP server code... :P
+11:45 < sam_moore> Looks like Robert C Nelson's 3.8 kernel does have a pwm_test module
+11:45 < sam_moore> Maybe the image you used just had an out of date kernel?
+11:45 -!- Irssi: #mctxuwa_softdev: Total of 3 nicks [0 ops, 0 halfops, 0 voices, 3 normal]
+11:51 < jtanx> hmm
+11:51 < jtanx> no idea
+11:51 < jtanx> it was made in july I think and it uses those rcn kernels
+11:51 < jtanx> We could always use lighttp
+11:51 < jtanx> lighttpd on angstrom if necessary
+11:52 < jtanx> lighttpd and install mod_fastcgi
+11:55 < jtanx> ok so the image uses 3.8.13-bone20, so maybe it wasn't enabled in that version, but it now is in 3.8.13-bone28?
+12:02 < sam_moore> I've just built 3.8.13-bone28 and the module pwm_test exists
+12:03 < sam_moore> ... I also copied the code from that guy's blog as pwm_test2 just in case :P
+12:03 < sam_moore> I'll have to test it later, but at least we have the kernel module
+12:08 < jtanx> nice
+12:39 < jtanx> ohhhhh I know why it didn't work from one bbb to the next, using the same image
+12:39 < jtanx> When you boot for the first time, it assigns the ethernet port eth0
+12:39 < jtanx> when you then take it out and boot it on a different BBB
+12:40 < jtanx> because the ethernet device has a different id, it gets assigned to say eth1
+12:40 < jtanx> and because you don't have any config for eth1 in your network config, there's no internet access
+12:40 < jtanx> http://www.eewiki.net/display/linuxonarm/BeagleBone#BeagleBone-Networking:UsingasharedSDcardwithMultipleBeagleBone
+12:41 < jtanx> should fix that
+13:21 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has left #mctxuwa_softdev []
+13:21 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:10 < jtanx> Eh, you know what I'll just stop the threads when you want to pause it
+15:10 < jtanx> instead of conditionals
+15:11 < jtanx> it's not like you're pausing the experiment that often
+15:18 < sam_moore> That's fine
+15:19 < sam_moore> The conditional approach is only really necessary if you're constantly pausing the threads
+15:19 < sam_moore> I used it for an nbody simulator, so the computation of force and position was split up between threads
+15:19 < sam_moore> It's really slow if you have to stop and then recreate the threads on every step
+15:22 < sam_moore> Although still actually faster than the single threaded program
+15:22 < sam_moore> Well, depending on how many objects you simulated
+15:23 < sam_moore> Anyway, just stop the threads, it's simpler to code and the performance effect in our case is probably negligable
+15:30 < jtanx> yeah
+15:30 < jtanx> say you had an actuator that was being controlled at that instant when an 'emergency stop' was issued
+15:31 < jtanx> since an 'emergency stop' is the same as just pausing (eg stopping the thread but keep DataFile open)
+15:31 < jtanx> you'd have to wait for that action to be completed before the 'emergency stop' would be propagated
+15:34 < jtanx> welp I guess that's why there's hardware safety interlocks
+15:38 < jtanx> Also, technically wouldn't it be possible to try to set the actuator value before the current value has been set
+15:38 < jtanx> Since there's no queue
+15:39 < jtanx> a->control could be overwritten by a new request as Actuator_SetValue operates
+16:12 < sam_moore> We want that right?
+16:13 < sam_moore> I'll look at it later if I get time
+16:14 < jtanx> I don't know if we want that or not
+16:15 < jtanx> wait want as in the current behaviour or the behaviour with a queue?
+16:16 < sam_moore> The current behaviour
+16:16 < sam_moore> I don't think you need a queue
+16:16 < sam_moore> You can extend the critical section in Actuator_Loop to stop the current control getting overwritten
+16:17 < sam_moore> Move the pthread_mutex_unlock on line 121 to below line 127 (Actuator_SetValue)
+16:17 < sam_moore> That way if Actuator_SetControl is called before the value has been successfully set, it will just wait
+16:17 < sam_moore> Mutexes actually implement a queue
+16:18 < sam_moore> If one thread has a lock on the mutex, subsequent threads that try to access the mutex will queue up; whenever the mutex is unlocked the next thread (if any) which was waiting will get it
+16:18 < jtanx> ok
+16:23 < jtanx> I'll leave it as is for now
+16:23 < sam_moore> Sure
+16:49 < sam_moore> PWM working
+16:49 < jtanx> nice
+16:50 < jtanx> I still don't really understand - did you compile the kernel from scratch
+16:50 < jtanx> or did you figure out how to use the install-me.sh script
+16:50 < sam_moore> I did, but I didn't need to modify it
+16:50 < jtanx> huh
+16:50 < jtanx> ok
+16:51 < sam_moore> http://www.eewiki.net/display/linuxonarm/BeagleBone+Black#BeagleBoneBlack-LinuxKernel
+16:52 < jtanx> so if we do this: http://www.eewiki.net/display/linuxonarm/BeagleBone+Black#BeagleBoneBlack-Networking:UsingasharedSDcardwithMultipleBeagleBone
+16:52 < jtanx> We should be able to just copy our image
+16:52 < jtanx> and stick it on the electronics' BBB
+16:53 < sam_moore> Sounds good
+16:53 < sam_moore> I'm glad that worked
+16:53 < jtanx> yeah
+16:54 < jtanx> I wonder if it also enabled the usb0 stuff (ethernet over usb)
+16:58 < sam_moore> PWM appears to have picosecond resolution? Or at least the arguments are in ps
+17:02 < jtanx> oO
+17:11 < sam_moore> ADC can sample at ~4KHz
+17:11 < sam_moore> But... that's using bash
+17:11 < sam_moore> It will probably be massively fast when done in C
+17:11 < jtanx> um
+17:11 < jtanx> is there any need to have it sample at a consistent rate
+17:11 < jtanx> as in, with threads there's no guarantee
+17:12 < jtanx> of a consistent sampling rate
+17:12 < sam_moore> Yes, you're right
+17:13 < sam_moore> I don't think we can achieve a consistent sampling rate, but I don't think it's critical that we do
+17:14 < sam_moore> As soon as we make our software run in an operating system with a kernel and other processes that can run as well, it gets pretty unfeasable to have a constant sample rate
+17:14 < sam_moore> We can have it constant to within an uncertainty I guess
+17:15 < jtanx> yeah, true
+17:18 < sam_moore> If you wanted a really high constant sample rate (say much faster than 1us which is probably the best case we could get) you'd have to use a more low level embedded device
+17:18 < sam_moore> Well I guess you could compile your own kernel for the BBB
+17:19 < sam_moore> But either way you'd have to physically run the webserver/GUI interface stuff on a seperate device
+17:19 < sam_moore> At this stage my feeling is what we have is good enough given the complexity of all the requirements we were given
+17:23 < jtanx> yeah
+17:25 < sam_moore> Hmm, I can set some GPIO pins to toggle whenever Sensor_Read is called and get an idea of sample rates and to what degree of accuracy we can quote the time stamps
+17:26 < sam_moore> I think I'll write some pin control code
+17:26 < sam_moore> I don't trust any of these custom libraries
+17:29 < jtanx> custom libraries?
+17:36 < sam_moore> Well they aren't really libraries
+17:36 < sam_moore> http://www.avrfreaks.net/wiki/index.php/Documentation:Linux/GPIO#Example_of_GPIO_access_from_within_a_C_program
+17:37 < sam_moore> Eg: That one has an fopen and fclose each time the value is changed
+17:38 < sam_moore> I could google until I find someone that has already written a C library, but chances are it will be slow or broken
+17:38 < sam_moore> Since I've worked out how to control the pins I may as well just write the C code to do it
+17:39 < jtanx> yep
+17:49 < sam_moore> I wonder if I can do this with a macro...
+18:30 < sam_moore> Ergh, screw that
+18:31 < sam_moore> Ok, I'm going to implement things like: GPIO/ADC/PWM_Export/Unexport to initialise or deinitialise all pins
+18:31 < jtanx> Ok
+18:31 < jtanx> too much effort with macros?
+18:31 < sam_moore> Yeah, 
+18:32 < sam_moore> I was thinking of having something like "GPIOX_Set()" instead of GPIO_Set(int x)"
+18:32 < sam_moore> But that's probably not as nice as I thought it was
+18:32 < sam_moore> Anyway, there's an enum in the header file that contains the id of all pins used
+18:32 < sam_moore> The implementation defines some structs that wrap around the file descriptors
+18:33 < sam_moore> But to use the module you just give it an ID as defined in the enums
+18:33 < jtanx> Makes sense
+18:33 < jtanx> designing the gui is actually not too bad
+18:33 < sam_moore> That's good
+18:34 < jtanx> looks ok in ie8 too
+18:34 < sam_moore> Nice
+18:35 < jtanx> gotta go, dinner
+18:35 < sam_moore> Ok
+18:35 < sam_moore> Hmm, it would be nice if C had value checking on enums
+18:35 < sam_moore> You can define a function that takes an enum type as an argument
+18:36 < sam_moore> But people can still just pass any old integer
+18:36 < sam_moore> As far as I know
+18:36 < sam_moore> eg: typedef enum {FIRST=1, SECOND=10, THIRD=100} EnumType
+18:36 < sam_moore> void Foo(EnumType e);
+18:37 < sam_moore> If you go Foo(2) it won't complain
+18:38 < sam_moore> Annoying
+18:38 < sam_moore> That seems like something the compiler would be able to pick up
+19:31 < sam_moore> Ergh, I'm getting too obsessive compulsive with this pin thing
+19:35 < sam_moore> It's annoying because ADC, GPIO and PWM are treated completely differently
+19:35 < sam_moore> You write one thing and it enables *all* the ADCs
+19:35 < sam_moore> You have to enable each GPIO pin individually
+19:36 < sam_moore> And to enable PWM pins you give a string (not just an integer)
+19:37 < sam_moore> Also the location of the pin files is not guaranteed (though it probably doesn't change for a given system configuration)
+19:39 < sam_moore> Ah, I found a way to enable pwm with /sys/class/ instead of that cape manager thing
+19:39 < sam_moore> I think I'll use that, since at least it's consistent with the GPIO stuff
+19:41 < sam_moore> Ooh!
+19:41 < sam_moore> http://beagleboard-gsoc13.blogspot.com.au/2013/07/sampling-analogue-signals-using-adc-on.html
+19:41 < sam_moore> Provides a driver for continuously sampling with the ADC
+19:41 < sam_moore> Oh wait
+19:41 < sam_moore> Crap in a bucket
+19:42 < sam_moore> Because we're using those multiplexers we can't do that
+19:42 < sam_moore> We have to set the multiplexer before each sample
+19:42 < sam_moore> Oh well, never mind
+19:44 < sam_moore> I suppose we could write our own kernel module :S
+19:45 < sam_moore> I think I understand this enough to talk to Adam next time he tries to talk about sample rate
+19:46 < sam_moore> 1. It's not actually constant, but we can probably have it constant to within a few us
+19:46 < sam_moore> 2. To make it constant would require writing a kernel module
+19:47 < sam_moore> Unless electronics stops being stingy and gets one amplifier per channel :P
+20:22 < jtanx> hehehe
+20:22 < jtanx> next week's adrian though
+20:22 < sam_moore> Ah
+20:23 < jtanx> grilling time
+20:23 < sam_moore> He'll probably ask us the same things :P
+20:23 < jtanx> yeah
+20:23 < jtanx> but man, so much stuff to go through just to get some readings from a few pins
+20:24 < jtanx> so good job with that :P
+20:54 < sam_moore> Thanks
+22:45 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Sun Sep 22 2013
+00:51 < sam_moore> Hell yes
+00:51 < sam_moore> PWM controlled through web browser
+00:51 < sam_moore> GPIO controlled through web browser
