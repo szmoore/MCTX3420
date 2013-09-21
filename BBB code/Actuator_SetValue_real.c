@@ -1,12 +1,13 @@
 #include "pwm.h"
 
 char pin_dir = "/sys/class/gpio/gpio";		//move these
-int pwm_active = 0;
 
 /** Sets a GPIO pin to the desired value
 *	@param value - the value (1 or 0) to write to the pin
 *	@param pin_num - the number of the pin (refer to electronics team)
 */
+
+//also need to export and set pin direction
 
 void SetPin(int value, int pin_num) {
 	int pin;
