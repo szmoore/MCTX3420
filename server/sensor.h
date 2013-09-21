@@ -32,10 +32,8 @@ typedef struct
 	SensorId id;
 	/** DataFile to store sensor values in **/
 	DataFile data_file;
-	/** Indicates whether the Sensor is not stopped **/
+	/** Indicates whether the Sensor is active or not **/
 	bool activated;
-	/** Indicates whether the Sensor should record data **/
-	bool record_data;
 	/** Thread the Sensor is running in **/
 	pthread_t thread;
 	/** Most recently recorded data **/
