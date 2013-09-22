@@ -8,7 +8,7 @@
 
 #include "common.h"
 
-extern void Image_Handler(FCGIContext * context, const char * params); 
+extern void Image_Handler(FCGIContext * context, char * params); 
 
 #endif //_IMAGE_H
 

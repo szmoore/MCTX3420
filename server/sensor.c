@@ -43,7 +43,6 @@ void Sensor_Init()
 	{
 		g_sensors[i].id = i;
 		Data_Init(&(g_sensors[i].data_file));
-		g_sensors[i].record_data = false;	
 	}
 
 	// Get the ADCs
@@ -73,7 +72,6 @@ void Sensor_SetMode(Sensor * s, ControlModes mode, void * arg)
 				// Set filename
 				char filename[BUFSIZ];
 				const char *experiment_name = (const char*) arg;
-				int ret;
 
 				if (snprintf(filename, BUFSIZ, "%s_s%d", experiment_name, s->id) >= BUFSIZ)
 				{
@@ -83,9 +81,11 @@ void Sensor_SetMode(Sensor * s, ControlModes mode, void * arg)
 				Log(LOGDEBUG, "Sensor %d with DataFile \"%s\"", s->id, filename);
 				// Open DataFile
 				Data_Open(&(s->data_file), filename);
-
-				s->activated = true;
-				s->record_data = true; // Don't forget this!
+			}
+		case CONTROL_RESUME: //Case fallthrough, no break before
+			{
+				int ret;
+				s->activated = true; // Don't forget this!
 
 				// Create the thread
 				ret = pthread_create(&(s->thread), NULL, Sensor_Loop, (void*)(s));
@@ -93,23 +93,29 @@ void Sensor_SetMode(Sensor * s, ControlModes mode, void * arg)
 				{
 					Fatal("Failed to create Sensor_Loop for Sensor %d", s->id);
 				}
+
+				Log(LOGDEBUG, "Resuming sensor %d", s->id);
 			}
-			break;
+		break;
+
 		case CONTROL_EMERGENCY:
 		case CONTROL_PAUSE:
-			s->record_data = false;
-		break;
-		case CONTROL_RESUME:
-			s->record_data = true;
-		break;
-		case CONTROL_STOP:
 			s->activated = false;
-			s->record_data = false;
 			pthread_join(s->thread, NULL);
+			Log(LOGDEBUG, "Paused sensor %d", s->id);
+		break;
+		
+		case CONTROL_STOP:
+			if (s->activated) //May have been paused before
+			{
+				s->activated = false;
+				pthread_join(s->thread, NULL);
+			}
 
 			Data_Close(&(s->data_file)); // Close DataFile
 			s->newest_data.time_stamp = 0;
 			s->newest_data.value = 0;
+			Log(LOGDEBUG, "Stopped sensor %d", s->id);
 		break;
 		default:
 			Fatal("Unknown control mode: %d", mode);
@@ -140,6 +146,7 @@ void Sensor_CheckData(SensorId id, double value)
 	{
 		Log(LOGERR, "Sensor %s is above or below its safety value of %f or %f\n", g_sensor_names[id],thresholds[id].max_error, thresholds[id].min_error);
 		//new function that stops actuators?
+		//Control_SetMode(CONTROL_EMERGENCY, NULL)
 	}
 	else if( value > thresholds[id].max_warn || value < thresholds[id].min_warn)
 	{
@@ -258,20 +265,12 @@ void * Sensor_Loop(void * arg)
 	// Until the sensor is stopped, record data points
 	while (s->activated)
 	{
-		if (s->record_data)
+		DataPoint d;
+		//Log(LOGDEBUG, "Sensor %d reads data [%f,%f]", s->id, d.time_stamp, d.value);
+		if (Sensor_Read(s, &d)) // If new DataPoint is read:
 		{
-			DataPoint d;
-			//Log(LOGDEBUG, "Sensor %d reads data [%f,%f]", s->id, d.time_stamp, d.value);
-			if (Sensor_Read(s, &d)) // If new DataPoint is read:
-			{
-				//Log(LOGDEBUG, "Sensor %d saves data [%f,%f]", s->id, d.time_stamp, d.value);
-				Data_Save(&(s->data_file), &d, 1); // Record it
-			}
-		}
-		else
-		{
-			//Do something? wait?
-			usleep(100000);
+			//Log(LOGDEBUG, "Sensor %d saves data [%f,%f]", s->id, d.time_stamp, d.value);
+			Data_Save(&(s->data_file), &d, 1); // Record it
 		}
 	}
 	

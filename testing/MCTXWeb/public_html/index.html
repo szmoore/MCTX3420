@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>MCTX3420 Web Interface</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!--[if lte IE 8]>
+      <script language="javascript" type="text/javascript" src="static/excanvas.min.js"></script>
+    <![endif]-->
+    <script type="text/javascript" src="static/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript" src="static/jquery.flot.min.js"></script>
+    <script type="text/javascript" src="static/mctx.gui.js"></script>
+    <link rel="stylesheet" type="text/css" href="static/style.css">
+    <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $("#menu-container").populateNavbar();
+      });
+    </script>
+  </head>
+  
+  <body>
+    <div id="header">
+      <span id="title">Exploding Cans</span>
+      <div id="rightnav">
+        <div id="menu-container" class="nav-menu">
+        </div>
+        <span id="date">
+          <script type="text/javascript">getDate();</script>
+        </span>
+      </div>
+      <div class="clear"></div>
+    </div>
+    
+    <div id="content">
+      <div id="sidebar">
+        <div class="widget">
+          <div class="title">
+           Status
+          </div>
+          <div class="item">
+            <table class="status centre">
+              <tr><th>Module</th> <th>State</th></tr>
+              <tr><td>Case interlock</td> <td>FAIL</td></tr>
+              <tr><td>Pressure level</td> <td>PASS</td></tr>
+            </table>
+          </div>         
+        </div>
+        
+        <div class="widget">
+          <div class="title">
+            Login
+          </div>
+          <div class="item">
+            <form action="#">
+              <table class="centre">
+                <tr><td>Username</td><td><input name="username" type="text"></td></tr>
+                <tr><td>Password</td><td><input name="pass" type="password"></td></tr>
+                <tr><td></td><td><input type="button" value="Submit"></td></tr>
+              </table>
+            </form>
+          </div>
+        </div>
+
+      </div>
+
+      <div id="main">
+        <div class="widget">
+          <div class="title">Dashboard</div>
+          
+        </div>
+        
+        <div class="widget">
+          <div class="title">Sensors</div>
+          
+        </div>
+        
+        <div class="widget">
+          <div class="title">Actuators</div>
+          <form action="#">
+            <table class="status">
+              <tr><th>Module</th><th>Control</th><th>State</th></tr>
+              <tr> <td>Solenoid 1</td> 
+                   <td><input type="button" value="Turn on"></td>
+                   <td><div class="circle"></div></td>
+              </tr>
+            </table>
+          </form> 
+        </div>
+        
+        <div class="widget">
+          <div class="title">Camera Dilatometer</div>
+          <img src="#" alt="Camera 1" id="cam1" class="centre">
+          <script type="text/javascript">
+            //$("#cam1").setCamera();
+          </script>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
