@@ -2699,3 +2699,415 @@
 20:00 -!- MctxBot [~twang@203-59-42-232.dyn.iinet.net.au] has quit [Ping timeout]
 21:26 -!- MctxBot [~twang@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
 22:58 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+--- Day changed Tue Sep 17 2013
+08:14 -!- jtanx [~asfa@130.95.101.14] has joined #mctxuwa_softdev
+09:50 -!- jtanx [~asfa@130.95.101.14] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+15:34 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:34 < jtanx> to run the software not as root, we need to at least add it to the 'video' group so it can access the webcam
+15:34 < jtanx> not sure about the sensors
+15:34 < jtanx> eg sudo usermod -a -G video debian
+15:38 < sam_moore> Ah, cool
+15:39 < sam_moore> I think I worked out how to get around the camera crashing without killing the rest of the program, won't implement it for a while though
+15:40 -!- MctxBot [~twang@203-59-42-232.dyn.iinet.net.au] has quit [EOF From client]
+15:43 -!- jtanx_ [~asfa@220-253-203-124.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:48 -!- MctxBot [~twang@220-253-203-124.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:53 -!- jtanx [~asfa@203-59-42-232.dyn.iinet.net.au] has quit [Ping timeout]
+15:57 -!- jtanx_ is now known as jtanx
+16:41 -!- jtanx [~asfa@220-253-203-124.dyn.iinet.net.au] has quit [Ping timeout]
+16:46 -!- jtanx_ [~asfa@220-253-203-124.dyn.iinet.net.au] has joined #mctxuwa_softdev
+16:46 -!- jtanx_ is now known as jtanx
+18:02 -!- jtanx [~asfa@220-253-203-124.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+18:16 -!- jtanx [~asfa@220-253-203-124.dyn.iinet.net.au] has joined #mctxuwa_softdev
+19:31 -!- MctxBot [~twang@220-253-203-124.dyn.iinet.net.au] has quit [Ping timeout]
+22:38 -!- MctxBot [~twang@220-253-203-124.dyn.iinet.net.au] has joined #mctxuwa_softdev
+22:49 -!- jtanx [~asfa@220-253-203-124.dyn.iinet.net.au] has quit [Ping timeout]
+23:17 -!- Callum [~chatzilla@124-169-175-15.dyn.iinet.net.au] has joined #mctxuwa_softdev
+23:18 < Callum> hey
+23:23 < sam_moore> Hi
+23:24 < Callum> do you know how to do the second question of that assignment?
+23:24 < Callum> https://docs.google.com/file/d/0B241H5liqVlnbHZETXRZX1Mwd1k/edit?usp=sharing
+23:25 < Callum> rather remember
+23:35 < sam_moore> Well, you can eliminate any epsilon^2 when you substitute those formulae for v into the formula for gamma
+23:35 < sam_moore> Then it has a really simple taylor expansion
+23:35 < Callum> i might have to hunt you down tomorrow to show me. or maybe il be able to think straight tomorrow.
+23:38 < sam_moore> You can express one of the epsilons in terms of the other one after that
+23:40 < sam_moore> I'm pretty busy tomorrow
+23:42 < Callum> mhmm. so no free time at all? coz im fairly free
+23:49 < sam_moore> Not from 8:00am until 5:00pm
+23:49 < Callum> ohwow. you are busy
+23:49 < Callum> im still unsure what im meant to be applyign the taylor expansion to
+23:53 < sam_moore> Substitute in the suggested formulae to gamma, simplify it, then apply a taylor expansion
+23:53 < sam_moore> Anyway, goodnight, good luck
+23:53 < Callum> night
+--- Day changed Wed Sep 18 2013
+00:07 -!- Callum [~chatzilla@124-169-175-15.dyn.iinet.net.au] has quit [EOF From client]
+07:50 -!- jtanx [~asfa@220-253-203-124.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:11 -!- jtanx [~asfa@220-253-203-124.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0.1/20130814063812]"]
+18:50 -!- jtanx [~asfa@220-253-203-124.dyn.iinet.net.au] has joined #mctxuwa_softdev
+19:04 -!- MctxBot [~twang@220-253-203-124.dyn.iinet.net.au] has quit [Ping timeout]
+21:03 -!- jtanx [~asfa@220-253-203-124.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+21:39 -!- MctxBot [~twang@220-253-203-124.dyn.iinet.net.au] has joined #mctxuwa_softdev
+--- Day changed Thu Sep 19 2013
+16:07 -!- jtanx [~asfa@220-253-203-124.dyn.iinet.net.au] has joined #mctxuwa_softdev
+16:08 < jtanx> one thing I forgot to mention - the latest version on git uses syslog
+16:08 < jtanx> if you copy the config file (server-configs/rsyslog.d/* ??) to /etc/
+16:09 < jtanx> it will log to /var/log/mctx[something I can't remember].log
+16:10 < jtanx> i'm pretty sure you can also create a log file specifically for warning level and above (so it logs in three places, stderr, the normal log, and a special 'error' log), but I haven't set this up yet
+18:15 -!- MctxBot_ [~twang@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:17 -!- jtanx_ [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:17 < jtanx_> :0
+18:22 < sam_moore> ?
+18:30 -!- MctxBot [~twang@220-253-203-124.dyn.iinet.net.au] has quit [Ping timeout]
+18:31 -!- jtanx [~asfa@220-253-203-124.dyn.iinet.net.au] has quit [Ping timeout]
+18:50 -!- jtanx_ is now known as jtanx
+19:11 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
+19:51 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+19:52 -!- MctxBot_ is now known as MctxBot
+20:24 < jtanx> I got the camera image to be updated in javascript instead: http://mctx.us.to:8080/test/
+20:25 < jtanx> right now it's updated around every ~400ms because my webcam is running through a usb1.1 link which seriously limits how fast it can update
+20:36 < jtanx> (its running on a pentium 3 computer)
+21:35 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Fri Sep 20 2013
+15:38 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:53 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
+18:02 < jtanx> this seems like an interesting option, at least for the cam that just shows the can explode:http://sourceforge.net/apps/mediawiki/mjpg-streamer/index.php?title=Main_Page
+18:51 < sam_moore> Cool
+18:51 < sam_moore> It, ah
+18:52 < sam_moore> Looks like we might have to recompile the kernel to get PWM working
+18:52 < sam_moore> Hooray
+18:52 < sam_moore> Kernel compiling
+18:52 < sam_moore> What could possibly go wrong?
+19:02 < jtanx> really??
+19:02 < jtanx> why....
+19:03 < jtanx> no am33xx_pwm module?
+19:04 < sam_moore> Not that I can tell
+19:05 < jtanx> well crap
+19:06 < sam_moore> Well... surely I can find a precompiled kernel somewhere
+19:06 < jtanx> it seems that stuff for the BBB is at a really premature stage
+19:07 < sam_moore> Yeah, RPi is much nicer
+19:07 < jtanx> the BBB is just too new..
+19:07 < sam_moore> What's the point of having fancy things like ADC and PWM...
+19:07 < sam_moore> If you can't actually use them without jumping through hoops
+19:07 < jtanx> hahaha
+19:07 < jtanx> were you referencing this, when you said we might have to recompile the kernel? https://groups.google.com/d/msg/beagleboard/wjbOVE6ItNg/AGYVRhYbTX8J
+19:08 < sam_moore> Yeah
+19:08 < sam_moore> ...
+19:08 < sam_moore> I wonder if I can take the kernel used by Angstrom and stick it in /boot
+19:08 < sam_moore> on the SD card
+19:09 < jtanx> ._.
+19:10 < jtanx> what about kernels from here
+19:10 < jtanx> http://rcn-ee.net/deb/precise-armhf/
+19:10 < jtanx> sorry
+19:10 < jtanx> http://rcn-ee.net/deb/wheezy-armhf/
+19:11 < jtanx> what's it currently running
+19:12 < sam_moore> 3.8.13-bone20
+19:13 < sam_moore> Try 3.8.13-bone28 ?
+19:15 < jtanx> what about v3.8.9-bone15
+19:15 < jtanx> oh wait
+19:15 < jtanx> ~.~
+19:15 < sam_moore> I wonder why the BBB developers didn't go with debian...
+19:15 < jtanx> v3.11.0-bone5
+19:15 < jtanx> yeah
+19:15 < jtanx> why angstrom, of all things
+19:15 < sam_moore> Is angstrom used anywhere else?
+19:16 < jtanx> dunno
+19:16 < sam_moore> Other embedded devices, heh
+19:16 < sam_moore> Everyone just has to use their own distro :P
+19:17 < sam_moore> I didn't see the .11 kernels, I'll try the latest one
+19:17 < jtanx> want to try the rc version? lol
+19:18 < jtanx> oh the rc versions are older than .11
+19:19 < jtanx> how does it work?
+19:19 < jtanx> do you just download from http://rcn-ee.net/deb/wheezy-armhf/v3.11.0-bone5/
+19:19 < jtanx> the .sh script and run it from the BBB?
+19:24 < sam_moore> I think so
+19:25 < sam_moore> Well... here goes nothing
+19:26 < sam_moore> Hopefully between 3.8 and 3.11 they actually enabled PWM by default...
+19:27 < sam_moore> It looks like install-me.sh downloads all the .deb files appropriately
+19:29 < sam_moore> It's creating files like: /lib/firmware/bone_pwm_P8_36-00
+19:29 < sam_moore> Which looks promising
+19:29 < sam_moore> Snoopy is not yet on fire
+19:29 < sam_moore> Which is promising
+19:29 < sam_moore> Rebooting and praying
+19:31 < sam_moore> And... it booted into 3.8.13-bone20 -_-
+19:31 < sam_moore> Tempted to just symlink that filename to the new kernel
+19:34 < sam_moore> The new kernel exists in /boot, but obviously there's some boot config that needs to get set
+19:39 < sam_moore> Ok, screw this, I'm making a symlink just to see if it works
+19:40 < jtanx> lol
+19:41 < jtanx> no grub
+19:43 < jtanx> did update-initramfs run?
+19:46 < jtanx> or maybe we need mkimage
+19:47 < jtanx> yeah probably need mkimage
+19:50 < sam_moore> Um, zImage is a symlink to the kernel
+19:50 < sam_moore> But regardless, the new one won't boot
+19:50 < sam_moore> Such a pain
+19:50 < sam_moore> I wonder if we can just toggle the GPIO pin fast enough to implement PWM
+19:56 < sam_moore> Using a decent oscilloscope, I read a 6us period when switching GPIO1_28 on/off as fast as possible
+19:59 < sam_moore> That
+19:59 < sam_moore> s like 166KHz
+19:59 < sam_moore> Heh
+19:59 < sam_moore> Maybe the sources you found were closing the file and reopening it?
+20:01 < sam_moore> Yeah, wow
+20:02 < sam_moore> Using fopen, fprintf and fclose each time takes the period to 224us
+20:02 < sam_moore> Or 4KHz
+20:03 < sam_moore> Also for future reference, that CRO in G19 is definitely broken; it's always a lovely square wave on the modern oscilloscope I'm testing with now
+20:12 < jtanx> haha ok
+20:13 < jtanx> but without kernel support your pwm signal won't be very accurate
+20:13 < sam_moore> Yeah, I suppose
+20:13 < jtanx> how come the new kernel won't boot?
+20:14 < sam_moore> No idea
+20:14 < jtanx> Hmm
+20:14 < jtanx> this lack of documentation on how you do such procedures is pretty crap
+20:15 < sam_moore> Yeah, kernel developers aren't great on documentation
+20:15 < jtanx> is the mkimage package present?
+20:15 < jtanx> if not, install it and try running the install-me script again
+20:16 < jtanx> from this: http://www.jeremycole.com/blog/2011/03/09/beagleboard-upgrading-from-debian-5-to-debian-6/
+20:16 < jtanx> it should be just running that install script and rebooting
+20:16 < sam_moore> Alright, uboot-mkimage I presume?
+20:16 < jtanx> i guess
+20:17 < jtanx> and update-initramfs?
+20:18 < jtanx> (just looking at what the install-me.sh script uses)
+20:18 < sam_moore> Oh, does the script not fail if packages it needs don't exist...
+20:18 < sam_moore> -_-
+20:19 < jtanx> a quick scan says nup
+20:24 < sam_moore> Already had initramfs-tools but not mkimage, so I'll try again
+20:27 < sam_moore> I should probably have focused on the ADC reading before PWM
+20:27 < sam_moore> We're definitely going to get asked about aliasing again
+20:28 < jtanx> urgh yeah
+20:28 < sam_moore> I don't have a signal generator here though
+20:28 < jtanx> this BBB has definitely not been designed with 'plug n play' in mind
+20:28 < sam_moore> Mmm
+20:29 < sam_moore> The Angstrom image would work for this stuff, but obviously has limitations in terms of the webserver stuff
+20:29 < sam_moore> But even with Angstrom you still have to go through a similar convoluted process to control pins
+20:30 < sam_moore> From what I can tell there are two ways to do it
+20:30 < sam_moore> SYSFS, which I can't find much documentation on
+20:30 < sam_moore> Which is the /sys/class/gpio/ stuff
+20:30 < sam_moore> Which actually seems more intuitive than the other way
+20:31 < sam_moore> That involves echoing a bunch of cruft to /sys/devices/cape-manager/slots/ or something similar
+20:31 < jtanx> hmm
+20:32 < sam_moore> There is a /sys/class/pwm
+20:32 < sam_moore> But unfortunately whatever you export it complains about
+20:32 < sam_moore> Probably because the kernel wasn't compiled with it enabled
+20:32 < jtanx> is this with the old kernel?
+20:32 < sam_moore> Yeah
+20:33 < sam_moore> Hangon, the new one's probably finished building by now
+20:34 < jtanx> we don't know if the new one has been compiled with pwm support though
+20:34 < sam_moore> Yeah
+20:36 < sam_moore> The diff between the config options for the kernels shows that the old one has a comment "CONFIG_EHRPWM_TEST is not set" and the newer one has no reference to it
+20:37 < sam_moore> ...
+20:37 < sam_moore> Someone at some point
+20:37 < sam_moore> Has realised that PWM was not enabled
+20:37 < sam_moore> And commented that it isn't enabled
+20:37 < sam_moore> WHY THE HELL DIDN'T THEY JUST ENABLE IT
+20:37 < jtanx> :P
+20:37 < sam_moore> Anyway it still booted off the old kernel
+20:37 < sam_moore> Dinner time
+20:38 < jtanx> ok
+20:57 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:15 < sam_moore> http://www.eewiki.net/display/linuxonarm/BeagleBone+Black#BeagleBoneBlack-LinuxKernel
+21:15 < sam_moore> Looks promising
+21:16 < sam_moore> Hmm...
+21:17 < sam_moore> I'll try using 3.8 but building with the PWM
+21:18 < jtanx> building from source - fun fun :P
+21:19 < sam_moore> Well in theory I just change a config option
+21:19 < jtanx> yeah
+21:19 < sam_moore> When that doesn't work and I have to modify the source, that's when the fun begins
+21:19 < jtanx> let's just hope it works
+21:19 < sam_moore> Yeah, if it doesn't we're (beagle) boned
+21:19 < jtanx> oh while you're at it, figure out how to enable the ethernet-over-usb feature
+21:19 < sam_moore> Haha
+21:20 < jtanx> loljk
+21:25 < sam_moore> Hmmm... compiling a kernel is going to take a while
+21:26 < sam_moore> Ergh, why am I running it on this Pentium D
+21:30 < sam_moore> Hmmm, more troubling... why does a debian wheezy server have OpenSUSE sources in sources.list
+21:30 < sam_moore> Oh well, not my problem
+21:33 < jtanx> heh
+21:33 < sam_moore> How the hell are we going to explain this in the progress report...
+21:34 < sam_moore> Also, I didn't fully understand, why can't you use the same image for multiple BBB?
+21:34 < sam_moore> Are we going to have to do this all again for the other BBB?
+21:34 < sam_moore> Spike I mean
+21:37 < jtanx> no idea
+21:38 < jtanx> without some sort of debugging cable to see what happens when it boots, who knows
+21:38 < sam_moore> :S
+21:39 < sam_moore> I love how git gets to the head of the branch
+21:39 < sam_moore> By starting at the initial commit
+21:39 < sam_moore> And going through every commit and changing the file
+21:42 < sam_moore> It hasn't started building yet
+21:42 < sam_moore> And the way you customise the build...
+21:42 < sam_moore> Is to build it with the defaults, so that the options file exists, then change the options, then build it again -_-
+21:43 < jtanx> ಠ ಠ
+21:43 < sam_moore> Oh well, I have to go home, I'll try finish this tomorrow
+21:43 < sam_moore> Bye
+21:43 < jtanx> ok
+21:43 < jtanx> bye
+23:20 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Sat Sep 21 2013
+08:42 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+11:23 < sam_moore> http://hipstercircuits.com/enable-pwm-on-beaglebone-with-device-tree-overlays/
+11:23 < sam_moore> So... according to this I should add pwm_test as a kernel module
+11:24 < sam_moore> "This is it. It is now three o’clock in the morning and I have not slept or eaten in two days. My neck is sore, my ass has fallen asleep and my organs are screaming “slow down, man”. I no longer see [CC]s, [LD]s and [AS]s, I only see blondes, brunettes and redheads flashing before my eyes. With my last ounce of energy I barely manage to type in “reboot” as my face hits the keyboard. And that is when it happens.."
+11:25 < sam_moore> Ummm
+11:25 < sam_moore> It's awesome that this guy has solved the problem (I think)
+11:26 < sam_moore> But a bit depressing that it still isn't in the official kernel
+11:29 < sam_moore> I think most people just give up and use Angstrom, which is tempting
+11:30 < sam_moore> I still have that HTTP server code... :P
+11:45 < sam_moore> Looks like Robert C Nelson's 3.8 kernel does have a pwm_test module
+11:45 < sam_moore> Maybe the image you used just had an out of date kernel?
+11:45 -!- Irssi: #mctxuwa_softdev: Total of 3 nicks [0 ops, 0 halfops, 0 voices, 3 normal]
+11:51 < jtanx> hmm
+11:51 < jtanx> no idea
+11:51 < jtanx> it was made in july I think and it uses those rcn kernels
+11:51 < jtanx> We could always use lighttp
+11:51 < jtanx> lighttpd on angstrom if necessary
+11:52 < jtanx> lighttpd and install mod_fastcgi
+11:55 < jtanx> ok so the image uses 3.8.13-bone20, so maybe it wasn't enabled in that version, but it now is in 3.8.13-bone28?
+12:02 < sam_moore> I've just built 3.8.13-bone28 and the module pwm_test exists
+12:03 < sam_moore> ... I also copied the code from that guy's blog as pwm_test2 just in case :P
+12:03 < sam_moore> I'll have to test it later, but at least we have the kernel module
+12:08 < jtanx> nice
+12:39 < jtanx> ohhhhh I know why it didn't work from one bbb to the next, using the same image
+12:39 < jtanx> When you boot for the first time, it assigns the ethernet port eth0
+12:39 < jtanx> when you then take it out and boot it on a different BBB
+12:40 < jtanx> because the ethernet device has a different id, it gets assigned to say eth1
+12:40 < jtanx> and because you don't have any config for eth1 in your network config, there's no internet access
+12:40 < jtanx> http://www.eewiki.net/display/linuxonarm/BeagleBone#BeagleBone-Networking:UsingasharedSDcardwithMultipleBeagleBone
+12:41 < jtanx> should fix that
+13:21 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has left #mctxuwa_softdev []
+13:21 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:10 < jtanx> Eh, you know what I'll just stop the threads when you want to pause it
+15:10 < jtanx> instead of conditionals
+15:11 < jtanx> it's not like you're pausing the experiment that often
+15:18 < sam_moore> That's fine
+15:19 < sam_moore> The conditional approach is only really necessary if you're constantly pausing the threads
+15:19 < sam_moore> I used it for an nbody simulator, so the computation of force and position was split up between threads
+15:19 < sam_moore> It's really slow if you have to stop and then recreate the threads on every step
+15:22 < sam_moore> Although still actually faster than the single threaded program
+15:22 < sam_moore> Well, depending on how many objects you simulated
+15:23 < sam_moore> Anyway, just stop the threads, it's simpler to code and the performance effect in our case is probably negligable
+15:30 < jtanx> yeah
+15:30 < jtanx> say you had an actuator that was being controlled at that instant when an 'emergency stop' was issued
+15:31 < jtanx> since an 'emergency stop' is the same as just pausing (eg stopping the thread but keep DataFile open)
+15:31 < jtanx> you'd have to wait for that action to be completed before the 'emergency stop' would be propagated
+15:34 < jtanx> welp I guess that's why there's hardware safety interlocks
+15:38 < jtanx> Also, technically wouldn't it be possible to try to set the actuator value before the current value has been set
+15:38 < jtanx> Since there's no queue
+15:39 < jtanx> a->control could be overwritten by a new request as Actuator_SetValue operates
+16:12 < sam_moore> We want that right?
+16:13 < sam_moore> I'll look at it later if I get time
+16:14 < jtanx> I don't know if we want that or not
+16:15 < jtanx> wait want as in the current behaviour or the behaviour with a queue?
+16:16 < sam_moore> The current behaviour
+16:16 < sam_moore> I don't think you need a queue
+16:16 < sam_moore> You can extend the critical section in Actuator_Loop to stop the current control getting overwritten
+16:17 < sam_moore> Move the pthread_mutex_unlock on line 121 to below line 127 (Actuator_SetValue)
+16:17 < sam_moore> That way if Actuator_SetControl is called before the value has been successfully set, it will just wait
+16:17 < sam_moore> Mutexes actually implement a queue
+16:18 < sam_moore> If one thread has a lock on the mutex, subsequent threads that try to access the mutex will queue up; whenever the mutex is unlocked the next thread (if any) which was waiting will get it
+16:18 < jtanx> ok
+16:23 < jtanx> I'll leave it as is for now
+16:23 < sam_moore> Sure
+16:49 < sam_moore> PWM working
+16:49 < jtanx> nice
+16:50 < jtanx> I still don't really understand - did you compile the kernel from scratch
+16:50 < jtanx> or did you figure out how to use the install-me.sh script
+16:50 < sam_moore> I did, but I didn't need to modify it
+16:50 < jtanx> huh
+16:50 < jtanx> ok
+16:51 < sam_moore> http://www.eewiki.net/display/linuxonarm/BeagleBone+Black#BeagleBoneBlack-LinuxKernel
+16:52 < jtanx> so if we do this: http://www.eewiki.net/display/linuxonarm/BeagleBone+Black#BeagleBoneBlack-Networking:UsingasharedSDcardwithMultipleBeagleBone
+16:52 < jtanx> We should be able to just copy our image
+16:52 < jtanx> and stick it on the electronics' BBB
+16:53 < sam_moore> Sounds good
+16:53 < sam_moore> I'm glad that worked
+16:53 < jtanx> yeah
+16:54 < jtanx> I wonder if it also enabled the usb0 stuff (ethernet over usb)
+16:58 < sam_moore> PWM appears to have picosecond resolution? Or at least the arguments are in ps
+17:02 < jtanx> oO
+17:11 < sam_moore> ADC can sample at ~4KHz
+17:11 < sam_moore> But... that's using bash
+17:11 < sam_moore> It will probably be massively fast when done in C
+17:11 < jtanx> um
+17:11 < jtanx> is there any need to have it sample at a consistent rate
+17:11 < jtanx> as in, with threads there's no guarantee
+17:12 < jtanx> of a consistent sampling rate
+17:12 < sam_moore> Yes, you're right
+17:13 < sam_moore> I don't think we can achieve a consistent sampling rate, but I don't think it's critical that we do
+17:14 < sam_moore> As soon as we make our software run in an operating system with a kernel and other processes that can run as well, it gets pretty unfeasable to have a constant sample rate
+17:14 < sam_moore> We can have it constant to within an uncertainty I guess
+17:15 < jtanx> yeah, true
+17:18 < sam_moore> If you wanted a really high constant sample rate (say much faster than 1us which is probably the best case we could get) you'd have to use a more low level embedded device
+17:18 < sam_moore> Well I guess you could compile your own kernel for the BBB
+17:19 < sam_moore> But either way you'd have to physically run the webserver/GUI interface stuff on a seperate device
+17:19 < sam_moore> At this stage my feeling is what we have is good enough given the complexity of all the requirements we were given
+17:23 < jtanx> yeah
+17:25 < sam_moore> Hmm, I can set some GPIO pins to toggle whenever Sensor_Read is called and get an idea of sample rates and to what degree of accuracy we can quote the time stamps
+17:26 < sam_moore> I think I'll write some pin control code
+17:26 < sam_moore> I don't trust any of these custom libraries
+17:29 < jtanx> custom libraries?
+17:36 < sam_moore> Well they aren't really libraries
+17:36 < sam_moore> http://www.avrfreaks.net/wiki/index.php/Documentation:Linux/GPIO#Example_of_GPIO_access_from_within_a_C_program
+17:37 < sam_moore> Eg: That one has an fopen and fclose each time the value is changed
+17:38 < sam_moore> I could google until I find someone that has already written a C library, but chances are it will be slow or broken
+17:38 < sam_moore> Since I've worked out how to control the pins I may as well just write the C code to do it
+17:39 < jtanx> yep
+17:49 < sam_moore> I wonder if I can do this with a macro...
+18:30 < sam_moore> Ergh, screw that
+18:31 < sam_moore> Ok, I'm going to implement things like: GPIO/ADC/PWM_Export/Unexport to initialise or deinitialise all pins
+18:31 < jtanx> Ok
+18:31 < jtanx> too much effort with macros?
+18:31 < sam_moore> Yeah, 
+18:32 < sam_moore> I was thinking of having something like "GPIOX_Set()" instead of GPIO_Set(int x)"
+18:32 < sam_moore> But that's probably not as nice as I thought it was
+18:32 < sam_moore> Anyway, there's an enum in the header file that contains the id of all pins used
+18:32 < sam_moore> The implementation defines some structs that wrap around the file descriptors
+18:33 < sam_moore> But to use the module you just give it an ID as defined in the enums
+18:33 < jtanx> Makes sense
+18:33 < jtanx> designing the gui is actually not too bad
+18:33 < sam_moore> That's good
+18:34 < jtanx> looks ok in ie8 too
+18:34 < sam_moore> Nice
+18:35 < jtanx> gotta go, dinner
+18:35 < sam_moore> Ok
+18:35 < sam_moore> Hmm, it would be nice if C had value checking on enums
+18:35 < sam_moore> You can define a function that takes an enum type as an argument
+18:36 < sam_moore> But people can still just pass any old integer
+18:36 < sam_moore> As far as I know
+18:36 < sam_moore> eg: typedef enum {FIRST=1, SECOND=10, THIRD=100} EnumType
+18:36 < sam_moore> void Foo(EnumType e);
+18:37 < sam_moore> If you go Foo(2) it won't complain
+18:38 < sam_moore> Annoying
+18:38 < sam_moore> That seems like something the compiler would be able to pick up
+19:31 < sam_moore> Ergh, I'm getting too obsessive compulsive with this pin thing
+19:35 < sam_moore> It's annoying because ADC, GPIO and PWM are treated completely differently
+19:35 < sam_moore> You write one thing and it enables *all* the ADCs
+19:35 < sam_moore> You have to enable each GPIO pin individually
+19:36 < sam_moore> And to enable PWM pins you give a string (not just an integer)
+19:37 < sam_moore> Also the location of the pin files is not guaranteed (though it probably doesn't change for a given system configuration)
+19:39 < sam_moore> Ah, I found a way to enable pwm with /sys/class/ instead of that cape manager thing
+19:39 < sam_moore> I think I'll use that, since at least it's consistent with the GPIO stuff
+19:41 < sam_moore> Ooh!
+19:41 < sam_moore> http://beagleboard-gsoc13.blogspot.com.au/2013/07/sampling-analogue-signals-using-adc-on.html
+19:41 < sam_moore> Provides a driver for continuously sampling with the ADC
+19:41 < sam_moore> Oh wait
+19:41 < sam_moore> Crap in a bucket
+19:42 < sam_moore> Because we're using those multiplexers we can't do that
+19:42 < sam_moore> We have to set the multiplexer before each sample
+19:42 < sam_moore> Oh well, never mind
+19:44 < sam_moore> I suppose we could write our own kernel module :S
+19:45 < sam_moore> I think I understand this enough to talk to Adam next time he tries to talk about sample rate
+19:46 < sam_moore> 1. It's not actually constant, but we can probably have it constant to within a few us
+19:46 < sam_moore> 2. To make it constant would require writing a kernel module
+19:47 < sam_moore> Unless electronics stops being stingy and gets one amplifier per channel :P
+20:22 < jtanx> hehehe
+20:22 < jtanx> next week's adrian though
+20:22 < sam_moore> Ah
+20:23 < jtanx> grilling time
+20:23 < sam_moore> He'll probably ask us the same things :P
+20:23 < jtanx> yeah
+20:23 < jtanx> but man, so much stuff to go through just to get some readings from a few pins
+20:24 < jtanx> so good job with that :P
+20:54 < sam_moore> Thanks
+22:45 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Sun Sep 22 2013
+00:51 < sam_moore> Hell yes
+00:51 < sam_moore> PWM controlled through web browser
+00:51 < sam_moore> GPIO controlled through web browser

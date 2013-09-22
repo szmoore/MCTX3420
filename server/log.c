@@ -22,10 +22,12 @@ static const char * unspecified_funct = "???";
 	If level is higher (less urgent) than the program's verbosity (see options.h) no message will be printed
  * @param funct - String indicating the function name from which this function was called.
 	If this is NULL, Log will show the unspecified_funct string instead
+ * @param file - Source file containing the function
+ * @param line - Line in the source file at which Log is called
  * @param fmt - A format string
  * @param ... - Arguments to be printed according to the format string
  */
-void LogEx(int level, const char * funct, ...)
+void LogEx(int level, const char * funct, const char * file, int line, ...)
 {
 	//Todo: consider setlogmask(3) to filter messages
 	const char *fmt;
@@ -36,7 +38,7 @@ void LogEx(int level, const char * funct, ...)
 	if (level > g_options.verbosity)
 		return;
 
-	va_start(va, funct);
+	va_start(va, line);
 	fmt = va_arg(va, const char*);
 	
 	if (fmt == NULL) // sanity check
@@ -74,22 +76,24 @@ void LogEx(int level, const char * funct, ...)
 			break;
 	}
 
-	syslog(level, "%s: %s - %s", severity, funct, buffer);
+	syslog(level, "%s: %s (%s:%d) - %s", severity, funct, file, line, buffer);
 }
 
 /**
  * Handle a Fatal error in the program by printing a message and exiting the program
  *	CALLING THIS FUNCTION WILL CAUSE THE PROGAM TO EXIT
  * @param funct - Name of the calling function
+ * @param file - Name of the source file containing the calling function
+ * @param line - Line in the source file at which Fatal is called
  * @param fmt - A format string
  * @param ... - Arguments to be printed according to the format string
  */
-void FatalEx(const char * funct, ...)
+void FatalEx(const char * funct, const char * file, int line, ...)
 {
 	const char *fmt;
 	char buffer[BUFSIZ];
 	va_list va;
-	va_start(va, funct);
+	va_start(va, line);
 	fmt = va_arg(va, const char*);
 	
 	if (fmt == NULL)
@@ -106,7 +110,7 @@ void FatalEx(const char * funct, ...)
 	if (funct == NULL)
 		funct = unspecified_funct;
 
-	syslog(LOG_CRIT, "FATAL: %s - %s", funct, buffer);
+	syslog(LOG_CRIT, "FATAL: %s (%s:%d) - %s", funct, file, line, buffer);
 	exit(EXIT_FAILURE);
 }
 
