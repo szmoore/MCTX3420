@@ -9,6 +9,7 @@
 #include "sensor.h"
 #include "actuator.h"
 #include "control.h"
+#include "bbb_pin_defines.h"
 
 // --- Standard headers --- //
 #include <syslog.h> // for system logging
@@ -29,7 +30,32 @@ void ParseArguments(int argc, char ** argv)
 	g_options.program = argv[0]; // program name
 	g_options.verbosity = LOGDEBUG; // default log level
 	gettimeofday(&(g_options.start_time), NULL); // Start time
+	g_options.adc_device_path = ADC_DEVICE_PATH;
 	Log(LOGDEBUG, "Called as %s with %d arguments.", g_options.program, argc);
+
+	for (int i = 1; i < argc; ++i)
+	{
+		if (argv[i][0] != '-')
+			Fatal("Unexpected argv[%d] - %s", i, argv[i]);
+
+		if (i+1 >= argc || argv[i+1][0] == '-')
+			Fatal("No argument following switch %s", argv[i]);
+		
+		if (strlen(argv[i]) > 2)
+			Fatal("Human readable switches are not supported.");
+
+		switch (argv[i][1])
+		{
+			case 'a':
+				g_options.adc_device_path = argv[i+1];
+				Log(LOGINFO, "ADC Device Path: %s", argv[i+1]);
+				++i;
+				break;
+			default:
+				Fatal("Unrecognised switch %s", argv[i]);
+				break;
+		}
+	}	
 }
 
 /**
@@ -67,11 +93,14 @@ void Cleanup()
  */
 int main(int argc, char ** argv)
 {
+	// Open log before calling ParseArguments (since ParseArguments may call the Log functions)
+	openlog("mctxserv", LOG_PID | LOG_PERROR, LOG_USER);
+	Log(LOGINFO, "Server started");
+
 	ParseArguments(argc, argv);
 
 	//Open the system log
-	openlog("mctxserv", LOG_PID | LOG_PERROR, LOG_USER);
-	Log(LOGINFO, "Server started");
+
 	// signal handler
 	//TODO: Make this work
 	/*

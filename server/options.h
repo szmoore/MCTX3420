@@ -19,6 +19,9 @@ typedef struct
 	/** Time at which program exits **/
 	struct timeval end_time;
 
+	/** Path to ADC files **/
+	char * adc_device_path;
+
 } Options;
 
 /** The only instance of the Options struct **/

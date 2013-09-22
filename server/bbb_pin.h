@@ -24,7 +24,7 @@ extern void ADC_Unexport();
 extern bool GPIO_Read(int pin);
 extern void GPIO_Set(int pin, bool value);
 
-extern long ADC_Read(int pin);
+extern int ADC_Read(int pin);
 
 extern void PWM_Set(int pin, bool polarity, long period, long duty); // period and duty are in ns
 extern void PWM_Stop(int pin);
