@@ -33,9 +33,9 @@ function getDate(){
  * Populates the navigation bar
  */
 $.fn.populateNavbar = function () {
-  var menu = $("<ul/>", {class : "menu"});
+  var menu = $("<ul/>", {"class" : "menu"});
   var sensorEntry = $("<li/>").append($("<a/>", {text : "Sensor data", href : "#"}));
-  var submenu = $("<ul/>", {class : "submenu"});
+  var submenu = $("<ul/>", {"class" : "submenu"});
   
   for (sensor in mctx.sensors) {
     var href = mctx.api + "sensors?start_time=0&format=tsv&id=" + sensor;
@@ -47,7 +47,7 @@ $.fn.populateNavbar = function () {
   menu.append(sensorEntry.append(submenu));
   
   var actuatorEntry = $("<li/>").append($("<a/>", {text : "Actuator data", href : "#"}));
-  submenu = $("<ul/>", {class : "submenu"});
+  submenu = $("<ul/>", {"class" : "submenu"});
   
   for (actuator in mctx.actuators) {
     var href = mctx.api + "actuators?start_time=0&format=tsv&id=" + actuator;
@@ -84,7 +84,7 @@ $.fn.setCamera = function () {
     
     parent.attr("src", url + "#" + (new Date()).getTime());
     
-    setTimeout(updater, 500);
+    setTimeout(updater, 1000);
   };
   
   updater();
@@ -108,7 +108,11 @@ $.fn.setStrainGraphs = function () {
       var data = new Array(arguments.length);
       for (var i = 0; i < arguments.length; i++) {
         var raw_data = arguments[i][0].data;
-        data[i] = raw_data;
+        var pruned_data = [];
+        var step = ~~(raw_data.length/100);
+        for (var j = 0; j < raw_data.length; j += step)
+          pruned_data.push(raw_data[j]); 
+        data[i] = pruned_data;
       }
       $.plot(graphdiv, data);
       setTimeout(updater, 500);
