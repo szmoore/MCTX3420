@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
   <head>
     <title>MCTX3420 Web Interface</title>
@@ -6,34 +6,39 @@
     <!--[if lte IE 8]>
       <script language="javascript" type="text/javascript" src="static/excanvas.min.js"></script>
     <![endif]-->
-    <script src="static/jquery-1.10.1.min.js"></script>
-    <script src="static/jquery.flot.min.js"></script>
-    <script src="static/mctx.gui.js"></script>
+    <script type="text/javascript" src="static/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript" src="static/jquery.flot.min.js"></script>
+    <script type="text/javascript" src="static/mctx.gui.js"></script>
     <link rel="stylesheet" type="text/css" href="static/style.css">
+    <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $("#menu-container").populateNavbar();
+      });
+    </script>
   </head>
+  
   <body>
     <div id="header">
       <span id="title">Exploding Cans</span>
       <div id="rightnav">
-        <div id="menu">
-          <a href="#">Link 1</a>
-          <a href="#">Link 2</a>
-          <a href="#">Link 3</a>
+        <div id="menu-container" class="nav-menu">
         </div>
         <span id="date">
           <script type="text/javascript">getDate();</script>
         </span>
       </div>
+      <div class="clear"></div>
     </div>
-
+    
     <div id="content">
       <div id="sidebar">
         <div class="widget">
-          <div class="announce">
+          <div class="title">
            Status
           </div>
           <div class="item">
-            <table>
+            <table class="status centre">
               <tr><th>Module</th> <th>State</th></tr>
               <tr><td>Case interlock</td> <td>FAIL</td></tr>
               <tr><td>Pressure level</td> <td>PASS</td></tr>
@@ -42,11 +47,17 @@
         </div>
         
         <div class="widget">
-          <div class="announce">
-            Meta2
+          <div class="title">
+            Login
           </div>
           <div class="item">
-            Some more text
+            <form action="#">
+              <table class="centre">
+                <tr><td>Username</td><td><input name="username" type="text"></td></tr>
+                <tr><td>Password</td><td><input name="pass" type="password"></td></tr>
+                <tr><td></td><td><input type="button" value="Submit"></td></tr>
+              </table>
+            </form>
           </div>
         </div>
 
@@ -54,18 +65,34 @@
 
       <div id="main">
         <div class="widget">
-          <div class="announce">Dashboard</div>
+          <div class="title">Dashboard</div>
           
         </div>
         
         <div class="widget">
-          <div class="announce">Sensors</div>
+          <div class="title">Sensors</div>
           
         </div>
         
         <div class="widget">
-          <div class="announce">Actuators</div>
-           	Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          <div class="title">Actuators</div>
+          <form action="#">
+            <table class="status">
+              <tr><th>Module</th><th>Control</th><th>State</th></tr>
+              <tr> <td>Solenoid 1</td> 
+                   <td><input type="button" value="Turn on"></td>
+                   <td><div class="circle"></div></td>
+              </tr>
+            </table>
+          </form> 
+        </div>
+        
+        <div class="widget">
+          <div class="title">Camera Dilatometer</div>
+          <img src="#" alt="Camera 1" id="cam1" class="centre">
+          <script type="text/javascript">
+            //$("#cam1").setCamera();
+          </script>
         </div>
       </div>
     </div>
