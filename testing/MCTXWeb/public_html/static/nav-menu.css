@@ -1,0 +1,89 @@
+/* 
+    Document   : nav-menu
+    Created on : 21/09/2013, 8:33:30 PM
+    Author     : Jeremy Tan
+    Description:
+        Navigation menu styling.
+        Background colour: #2A2A2A
+        Highlight colour: #f2f2f2
+        Normal text colour: #bbbbbb
+*/
+
+/** Easing **/
+.nav-menu {
+  transition: all 0.2s ease 0s;
+}
+
+/** Main menu list styling **/
+.nav-menu ul {
+  list-style: none outside none;
+  margin: 0;
+  padding-left: 0;
+  text-align: right;
+}
+
+/** Menu item styling **/
+.nav-menu li {
+  display: inline-block;
+  position: relative;
+}
+
+/** Link styling **/
+.nav-menu a {
+  background-color: #2A2A2A;
+  border-radius: 2px;
+  border: 1px solid #444444;
+  color: #BBBBBB;
+  display: inline-block;
+  margin: 0.1em;
+  padding: 0.2em 2em;
+  text-decoration: none;
+  transition: all 0.2s ease 0s;
+}
+
+/** Highlight currently hovered-over item **/
+.nav-menu li:hover > a {
+  background-color: #f2f2f2;
+  color: #2a2a2a;
+}
+
+/** Display submenu when hovering over list item **/
+.nav-menu ul li:hover > ul {
+  display: block;
+}
+
+/** Submenu styling **/
+.nav-menu ul ul {
+  background-color: #2A2A2A;
+  border-radius: 2px;
+  box-shadow: 1px 1px 1px #2A2A2A;
+  display: none;
+  left: 0;
+  padding: 0.25em 0.5em;
+  position: absolute;
+  text-align: left;
+  z-index: 10;
+}
+
+/** Submenu link styling **/
+.nav-menu ul ul a {
+  width: 11em;
+  padding: 0.25em 0.5em;
+}
+
+/**
+  Style of menu:
+  <div class="nav-menu">
+    <ul class="menu">
+      <li><a href="#">Link 1</a></li>
+      <li><a href="#">Link 2</a></li>
+      <li>
+        <a href="#">Link 3</a>
+        <ul class="submenu">
+          <li><a href="#">Sub-link 1</a></li>
+          <li><a href="#">Sub-link 2</a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+*/
