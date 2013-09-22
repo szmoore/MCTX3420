@@ -9,6 +9,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <ctype.h>
+#include "options.h"
 
 /**
  * Structure to represent a GPIO pin
@@ -26,7 +28,7 @@ typedef struct
  */
 typedef struct
 {
-	FILE * file_value;
+	int fd_value;
 } ADC_Pin;
 
 /**
@@ -129,7 +131,7 @@ void PWM_Export(int pin)
 	if (export == NULL)
 		Fatal("Couldn't open %s to export PWM pin %d - %s", g_buffer, pin, strerror(errno));
 	
-	fprintf(export, "%d", pin);
+	fprintf(export, "%d\n", pin);
 	fclose(export);
 
 	// Open file descriptors
@@ -194,22 +196,14 @@ void PWM_Unexport(int pin)
  */
 void ADC_Export()
 {
-	
-	FILE * export = fopen(ADC_EXPORT_PATH, "w");
-	if (export == NULL)
-		Fatal("Couldn't open %s to export ADCs - %s", ADC_EXPORT_PATH, strerror(errno));
-
-	fprintf(export, "cape-bone-iio");
-	fclose(export);
-
 	for (int i = 0; i < ADC_NUM_PINS; ++i)
 	{
-		sprintf(g_buffer, "%s/AIN%d", ADC_DEVICE_PATH, i);
-		g_adc[i].file_value = fopen(g_buffer, "r");
-		if (g_adc[i].file_value == NULL)
+		sprintf(g_buffer, "%s/AIN%d", g_options.adc_device_path, i);
+		g_adc[i].fd_value = open(g_buffer, O_RDONLY);
+		if (g_adc[i].fd_value < 0)
 			Fatal("Couldn't open ADC %d device file %s - %s", i, g_buffer, strerror(errno));
 
-		setbuf(g_adc[i].file_value, NULL);
+		//setbuf(g_adc[i].file_value, NULL);
 
 	}
 }
@@ -220,7 +214,7 @@ void ADC_Export()
 void ADC_Unexport()
 {
 	for (int i = 0; i < ADC_NUM_PINS; ++i)
-		fclose(g_adc[i].file_value);
+		close(g_adc[i].fd_value);
 }
 
 /**
@@ -229,11 +223,11 @@ void ADC_Unexport()
  */
 void GPIO_Set(int pin, bool value)
 {
-	if (pwrite(g_gpio[pin].fd_direction, "out", 3*sizeof(char), 0) != 3)
+	if (pwrite(g_gpio[pin].fd_direction, "out", 3, 0) != 3)
 		Fatal("Couldn't set GPIO %d direction - %s", pin, strerror(errno));
 
 	char c = '0' + (value);
-	if (pwrite(g_gpio[pin].fd_value, &c, 1*sizeof(char), 0) != 1)
+	if (pwrite(g_gpio[pin].fd_value, &c, 1, 0) != 1)
 		Fatal("Couldn't read GPIO %d value - %s", pin, strerror(errno));
 
 }
@@ -244,10 +238,10 @@ void GPIO_Set(int pin, bool value)
  */
 bool GPIO_Read(int pin)
 {
-	if (pwrite(g_gpio[pin].fd_direction, "in", 2*sizeof(char), 0) != 2)
+	if (pwrite(g_gpio[pin].fd_direction, "in", 2, 0) != 2)
 		Fatal("Couldn't set GPIO %d direction - %s", pin, strerror(errno)); 
 	char c = '0';
-	if (pread(g_gpio[pin].fd_value, &c, 1*sizeof(char), 0) != 1)
+	if (pread(g_gpio[pin].fd_value, &c, 1, 0) != 1)
 		Fatal("Couldn't read GPIO %d value - %s", pin, strerror(errno));
 
 	return (c == '1');
@@ -264,11 +258,11 @@ bool GPIO_Read(int pin)
 void PWM_Set(int pin, bool polarity, long period, long duty)
 {
 	// Have to stop PWM before changing it
-	if (pwrite(g_pwm[pin].fd_run, "0", 1*sizeof(char), 0) != 1)
+	if (pwrite(g_pwm[pin].fd_run, "0", 1, 0) != 1)
 		Fatal("Couldn't stop PWM %d - %s", pin, strerror(errno));
 
 	char c = '0' + polarity;
-	if (pwrite(g_pwm[pin].fd_polarity, &c, 1*sizeof(char), 0) != 1)
+	if (pwrite(g_pwm[pin].fd_polarity, &c, 1, 0) != 1)
 		Fatal("Couldn't set PWM %d polarity - %s", pin, strerror(errno));
 
 	
@@ -281,7 +275,7 @@ void PWM_Set(int pin, bool polarity, long period, long duty)
 	if (fprintf(g_pwm[pin].file_period, "%lu", period) == 0)
 		Fatal("Couldn't set period for PWM %d - %s", pin, strerror(errno));
 	
-	if (pwrite(g_pwm[pin].fd_run, "1", 1*sizeof(char), 0) != 1)
+	if (pwrite(g_pwm[pin].fd_run, "1", 1, 0) != 1)
 		Fatal("Couldn't start PWM %d - %s", pin, strerror(errno));
 
 }
@@ -292,7 +286,7 @@ void PWM_Set(int pin, bool polarity, long period, long duty)
  */
 void PWM_Stop(int pin)
 {
-	if (pwrite(g_pwm[pin].fd_run, "0", 1*sizeof(char), 0) != 1)
+	if (pwrite(g_pwm[pin].fd_run, "0", 1, 0) != 1)
 		Fatal("Couldn't stop PWM %d - %s", pin, strerror(errno));
 
 }
@@ -302,25 +296,28 @@ void PWM_Stop(int pin)
  * @param id - The ID of the ADC pin to read
  * @returns - The reading of the ADC channel
  */
-long ADC_Read(int id)
+int ADC_Read(int id)
 {
-
-	//Log(LOGDEBUG, "Called for pin %d", id);
-	char adc_val[ADC_DIGITS] = "";
-	rewind(g_adc[id].file_value);
-	fgets(adc_val, sizeof(adc_val)/sizeof(char), g_adc[id].file_value);
-	for(int i = ADC_DIGITS-1; i > 0; --i)
+	char adc_str[ADC_DIGITS] = "";
+	lseek(g_adc[id].fd_value, 0, SEEK_SET);
+	
+	int i = 0;
+	for (i = 0; i < ADC_DIGITS-1; ++i)
 	{
-		if (adc_val[i] == '\n')
-			adc_val[i] = '\0';
+		if (read(g_adc[id].fd_value, adc_str+i, 1) != 1)
+			break;
+		if (adc_str[i] == '\n')
+		{
+			adc_str[i] = '\0';
+			break;
+		}
 	}
 
 	char * end;
-	long val = strtol(adc_val, &end, 10);
+	int val = strtol(adc_str, &end, 10);
 	if (*end != '\0')
 	{
-		Log(LOGERR, "Reading ADC%d gives %s - invalid!", id, adc_val);
-	}
-	//Log(LOGDEBUG, "Returns %lu", val);
-	return val;
+		Log(LOGERR, "Read non integer from ADC %d - %s", id, adc_str);
+	}	
+	return val;	
 }

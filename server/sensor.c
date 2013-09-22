@@ -138,12 +138,12 @@ void Sensor_CheckData(SensorId id, double value)
 {
 	if( value > thresholds[id].max_error || value < thresholds[id].min_error)
 	{
-		Log(LOGERR, "Sensor %s is above or below its safety value of %f or %f\n", g_sensor_names[id],thresholds[id].max_error, thresholds[id].min_error);
+		Log(LOGERR, "Sensor %s at %f is above or below its safety value of %f or %f\n", value, g_sensor_names[id],thresholds[id].max_error, thresholds[id].min_error);
 		//new function that stops actuators?
 	}
 	else if( value > thresholds[id].max_warn || value < thresholds[id].min_warn)
 	{
-		Log(LOGWARN, "Sensor %s is above or below its warning value of %f or %f\n", g_sensor_names[id],thresholds[id].max_warn, thresholds[id].min_warn);	
+		Log(LOGWARN, "Sensor %s at %f is above or below its warning value of %f or %f\n", value, g_sensor_names[id],thresholds[id].max_warn, thresholds[id].min_warn);	
 	}
 }
 
@@ -173,7 +173,7 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 			static bool set = false;
 			
 			GPIO_Set(GPIO0_30, true);
-			d->value = (double)ADC_Read(ADC0);	//ADC #0 on the Beaglebone
+			d->value = 0;//(double)ADC_Read(ADC0);	//ADC #0 on the Beaglebone
 			//Log(LOGDEBUG, "Got value %f from ADC0", d->value);
 			GPIO_Set(GPIO0_30, false);
 			set = !set;

@@ -32,6 +32,7 @@ void Actuator_Init()
 	// Initialise pins used
 	GPIO_Export(GPIO1_16);
 	PWM_Export(EHRPWM0A);
+	PWM_Export(EHRPWM0B);
 	
 }
 
