@@ -19,7 +19,7 @@ body {
 
 hr {
   border: 0;
-  border-bottom: 1px dashed gray;
+  border-bottom: 1px solid gray;
 }
 
 table {
@@ -44,7 +44,7 @@ img.centre {
   margin: auto;
 }
 
-input[type="button"] {
+input[type="button"], input[type="submit"] {
   background-color: #F5F5F5;
   border: 1px solid #A2A2A2;
   border-radius: 3px;
@@ -52,7 +52,7 @@ input[type="button"] {
   transition: all 0.13s ease 0s;
 }
 
-input[type="button"]:active {
+input[type="button"]:active, input[type="submit"]:active {
   background-color: #E8E8E8;
 }
 

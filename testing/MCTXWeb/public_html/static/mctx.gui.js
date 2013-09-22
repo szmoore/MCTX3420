@@ -5,6 +5,17 @@
 mctx = {};
 mctx.api = location.protocol + "//" +  location.host + "/api/";
 mctx.expected_api_version = 0;
+mctx.key = undefined;
+mctx.has_control = false;
+
+mctx.return_codes = {
+  "1" : "Ok",
+  "-1" : "General error",
+  "-2" : "Unauthorized",
+  "-3" : "Not running",
+  "-4" : "Already exists"
+};
+
 mctx.sensors = {
   0 : {name : "Strain gauge 1"},
   1 : {name : "Strain gauge 2"},
@@ -25,39 +36,55 @@ mctx.strain_gauges = {};
 mctx.strain_gauges.ids = [0, 1, 2, 3];
 mctx.strain_gauges.time_limit = 20;
 
+/**
+ * Writes the current date to wherever it's called.
+ */
 function getDate(){
 	document.write((new Date()).toDateString());
 }
+
+/**
+ * Populates a submenu of the navigation bar
+ * @param {string} header The header
+ * @param {object} items An object representing the submenu items
+ * @param {function} translator A function that translates an object item
+ *                              into a text and href.
+ * @returns {$.fn} Itself
+ */
+$.fn.populateSubmenu = function(header, items, translator) {
+  var submenuHeader = $("<li/>").append($("<a/>", {text : header, href : "#"}));
+  var submenu = $("<ul/>", {"class" : "submenu"});
+  
+  for (item in items) {
+    var info = translator(item, items);
+    submenu.append($("<li/>").append(
+          $("<a/>", {text : info.text, 
+                     href : info.href, target : "_blank"})
+    ));
+  }
+  
+  this.append(submenuHeader.append(submenu));
+  return this;
+};
 
 /** 
  * Populates the navigation bar
  */
 $.fn.populateNavbar = function () {
   var menu = $("<ul/>", {"class" : "menu"});
-  var sensorEntry = $("<li/>").append($("<a/>", {text : "Sensor data", href : "#"}));
-  var submenu = $("<ul/>", {"class" : "submenu"});
+  var sensorTranslator = function(item, items) {
+    var href = mctx.api + "sensors?start_time=0&format=tsv&id=" + item;
+    return {text : items[item].name, href : href};
+  };
+  var actuatorTranslator = function(item, items) {
+    var href = mctx.api + "actuators?start_time=0&format=tsv&id=" + item;
+    return {text : items[item].name, href : href};
+  };
   
-  for (sensor in mctx.sensors) {
-    var href = mctx.api + "sensors?start_time=0&format=tsv&id=" + sensor;
-    submenu.append($("<li/>").append(
-          $("<a/>", {text : mctx.sensors[sensor].name, 
-                     href : href, target : "_blank"})
-    ));
-  }
-  menu.append(sensorEntry.append(submenu));
-  
-  var actuatorEntry = $("<li/>").append($("<a/>", {text : "Actuator data", href : "#"}));
-  submenu = $("<ul/>", {"class" : "submenu"});
-  
-  for (actuator in mctx.actuators) {
-    var href = mctx.api + "actuators?start_time=0&format=tsv&id=" + actuator;
-    submenu.append($("<li/>").append(
-          $("<a/>", {text : mctx.actuators[actuator].name, 
-                     href : href, target : "_blank"})
-    ));
-  }
-  menu.append(actuatorEntry.append(submenu));  
+  menu.populateSubmenu("Sensor data", mctx.sensors, sensorTranslator);
+  menu.populateSubmenu("Actuator data", mctx.actuators, actuatorTranslator);
   menu.appendTo(this);
+  return this;
 }
 
 /**
@@ -116,9 +143,39 @@ $.fn.setStrainGraphs = function () {
       }
       $.plot(graphdiv, data);
       setTimeout(updater, 500);
-    }, function () {alert("boo");});
+    }, function () {alert("It crashed");});
   };
   
   updater();
   return this;
+};
+
+$.fn.login = function () {
+  var username = this.find("input[name='username']").val();
+  var password = this.find("input[name='pass']").val();
+  var force = this.find("input[name='force']").is(":checked");
+  var url = mctx.api + "control";
+  
+  var authFunc = function(xhr) {
+    xhr.setRequestHeader("Authorization",
+        "Basic " + base64.encode(username + ":" + password));
+  };
+
+  $.ajax({
+    url : url,
+    data : {action : "lock", force : (force ? true : undefined)},
+    beforeSend : authFunc
+  }).done(function (data) {
+    mctx.key = data.key;
+    if (data.status < 0) {
+      alert("no - " + data.description);
+    } else {
+      mctx.has_control = true;
+      alert("yes - " + mctx.key);
+    }
+  }).fail(function (jqXHR) {
+    mctx.key = undefined;
+    mctx.has_control = false;
+    alert("no");
+  });
 };
