@@ -14,13 +14,14 @@
 //		Might be OK in C++ but not easy in C
 
 /** Number of actuators **/
-#define NUMACTUATORS 2
+#define NUMACTUATORS 3
 
 /** List of actuator ids (should be of size NUMACTUATORS) **/
 typedef enum
 {
 	ACTUATOR_TEST0,
-	ACTUATOR_TEST1
+	ACTUATOR_TEST1,
+	ACTUATOR_TEST2
 } ActuatorId;
 
 /** Human readable names for the Actuators **/

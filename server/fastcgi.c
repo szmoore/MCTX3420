@@ -447,15 +447,17 @@ void * FCGI_RequestLoop (void *data)
 {
 	FCGIContext context = {0};
 	
-	Log(LOGDEBUG, "First request...");
+	Log(LOGDEBUG, "Start loop");
 	while (FCGI_Accept() >= 0) {
-		Log(LOGDEBUG, "Got request #%d", context.response_number);
+		
 		ModuleHandler module_handler = NULL;
 		char module[BUFSIZ], params[BUFSIZ];
 		
 		//strncpy doesn't zero-truncate properly
 		snprintf(module, BUFSIZ, "%s", getenv("DOCUMENT_URI_LOCAL"));
 		snprintf(params, BUFSIZ, "%s", getenv("QUERY_STRING"));
+
+		Log(LOGDEBUG, "Got request #%d - Module %s, params %s", context.response_number, module, params);
 		
 		//Remove trailing slashes (if present) from module query
 		size_t lastchar = strlen(module) - 1;
@@ -489,7 +491,7 @@ void * FCGI_RequestLoop (void *data)
 		}
 		context.response_number++;
 
-		Log(LOGDEBUG, "Waiting for request #%d", context.response_number);
+		
 	}
 
 	Log(LOGDEBUG, "Thread exiting.");

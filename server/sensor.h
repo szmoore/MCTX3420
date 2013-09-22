@@ -9,16 +9,18 @@
 #include "data.h"
 
 /** Number of sensors **/
-#define NUMSENSORS 6 
+#define NUMSENSORS 8
 
 /** Sensor ids - there should be correspondence with the names in g_sensor_names **/
 typedef enum SensorId 
 {
 	ANALOG_TEST0,
 	ANALOG_TEST1,
+	ANALOG_REALTEST,
 	ANALOG_FAIL0,
 	DIGITAL_TEST0,
 	DIGITAL_TEST1,
+	DIGITAL_REALTEST,
 	DIGITAL_FAIL0
 } SensorId;
 
