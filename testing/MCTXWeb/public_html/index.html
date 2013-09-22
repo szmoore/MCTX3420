@@ -14,6 +14,7 @@
     <script type="text/javascript">
       $(document).ready(function () {
         $("#menu-container").populateNavbar();
+        $("#cam1").setCamera();
       });
     </script>
   </head>
@@ -30,13 +31,12 @@
       </div>
       <div class="clear"></div>
     </div>
+    <!-- End header -->
     
     <div id="content">
       <div id="sidebar">
         <div class="widget">
-          <div class="title">
-           Status
-          </div>
+          <div class="title">Status</div>
           <div class="item">
             <table class="status centre">
               <tr><th>Module</th> <th>State</th></tr>
@@ -47,9 +47,11 @@
         </div>
         
         <div class="widget">
-          <div class="title">
-            Login
-          </div>
+          <div class="title">Pressure controls</div>
+        </div>
+        
+        <div class="widget">
+          <div class="title">Login</div>
           <div class="item">
             <form action="#">
               <table class="centre">
@@ -60,8 +62,8 @@
             </form>
           </div>
         </div>
-
       </div>
+      <!-- End sidebar -->
 
       <div id="main">
         <div class="widget">
@@ -70,31 +72,22 @@
         </div>
         
         <div class="widget">
-          <div class="title">Sensors</div>
-          
-        </div>
-        
-        <div class="widget">
-          <div class="title">Actuators</div>
-          <form action="#">
-            <table class="status">
-              <tr><th>Module</th><th>Control</th><th>State</th></tr>
-              <tr> <td>Solenoid 1</td> 
-                   <td><input type="button" value="Turn on"></td>
-                   <td><div class="circle"></div></td>
-              </tr>
-            </table>
-          </form> 
+          <div class="title">Strain gauges</div>
+          <div id="strain-graphs" class="graph">
+            <!-- Strain graph placeholder -->
+            <script type="text/javascript">
+              $("#strain-graphs").setStrainGraphs();
+            </script>
+          </div>
         </div>
         
         <div class="widget">
           <div class="title">Camera Dilatometer</div>
           <img src="#" alt="Camera 1" id="cam1" class="centre">
-          <script type="text/javascript">
-            //$("#cam1").setCamera();
-          </script>
         </div>
       </div>
+      <!-- End main content -->
+      
     </div>
   </body>
 </html>

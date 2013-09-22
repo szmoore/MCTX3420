@@ -3,8 +3,7 @@
  */
 
 mctx = {};
-//mctx.api = location.protocol + "/" +  location.host + "/api/";
-mctx.api = "http://mctx.us.to:8080/api/";
+mctx.api = location.protocol + "//" +  location.host + "/api/";
 mctx.expected_api_version = 0;
 mctx.sensors = {
   0 : {name : "Strain gauge 1"},
@@ -21,6 +20,10 @@ mctx.actuators = {
   2 : {name : "Solenoid 3"},
   3 : {name : "Pressure regulator"}
 };
+
+mctx.strain_gauges = {};
+mctx.strain_gauges.ids = [0, 1, 2, 3];
+mctx.strain_gauges.time_limit = 20;
 
 function getDate(){
 	document.write((new Date()).toDateString());
@@ -62,9 +65,10 @@ $.fn.populateNavbar = function () {
  * @returns {$.fn}
  */
 $.fn.setCamera = function () {
-  var loc = mctx.api + "image";
+  var url = mctx.api + "image";
   var update = true;
 
+  //Stop updating if we can't retrieve an image!
   this.error(function() {
     update = false;
   });
@@ -78,9 +82,37 @@ $.fn.setCamera = function () {
       return;
     }
     
-    parent.attr("src", loc + "#" + (new Date()).getTime());
+    parent.attr("src", url + "#" + (new Date()).getTime());
     
     setTimeout(updater, 500);
+  };
+  
+  updater();
+  return this;
+};
+
+$.fn.setStrainGraphs = function () {
+  var sensor_url = mctx.api + "sensors";
+  var graphdiv = this;
+  
+  var updater = function () {
+    var time_limit = mctx.strain_gauges.time_limit;
+    var responses = new Array(mctx.strain_gauges.ids.length);
+    
+    for (var i = 0; i < mctx.strain_gauges.ids.length; i++) {
+      var parameters = {id : i, start_time: -time_limit};
+      responses[i] = $.ajax({url : sensor_url, data : parameters});
+    }
+    
+    $.when.apply(this, responses).then(function () {
+      var data = new Array(arguments.length);
+      for (var i = 0; i < arguments.length; i++) {
+        var raw_data = arguments[i][0].data;
+        data[i] = raw_data;
+      }
+      $.plot(graphdiv, data);
+      setTimeout(updater, 500);
+    }, function () {alert("boo");});
   };
   
   updater();
