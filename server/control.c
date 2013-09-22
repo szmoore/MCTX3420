@@ -50,11 +50,6 @@ void Control_Handler(FCGIContext *context, char *params) {
 		return;
 	} else if (!strcmp(action, "emergency")) {
 		desired_mode = CONTROL_EMERGENCY;
-	} else if (!strcmp(action, "query")) {
-		FCGI_BeginJSON(context, STATUS_OK);
-		FCGI_JSONPair("state", Control_GetModeName(Control_GetMode()));
-		FCGI_EndJSON();
-		return;
 	} else if (FCGI_HasControl(context, key)) {
 		if (!strcmp(action, "release")) {
 			FCGI_ReleaseControl(context);
@@ -78,11 +73,7 @@ void Control_Handler(FCGIContext *context, char *params) {
 
 	void *arg = NULL;
 	if (desired_mode == CONTROL_START) {
-		int len = strlen(name);
-		if (len <= 0) {
-			FCGI_RejectJSON(context, "An experiment name must be specified.");
-			return;
-		} else if (PathExists(name) && !force) {
+		if (PathExists(name) && !force) {
 			FCGI_RejectJSON(context, "An experiment with that name already exists.");
 			return;
 		}
@@ -111,26 +102,43 @@ const char* Control_SetMode(ControlModes desired_mode, void * arg)
 	const char *ret = NULL;
 
 	pthread_mutex_lock(&(g_controls.mutex));
-	if (g_controls.current_mode == CONTROL_EMERGENCY && desired_mode != CONTROL_STOP) {
-		ret = "In emergency mode. Stop before doing anything else.";
-	} else if (g_controls.current_mode == desired_mode) {
-		ret = "Already in desired mode.";
-	} else if (desired_mode == CONTROL_START) {
-		if (g_controls.current_mode == CONTROL_STOP) {
-			//TODO Sanitise name (ensure it contains no special chars eg \ / .. . 
-			FILE *fp = fopen((const char*) arg, "a");
-			if (fp) {
-				fclose(fp);
-				gettimeofday(&(g_controls.start_time), NULL);
-			} else {
-				ret = "Cannot open experiment name marker";
-			}
-		} else {
-			ret = "Cannot start when not in a stopped state.";
-		}
-	} else if (desired_mode == CONTROL_RESUME) {
-		if (g_controls.current_mode != CONTROL_PAUSE)
-			ret = "Cannot resume when not in a paused state.";
+	if (g_controls.current_mode == desired_mode)
+		ret = "Already in the desired mode.";
+	else if (g_controls.current_mode == CONTROL_EMERGENCY && desired_mode != CONTROL_STOP)
+		ret = "In emergency mode. You must stop before continuing.";
+	else switch (desired_mode) {
+		case CONTROL_START:
+			if (g_controls.current_mode == CONTROL_STOP) {
+				const char * name = arg;
+				if (!*name)
+					ret = "An experiment name must be specified";
+				else if (strpbrk(name, INVALID_CHARACTERS))
+					ret = "The experiment name must not contain: " INVALID_CHARACTERS_JSON;
+				else {
+					FILE *fp = fopen((const char*) arg, "a");
+					if (fp) {
+						fclose(fp);
+						gettimeofday(&(g_controls.start_time), NULL);
+					} else
+						ret = "Cannot open experiment name marker";
+				}
+			} else 
+				ret = "Cannot start when not in a stopped state.";
+		break;
+		case CONTROL_PAUSE:
+			if (g_controls.current_mode != CONTROL_START)
+				ret = "Cannot pause when not in a running state.";
+		break;
+		case CONTROL_RESUME:
+			if (g_controls.current_mode != CONTROL_PAUSE)
+				ret = "Cannot resume when not in a paused state.";
+		break;
+		case CONTROL_EMERGENCY:
+			if (g_controls.current_mode != CONTROL_START) //pfft
+				ret = "Not running so how can there be an emergency.";
+		break;
+		default:
+		break;
 	}
 	
 	if (ret == NULL) {
@@ -146,22 +154,14 @@ const char* Control_SetMode(ControlModes desired_mode, void * arg)
 }
 
 /**
- * Gets the current mode.
- * @return The current mode
- */
-ControlModes Control_GetMode() {
-	return g_controls.current_mode;
-}
-
-/**
- * Gets a string representation of a mode
+ * Gets a string representation of the current mode
  * @param mode The mode to get a string representation of
  * @return The string representation of the mode
  */
-const char * Control_GetModeName(ControlModes mode) {
+const char * Control_GetModeName() {
 	const char * ret = "Unknown";
 
-	switch (mode) {
+	switch (g_controls.current_mode) {
 		case CONTROL_START: ret = "Running"; break;
 		case CONTROL_PAUSE: ret = "Paused"; break;
 		case CONTROL_RESUME: ret = "Resumed"; break;
@@ -170,19 +170,6 @@ const char * Control_GetModeName(ControlModes mode) {
 	}
 	return ret;
 }
-
-/*
-bool Control_Lock() {
-	pthread_mutex_lock(&(g_controls.mutex));
-	if (g_controls.state == STATE_RUNNING || g_controls.state == STATE_PAUSED)
-		return true;
-	pthread_mutex_unlock(&(g_controls.mutex));
-	return false;
-}
-
-void Control_Unlock() {
-	pthread_mutex_unlock(&(g_controls.mutex));
-}*/
 
 /**
  * Gets the start time for the current experiment

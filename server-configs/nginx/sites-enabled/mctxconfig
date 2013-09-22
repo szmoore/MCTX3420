@@ -2,7 +2,7 @@ server {
 	listen 80;
 
 	#Change this to match your root directory
-	root /usr/share/nginx/html;
+	root /usr/share/nginx/www;
 	index index.php index.html index.htm;
 
 	# Make site accessible from http://localhost/
@@ -67,6 +67,12 @@ server {
 		#Program log
 		location ^~ /api/log {
 			alias /var/log/mctxserv.log;
+			default_type text/plain;
+		}
+
+		#Program error log
+		location ^~ /api/errorlog {
+			alias /var/log/mctxserv-error.log;
 			default_type text/plain;
 		}
 

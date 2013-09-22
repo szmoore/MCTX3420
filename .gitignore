@@ -12,3 +12,4 @@ ehthumbs.db
 Thumbs.db
 
 server/win32
+**/nbproject/private/
