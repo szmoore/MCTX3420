@@ -53,7 +53,6 @@ void Actuator_SetMode(Actuator * a, ControlModes mode, void *arg)
 			{
 				char filename[BUFSIZ];
 				const char *experiment_name = (const char*) arg;
-				int ret;
 
 				if (snprintf(filename, BUFSIZ, "%s_a%d", experiment_name, a->id) >= BUFSIZ)
 				{
@@ -63,34 +62,43 @@ void Actuator_SetMode(Actuator * a, ControlModes mode, void *arg)
 				Log(LOGDEBUG, "Actuator %d with DataFile \"%s\"", a->id, filename);
 				// Open DataFile
 				Data_Open(&(a->data_file), filename);
-
+			} 
+		case CONTROL_RESUME:  //Case fallthrough; no break before
+			{
+				int ret;
 				a->activated = true; // Don't forget this
-				a->allow_actuation = true;
-
 				a->control_changed = false;
 
-				// Create the thread
 				ret = pthread_create(&(a->thread), NULL, Actuator_Loop, (void*)(a));
 				if (ret != 0)
 				{
 					Fatal("Failed to create Actuator_Loop for Actuator %d", a->id);
 				}
+
+				Log(LOGDEBUG, "Resuming actuator %d", a->id);
 			}
 		break;
 
 		case CONTROL_EMERGENCY: //TODO add proper case for emergency
 		case CONTROL_PAUSE:
-			a->allow_actuation = false;
-		break;
-		case CONTROL_RESUME:
-			a->allow_actuation = true;
-		break;
-		case CONTROL_STOP:
-			a->allow_actuation = false;
 			a->activated = false;
 			Actuator_SetControl(a, NULL);
-			pthread_join(a->thread, NULL); // Wait for thread to exit	
+			pthread_join(a->thread, NULL); // Wait for thread to exit
+
+			Log(LOGDEBUG, "Paused actuator %d", a->id);
+		break;
+
+		break;
+		case CONTROL_STOP:
+			if (a->activated) //May have been paused before
+			{
+				a->activated = false;
+				Actuator_SetControl(a, NULL);
+				pthread_join(a->thread, NULL); // Wait for thread to exit	
+			}
 			Data_Close(&(a->data_file)); // Close DataFile
+			
+			Log(LOGDEBUG, "Stopped actuator %d", a->id);
 		break;
 		default:
 			Fatal("Unknown control mode: %d", mode);
@@ -130,8 +138,6 @@ void * Actuator_Loop(void * arg)
 		pthread_mutex_unlock(&(a->mutex));
 		if (!a->activated)
 			break;
-		else if (!a->allow_actuation)
-			continue;
 
 		Actuator_SetValue(a, a->control.value);
 	}
@@ -255,8 +261,6 @@ void Actuator_EndResponse(FCGIContext * context, ActuatorId id, DataFormat forma
 			break;
 	}
 }
-
-
 
 
 /**
