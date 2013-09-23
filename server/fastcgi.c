@@ -16,6 +16,7 @@
 #include "control.h"
 #include "options.h"
 #include "image.h"
+#include "pin_test.h"
 
 /**The time period (in seconds) before the control key expires */
 #define CONTROL_TIMEOUT 180
@@ -481,6 +482,8 @@ void * FCGI_RequestLoop (void *data)
 			module_handler = Actuator_Handler;
 		} else if (!strcmp("image", module)) {
 			module_handler = Image_Handler;
+		} else if (!strcmp("pin", module)) { 
+			module_handler = Pin_Handler; // *Debug only* pin test module
 		}
 
 		context.current_module = module;

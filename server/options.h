@@ -22,6 +22,11 @@ typedef struct
 	/** Path to ADC files **/
 	char * adc_device_path;
 
+	/*** Horrible horrible hack ***/
+	int argc;
+	/*** Horrible horrible hack ***/
+	char ** argv;
+
 } Options;
 
 /** The only instance of the Options struct **/

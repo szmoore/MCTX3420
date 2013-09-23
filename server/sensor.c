@@ -46,12 +46,12 @@ void Sensor_Init()
 	}
 
 	// Get the ADCs
-	ADC_Export();
+	//ADC_Export();
 
 	// GPIO1_28 used as a pulse for sampling
-	GPIO_Export(GPIO1_28);
+	//GPIO_Export(GPIO1_28);
 	// GPIO0_30 toggled during sampling
-	GPIO_Export(GPIO0_30);
+	//GPIO_Export(GPIO0_30);
 }
 
 /**
@@ -175,16 +175,18 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 	// Read value based on Sensor Id
 	switch (s->id)
 	{
-		case ANALOG_REALTEST:
+		case 2:
 		{
 			static bool set = false;
 			
-			GPIO_Set(GPIO0_30, true);
-			d->value = 0;//(double)ADC_Read(ADC0);	//ADC #0 on the Beaglebone
+			//GPIO_Set(GPIO0_30, true);
+			d->value = (double)ADC_Read(ADC0);	//ADC #0 on the Beaglebone
 			//Log(LOGDEBUG, "Got value %f from ADC0", d->value);
-			GPIO_Set(GPIO0_30, false);
+			//GPIO_Set(GPIO0_30, false);
 			set = !set;
-			GPIO_Set(GPIO1_28, set);
+			//GPIO_Set(GPIO1_28, set);
+
+			usleep(100000);
 			
 			break;
 		}
