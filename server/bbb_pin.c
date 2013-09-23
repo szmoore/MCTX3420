@@ -61,7 +61,9 @@ static char g_buffer[BUFSIZ] = "";
 void GPIO_Export(int pin)
 {
 	if (pin < 0 || pin > GPIO_NUM_PINS)
-		Fatal("Invalid pin number %d", pin);
+	{
+		Abort("Invalid pin number %d", pin);
+	}
 
 	
 
@@ -69,7 +71,9 @@ void GPIO_Export(int pin)
 	sprintf(g_buffer, "%s/export", GPIO_DEVICE_PATH);
 	FILE * export = fopen(g_buffer, "w");
 	if (export == NULL)
-		Fatal("Couldn't open %s to export GPIO pin %d - %s", g_buffer, pin, strerror(errno));
+	{
+		Abort("Couldn't open %s to export GPIO pin %d - %s", g_buffer, pin, strerror(errno));
+	}
 
 	fprintf(export, "%d", pin);	
 	fclose(export);
@@ -78,14 +82,21 @@ void GPIO_Export(int pin)
 	sprintf(g_buffer, "%s/gpio%d/direction", GPIO_DEVICE_PATH, pin);
 	g_gpio[pin].fd_direction = open(g_buffer, O_RDWR);
 	if (g_gpio[pin].fd_direction < 0)
-		Fatal("Couldn't open %s for GPIO pin %d - %s", g_buffer, pin, strerror(errno));
+	{
+		Abort("Couldn't open %s for GPIO pin %d - %s", g_buffer, pin, strerror(errno));
+	}
 
 
 	// Setup value file descriptor
 	sprintf(g_buffer, "%s/gpio%d/value", GPIO_DEVICE_PATH, pin);
 	g_gpio[pin].fd_value = open(g_buffer, O_RDWR);
 	if (g_gpio[pin].fd_value < 0)
-		Fatal("Couldn't open %s for GPIO pin %d - %s", g_buffer, pin, strerror(errno));
+	{
+		Abort("Couldn't open %s for GPIO pin %d - %s", g_buffer, pin, strerror(errno));
+	}
+
+	Log(LOGDEBUG, "Exported GPIO%d", pin);
+	//sleep(1);
 }
 
 /**
@@ -95,7 +106,9 @@ void GPIO_Unexport(int pin)
 {
 
 	if (pin < 0 || pin > GPIO_NUM_PINS)
-		Fatal("Invalid pin number %d", pin);
+	{
+		Abort("Invalid pin number %d", pin);
+	}
 
 	// Close file descriptors
 	close(g_gpio[pin].fd_value);
@@ -107,7 +120,9 @@ void GPIO_Unexport(int pin)
 		sprintf(g_buffer, "%s/unexport", GPIO_DEVICE_PATH);	
 	FILE * export = fopen(g_buffer, "w");
 	if (export == NULL)
-		Fatal("Couldn't open %s to export GPIO pin %d - %s", g_buffer, pin, strerror(errno));
+	{
+		Abort("Couldn't open %s to export GPIO pin %d - %s", g_buffer, pin, strerror(errno));
+	}
 
 	fprintf(export, "%d", pin);	
 	fclose(export);
@@ -123,13 +138,17 @@ void GPIO_Unexport(int pin)
 void PWM_Export(int pin)
 {
 	if (pin < 0 || pin > PWM_NUM_PINS)
-		Fatal("Invalid pin number %d", pin);
+	{
+		Abort("Invalid pin number %d", pin);
+	}
 	
 	// Export the pin
 	sprintf(g_buffer, "%s/export", PWM_DEVICE_PATH);
 	FILE * export = fopen(g_buffer, "w");
 	if (export == NULL)
-		Fatal("Couldn't open %s to export PWM pin %d - %s", g_buffer, pin, strerror(errno));
+	{
+		Abort("Couldn't open %s to export PWM pin %d - %s", g_buffer, pin, strerror(errno));
+	}
 	
 	fprintf(export, "%d\n", pin);
 	fclose(export);
@@ -138,22 +157,30 @@ void PWM_Export(int pin)
 	sprintf(g_buffer, "%s/pwm%d/run", PWM_DEVICE_PATH, pin);
 	g_pwm[pin].fd_run = open(g_buffer, O_WRONLY);
 	if (g_pwm[pin].fd_run < 0)
-		Fatal("Couldn't open %s for PWM pin %d - %s", g_buffer, pin, strerror(errno));
+	{
+		Abort("Couldn't open %s for PWM pin %d - %s", g_buffer, pin, strerror(errno));
+	}
 
 	sprintf(g_buffer, "%s/pwm%d/polarity",PWM_DEVICE_PATH, pin);
 	g_pwm[pin].fd_polarity = open(g_buffer, O_WRONLY);
 	if (g_pwm[pin].fd_polarity < 0)
-		Fatal("Couldn't open %s for PWM pin %d - %s", g_buffer, pin, strerror(errno));
+	{
+		Abort("Couldn't open %s for PWM pin %d - %s", g_buffer, pin, strerror(errno));
+	}
 
 	sprintf(g_buffer, "%s/pwm%d/period_ns",PWM_DEVICE_PATH, pin);
 	g_pwm[pin].file_period = fopen(g_buffer, "w");
 	if (g_pwm[pin].file_period == NULL)
-		Fatal("Couldn't open %s for PWM pin %d - %s", g_buffer, pin, strerror(errno));
+	{
+		Abort("Couldn't open %s for PWM pin %d - %s", g_buffer, pin, strerror(errno));
+	}
 
 	sprintf(g_buffer, "%s/pwm%d/duty_ns",PWM_DEVICE_PATH, pin);
 	g_pwm[pin].file_duty = fopen(g_buffer, "w");
 	if (g_pwm[pin].file_duty == NULL)
-		Fatal("Couldn't open %s for PWM pin %d - %s", g_buffer, pin, strerror(errno));
+	{
+		Abort("Couldn't open %s for PWM pin %d - %s", g_buffer, pin, strerror(errno));
+	}
 
 	// Don't buffer the streams
 	setbuf(g_pwm[pin].file_period, NULL);
@@ -169,7 +196,9 @@ void PWM_Export(int pin)
 void PWM_Unexport(int pin)
 {
 	if (pin < 0 || pin > PWM_NUM_PINS)
-		Fatal("Invalid pin number %d", pin);
+	{
+		Abort("Invalid pin number %d", pin);
+	}
 
 	// Close the file descriptors
 	close(g_pwm[pin].fd_polarity);
@@ -181,7 +210,9 @@ void PWM_Unexport(int pin)
 	sprintf(g_buffer, "%s/unexport", PWM_DEVICE_PATH);
 	FILE * export = fopen(g_buffer, "w");
 	if (export == NULL)
-		Fatal("Couldn't open %s to unexport PWM pin %d - %s", g_buffer, pin, strerror(errno));
+	{
+		Abort("Couldn't open %s to unexport PWM pin %d - %s", g_buffer, pin, strerror(errno));	
+	}
 	
 	fprintf(export, "%d", pin);
 	fclose(export);
@@ -201,7 +232,9 @@ void ADC_Export()
 		sprintf(g_buffer, "%s/AIN%d", g_options.adc_device_path, i);
 		g_adc[i].fd_value = open(g_buffer, O_RDONLY);
 		if (g_adc[i].fd_value < 0)
-			Fatal("Couldn't open ADC %d device file %s - %s", i, g_buffer, strerror(errno));
+		{
+			Abort("Couldn't open ADC %d device file %s - %s", i, g_buffer, strerror(errno));
+		}
 
 		//setbuf(g_adc[i].file_value, NULL);
 
@@ -224,11 +257,15 @@ void ADC_Unexport()
 void GPIO_Set(int pin, bool value)
 {
 	if (pwrite(g_gpio[pin].fd_direction, "out", 3, 0) != 3)
-		Fatal("Couldn't set GPIO %d direction - %s", pin, strerror(errno));
+	{
+		Abort("Couldn't set GPIO %d direction - %s", pin, strerror(errno));
+	}
 
 	char c = '0' + (value);
 	if (pwrite(g_gpio[pin].fd_value, &c, 1, 0) != 1)
-		Fatal("Couldn't read GPIO %d value - %s", pin, strerror(errno));
+	{
+		Abort("Couldn't read GPIO %d value - %s", pin, strerror(errno));
+	}
 
 }
 
@@ -239,10 +276,10 @@ void GPIO_Set(int pin, bool value)
 bool GPIO_Read(int pin)
 {
 	if (pwrite(g_gpio[pin].fd_direction, "in", 2, 0) != 2)
-		Fatal("Couldn't set GPIO %d direction - %s", pin, strerror(errno)); 
+		Log(LOGERR,"Couldn't set GPIO %d direction - %s", pin, strerror(errno)); 
 	char c = '0';
 	if (pread(g_gpio[pin].fd_value, &c, 1, 0) != 1)
-		Fatal("Couldn't read GPIO %d value - %s", pin, strerror(errno));
+		Log(LOGERR,"Couldn't read GPIO %d value - %s", pin, strerror(errno));
 
 	return (c == '1');
 
@@ -259,24 +296,31 @@ void PWM_Set(int pin, bool polarity, long period, long duty)
 {
 	// Have to stop PWM before changing it
 	if (pwrite(g_pwm[pin].fd_run, "0", 1, 0) != 1)
-		Fatal("Couldn't stop PWM %d - %s", pin, strerror(errno));
+	{
+		Abort("Couldn't stop PWM %d - %s", pin, strerror(errno));
+	}
 
 	char c = '0' + polarity;
 	if (pwrite(g_pwm[pin].fd_polarity, &c, 1, 0) != 1)
-		Fatal("Couldn't set PWM %d polarity - %s", pin, strerror(errno));
-
+	{
+		Abort("Couldn't set PWM %d polarity - %s", pin, strerror(errno));
+	}
 	
 	rewind(g_pwm[pin].file_period);	
 	rewind(g_pwm[pin].file_duty);
 
 	if (fprintf(g_pwm[pin].file_duty, "%lu", duty) == 0)
-		Fatal("Couldn't set duty cycle for PWM %d - %s", pin, strerror(errno));
-
+	{
+		Abort("Couldn't set duty cycle for PWM %d - %s", pin, strerror(errno));
+	}
 	if (fprintf(g_pwm[pin].file_period, "%lu", period) == 0)
-		Fatal("Couldn't set period for PWM %d - %s", pin, strerror(errno));
-	
+	{
+		Abort("Couldn't set period for PWM %d - %s", pin, strerror(errno));
+	}
 	if (pwrite(g_pwm[pin].fd_run, "1", 1, 0) != 1)
-		Fatal("Couldn't start PWM %d - %s", pin, strerror(errno));
+	{
+		Abort("Couldn't start PWM %d - %s", pin, strerror(errno));
+	}
 
 }
 
@@ -287,8 +331,9 @@ void PWM_Set(int pin, bool polarity, long period, long duty)
 void PWM_Stop(int pin)
 {
 	if (pwrite(g_pwm[pin].fd_run, "0", 1, 0) != 1)
-		Fatal("Couldn't stop PWM %d - %s", pin, strerror(errno));
-
+	{
+		Abort("Couldn't stop PWM %d - %s", pin, strerror(errno));
+	}
 }
 
 /**

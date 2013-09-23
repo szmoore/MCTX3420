@@ -15,6 +15,7 @@
 
 static const char * unspecified_funct = "???";
 
+
 /**
  * Print a message to stderr and log it via syslog. The message must be
  * less than BUFSIZ characters long, or it will be truncated.
@@ -111,6 +112,7 @@ void FatalEx(const char * funct, const char * file, int line, ...)
 		funct = unspecified_funct;
 
 	syslog(LOG_CRIT, "FATAL: %s (%s:%d) - %s", funct, file, line, buffer);
+
 	exit(EXIT_FAILURE);
 }
 

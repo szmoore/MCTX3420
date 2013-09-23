@@ -27,6 +27,10 @@ Options g_options; // options passed to program through command line arguments
  */
 void ParseArguments(int argc, char ** argv)
 {
+	// horrible horrible hacks
+	g_options.argc = argc;
+	g_options.argv = argv;
+
 	g_options.program = argv[0]; // program name
 	g_options.verbosity = LOGDEBUG; // default log level
 	gettimeofday(&(g_options.start_time), NULL); // Start time
@@ -112,6 +116,7 @@ int main(int argc, char ** argv)
 	*/
 	Sensor_Init();
 	Actuator_Init();
+	Pin_Init();
 	//Sensor_StartAll("test");
 	//Actuator_StartAll("test");
 	const char *ret;
@@ -125,6 +130,8 @@ int main(int argc, char ** argv)
 		Fatal("Control_SetMode failed with '%s'", ret);
 	//Sensor_StopAll();
 	//Actuator_StopAll();
+
+	Pin_Close();
 
 	Cleanup();
 	return 0;
