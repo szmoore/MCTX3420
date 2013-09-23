@@ -1,0 +1,199 @@
+<! DOCTYPE html>
+<!--VERSION 0.01.02-->
+<!--SEE CHANGELOG FOR CHANGES SINCE PREVIOUS VERSION-->
+<!--INTERFACE PAGE-->
+
+<html lan="us">
+<meta charset="utf-8"></meta>
+<title>
+REMOTEworks: Remote Experiment Interface 
+</title>
+
+
+<head>
+<script src="jquery-ui-1.10.3.custom/js/jquery-1.9.1.js"></script>
+<script src="jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.js"></script>
+<link rel="stylesheet" href="jquery-ui-1.10.3.custom/css/black-tie/jquery-ui-1.10.3.custom.css"></link>
+
+<style>
+	body{
+		font: 75% "Trebuchet MS", sans-serif;
+		margin: 50px;
+	}
+	.demoHeaders {
+		margin-top: 2em;
+	}
+	#dialog-link {
+		padding: .4em 1em .4em 20px;
+		text-decoration: none;
+		position: relative;
+	}
+	#dialog-link span.ui-icon {
+		margin: 0 5px 0 0;
+		position: absolute;
+		left: .2em;
+		top: 50%;
+		margin-top: -8px;
+	}
+	#icons {
+		margin: 0;
+		padding: 0;
+	}
+	#icons li {
+		margin: 2px;
+		position: relative;
+		padding: 4px 0;
+		cursor: pointer;
+		float: left;
+		list-style: none;
+	}
+	#icons span.ui-icon {
+		float: left;
+		margin: 0 4px;
+	}
+	.fakewindowcontain .ui-widget-overlay {
+		position: absolute;
+	}
+	
+</style>
+
+
+<script>
+	$( function() {
+	//$("#digitalIO-START").button();
+	//$("#digitalIO-STOP").button();
+	//$("#digitalIO-001").button();
+	//$("#digitalIO-002").button();
+	//$("#digitalIO-003").button();
+	//$("#digitalIO-004").button();
+	$("#selector-OVERVIEW").click(function(e){
+	alert("Overview Has Been Clicked");
+	});
+	$("selector-001").click(function(){
+	$("#dynamic").append('appended content');
+	$("#tabbedContentView").tabs();
+	});
+	});
+</script>
+</head>
+<body>
+
+<!--Container for whole webpage-->
+<div id="container" style="width:1250px">
+
+<!--The title block holds the title and version number information-->
+	<div id="title block" style="background-color:grey;text-align:right;color:ivory;">
+		<p> REMOTEworks&#8482; Ver No: 0.01 </p>
+	</div>
+	
+	<div id="controlpane" style="background-color:lightgrey;width:200px;height:500px;float:left;">
+		<div id="keycontrols">
+		<h2 style="text-align:center">MASTER CONTROLS</h2>
+			<button style="width:90px;height:25px;margin:4px;background-color:darkgreen;color:white;" id="digitalIO-START" value="Request Access" role="button">
+				<span class="ui-button-text">
+					Start
+				</span>
+			</button>
+			<button style="width:90px;height:25px;margin:4px;background-color:red;color:white;" id="digitalIO-STOP" class="ui-button ui-widgetui-state-default ui-corner-all ui-button-text-only" value="Request Access" role="button">
+				<span class="ui-button-text">
+					Stop
+				</span>
+		</button>
+		<hr/>
+		</div>
+		<h2 style="text-align:center;">DIGITAL CONTROLS</h2>
+		<button style="width:90px;margin:3px;background-color:darkgrey;color:white;" id="digitalIO-001" class="ui-button ui-widgetui-state-default ui-corner-all ui-button-text-only" value="Request Access" role="button">
+			<span class="ui-button-text">
+				Actuator 1
+			</span>
+		</button>
+		<button style="width:90px;margin:3px;background-color:darkgrey;color:white;" id="digitalIO-002" class="ui-button ui-widgetui-state-default ui-corner-all ui-button-text-only" value="Request Access" role="button">
+			<span class="ui-button-text">
+				Actuator 2
+			</span>
+		</button>
+		<button style="width:90px;margin:3px;background-color:darkgrey;color:white;" id="digitalIO-003" class="ui-button ui-widgetui-state-default ui-corner-all ui-button-text-only" value="Request Access" role="button">
+			<span class="ui-button-text">
+				Button 1
+			</span>
+		</button>
+		<button style="width:90px;margin:3px;background-color:darkgrey;color:white;" id="digitalIO-004" class="ui-button ui-widgetui-state-default ui-corner-all ui-button-text-only" value="Request Access" role="button">
+			<span class="ui-button-text">
+				Button 2
+			</span>
+		</button>
+	</div>
+		
+<!--Seperator to divide the controlpane and the contentpane-->	
+	<div id="seperator" style="background-color:black;width:5;height:500px;float:left;">
+	<p></p>
+	</div>
+	
+	
+	<!--
+	<div id="tabbedContentView" class="ui-tabs ui-widget ui-widget-content ui-corner-all">
+		<ul>
+			<li><a href="#overview">OVERVIEW</a></li>
+			<li><a href="view01">VIEW 1</a></li>
+			<li><a href="view02">VIEW 2</a></li>
+		</ul>
+		<div id="overview">
+			<p> Overview Panel </p>
+		</div>
+		<div id="view01">
+			<p> View Number 1 </p>
+		</div>
+		<div id ="view02">
+			<p> View Number 2 </p>
+		</div>	
+	</div>
+	-->
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div id="contentselector" style="background-color:black;width:1045px;float:left;">
+		<button style="width:90px;margin:4px;background-color:black;color:white;border:2px solid white;" id="selector-OVERVIEW" class="ui-button ui-widgetui-state-default ui-corner-all ui-button-text-only" value="Request Access" role="button">
+			<span class="ui-button-text">
+				OVERVIEW
+			</span>
+		</button>
+		<button style="width:90px;margin:4px;background-color:black;color:white;border:2px solid white;" id="selector-001" class="ui-button ui-widgetui-state-default ui-corner-all ui-button-text-only" value="Request Access" role="button">
+			<span class="ui-button-text">
+				VIEW 1
+			</span>
+		</button>
+		<button style="width:90px;margin:4px;background-color:black;color:white;border:2px solid white;" id="selector-002" class="ui-button ui-widgetui-state-default ui-corner-all ui-button-text-only" value="Request Access" role="button">
+			<span class="ui-button-text">
+				VIEW 2
+			</span>
+		</button>
+	</div>
+
+	
+<!--The contentpane is the main area for dispaying data-->
+
+	<div id="contentPane" style="margin:5px;width:1000px;float:left;">
+		<h3 style="text-align:center;">OVERVIEW</h3>
+		<p style="margin:5px;">Content will go here.</p>
+		<div id="dynamic"></div>
+	
+	</div>
+
+
+</body>
+</html>
