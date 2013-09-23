@@ -33,4 +33,16 @@ adc_device_path=$(dirname $(find /sys -name *AIN0))
 # Run the program with parameters
 # TODO: Can tell spawn-fcgi to run the program as an unprivelaged user?
 # But first will have to work out how to set PWM/GPIO as unprivelaged user
-spawn-fcgi -p9005 -n -- ./server -a "$adc_device_path"
+fails=0
+while [ $fails -lt 10 ]; do
+	spawn-fcgi -p9005 -n -- ./server -a "$adc_device_path"
+	if [ "$?" == "0" ]; then
+		exit 0
+	fi
+	fails=$(( $fails + 1 ))
+	(echo "Restarting server after Fatal Error #$fails") 1>&2
+	
+done
+(echo "Server had too many Fatal Errors ($fails)") 1>&2
+exit $fails
+
