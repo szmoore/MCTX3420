@@ -55,7 +55,7 @@ $.fn.populateSubmenu = function(header, items, translator) {
   var submenuHeader = $("<li/>").append($("<a/>", {text : header, href : "#"}));
   var submenu = $("<ul/>", {"class" : "submenu"});
   
-  for (item in items) {
+  for (var item in items) {
     var info = translator(item, items);
     submenu.append($("<li/>").append(
           $("<a/>", {text : info.text, 
@@ -92,7 +92,7 @@ $.fn.populateNavbar = function () {
  * @returns {$.fn}
  */
 $.fn.setCamera = function () {
-  var url = mctx.api + "image";
+  var url = mctx.api + "image";  //http://beaglebone/api/image
   var update = true;
 
   //Stop updating if we can't retrieve an image!
@@ -178,4 +178,20 @@ $.fn.login = function () {
     mctx.has_control = false;
     alert("no");
   });
+};
+
+$.fn.setErrorLog = function () {
+  var url = mctx.api + "errorlog";
+  var outdiv = this;
+  
+  var updater = function () {
+    $.ajax({url : url}).done(function (data) {
+      outdiv.text(data);
+      setTimeout(updater, 1000);
+    }).fail(function (jqXHR) {
+      outdiv.text("Failed to retrieve the error log.");
+    });
+  };
+  
+  updater();
 };
