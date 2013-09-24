@@ -228,7 +228,16 @@ bool FCGI_ParseRequest(FCGIContext *context, char *params, FCGIValue values[], s
 
 				switch(FCGI_TYPE(val->flags)) {
 					case FCGI_BOOL_T:
-						*((bool*) val->value) = true;
+						if (!*value) //No value: Default true
+							*((bool*) val->value) = true;
+						else {
+							*((bool*) val->value) = !!(strtol(value, &ptr, 10));
+							if (*ptr) {
+								snprintf(buf, BUFSIZ, "Expected bool for '%s' but got '%s'", key, value);
+								FCGI_RejectJSON(context, buf);
+								return false;
+							}
+						}
 						break;
 					case FCGI_INT_T: case FCGI_LONG_T: {
 						long parsed = strtol(value, &ptr, 10);
