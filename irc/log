@@ -3154,3 +3154,32 @@
 20:55 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
 21:02 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
 22:33 -!- Irssi: #mctxuwa_softdev: Total of 2 nicks [0 ops, 0 halfops, 0 voices, 2 normal]
+--- Day changed Tue Sep 24 2013
+13:56 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+14:18 < jtanx> with kernel 3.8 they decided to make life hard with device tree overlays
+14:19 < jtanx> http://e2e.ti.com/support/arm/sitara_arm/f/791/t/277811.aspx
+14:19 < jtanx> https://docs.google.com/a/beagleboard.org/document/d/17P54kZkZO_-JtTjrFuVz-Cp_RMMg7GB_8W9JK9sLKfA/pub
+14:47 < jtanx> huh
+14:47 < jtanx> http://www.youtube.com/watch?v=6gv3gWtoBWQ
+14:47 < jtanx> http://digital-drive.com/?p=146
+15:39 < sam_moore> I wonder if I can write a module that just uses /dev/adcX /dev/gpioX and /dev/pwmX
+15:40 < jtanx> that would make life simple
+15:40 < jtanx> but no
+15:42 < sam_moore> http://www.tldp.org/LDP/lkmpg/2.6/html/x569.html
+15:42 < sam_moore> Probably out of date (2.6?)
+15:45 < sam_moore> Also rt.wiki.kernel.org - realtime linux supposedly gives you better timing accuracy, although it would possibly break with our setup involving nginx
+15:46 < sam_moore> Actually it looks like there are quite a few ways for it to not work
+15:48 < jtanx> I think trying to write a kernel module would cause more grief than it's worth
+15:50 < jtanx> http://saadahmad.ca/using-pwm-on-the-beaglebone-black/
+15:51 < jtanx> I have no idea what's been updated and what hasn't
+15:51 < jtanx> as in, do we have that fix in our kernel
+15:53 < sam_moore> I don't know
+15:54 < sam_moore> We only need 1 PWM though
+16:00 < sam_moore> Or at least, last we heard there was only one. Doesn't make the system very expandable though.
+19:07 < jtanx> you know what I'll try loading an Ubuntu image from rcn to my sd card
+19:08 < jtanx> instead of from armhf
+19:08 < jtanx> armhf.com*
+19:17 < jtanx> ah screw it
+19:17 < jtanx> i'll stick with debian (but do the same thing)
+21:07 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+21:34 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
