@@ -9,9 +9,9 @@
 /** GPIO0 defines **/
 
 #define GPIO0_1 1
-#define GPIO0_2 2
-//#define GPIO0_3 3 // Used for PWM
-//#define GPIO0_4 4 // Used for PWM
+#define GPIO0_2 2 // Used for PWM
+#define GPIO0_3 3 // Used for PWM
+#define GPIO0_4 4 
 #define GPIO0_5 5
 #define GPIO0_6 6
 #define GPIO0_7 7
@@ -111,8 +111,8 @@
 #define GPIO2_31 95
 #define GPIO2_32 96
 
-/** Number of GPIO pins **/
-#define GPIO_NUM_PINS 97
+/** Number of useable GPIO pins **/
+#define GPIO_NUM_PINS 50
 
 /** Export path **/
 #define GPIO_DEVICE_PATH "/sys/class/gpio"

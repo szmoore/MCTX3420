@@ -12,12 +12,12 @@
  */
 void Pin_Init()
 {
-/*	for (int i = 0; i < GPIO_NUM_PINS; ++i)
+	for (int i = 0; i < 128; ++i)
 		GPIO_Export(i);
 
 	for (int i = 0; i < ADC_NUM_PINS; ++i)
 		ADC_Export();
-*/
+
 	for (int i = 0; i < PWM_NUM_PINS; ++i)
 		PWM_Export(i);
 }
