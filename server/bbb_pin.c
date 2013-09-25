@@ -52,20 +52,52 @@ static PWM_Pin g_pwm[PWM_NUM_PINS] = {{0}};
 
 static char g_buffer[BUFSIZ] = "";
 
+#define GPIO_LUT_SIZE 93
+#define GPIO_INDEX_SIZE 128
 
+/** 
+ * A lookup table from header number to GPIO pin number.
+ * e.g P8_13 is g_gpio_lut[0*46+13] = g_gpio_lut[13]
+ * e.g P9_13 is g_gpio_lut[1*46+13] = g_gpio_lut[59]
+ *
+ * Where the returned value is 0, there is no GPIO pin
+ * at that location.
+ */
+const unsigned char g_gpio_lut[GPIO_LUT_SIZE] = {
+	  0,   0,   0,   0,   0,   0,   0,  66,  67,  69,  68,  45,  44,  23,
+	 26,  47,  46,  27,  65,  22,   0,   0,   0,   0,   0,   0,  61,  86,
+	 88,  87,  89,  10,  11,   9,  81,   8,  80,  78,  79,  76,  77,  74,
+	 75,  72,  73,  70,  71,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+	  0,  30,  60,  31,  50,  48,  51,   5,   4,   0,   0,   3,   2,  49,
+	 15, 117,  14, 115,   0,   0, 112,   0,   0,   0,   0,   0,   0,   0,
+	  0,   0,   0,   0,   0,   0,   0,   0,   0
+};
 
+/**
+ * Converts GPIO number to index into g_gpio, or 128 if no map.
+ */
+const unsigned char g_gpio_index[GPIO_INDEX_SIZE] = {
+	128, 128,   0,   1,   2,   3, 128, 128,   4,   5,   6,   7, 128, 128,
+	  8,   9, 128, 128, 128, 128, 128, 128,  10,  11, 128, 128,  12,  13,
+	128, 128,  14,  15, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128,
+	128, 128,  16,  17,  18,  19,  20,  21,  22,  23, 128, 128, 128, 128,
+	128, 128, 128, 128,  24,  25, 128, 128, 128,  26,  27,  28,  29,  30,
+	 31,  32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42, 128, 128,
+	128, 128,  43,  44,  45,  46, 128, 128, 128, 128, 128, 128, 128, 128,
+	128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128,
+	 47, 128, 128,  48, 128,  49, 128, 128, 128, 128, 128, 128, 128, 128,
+	128, 128
+};
 
 /**
  * Export a GPIO pin and open the file descriptors
  */
 void GPIO_Export(int pin)
 {
-	if (pin < 0 || pin > GPIO_NUM_PINS)
+	if (pin < 0 || pin >= GPIO_INDEX_SIZE || g_gpio_index[pin] == 128)
 	{
-		Abort("Invalid pin number %d", pin);
+		Abort("Not a useable pin (number %d)", pin);
 	}
-
-	
 
 	// Export the pin
 	sprintf(g_buffer, "%s/export", GPIO_DEVICE_PATH);
@@ -78,10 +110,11 @@ void GPIO_Export(int pin)
 	fprintf(export, "%d", pin);	
 	fclose(export);
 	
+	GPIO_Pin *gpio = &g_gpio[g_gpio_index[pin]];
 	// Setup direction file descriptor
 	sprintf(g_buffer, "%s/gpio%d/direction", GPIO_DEVICE_PATH, pin);
-	g_gpio[pin].fd_direction = open(g_buffer, O_RDWR);
-	if (g_gpio[pin].fd_direction < 0)
+	gpio->fd_direction = open(g_buffer, O_RDWR);
+	if (gpio->fd_direction < 0)
 	{
 		Abort("Couldn't open %s for GPIO pin %d - %s", g_buffer, pin, strerror(errno));
 	}
@@ -89,8 +122,8 @@ void GPIO_Export(int pin)
 
 	// Setup value file descriptor
 	sprintf(g_buffer, "%s/gpio%d/value", GPIO_DEVICE_PATH, pin);
-	g_gpio[pin].fd_value = open(g_buffer, O_RDWR);
-	if (g_gpio[pin].fd_value < 0)
+	gpio->fd_value = open(g_buffer, O_RDWR);
+	if (gpio->fd_value < 0)
 	{
 		Abort("Couldn't open %s for GPIO pin %d - %s", g_buffer, pin, strerror(errno));
 	}
@@ -105,14 +138,15 @@ void GPIO_Export(int pin)
 void GPIO_Unexport(int pin)
 {
 
-	if (pin < 0 || pin > GPIO_NUM_PINS)
+	if (pin < 0 || pin >= GPIO_INDEX_SIZE || g_gpio_index[pin] == 128)
 	{
-		Abort("Invalid pin number %d", pin);
+		Abort("Not a useable pin (number %d)", pin);
 	}
 
+	GPIO_Pin *gpio = &g_gpio[g_gpio_index[pin]];
 	// Close file descriptors
-	close(g_gpio[pin].fd_value);
-	close(g_gpio[pin].fd_direction);
+	close(gpio->fd_value);
+	close(gpio->fd_direction);
 
 	// Unexport the pin
 
@@ -216,8 +250,6 @@ void PWM_Unexport(int pin)
 	
 	fprintf(export, "%d", pin);
 	fclose(export);
-
-
 }
 
 /**
@@ -256,13 +288,19 @@ void ADC_Unexport()
  */
 void GPIO_Set(int pin, bool value)
 {
-	if (pwrite(g_gpio[pin].fd_direction, "out", 3, 0) != 3)
+	if (pin < 0 || pin >= GPIO_INDEX_SIZE || g_gpio_index[pin] == 128)
+	{
+		Abort("Not a useable pin (number %d)", pin);
+	}
+
+	GPIO_Pin *gpio = &g_gpio[g_gpio_index[pin]];
+	if (pwrite(gpio->fd_direction, "out", 3, 0) != 3)
 	{
 		Abort("Couldn't set GPIO %d direction - %s", pin, strerror(errno));
 	}
 
 	char c = '0' + (value);
-	if (pwrite(g_gpio[pin].fd_value, &c, 1, 0) != 1)
+	if (pwrite(gpio->fd_value, &c, 1, 0) != 1)
 	{
 		Abort("Couldn't read GPIO %d value - %s", pin, strerror(errno));
 	}
@@ -275,10 +313,17 @@ void GPIO_Set(int pin, bool value)
  */
 bool GPIO_Read(int pin)
 {
-	if (pwrite(g_gpio[pin].fd_direction, "in", 2, 0) != 2)
+	if (pin < 0 || pin >= GPIO_INDEX_SIZE || g_gpio_index[pin] == 128)
+	{
+		Log(LOGERR, "Not a useable pin (number %d)", pin);
+		return false;
+	}
+
+	GPIO_Pin *gpio = &g_gpio[g_gpio_index[pin]];
+	if (pwrite(gpio->fd_direction, "in", 2, 0) != 2)
 		Log(LOGERR,"Couldn't set GPIO %d direction - %s", pin, strerror(errno)); 
 	char c = '0';
-	if (pread(g_gpio[pin].fd_value, &c, 1, 0) != 1)
+	if (pread(gpio->fd_value, &c, 1, 0) != 1)
 		Log(LOGERR,"Couldn't read GPIO %d value - %s", pin, strerror(errno));
 
 	return (c == '1');
@@ -294,6 +339,15 @@ bool GPIO_Read(int pin)
  */
 void PWM_Set(int pin, bool polarity, long period, long duty)
 {
+	Log(LOGDEBUG, "Pin %d, pol %d, period: %lu, duty: %lu", pin, polarity, period, duty);
+	
+	rewind(g_pwm[pin].file_duty);
+
+	if (fprintf(g_pwm[pin].file_duty, "0") == 0)
+	{
+		Abort("Couldn't zero the duty cycle for PWM %d - s", pin, strerror(errno));
+	}
+	
 	// Have to stop PWM before changing it
 	if (pwrite(g_pwm[pin].fd_run, "0", 1, 0) != 1)
 	{
@@ -308,15 +362,16 @@ void PWM_Set(int pin, bool polarity, long period, long duty)
 	
 	rewind(g_pwm[pin].file_period);	
 	rewind(g_pwm[pin].file_duty);
+	if (fprintf(g_pwm[pin].file_period, "%lu", period) == 0)
+	{
+		Abort("Couldn't set period for PWM %d - %s", pin, strerror(errno));
+	}
 
 	if (fprintf(g_pwm[pin].file_duty, "%lu", duty) == 0)
 	{
 		Abort("Couldn't set duty cycle for PWM %d - %s", pin, strerror(errno));
 	}
-	if (fprintf(g_pwm[pin].file_period, "%lu", period) == 0)
-	{
-		Abort("Couldn't set period for PWM %d - %s", pin, strerror(errno));
-	}
+
 	if (pwrite(g_pwm[pin].fd_run, "1", 1, 0) != 1)
 	{
 		Abort("Couldn't start PWM %d - %s", pin, strerror(errno));
