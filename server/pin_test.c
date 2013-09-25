@@ -12,12 +12,12 @@
  */
 void Pin_Init()
 {
-	for (int i = 0; i < GPIO_NUM_PINS; ++i)
+/*	for (int i = 0; i < GPIO_NUM_PINS; ++i)
 		GPIO_Export(i);
 
 	for (int i = 0; i < ADC_NUM_PINS; ++i)
 		ADC_Export();
-
+*/
 	for (int i = 0; i < PWM_NUM_PINS; ++i)
 		PWM_Export(i);
 }
@@ -57,8 +57,8 @@ void Pin_Handler(FCGIContext *context, char * params)
 	FCGIValue values[] = {
 		{"type", &type, FCGI_REQUIRED(FCGI_STRING_T)},
 		{"num", &num, FCGI_REQUIRED(FCGI_INT_T)}, 
-		{"set", &set, FCGI_INT_T},
-		{"pol", &pol, FCGI_INT_T},
+		{"set", &set, FCGI_BOOL_T},
+		{"pol", &pol, FCGI_BOOL_T},
 		{"freq", &freq, FCGI_DOUBLE_T},
 		{"duty", &duty, FCGI_DOUBLE_T}
 	};
@@ -68,6 +68,7 @@ void Pin_Handler(FCGIContext *context, char * params)
 		TYPE,
 		NUM,
 		SET,
+		POL,
 		FREQ,
 		DUTY
 	} SensorParams;
@@ -131,10 +132,12 @@ void Pin_Handler(FCGIContext *context, char * params)
 		if (set)
 		{
 			Log(LOGDEBUG, "Setting PWM%d", num);
+			duty = duty < 0 ? 0 : duty > 1 ? 1 : duty;
 			long period_ns = (long)(1e9 / freq);
 			long duty_ns = (long)(duty * period_ns);
 			PWM_Set(num, pol, period_ns, duty_ns);
-			FCGI_PrintRaw("PWM%d set to period_ns = %lu (%f Hz), duty_ns = %lu (%d), polarity = %d", num, period_ns, freq, duty_ns, duty*100, pol);
+			FCGI_PrintRaw("PWM%d set to period_ns = %lu (%f Hz), duty_ns = %lu (%f), polarity = %d", 
+				num, period_ns, freq, duty_ns, duty*100, (int)pol);
 		}
 		else
 		{

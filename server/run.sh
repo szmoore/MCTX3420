@@ -18,13 +18,18 @@ fi
 
 # Identify cape-manager slots
 slot=$(echo /sys/devices/bone_capemgr.*/slots | awk '{print $1}')
+pwm=/sys/class/pwm/
 
 # Load PWM module
-modprobe pwm_test
+#modprobe pwm_test
 (echo am33xx_pwm > $slot) 1>&2 >> /dev/null
-for port in P9_21 P9_22 P9_14 P9_16 P9_29 P9_31 P9_42 P8_13 P8_19 P8_34 P8_36 P8_45 P8_46; do
-	echo bone_pwm_$port > $slot
-done
+#for port in P9_21 P9_22 P9_14 P9_16 P9_29 P9_31 P9_42 P8_13 P8_19 P8_34 P8_36 P8_45 P8_46; do
+#	echo bone_pwm_$port > $slot
+#done
+echo 0 > $pwm/export
+echo 1 > $pwm/export
+echo bone_pwm_P9_21 > $slot
+echo bone_pwm_P9_22 > $slot
 
 # Load ADCs
 (echo cape-bone-iio > $slot) 1>&2 >> /dev/null
