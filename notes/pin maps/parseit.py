@@ -34,14 +34,18 @@ def doit(x):
 def printlut(lut, name="g_gpio_lut"):
     '''print the lut for C'''
     rowsize = 14
-    print("const char %s[%d] = {" % (name, len(lut)))
+    print("const unsigned char %s[%d] = {" % (name, len(lut)))
     low = 0
     high = rowsize
     for i in range(0, len(lut), rowsize):
         print("\t", end="")
-        print(*("%3d" % g for g in lut[low:high]), sep=', ')
+        print(*("%3d" % g for g in lut[low:high]), sep=', ', end="")
         low = high
         high += rowsize
+        if low < len(lut):
+            print(",")
+        else:
+            print("")
     print("}")
 
 

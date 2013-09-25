@@ -12,8 +12,8 @@
  */
 void Pin_Init()
 {
-	for (int i = 0; i < 128; ++i)
-		GPIO_Export(i);
+	for (int i = 0; i < GPIO_NUM_PINS; ++i)
+		GPIO_Export(g_index_to_gpio[i]);
 
 	for (int i = 0; i < ADC_NUM_PINS; ++i)
 		ADC_Export();
@@ -28,7 +28,7 @@ void Pin_Init()
 void Pin_Close()
 {
 	for (int i = 0; i < GPIO_NUM_PINS; ++i)
-		GPIO_Unexport(i);
+		GPIO_Unexport(g_index_to_gpio[i]);
 
 	for (int i = 0; i < ADC_NUM_PINS; ++i)
 		ADC_Unexport(i);

@@ -114,6 +114,13 @@
 /** Number of useable GPIO pins **/
 #define GPIO_NUM_PINS 50
 
+/* Luts */
+#define GPIO_LUT_SIZE 93
+#define GPIO_INDEX_SIZE 128
+extern const unsigned char g_pin_to_gpio[GPIO_LUT_SIZE];
+extern const unsigned char g_gpio_to_index[GPIO_INDEX_SIZE];
+extern const unsigned char g_index_to_gpio[GPIO_NUM_PINS];
+
 /** Export path **/
 #define GPIO_DEVICE_PATH "/sys/class/gpio"
 
@@ -146,7 +153,6 @@
 
 /** Path to PWM sysfs **/
 #define PWM_DEVICE_PATH "/sys/class/pwm"
-
 
 
 #endif //_BBB_PIN_DEFINES_H
