@@ -52,53 +52,18 @@ static PWM_Pin g_pwm[PWM_NUM_PINS] = {{0}};
 
 static char g_buffer[BUFSIZ] = "";
 
-#define GPIO_LUT_SIZE 93
-#define GPIO_INDEX_SIZE 128
-
-/** 
- * A lookup table from header number to GPIO pin number.
- * e.g P8_13 is g_gpio_lut[0*46+13] = g_gpio_lut[13]
- * e.g P9_13 is g_gpio_lut[1*46+13] = g_gpio_lut[59]
- *
- * Where the returned value is 0, there is no GPIO pin
- * at that location.
- */
-const unsigned char g_gpio_lut[GPIO_LUT_SIZE] = {
-	  0,   0,   0,   0,   0,   0,   0,  66,  67,  69,  68,  45,  44,  23,
-	 26,  47,  46,  27,  65,  22,   0,   0,   0,   0,   0,   0,  61,  86,
-	 88,  87,  89,  10,  11,   9,  81,   8,  80,  78,  79,  76,  77,  74,
-	 75,  72,  73,  70,  71,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-	  0,  30,  60,  31,  50,  48,  51,   5,   4,   0,   0,   3,   2,  49,
-	 15, 117,  14, 115,   0,   0, 112,   0,   0,   0,   0,   0,   0,   0,
-	  0,   0,   0,   0,   0,   0,   0,   0,   0
-};
-
-/**
- * Converts GPIO number to index into g_gpio, or 128 if no map.
- */
-const unsigned char g_gpio_index[GPIO_INDEX_SIZE] = {
-	128, 128,   0,   1,   2,   3, 128, 128,   4,   5,   6,   7, 128, 128,
-	  8,   9, 128, 128, 128, 128, 128, 128,  10,  11, 128, 128,  12,  13,
-	128, 128,  14,  15, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128,
-	128, 128,  16,  17,  18,  19,  20,  21,  22,  23, 128, 128, 128, 128,
-	128, 128, 128, 128,  24,  25, 128, 128, 128,  26,  27,  28,  29,  30,
-	 31,  32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42, 128, 128,
-	128, 128,  43,  44,  45,  46, 128, 128, 128, 128, 128, 128, 128, 128,
-	128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128,
-	 47, 128, 128,  48, 128,  49, 128, 128, 128, 128, 128, 128, 128, 128,
-	128, 128
-};
 
 /**
  * Export a GPIO pin and open the file descriptors
  */
 void GPIO_Export(int pin)
 {
-	if (pin < 0 || pin >= GPIO_INDEX_SIZE || g_gpio_index[pin] == 128)
+	if (pin < 0 || pin >= GPIO_INDEX_SIZE || g_gpio_to_index[pin] == 128)
 	{
-		Abort("Not a useable pin (number %d)", pin);
+		Abort("Not a useable pin number: %d", pin);
 	}
 
+	GPIO_Pin *gpio = &g_gpio[g_gpio_to_index[pin]];
 	// Export the pin
 	sprintf(g_buffer, "%s/export", GPIO_DEVICE_PATH);
 	FILE * export = fopen(g_buffer, "w");
@@ -110,7 +75,6 @@ void GPIO_Export(int pin)
 	fprintf(export, "%d", pin);	
 	fclose(export);
 	
-	GPIO_Pin *gpio = &g_gpio[g_gpio_index[pin]];
 	// Setup direction file descriptor
 	sprintf(g_buffer, "%s/gpio%d/direction", GPIO_DEVICE_PATH, pin);
 	gpio->fd_direction = open(g_buffer, O_RDWR);
@@ -137,13 +101,12 @@ void GPIO_Export(int pin)
  */
 void GPIO_Unexport(int pin)
 {
-
-	if (pin < 0 || pin >= GPIO_INDEX_SIZE || g_gpio_index[pin] == 128)
+	if (pin < 0 || pin >= GPIO_INDEX_SIZE || g_gpio_to_index[pin] == 128)
 	{
-		Abort("Not a useable pin (number %d)", pin);
+		Abort("Not a useable pin number: %d", pin);
 	}
 
-	GPIO_Pin *gpio = &g_gpio[g_gpio_index[pin]];
+	GPIO_Pin *gpio = &g_gpio[g_gpio_to_index[pin]];
 	// Close file descriptors
 	close(gpio->fd_value);
 	close(gpio->fd_direction);
@@ -288,12 +251,13 @@ void ADC_Unexport()
  */
 void GPIO_Set(int pin, bool value)
 {
-	if (pin < 0 || pin >= GPIO_INDEX_SIZE || g_gpio_index[pin] == 128)
+	if (pin < 0 || pin >= GPIO_INDEX_SIZE || g_gpio_to_index[pin] == 128)
 	{
-		Abort("Not a useable pin (number %d)", pin);
+		Abort("Not a useable pin number: %d", pin);
 	}
 
-	GPIO_Pin *gpio = &g_gpio[g_gpio_index[pin]];
+	GPIO_Pin *gpio = &g_gpio[g_gpio_to_index[pin]];
+
 	if (pwrite(gpio->fd_direction, "out", 3, 0) != 3)
 	{
 		Abort("Couldn't set GPIO %d direction - %s", pin, strerror(errno));
@@ -313,13 +277,14 @@ void GPIO_Set(int pin, bool value)
  */
 bool GPIO_Read(int pin)
 {
-	if (pin < 0 || pin >= GPIO_INDEX_SIZE || g_gpio_index[pin] == 128)
+	if (pin < 0 || pin >= GPIO_INDEX_SIZE || g_gpio_to_index[pin] == 128)
 	{
-		Log(LOGERR, "Not a useable pin (number %d)", pin);
+		Log(LOGERR, "Not a useable pin number: %d", pin);
 		return false;
 	}
 
-	GPIO_Pin *gpio = &g_gpio[g_gpio_index[pin]];
+	GPIO_Pin *gpio = &g_gpio[g_gpio_to_index[pin]];
+
 	if (pwrite(gpio->fd_direction, "in", 2, 0) != 2)
 		Log(LOGERR,"Couldn't set GPIO %d direction - %s", pin, strerror(errno)); 
 	char c = '0';
