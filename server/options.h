@@ -20,7 +20,7 @@ typedef struct
 	struct timeval end_time;
 
 	/** Path to ADC files **/
-	char * adc_device_path;
+	const char * adc_device_path;
 
 	/*** Horrible horrible hack ***/
 	int argc;

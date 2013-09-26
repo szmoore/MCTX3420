@@ -138,22 +138,29 @@ extern const unsigned char g_index_to_gpio[GPIO_NUM_PINS];
 /** Number of ADC pins **/
 #define ADC_NUM_PINS 8
 
-/** Path to export ADCs with**/
-#define ADC_EXPORT_PATH "/sys/devices/bone_capemgr.9/slots"
-/** Path at which ADCs appear **/
-#define ADC_DEVICE_PATH "/sys/devices/ocp.3/helper.16"
+#define ADC_DEVICE_PATH "/sys/bus/iio/devices/iio:device0/"
 
-/** PWM defines **/
-#define EHRPWM0A 0
-#define EHRPWM0B 1
-// No other PWM pins work!
+/** PWM names to sysfs numbers **/
+#define EHRPWM0A 0 //P9_22
+#define EHRPWM0B 1 //P9_21 - period paired with EHRPWM0A
+#define EHRPWM1A 3 //P9_14
+#define EHRPWM1B 4 //P9_16 - period paired with EHRPWM1A
+#define ECAP0    2 //P9_42
+#define ECAP2	 7 //P9_28
+#define EHRPWM2A 5 //P8_19
+#define EHRPWM2B 6 //P8_13 - period paired with EHRPWM2A
 
 /** Number of PWM pins **/
-#define PWM_NUM_PINS 2
+#define PWM_NUM_PINS 8
+
+/** Number of PWM pins which are guaranteed not to interfere with one another **/
+#define PWM_NUM_SAFE_PINS 5
 
 /** Path to PWM sysfs **/
 #define PWM_DEVICE_PATH "/sys/class/pwm"
 
+/** Maps internal pin number to safe 'pwmX' number **/
+extern const unsigned char g_pin_safe_pwm[PWM_NUM_SAFE_PINS];
 
 #endif //_BBB_PIN_DEFINES_H
 

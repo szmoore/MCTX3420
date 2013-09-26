@@ -126,123 +126,122 @@ void GPIO_Unexport(int pin)
 }
 
 
-
-
 /**
- * Export all PWM pins and open file descriptors
- * @param pin - The pin number
+ * Initialise all PWM pins and open file descriptors
+ * @param pin - The sysfs pin number
  */
 void PWM_Export(int pin)
 {
-	if (pin < 0 || pin > PWM_NUM_PINS)
+	if (pin < 0 || pin >= PWM_NUM_PINS)
 	{
-		Abort("Invalid pin number %d", pin);
+		Abort("Invalid PWM pin number %d specified.", pin);
 	}
-	
-	// Export the pin
-	sprintf(g_buffer, "%s/export", PWM_DEVICE_PATH);
-	FILE * export = fopen(g_buffer, "w");
-	if (export == NULL)
+
+	PWM_Pin *pwm = &g_pwm[pin];
+
+	if (pwm->file_duty != NULL)
 	{
-		Abort("Couldn't open %s to export PWM pin %d - %s", g_buffer, pin, strerror(errno));
+		Abort("PWM %d already exported.", pin);
 	}
-	
-	fprintf(export, "%d\n", pin);
-	fclose(export);
 
 	// Open file descriptors
 	sprintf(g_buffer, "%s/pwm%d/run", PWM_DEVICE_PATH, pin);
-	g_pwm[pin].fd_run = open(g_buffer, O_WRONLY);
-	if (g_pwm[pin].fd_run < 0)
+	pwm->fd_run = open(g_buffer, O_WRONLY);
+	if (pwm->fd_run < 0)
 	{
-		Abort("Couldn't open %s for PWM pin %d - %s", g_buffer, pin, strerror(errno));
+		Abort("Couldn't open %s for PWM%d - %s", g_buffer, pin, strerror(errno));
 	}
 
-	sprintf(g_buffer, "%s/pwm%d/polarity",PWM_DEVICE_PATH, pin);
-	g_pwm[pin].fd_polarity = open(g_buffer, O_WRONLY);
-	if (g_pwm[pin].fd_polarity < 0)
+	sprintf(g_buffer, "%s/pwm%d/polarity", PWM_DEVICE_PATH, pin);
+	pwm->fd_polarity = open(g_buffer, O_WRONLY);
+	if (pwm->fd_polarity < 0)
 	{
-		Abort("Couldn't open %s for PWM pin %d - %s", g_buffer, pin, strerror(errno));
+		Abort("Couldn't open %s for PWM%d - %s", g_buffer, pin, strerror(errno));
 	}
 
-	sprintf(g_buffer, "%s/pwm%d/period_ns",PWM_DEVICE_PATH, pin);
-	g_pwm[pin].file_period = fopen(g_buffer, "w");
-	if (g_pwm[pin].file_period == NULL)
+	sprintf(g_buffer, "%s/pwm%d/period_ns", PWM_DEVICE_PATH, pin);
+	pwm->file_period = fopen(g_buffer, "w");
+	if (pwm->file_period == NULL)
 	{
-		Abort("Couldn't open %s for PWM pin %d - %s", g_buffer, pin, strerror(errno));
+		Abort("Couldn't open %s for PWM%d - %s", g_buffer, pin, strerror(errno));
 	}
 
-	sprintf(g_buffer, "%s/pwm%d/duty_ns",PWM_DEVICE_PATH, pin);
-	g_pwm[pin].file_duty = fopen(g_buffer, "w");
-	if (g_pwm[pin].file_duty == NULL)
+	sprintf(g_buffer, "%s/pwm%d/duty_ns", PWM_DEVICE_PATH, pin);
+	pwm->file_duty = fopen(g_buffer, "w");
+	if (pwm->file_duty == NULL)
 	{
-		Abort("Couldn't open %s for PWM pin %d - %s", g_buffer, pin, strerror(errno));
+		Abort("Couldn't open %s for PWM%d - %s", g_buffer, pin, strerror(errno));
 	}
 
 	// Don't buffer the streams
-	setbuf(g_pwm[pin].file_period, NULL);
-	setbuf(g_pwm[pin].file_duty, NULL);
+	setbuf(pwm->file_period, NULL);
+	setbuf(pwm->file_duty, NULL);	
 
-	
+	Log(LOGDEBUG, "Exported PWM%d", pin);
 }
 
 /**
  * Unexport a PWM pin and close its file descriptors
- * @param pin - The pin number
+ * @param pin - The sysfs pin number
  */
 void PWM_Unexport(int pin)
 {
-	if (pin < 0 || pin > PWM_NUM_PINS)
+	if (pin < 0 || pin >= PWM_NUM_PINS)
 	{
-		Abort("Invalid pin number %d", pin);
+		Abort("Invalid PWM pin number %d specified.", pin);
 	}
 
+	PWM_Pin *pwm = &g_pwm[pin];
 	// Close the file descriptors
-	close(g_pwm[pin].fd_polarity);
-	close(g_pwm[pin].fd_run);
-	fclose(g_pwm[pin].file_period);
-	fclose(g_pwm[pin].file_duty);
+	if (pwm->fd_polarity != -1)
+		close(pwm->fd_polarity);
+	if (pwm->fd_run != -1)
+		close(pwm->fd_run);
+	if (pwm->file_period != NULL)
+		fclose(pwm->file_period);
+	if (pwm->file_duty != NULL)
+		fclose(pwm->file_duty);
 
-	//Unexport the pin
-	sprintf(g_buffer, "%s/unexport", PWM_DEVICE_PATH);
-	FILE * export = fopen(g_buffer, "w");
-	if (export == NULL)
-	{
-		Abort("Couldn't open %s to unexport PWM pin %d - %s", g_buffer, pin, strerror(errno));	
-	}
-	
-	fprintf(export, "%d", pin);
-	fclose(export);
+	//So that another call to PWM_Unexport is OK.
+	pwm->fd_polarity = pwm->fd_run = -1;
+	pwm->file_period = pwm->file_duty = NULL;
 }
 
+
 /**
- * Export ADC pins; http://beaglebone.cameon.net/home/reading-the-analog-inputs-adc
- * Can't use sysfs like GPIO or PWM pins
- * Bloody annoying how inconsistent stuff is on the Beaglebone
+ * Initialise ADC structures
+ * @param pin The ADC pin number
  */
-void ADC_Export()
+void ADC_Export(int pin)
 {
-	for (int i = 0; i < ADC_NUM_PINS; ++i)
+	if (pin < 0 || pin >= ADC_NUM_PINS)
 	{
-		sprintf(g_buffer, "%s/AIN%d", g_options.adc_device_path, i);
-		g_adc[i].fd_value = open(g_buffer, O_RDONLY);
-		if (g_adc[i].fd_value < 0)
-		{
-			Abort("Couldn't open ADC %d device file %s - %s", i, g_buffer, strerror(errno));
-		}
-
-		//setbuf(g_adc[i].file_value, NULL);
-
+		Abort("Invalid ADC pin %d specified.", pin);
 	}
+
+	sprintf(g_buffer, "%s/in_voltage%d_raw", g_options.adc_device_path, pin);
+	g_adc[pin].fd_value = open(g_buffer, O_RDONLY);
+	if (g_adc[pin].fd_value <0)
+	{
+		Abort("Couldn't open ADC %d device file %s - %s", pin, g_buffer, strerror(errno));
+	}
+	Log(LOGDEBUG, "Opened ADC %d", pin);
 }
 
 /**
  * Unexport ADC pins
+ * @param pin The ADC pin number
  */
-void ADC_Unexport()
+void ADC_Unexport(int pin)
 {
-	for (int i = 0; i < ADC_NUM_PINS; ++i)
-		close(g_adc[i].fd_value);
+	if (pin < 0 || pin >= ADC_NUM_PINS)
+	{
+		Abort("Invalid ADC pin %d specified.", pin);
+	}
+	if (pin != -1)
+		close(g_adc[pin].fd_value);	
+
+	g_adc[pin].fd_value = -1;
 }
 
 /**
@@ -297,7 +296,7 @@ bool GPIO_Read(int pin)
 
 /**
  * Activate a PWM pin
- * @param pin - The pin to activate
+ * @param pin - The sysfs pin number
  * @param polarity - if true, pin is active high, else active low
  * @param period - The period in ns
  * @param duty - The time the pin is active in ns
@@ -306,50 +305,52 @@ void PWM_Set(int pin, bool polarity, long period, long duty)
 {
 	Log(LOGDEBUG, "Pin %d, pol %d, period: %lu, duty: %lu", pin, polarity, period, duty);
 	
-	rewind(g_pwm[pin].file_duty);
-
-	if (fprintf(g_pwm[pin].file_duty, "0") == 0)
+	if (pin < 0 || pin >= PWM_NUM_PINS)
 	{
-		Abort("Couldn't zero the duty cycle for PWM %d - s", pin, strerror(errno));
+		Abort("Invalid PWM pin number %d specified.", pin);
 	}
-	
+
+	PWM_Pin *pwm = &g_pwm[pin];
+
 	// Have to stop PWM before changing it
-	if (pwrite(g_pwm[pin].fd_run, "0", 1, 0) != 1)
+	if (pwrite(pwm->fd_run, "0", 1, 0) != 1)
 	{
-		Abort("Couldn't stop PWM %d - %s", pin, strerror(errno));
+		Abort("Couldn't stop PWM%d - %s", pin, strerror(errno));
 	}
 
-	char c = '0' + polarity;
-	if (pwrite(g_pwm[pin].fd_polarity, &c, 1, 0) != 1)
+	char c = polarity ? '1' : '0';
+	if (pwrite(pwm->fd_polarity, &c, 1, 0) != 1)
 	{
-		Abort("Couldn't set PWM %d polarity - %s", pin, strerror(errno));
-	}
-	
-	rewind(g_pwm[pin].file_period);	
-	rewind(g_pwm[pin].file_duty);
-	if (fprintf(g_pwm[pin].file_period, "%lu", period) == 0)
-	{
-		Abort("Couldn't set period for PWM %d - %s", pin, strerror(errno));
+		Abort("Couldn't set PWM%d polarity - %s", pin, strerror(errno));
 	}
 
-	if (fprintf(g_pwm[pin].file_duty, "%lu", duty) == 0)
+	if (fprintf(pwm->file_period, "%lu", period) < 0)
 	{
-		Abort("Couldn't set duty cycle for PWM %d - %s", pin, strerror(errno));
+		Abort("Couldn't set period for PWM%d - %s", pin, strerror(errno));
 	}
 
-	if (pwrite(g_pwm[pin].fd_run, "1", 1, 0) != 1)
+	if (fprintf(pwm->file_duty, "%lu", duty) < 0)
 	{
-		Abort("Couldn't start PWM %d - %s", pin, strerror(errno));
+		Abort("Couldn't set duty cycle for PWM%d - %s", pin, strerror(errno));
 	}
 
+	if (pwrite(pwm->fd_run, "1", 1, 0) != 1)
+	{
+		Abort("Couldn't start PWM%d - %s", pin, strerror(errno));
+	}
 }
 
 /**
  * Deactivate a PWM pin
- * @param pin - The pin to turn off
+ * @param pin - The syfs pin number
  */
 void PWM_Stop(int pin)
 {
+	if (pin < 0 || pin >= PWM_NUM_PINS)
+	{
+		Abort("Invalid PWM pin number %d specified.", pin);
+	}
+
 	if (pwrite(g_pwm[pin].fd_run, "0", 1, 0) != 1)
 	{
 		Abort("Couldn't stop PWM %d - %s", pin, strerror(errno));
@@ -363,26 +364,13 @@ void PWM_Stop(int pin)
  */
 int ADC_Read(int id)
 {
-	char adc_str[ADC_DIGITS] = "";
-	lseek(g_adc[id].fd_value, 0, SEEK_SET);
-	
-	int i = 0;
-	for (i = 0; i < ADC_DIGITS-1; ++i)
+	char adc_str[ADC_DIGITS] = {0};
+
+	if (pread(g_adc[id].fd_value, adc_str, ADC_DIGITS-1, 0) == -1)
 	{
-		if (read(g_adc[id].fd_value, adc_str+i, 1) != 1)
-			break;
-		if (adc_str[i] == '\n')
-		{
-			adc_str[i] = '\0';
-			break;
-		}
+		Log(LOGERR, "ADC %d read failed: %s", id, strerror(errno));
+		return 0;
 	}
 
-	char * end;
-	int val = strtol(adc_str, &end, 10);
-	if (*end != '\0')
-	{
-		Log(LOGERR, "Read non integer from ADC %d - %s", id, adc_str);
-	}	
-	return val;	
+	return strtol(adc_str, NULL, 10);
 }
