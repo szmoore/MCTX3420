@@ -43,3 +43,11 @@ const unsigned char g_index_to_gpio[GPIO_NUM_PINS] = {
 	 67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,  78,  79,  80,
 	 81,  86,  87,  88,  89, 112, 115, 117
 };
+
+/**
+ * Converts PWM index to PWM number
+ * e.g index 3 becomes 6 for /sys/class/pwm/pwm6
+ */
+const unsigned char g_pin_safe_pwm[PWM_NUM_SAFE_PINS] = {
+	0, 2, 4, 6, 7
+};

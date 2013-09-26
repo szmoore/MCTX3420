@@ -16,10 +16,11 @@ void Pin_Init()
 		GPIO_Export(g_index_to_gpio[i]);
 
 	for (int i = 0; i < ADC_NUM_PINS; ++i)
-		ADC_Export();
+		ADC_Export(i);
 
+	//Only export 'safe' PWM pins that don't interfere with one another
 	for (int i = 0; i < PWM_NUM_PINS; ++i)
-		PWM_Export(i);
+		PWM_Export(g_pin_safe_pwm[i]);
 }
 
 /**
@@ -34,7 +35,7 @@ void Pin_Close()
 		ADC_Unexport(i);
 
 	for (int i = 0; i < PWM_NUM_PINS; ++i)
-		PWM_Unexport(i);
+		PWM_Unexport(g_pin_safe_pwm[i]);
 }
 
 /**
@@ -121,7 +122,7 @@ void Pin_Handler(FCGIContext *context, char * params)
 	}
 	else if (strcmp(type, "pwm") == 0)
 	{
-		if (num < 0 || num >= PWM_NUM_PINS)
+		if (num < 0 || num >= PWM_NUM_SAFE_PINS)
 		{
 			FCGI_RejectJSON(context, "Invalid PWM pin");
 			return;
@@ -135,14 +136,14 @@ void Pin_Handler(FCGIContext *context, char * params)
 			duty = duty < 0 ? 0 : duty > 1 ? 1 : duty;
 			long period_ns = (long)(1e9 / freq);
 			long duty_ns = (long)(duty * period_ns);
-			PWM_Set(num, pol, period_ns, duty_ns);
+			PWM_Set(g_pin_safe_pwm[num], pol, period_ns, duty_ns);
 			FCGI_PrintRaw("PWM%d set to period_ns = %lu (%f Hz), duty_ns = %lu (%f), polarity = %d", 
 				num, period_ns, freq, duty_ns, duty*100, (int)pol);
 		}
 		else
 		{
 			Log(LOGDEBUG, "Stopping PWM%d",num);
-			PWM_Stop(num);
+			PWM_Stop(g_pin_safe_pwm[num]);
 			FCGI_PrintRaw("PWM%d stopped",num);
 		}		
 	}

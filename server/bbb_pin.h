@@ -17,8 +17,8 @@ extern void GPIO_Unexport(int pin);
 extern void PWM_Export(int pin);
 extern void PWM_Unexport(int pin);
 
-extern void ADC_Export();
-extern void ADC_Unexport();
+extern void ADC_Export(int pin);
+extern void ADC_Unexport(int pin);
 
 // Pin reading/setting functions
 extern bool GPIO_Read(int pin);
