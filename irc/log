@@ -3441,3 +3441,36 @@
 19:57 < jtanx> bye
 20:50 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
 21:50 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
+--- Day changed Thu Sep 26 2013
+07:45 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+08:36 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
+09:36 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+10:47 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
+13:08 -!- jtanx [~asfa@130.95.54.13] has joined #mctxuwa_softdev
+16:26 -!- jtanx [~asfa@130.95.54.13] has quit [Ping timeout]
+17:04 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+17:52 < jtanx> http://www.ti.com/lit/ug/spruh73i/spruh73i.pdf p1986 (chapter 15) on pwm
+17:55 < jtanx> page 1996 on ePWM
+17:56 < jtanx> ahhhhh
+17:56 < jtanx> for ehrpwm0a/0b
+17:56 < jtanx> the frequency is linked
+18:08 < jtanx> ehrpwm is enhanced resolution pwm
+18:08 < jtanx> Implemented using the A signal path of PWM, that is, on the EPWMxA output. EPWMxB output has
+18:08 < jtanx> conventional PWM capabilities
+18:08 < jtanx> (p2053)
+19:06 < jtanx> if you want to make the pwm stuff not suck
+19:06 < jtanx> there's this file called pwm_test.c
+19:06 < jtanx> that's the driver
+19:59 < jtanx> for future ref: http://armsdr.blogspot.com.au/2013/04/archlinux-on-beaglebone-and-linux-38.html
+20:08 -!- jtanx_ [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+20:21 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
+21:19 < jtanx_> urgh wow
+21:19 < jtanx_> ok, so I think pwm1/3/5 shouldn't be used to avoid period conflicts
+21:19 < jtanx_> (pwm0/1 is for channel A/B of one pwm device, 3/4 another, 5/6 another)
+21:20 < jtanx_> btw the correspondence between pwmX and pin number is:
+21:21 < jtanx_> P9_22, P9_21, P9_42. P9_14, P9_16, P8_19, P8_13, P9_28
+21:23 < jtanx_> pwm 2/7 correspond to eCAP devices
+21:24 < jtanx_> which I think are to capture PWM input
+21:24 < jtanx_> but they can also be used to generate PWM output, afaik
+23:08 -!- jtanx_ [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+23:10 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
