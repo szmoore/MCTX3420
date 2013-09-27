@@ -316,7 +316,7 @@ bool GPIO_Set(int pin, bool value)
 	}
 
 	GPIO_Pin *gpio = &g_gpio[g_pin_gpio_to_index[pin]];
-	if (gpio->initialised)
+	if (!gpio->initialised)
 	{
 		AbortBool("GPIO %d is not initialised.", pin);
 	}
