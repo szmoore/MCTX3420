@@ -45,8 +45,8 @@ void Sensor_Init()
 		Data_Init(&(g_sensors[i].data_file));
 	}
 
-	// Get the ADCs
-	//ADC_Export();
+	// Get the required ADCs
+	ADC_Export(0);
 
 	// GPIO1_28 used as a pulse for sampling
 	//GPIO_Export(GPIO1_28);
@@ -178,9 +178,10 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 		case 2:
 		{
 			static bool set = false;
-			
+			int raw_adc = 0;
 			//GPIO_Set(GPIO0_30, true);
-			d->value = (double)ADC_Read(ADC0);	//ADC #0 on the Beaglebone
+			ADC_Read(ADC0, &raw_adc);
+			d->value = (double)raw_adc;	//ADC #0 on the Beaglebone
 			//Log(LOGDEBUG, "Got value %f from ADC0", d->value);
 			//GPIO_Set(GPIO0_30, false);
 			set = !set;
@@ -251,6 +252,11 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 		s->newest_data.time_stamp = d->time_stamp;
 		s->newest_data.value = d->value;
 	}
+
+#ifdef _BBB
+	//Not all cases have usleep, easiest here.
+	usleep(1000000);
+#endif
 	return result;
 }
 
