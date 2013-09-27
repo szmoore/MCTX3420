@@ -19,6 +19,7 @@
  */
 typedef struct
 {
+	bool initialised;
 	int fd_value;
 	int fd_direction;
 } GPIO_Pin;
@@ -29,6 +30,7 @@ typedef struct
  */
 typedef struct
 {
+	bool initialised;
 	int fd_value;
 } ADC_Pin;
 
@@ -38,6 +40,7 @@ typedef struct
  */
 typedef struct
 {
+	bool initialised;
 	int fd_run;
 	FILE * file_duty;
 	FILE * file_period;
@@ -51,50 +54,57 @@ static ADC_Pin g_adc[ADC_NUM_PINS] = {{0}};
 /** Array of PWM pins **/
 static PWM_Pin g_pwm[PWM_NUM_PINS] = {{0}};
 
-static char g_buffer[BUFSIZ] = "";
-
+static char g_buffer[BUFSIZ] = {0};
 
 /**
  * Export a GPIO pin and open the file descriptors
+ * @param pin The GPIO number to be exported
+ * @return true on success, false otherwise
  */
-void GPIO_Export(int pin)
+bool GPIO_Export(int pin)
 {
-	if (pin < 0 || pin >= GPIO_INDEX_SIZE || g_gpio_to_index[pin] == 128)
+	if (pin < 0 || pin > GPIO_MAX_NUMBER || g_pin_gpio_to_index[pin] == 128)
 	{
-		Abort("Not a useable pin number: %d", pin);
+		AbortBool("Not a useable pin number: %d", pin);
 	}
 
-	GPIO_Pin *gpio = &g_gpio[g_gpio_to_index[pin]];
+	GPIO_Pin *gpio = &g_gpio[g_pin_gpio_to_index[pin]];
+	if (gpio->initialised)
+	{
+		Log(LOGNOTE, "GPIO %d already initialised.", pin);
+		return true;
+	}
+
 	// Export the pin
 	sprintf(g_buffer, "%s/export", GPIO_DEVICE_PATH);
-	FILE * export = fopen(g_buffer, "w");
-	if (export == NULL)
+	FILE * file_export = fopen(g_buffer, "w");
+	if (file_export == NULL)
 	{
-		Abort("Couldn't open %s to export GPIO pin %d - %s", g_buffer, pin, strerror(errno));
+		AbortBool("Couldn't open %s to export GPIO pin %d - %s", g_buffer, pin, strerror(errno));
 	}
-
-	fprintf(export, "%d", pin);	
-	fclose(export);
+	fprintf(file_export, "%d", pin);	
+	fclose(file_export);
 	
 	// Setup direction file descriptor
 	sprintf(g_buffer, "%s/gpio%d/direction", GPIO_DEVICE_PATH, pin);
 	gpio->fd_direction = open(g_buffer, O_RDWR);
 	if (gpio->fd_direction < 0)
 	{
-		Abort("Couldn't open %s for GPIO pin %d - %s", g_buffer, pin, strerror(errno));
+		AbortBool("Couldn't open %s for GPIO pin %d - %s", g_buffer, pin, strerror(errno));
 	}
-
 
 	// Setup value file descriptor
 	sprintf(g_buffer, "%s/gpio%d/value", GPIO_DEVICE_PATH, pin);
 	gpio->fd_value = open(g_buffer, O_RDWR);
 	if (gpio->fd_value < 0)
 	{
-		Abort("Couldn't open %s for GPIO pin %d - %s", g_buffer, pin, strerror(errno));
+		close(gpio->fd_direction);
+		AbortBool("Couldn't open %s for GPIO pin %d - %s", g_buffer, pin, strerror(errno));
 	}
 
+	gpio->initialised = true;
 	Log(LOGDEBUG, "Exported GPIO%d", pin);
-	//sleep(1);
+	return true;
 }
 
 /**
@@ -102,84 +112,111 @@ void GPIO_Export(int pin)
  */
 void GPIO_Unexport(int pin)
 {
-	if (pin < 0 || pin >= GPIO_INDEX_SIZE || g_gpio_to_index[pin] == 128)
+	if (pin < 0 || pin > GPIO_MAX_NUMBER || g_pin_gpio_to_index[pin] == 128)
 	{
 		Abort("Not a useable pin number: %d", pin);
 	}
 
-	GPIO_Pin *gpio = &g_gpio[g_gpio_to_index[pin]];
+	GPIO_Pin *gpio = &g_gpio[g_pin_gpio_to_index[pin]];
+	if (!gpio->initialised)
+	{
+		Abort("GPIO %d is already uninitialised", pin);
+	}
+
 	// Close file descriptors
 	close(gpio->fd_value);
 	close(gpio->fd_direction);
+	// Uninitialise this one
+	gpio->initialised = false;
 
 	// Unexport the pin
-
 	if (g_buffer[0] == '\0')
 		sprintf(g_buffer, "%s/unexport", GPIO_DEVICE_PATH);	
-	FILE * export = fopen(g_buffer, "w");
-	if (export == NULL)
+	FILE * file_export = fopen(g_buffer, "w");
+	if (file_export == NULL)
 	{
 		Abort("Couldn't open %s to export GPIO pin %d - %s", g_buffer, pin, strerror(errno));
 	}
 
-	fprintf(export, "%d", pin);	
-	fclose(export);
+	fprintf(file_export, "%d", pin);	
+	fclose(file_export);
 }
-
 
 /**
  * Initialise all PWM pins and open file descriptors
  * @param pin - The sysfs pin number
+ * @return true if exported, false otherwise
  */
-void PWM_Export(int pin)
+bool PWM_Export(int pin)
 {
+	//goto would make this easier...
 	if (pin < 0 || pin >= PWM_NUM_PINS)
 	{
-		Abort("Invalid PWM pin number %d specified.", pin);
+		AbortBool("Invalid PWM pin %d specified.", pin);
 	}
 
 	PWM_Pin *pwm = &g_pwm[pin];
-
-	if (pwm->file_duty != NULL)
+	if (pwm->initialised)
 	{
-		Abort("PWM %d already exported.", pin);
+		Log(LOGNOTE, "PWM %d already exported.", pin);
+		return true;
 	}
+
+	// Try export the pin, doesn't matter if it's already exported.
+	sprintf(g_buffer, "%s/export", PWM_DEVICE_PATH);
+	FILE * file_export = fopen(g_buffer, "w");
+	if (file_export == NULL)
+	{
+		AbortBool("Couldn't open %s to export PWM pin %d - %s", 
+				g_buffer, pin, strerror(errno));
+	}
+	fprintf(file_export, "%d\n", pin);
+	fclose(file_export);
 
 	// Open file descriptors
 	sprintf(g_buffer, "%s/pwm%d/run", PWM_DEVICE_PATH, pin);
 	pwm->fd_run = open(g_buffer, O_WRONLY);
 	if (pwm->fd_run < 0)
 	{
-		Abort("Couldn't open %s for PWM%d - %s", g_buffer, pin, strerror(errno));
+		AbortBool("Couldn't open %s for PWM%d - %s", g_buffer, pin, strerror(errno));
 	}
 
 	sprintf(g_buffer, "%s/pwm%d/polarity", PWM_DEVICE_PATH, pin);
 	pwm->fd_polarity = open(g_buffer, O_WRONLY);
 	if (pwm->fd_polarity < 0)
 	{
-		Abort("Couldn't open %s for PWM%d - %s", g_buffer, pin, strerror(errno));
+		close(pwm->fd_run);
+		AbortBool("Couldn't open %s for PWM%d - %s", g_buffer, pin, strerror(errno));
 	}
 
 	sprintf(g_buffer, "%s/pwm%d/period_ns", PWM_DEVICE_PATH, pin);
 	pwm->file_period = fopen(g_buffer, "w");
 	if (pwm->file_period == NULL)
 	{
-		Abort("Couldn't open %s for PWM%d - %s", g_buffer, pin, strerror(errno));
+		close(pwm->fd_run);
+		close(pwm->fd_polarity);
+		AbortBool("Couldn't open %s for PWM%d - %s", g_buffer, pin, strerror(errno));
 	}
 
 	sprintf(g_buffer, "%s/pwm%d/duty_ns", PWM_DEVICE_PATH, pin);
 	pwm->file_duty = fopen(g_buffer, "w");
 	if (pwm->file_duty == NULL)
 	{
-		Abort("Couldn't open %s for PWM%d - %s", g_buffer, pin, strerror(errno));
+		close(pwm->fd_run);
+		close(pwm->fd_polarity);
+		fclose(pwm->file_period);
+		AbortBool("Couldn't open %s for PWM%d - %s", g_buffer, pin, strerror(errno));
 	}
 
 	// Don't buffer the streams
 	setbuf(pwm->file_period, NULL);
 	setbuf(pwm->file_duty, NULL);	
 
+	pwm->initialised = true;
 	Log(LOGDEBUG, "Exported PWM%d", pin);
+	return true;
 }
+
 
 /**
  * Unexport a PWM pin and close its file descriptors
@@ -193,40 +230,58 @@ void PWM_Unexport(int pin)
 	}
 
 	PWM_Pin *pwm = &g_pwm[pin];
+	if (!pwm->initialised)
+	{
+		Abort("PWM %d not initialised", pin);
+	}
+
 	// Close the file descriptors
-	if (pwm->fd_polarity != -1)
-		close(pwm->fd_polarity);
-	if (pwm->fd_run != -1)
-		close(pwm->fd_run);
-	if (pwm->file_period != NULL)
-		fclose(pwm->file_period);
-	if (pwm->file_duty != NULL)
-		fclose(pwm->file_duty);
+	close(pwm->fd_polarity);
+	//Stop it, if it's still running
+	pwrite(pwm->fd_run, "0", 1, 0);
+	close(pwm->fd_run);
+	fclose(pwm->file_period);
+	fclose(pwm->file_duty);
 
-	//So that another call to PWM_Unexport is OK.
-	pwm->fd_polarity = pwm->fd_run = -1;
-	pwm->file_period = pwm->file_duty = NULL;
+	pwm->initialised = false;
+
+	// Try unexport the pin, doesn't matter if it's already unexported.
+	sprintf(g_buffer, "%s/unexport", PWM_DEVICE_PATH);
+	FILE * file_unexport = fopen(g_buffer, "w");
+	if (file_unexport == NULL)
+	{
+		Abort("Couldn't open %s to unexport PWM pin %d - %s", g_buffer, pin, strerror(errno));
+	}
+	fprintf(file_unexport, "%d\n", pin);
+	fclose(file_unexport);
 }
-
 
 /**
  * Initialise ADC structures
  * @param pin The ADC pin number
  */
-void ADC_Export(int pin)
+bool ADC_Export(int pin)
 {
 	if (pin < 0 || pin >= ADC_NUM_PINS)
 	{
-		Abort("Invalid ADC pin %d specified.", pin);
+		AbortBool("Invalid ADC pin %d specified.", pin);
+	}
+	else if (g_adc[pin].initialised)
+	{
+		Log(LOGNOTE, "ADC %d already initialised", pin);
+		return true;
 	}
 
 	sprintf(g_buffer, "%s/in_voltage%d_raw", g_options.adc_device_path, pin);
 	g_adc[pin].fd_value = open(g_buffer, O_RDONLY);
 	if (g_adc[pin].fd_value <0)
 	{
-		Abort("Couldn't open ADC %d device file %s - %s", pin, g_buffer, strerror(errno));
+		AbortBool("Couldn't open ADC %d device file %s - %s", pin, g_buffer, strerror(errno));
 	}
+
+	g_adc[pin].initialised = true;
 	Log(LOGDEBUG, "Opened ADC %d", pin);
+	return true;
 }
 
 /**
@@ -239,60 +294,71 @@ void ADC_Unexport(int pin)
 	{
 		Abort("Invalid ADC pin %d specified.", pin);
 	}
-	if (pin != -1)
-		close(g_adc[pin].fd_value);	
+	else if (!g_adc[pin].initialised)
+	{
+		Abort("ADC %d already uninitialised", pin);
+	}
 
+	close(g_adc[pin].fd_value);	
 	g_adc[pin].fd_value = -1;
+	g_adc[pin].initialised = false;
 }
 
 /**
  * Set a GPIO pin
  * @param pin - The pin to set. MUST have been exported before calling this function.
  */
-void GPIO_Set(int pin, bool value)
+bool GPIO_Set(int pin, bool value)
 {
-	if (pin < 0 || pin >= GPIO_INDEX_SIZE || g_gpio_to_index[pin] == 128)
+	if (pin < 0 || pin > GPIO_MAX_NUMBER || g_pin_gpio_to_index[pin] == 128)
 	{
-		Abort("Not a useable pin number: %d", pin);
+		AbortBool("Not a useable pin number: %d", pin);
 	}
 
-	GPIO_Pin *gpio = &g_gpio[g_gpio_to_index[pin]];
-
+	GPIO_Pin *gpio = &g_gpio[g_pin_gpio_to_index[pin]];
+	if (gpio->initialised)
+	{
+		AbortBool("GPIO %d is not initialised.", pin);
+	}
+	//Set the pin direction
 	if (pwrite(gpio->fd_direction, "out", 3, 0) != 3)
 	{
-		Abort("Couldn't set GPIO %d direction - %s", pin, strerror(errno));
+		AbortBool("Couldn't set GPIO %d direction - %s", pin, strerror(errno));
 	}
 
-	char c = '0' + (value);
+	char c = value ? '1' : '0';
 	if (pwrite(gpio->fd_value, &c, 1, 0) != 1)
 	{
-		Abort("Couldn't read GPIO %d value - %s", pin, strerror(errno));
+		AbortBool("Couldn't read GPIO %d value - %s", pin, strerror(errno));
 	}
 
+	return true;
 }
 
 /** 
  * Read from a GPIO Pin
  * @param pin - The pin to read
+ * @param result A pointer to store the result
+ * @return true on success, false otherwise
  */
-bool GPIO_Read(int pin)
+bool GPIO_Read(int pin, bool *result)
 {
-	if (pin < 0 || pin >= GPIO_INDEX_SIZE || g_gpio_to_index[pin] == 128)
+	if (pin < 0 || pin > GPIO_MAX_NUMBER || g_pin_gpio_to_index[pin] == 128)
 	{
-		Log(LOGERR, "Not a useable pin number: %d", pin);
-		return false;
+		AbortBool("Not a useable pin number: %d", pin);
 	}
 
-	GPIO_Pin *gpio = &g_gpio[g_gpio_to_index[pin]];
+	GPIO_Pin *gpio = &g_gpio[g_pin_gpio_to_index[pin]];
 
 	if (pwrite(gpio->fd_direction, "in", 2, 0) != 2)
-		Log(LOGERR,"Couldn't set GPIO %d direction - %s", pin, strerror(errno)); 
+		AbortBool("Couldn't set GPIO %d direction - %s", pin, strerror(errno)); 
+	
 	char c = '0';
 	if (pread(gpio->fd_value, &c, 1, 0) != 1)
-		Log(LOGERR,"Couldn't read GPIO %d value - %s", pin, strerror(errno));
+		AbortBool("Couldn't read GPIO %d value - %s", pin, strerror(errno));
 
-	return (c == '1');
-
+	*result = (c == '1');
+	return true;
 }
 
 /**
@@ -302,43 +368,57 @@ bool GPIO_Read(int pin)
  * @param period - The period in ns
  * @param duty - The time the pin is active in ns
  */
-void PWM_Set(int pin, bool polarity, long period, long duty)
+bool PWM_Set(int pin, bool polarity, long period, long duty)
 {
 	Log(LOGDEBUG, "Pin %d, pol %d, period: %lu, duty: %lu", pin, polarity, period, duty);
 	
 	if (pin < 0 || pin >= PWM_NUM_PINS)
 	{
-		Abort("Invalid PWM pin number %d specified.", pin);
+		AbortBool("Invalid PWM pin number %d specified.", pin);
 	}
 
 	PWM_Pin *pwm = &g_pwm[pin];
+	if (!pwm->initialised)
+	{
+		AbortBool("PWM %d is not initialised.", pin);
+	}
 
 	// Have to stop PWM before changing it
 	if (pwrite(pwm->fd_run, "0", 1, 0) != 1)
 	{
-		Abort("Couldn't stop PWM%d - %s", pin, strerror(errno));
+		AbortBool("Couldn't stop PWM%d - %s", pin, strerror(errno));
 	}
 
 	char c = polarity ? '1' : '0';
 	if (pwrite(pwm->fd_polarity, &c, 1, 0) != 1)
 	{
-		Abort("Couldn't set PWM%d polarity - %s", pin, strerror(errno));
+		AbortBool("Couldn't set PWM%d polarity - %s", pin, strerror(errno));
+	}
+
+	//This must be done first, otherwise period/duty settings can conflict
+	if (fwrite("0", 1, 1, pwm->file_duty) < 1)
+	{
+		AbortBool("Couldn't zero the duty for PWM%d - %s", pin, strerror(errno));
 	}
 
 	if (fprintf(pwm->file_period, "%lu", period) < 0)
 	{
-		Abort("Couldn't set period for PWM%d - %s", pin, strerror(errno));
+		AbortBool("Couldn't set period for PWM%d - %s", pin, strerror(errno));
 	}
+
 
 	if (fprintf(pwm->file_duty, "%lu", duty) < 0)
 	{
-		Abort("Couldn't set duty cycle for PWM%d - %s", pin, strerror(errno));
+		AbortBool("Couldn't set duty cycle for PWM%d - %s", pin, strerror(errno));
 	}
+
 
 	if (pwrite(pwm->fd_run, "1", 1, 0) != 1)
 	{
-		Abort("Couldn't start PWM%d - %s", pin, strerror(errno));
+		AbortBool("Couldn't start PWM%d - %s", pin, strerror(errno));
 	}
+
+	return true;
 }
 
 /**
@@ -361,17 +441,26 @@ void PWM_Stop(int pin)
 /**
  * Read an ADC value
  * @param id - The ID of the ADC pin to read
- * @returns - The reading of the ADC channel
+ * @param value - A pointer to store the value read from the ADC
+ * @returns - The true if succeeded, false otherwise.
  */
-int ADC_Read(int id)
+bool ADC_Read(int id, int *value)
 {
 	char adc_str[ADC_DIGITS] = {0};
 
-	if (pread(g_adc[id].fd_value, adc_str, ADC_DIGITS-1, 0) == -1)
+	if (id < 0 || id >= ADC_NUM_PINS)
 	{
-		Log(LOGERR, "ADC %d read failed: %s", id, strerror(errno));
-		return 0;
+		AbortBool("Invalid ADC pin %d specified.", id);
+	}
+	else if (!g_adc[id].initialised)
+	{
+		AbortBool("ADC %d is not initialised.", id);
 	}
 
-	return strtol(adc_str, NULL, 10);
+	if (pread(g_adc[id].fd_value, adc_str, ADC_DIGITS-1, 0) == -1)
+	{
+		AbortBool("ADC %d read failed: %s", id, strerror(errno));
+	}
+	*value = strtol(adc_str, NULL, 10);
+	return true;
 }

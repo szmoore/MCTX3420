@@ -6,6 +6,9 @@
 #ifndef _BBB_PIN_DEFINES_H
 #define _BBB_PIN_DEFINES_H
 
+/** The number of expansion pins on the BBB **/
+#define BBB_PIN_COUNT 92
+
 /** GPIO0 defines **/
 
 #define GPIO0_1 1
@@ -111,15 +114,15 @@
 #define GPIO2_31 95
 #define GPIO2_32 96
 
-/** Number of useable GPIO pins **/
-#define GPIO_NUM_PINS 50
-
 /* Luts */
-#define GPIO_LUT_SIZE 93
-#define GPIO_INDEX_SIZE 128
-extern const unsigned char g_pin_to_gpio[GPIO_LUT_SIZE];
-extern const unsigned char g_gpio_to_index[GPIO_INDEX_SIZE];
-extern const unsigned char g_index_to_gpio[GPIO_NUM_PINS];
+/** Number of useable GPIO pins **/
+#define GPIO_NUM_PINS 44
+/** The max usable GPIO number **/
+#define GPIO_MAX_NUMBER 117
+
+extern const unsigned char g_pin_real_to_gpio[BBB_PIN_COUNT+1];
+extern const unsigned char g_pin_gpio_to_index[GPIO_MAX_NUMBER+1];
+extern const unsigned char g_pin_index_to_gpio[GPIO_NUM_PINS];
 
 /** Export path **/
 #define GPIO_DEVICE_PATH "/sys/class/gpio"

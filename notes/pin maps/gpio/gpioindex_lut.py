@@ -14,7 +14,7 @@ def doit2(x):
 
         lutarr = []
         reverse = []
-        for i in range(128):
+        for i in range(118): #Max safe gpio is 117
             lutarr.append(lut.get(i, 128))
         for i in range(len(rlut)):
             reverse.append(rlut[i])

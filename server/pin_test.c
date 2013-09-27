@@ -12,15 +12,16 @@
  */
 void Pin_Init()
 {
-	for (int i = 0; i < GPIO_NUM_PINS; ++i)
+	//Don't export anything; make the user do it.
+	/*for (int i = 0; i < GPIO_NUM_PINS; ++i)
 		GPIO_Export(g_index_to_gpio[i]);
 
 	for (int i = 0; i < ADC_NUM_PINS; ++i)
 		ADC_Export(i);
 
 	//Only export 'safe' PWM pins that don't interfere with one another
-	for (int i = 0; i < PWM_NUM_PINS; ++i)
-		PWM_Export(g_pin_safe_pwm[i]);
+	for (int i = 0; i < PWM_NUM_SAFE_PINS; ++i)
+		PWM_Export(g_pin_safe_pwm[i]);*/
 }
 
 /**
@@ -29,7 +30,7 @@ void Pin_Init()
 void Pin_Close()
 {
 	for (int i = 0; i < GPIO_NUM_PINS; ++i)
-		GPIO_Unexport(g_index_to_gpio[i]);
+		GPIO_Unexport(g_pin_index_to_gpio[i]);
 
 	for (int i = 0; i < ADC_NUM_PINS; ++i)
 		ADC_Unexport(i);
@@ -106,7 +107,11 @@ void Pin_Handler(FCGIContext *context, char * params)
 		}
 		Log(LOGDEBUG, "Reading GPIO%d", num);
 		FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
-		FCGI_PrintRaw("GPIO%d reads %d\n", num, GPIO_Read(num));
+		bool ret;
+		if (!GPIO_Read(num, &ret))
+			FCGI_PrintRaw("GPIO%d read failed. Is it exported?", num);
+		else
+			FCGI_PrintRaw("GPIO%d reads %d\n", num, ret);
 
 	}
 	else if (strcmp(type, "adc") == 0)
@@ -118,7 +123,15 @@ void Pin_Handler(FCGIContext *context, char * params)
 		}
 		Log(LOGDEBUG, "Reading ADC%d", num, set);
 		FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
-		FCGI_PrintRaw("ADC%d reads %d\n", num, ADC_Read(num));
+		int raw_adc;
+		if (!ADC_Read(num, &raw_adc))
+		{
+			FCGI_PrintRaw("ADC%d read failed. Is it initialised?", num);
+		}
+		else
+		{
+			FCGI_PrintRaw("ADC%d reads %d\n", num, raw_adc);
+		}
 	}
 	else if (strcmp(type, "pwm") == 0)
 	{
@@ -153,8 +166,4 @@ void Pin_Handler(FCGIContext *context, char * params)
 		FCGI_RejectJSON(context, "Invalid pin type");
 	}
 
-	
-
 }
-
-//EOF

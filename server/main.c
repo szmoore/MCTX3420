@@ -9,6 +9,7 @@
 #include "sensor.h"
 #include "actuator.h"
 #include "control.h"
+#include "pin_test.h"
 #include "bbb_pin_defines.h"
 
 // --- Standard headers --- //

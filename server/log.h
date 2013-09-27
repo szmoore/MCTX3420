@@ -11,7 +11,8 @@
 #define Fatal(...) FatalEx(__func__, __FILE__, __LINE__, __VA_ARGS__)
 
 /*** Macro to abort function ***/
-#define Abort(...) LogEx(LOGERR, __func__, __FILE__, __LINE__, __VA_ARGS__); return
+#define Abort(...) { LogEx(LOGERR, __func__, __FILE__, __LINE__, __VA_ARGS__); return; }
+#define AbortBool(...) { LogEx(LOGERR, __func__, __FILE__, __LINE__, __VA_ARGS__); return false; }
 
 // An enum to make the severity of log messages human readable in code
 enum {LOGERR=0, LOGWARN=1, LOGNOTE=2, LOGINFO=3,LOGDEBUG=4};
