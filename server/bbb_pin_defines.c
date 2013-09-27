@@ -10,7 +10,6 @@
  * Where the returned value is 0, there is no GPIO pin
  * at that location.
  */
-
 const unsigned char g_pin_real_to_gpio[BBB_PIN_COUNT+1] = {
 	  0,   0,   0,   0,   0,   0,   0,  66,  67,  69,  68,  45,  44,   0,
 	 26,  47,  46,  27,  65,   0,   0,   0,   0,   0,   0,   0,  61,  86,
@@ -40,7 +39,7 @@ const unsigned char g_pin_gpio_to_index[GPIO_MAX_NUMBER+1] = {
 /**
  * Maps an index in g_gpio to the corresponding GPIO number.
  */
-const unsigned char g_gpio_lut[GPIO_NUM_PINS] = {
+const unsigned char g_pin_index_to_gpio[GPIO_NUM_PINS] = {
 	  4,   5,   8,   9,  10,  11,  14,  15,  26,  27,  30,  31,  44,  45,
 	 46,  47,  48,  49,  60,  61,  65,  66,  67,  68,  69,  70,  71,  72,
 	 73,  74,  75,  76,  77,  78,  79,  80,  81,  86,  87,  88,  89, 112,
