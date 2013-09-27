@@ -10,7 +10,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <ctype.h>
 #include "options.h"
 
 /**
@@ -109,6 +108,7 @@ bool GPIO_Export(int pin)
 
 /**
  * Unexport a GPIO pin and close its' file descriptors
+ * @param pin The GPIO number to be unexported
  */
 void GPIO_Unexport(int pin)
 {
@@ -349,13 +349,21 @@ bool GPIO_Read(int pin, bool *result)
 	}
 
 	GPIO_Pin *gpio = &g_gpio[g_pin_gpio_to_index[pin]];
+	if (!gpio->initialised)
+	{
+		AbortBool("GPIO %d is not initialised.", pin);
+	}
 
 	if (pwrite(gpio->fd_direction, "in", 2, 0) != 2)
-		AbortBool("Couldn't set GPIO %d direction - %s", pin, strerror(errno)); 
+	{
+		AbortBool("Couldn't set GPIO %d direction - %s", pin, strerror(errno));
+	}
 	
 	char c = '0';
 	if (pread(gpio->fd_value, &c, 1, 0) != 1)
+	{
 		AbortBool("Couldn't read GPIO %d value - %s", pin, strerror(errno));
+	}
 
 	*result = (c == '1');
 	return true;
@@ -386,36 +394,36 @@ bool PWM_Set(int pin, bool polarity, long period, long duty)
 	// Have to stop PWM before changing it
 	if (pwrite(pwm->fd_run, "0", 1, 0) != 1)
 	{
-		AbortBool("Couldn't stop PWM%d - %s", pin, strerror(errno));
+		AbortBool("Couldn't stop PWM %d - %s", pin, strerror(errno));
 	}
 
 	char c = polarity ? '1' : '0';
 	if (pwrite(pwm->fd_polarity, &c, 1, 0) != 1)
 	{
-		AbortBool("Couldn't set PWM%d polarity - %s", pin, strerror(errno));
+		AbortBool("Couldn't set PWM %d polarity - %s", pin, strerror(errno));
 	}
 
 	//This must be done first, otherwise period/duty settings can conflict
 	if (fwrite("0", 1, 1, pwm->file_duty) < 1)
 	{
-		AbortBool("Couldn't zero the duty for PWM%d - %s", pin, strerror(errno));
+		AbortBool("Couldn't zero the duty for PWM %d - %s", pin, strerror(errno));
 	}
 
 	if (fprintf(pwm->file_period, "%lu", period) < 0)
 	{
-		AbortBool("Couldn't set period for PWM%d - %s", pin, strerror(errno));
+		AbortBool("Couldn't set period for PWM %d - %s", pin, strerror(errno));
 	}
 
 
 	if (fprintf(pwm->file_duty, "%lu", duty) < 0)
 	{
-		AbortBool("Couldn't set duty cycle for PWM%d - %s", pin, strerror(errno));
+		AbortBool("Couldn't set duty cycle for PWM %d - %s", pin, strerror(errno));
 	}
 
 
 	if (pwrite(pwm->fd_run, "1", 1, 0) != 1)
 	{
-		AbortBool("Couldn't start PWM%d - %s", pin, strerror(errno));
+		AbortBool("Couldn't start PWM %d - %s", pin, strerror(errno));
 	}
 
 	return true;
@@ -424,18 +432,25 @@ bool PWM_Set(int pin, bool polarity, long period, long duty)
 /**
  * Deactivate a PWM pin
  * @param pin - The syfs pin number
+ * @return true on success, false otherwise
  */
-void PWM_Stop(int pin)
+bool PWM_Stop(int pin)
 {
 	if (pin < 0 || pin >= PWM_NUM_PINS)
 	{
-		Abort("Invalid PWM pin number %d specified.", pin);
+		AbortBool("Invalid PWM pin number %d specified.", pin);
+	}
+	else if (!g_pwm[pin].initialised)
+	{
+		AbortBool("PWM %d is not initialised.", pin);
 	}
 
 	if (pwrite(g_pwm[pin].fd_run, "0", 1, 0) != 1)
 	{
-		Abort("Couldn't stop PWM %d - %s", pin, strerror(errno));
+		AbortBool("Couldn't stop PWM %d - %s", pin, strerror(errno));
 	}
+
+	return true;
 }
 
 /**
@@ -461,6 +476,7 @@ bool ADC_Read(int id, int *value)
 	{
 		AbortBool("ADC %d read failed: %s", id, strerror(errno));
 	}
+
 	*value = strtol(adc_str, NULL, 10);
 	return true;
 }

@@ -12,16 +12,7 @@
  */
 void Pin_Init()
 {
-	//Don't export anything; make the user do it.
-	/*for (int i = 0; i < GPIO_NUM_PINS; ++i)
-		GPIO_Export(g_index_to_gpio[i]);
-
-	for (int i = 0; i < ADC_NUM_PINS; ++i)
-		ADC_Export(i);
-
-	//Only export 'safe' PWM pins that don't interfere with one another
-	for (int i = 0; i < PWM_NUM_SAFE_PINS; ++i)
-		PWM_Export(g_pin_safe_pwm[i]);*/
+	
 }
 
 /**
@@ -39,6 +30,34 @@ void Pin_Close()
 		PWM_Unexport(g_pin_safe_pwm[i]);
 }
 
+bool Pin_Configure(const char *type, int pin_export, int num)
+{
+	bool ret = true;
+
+	if (strcmp(type, "gpo") == 0 || strcmp(type, "gpi") == 0)
+	{
+		if (pin_export < 0)
+			GPIO_Unexport(num);
+		else
+			ret = GPIO_Export(num);
+	}
+	else if (strcmp(type, "pwm") == 0)
+	{
+		if (pin_export < 0)
+			PWM_Unexport(num);
+		else
+			ret = PWM_Export(num);		
+	}
+	else if (strcmp(type, "adc") == 0)
+	{
+		if (pin_export < 0)
+			ADC_Unexport(num);
+		else
+			ret = ADC_Export(num);
+	}
+	return ret;
+}
+
 /**
  * Handle a request to the Pin test module
  * @param context - The FastCGI context
@@ -47,9 +66,10 @@ void Pin_Close()
 void Pin_Handler(FCGIContext *context, char * params)
 {
 	
-	char * type = NULL;
+	const char * type = NULL;
 	int num = 0;
-	bool set = true;
+	int pin_export = 0;
+	bool set = false;
 	bool pol = false;
 	double freq = 50;
 	double duty = 0.5;
@@ -59,6 +79,7 @@ void Pin_Handler(FCGIContext *context, char * params)
 	FCGIValue values[] = {
 		{"type", &type, FCGI_REQUIRED(FCGI_STRING_T)},
 		{"num", &num, FCGI_REQUIRED(FCGI_INT_T)}, 
+		{"export", &pin_export, FCGI_INT_T},
 		{"set", &set, FCGI_BOOL_T},
 		{"pol", &pol, FCGI_BOOL_T},
 		{"freq", &freq, FCGI_DOUBLE_T},
@@ -69,6 +90,7 @@ void Pin_Handler(FCGIContext *context, char * params)
 	typedef enum {
 		TYPE,
 		NUM,
+		EXPORT,
 		SET,
 		POL,
 		FREQ,
@@ -82,7 +104,19 @@ void Pin_Handler(FCGIContext *context, char * params)
 		return;
 	}
 
-	Log(LOGDEBUG, "Params: type = %s, num = %d, set = %d, pol = %d, freq = %f, duty = %f", type, num, set, pol, freq, duty);
+	Log(LOGDEBUG, "Params: type = %s, num = %d, export = %d, set = %d, pol = %d, freq = %f, duty = %f", type, num, pin_export, set, pol, freq, duty);
+	if (pin_export != 0)
+	{
+		if (!Pin_Configure(type, pin_export, num))
+		{
+			FCGI_RejectJSON(context, "Failed to (un)export the pin. Check that a valid number has been specified.");
+			return;
+		}
+		FCGI_BeginJSON(context, STATUS_OK);
+		FCGI_JSONPair("description", "Pin (un)export OK!");
+		FCGI_EndJSON();
+		return;
+	}
 
 	if (strcmp(type, "gpo") == 0)
 	{
@@ -93,10 +127,15 @@ void Pin_Handler(FCGIContext *context, char * params)
 		}
 
 		Log(LOGDEBUG, "Setting GPIO%d to %d", num, set);
-		GPIO_Set(num, set);
-
-		FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
-		FCGI_PrintRaw("GPIO%d set to %d\n", num, set);
+		if (!GPIO_Set(num, set))
+		{
+			FCGI_RejectJSON(context, "Failed to set the GPIO pin. Check that it's exported.");
+		}
+		else
+		{
+			FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
+			FCGI_PrintRaw("GPIO%d set to %d\n", num, set);
+		}
 	}
 	else if (strcmp(type, "gpi") == 0)
 	{
@@ -106,13 +145,16 @@ void Pin_Handler(FCGIContext *context, char * params)
 			return;
 		}
 		Log(LOGDEBUG, "Reading GPIO%d", num);
-		FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
-		bool ret;
-		if (!GPIO_Read(num, &ret))
-			FCGI_PrintRaw("GPIO%d read failed. Is it exported?", num);
+		bool val;
+		if (!GPIO_Read(num, &val))
+		{
+			FCGI_RejectJSON(context, "Failed to read from the GPIO pin. Check that it's exported.");
+		}
 		else
-			FCGI_PrintRaw("GPIO%d reads %d\n", num, ret);
-
+		{
+			FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
+			FCGI_PrintRaw("GPIO%d reads %d\n", num, val);
+		}
 	}
 	else if (strcmp(type, "adc") == 0)
 	{
@@ -122,14 +164,14 @@ void Pin_Handler(FCGIContext *context, char * params)
 			return;
 		}
 		Log(LOGDEBUG, "Reading ADC%d", num, set);
-		FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
 		int raw_adc;
 		if (!ADC_Read(num, &raw_adc))
 		{
-			FCGI_PrintRaw("ADC%d read failed. Is it initialised?", num);
+			FCGI_RejectJSON(context, "ADC read failed. Check that it's exported.");
 		}
 		else
 		{
+			FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
 			FCGI_PrintRaw("ADC%d reads %d\n", num, raw_adc);
 		}
 	}
@@ -140,8 +182,6 @@ void Pin_Handler(FCGIContext *context, char * params)
 			FCGI_RejectJSON(context, "Invalid PWM pin");
 			return;
 		}
-
-		FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
 		
 		if (set)
 		{
@@ -149,14 +189,22 @@ void Pin_Handler(FCGIContext *context, char * params)
 			duty = duty < 0 ? 0 : duty > 1 ? 1 : duty;
 			long period_ns = (long)(1e9 / freq);
 			long duty_ns = (long)(duty * period_ns);
-			PWM_Set(g_pin_safe_pwm[num], pol, period_ns, duty_ns);
-			FCGI_PrintRaw("PWM%d set to period_ns = %lu (%f Hz), duty_ns = %lu (%f), polarity = %d", 
-				num, period_ns, freq, duty_ns, duty*100, (int)pol);
+			if (!PWM_Set(num, pol, period_ns, duty_ns))
+			{
+				FCGI_RejectJSON(context, "PWM set failed. Check if it's exported, and that there's no channel conflict.");
+			}
+			else
+			{
+				FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
+				FCGI_PrintRaw("PWM%d set to period_ns = %lu (%f Hz), duty_ns = %lu (%f), polarity = %d", 
+					num, period_ns, freq, duty_ns, duty*100, (int)pol);
+			}
 		}
 		else
 		{
 			Log(LOGDEBUG, "Stopping PWM%d",num);
 			PWM_Stop(g_pin_safe_pwm[num]);
+			FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
 			FCGI_PrintRaw("PWM%d stopped",num);
 		}		
 	}
