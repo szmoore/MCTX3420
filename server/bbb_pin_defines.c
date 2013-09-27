@@ -1,5 +1,7 @@
 #include "bbb_pin_defines.h"
 
+/* Luts and stuff. Yay magic numbers **/
+
 /** 
  * A lookup table from the actual pin number to GPIO number.
  * e.g P8_13 is g_pin_real_to_gpio[0*46+13] = g_pin_real_to_gpio[13]
@@ -50,4 +52,4 @@ const unsigned char g_pin_index_to_gpio[GPIO_NUM_PINS] = {
  */
 const unsigned char g_pin_safe_pwm[PWM_NUM_SAFE_PINS] = {
 	0, 2, 4, 6, 7
-};
+}; //blergh
