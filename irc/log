@@ -3183,3 +3183,294 @@
 19:17 < jtanx> i'll stick with debian (but do the same thing)
 21:07 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
 21:34 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
+--- Day changed Wed Sep 25 2013
+08:41 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+11:31 -!- jtanx [~asfa@130.95.54.13] has joined #mctxuwa_softdev
+12:15 < jtanx> I think I know why we were having issues with pwm yesterday
+12:16 < jtanx> if you do this command
+12:16 < jtanx> echo bone_pwm_P8_13 > /sys/devices/bone_capemgr.8/slots
+12:16 < jtanx> you make it unavailable from /sys/class/pwm
+12:16 < jtanx> so in the run.sh script it was exporting all the pwm devices via the first method
+12:16 < jtanx> and then it becomes unavailable via sysfs
+12:17 < jtanx> anyway... I tried booting from the rcn image
+12:17 < jtanx> it comes with pwm enabled already
+12:17 < jtanx> and via that capemgr I got pwm to work
+12:17 < jtanx> I don't know what /sys/class/pwm/pwm0 corresponds to (which pin)
+12:19 < jtanx> the electronics teams' bbb wasn't done properly when we tried to upgrade the kernel
+12:19 < jtanx> probably something to do with the device tree stuff
+12:19 < jtanx> so I flashed it with the rcn image (which runs 3.8.13-bone26
+12:20 < jtanx> (demo image from here)
+12:20 < jtanx> elinux.org/BeagleBoardDebian
+12:47 -!- jtanx [~asfa@130.95.54.13] has quit [Ping timeout]
+13:09 -!- jtanx_ [~asfa@130.95.54.13] has joined #mctxuwa_softdev
+13:09 -!- jtanx_ is now known as jtanx
+13:16 < jtanx> oh
+13:16 < jtanx> so it now works
+13:16 < jtanx>  echo bone_pwm_P9_22 > slots
+13:16 < jtanx> if I do that line for pwm0
+13:26 < jtanx> oh right
+13:26 < jtanx> echo bone_pwm_P9_21 >slots 
+13:26 < jtanx> for pwm1
+13:30 < jtanx> ahhhhhh
+13:30 < jtanx> if you comment out the line
+13:30 < jtanx> modprobe pwm_test
+13:30 < jtanx> from run.sh
+13:30 < jtanx> it works
+13:43 < jtanx> geeze kernel 3.8 has issues with usb hotplugging 
+13:43 < jtanx> https://groups.google.com/forum/?fromgroups#!searchin/beagleboard/usb/beagleboard/8aalvyWwaig/MUXAPuMTSOYJ
+13:43 < jtanx> which explains why we're having issues with cameras
+13:43 < jtanx> (partly at least)
+13:47 < jtanx> and now pwms not working again
+13:48 < jtanx> via sysfs
+13:50 < jtanx> oh
+13:50 < jtanx> I know why
+13:51 < jtanx> you have to export it /sys/class/pwm
+13:51 < jtanx> first
+13:51 < jtanx> *before* you do stuff like 	echo bone_pwm_P9_21 >slots 
+13:52 < jtanx> yep 
+13:53 < jtanx> so the order is: echo 0/1 > /sys/class/pwm/export
+13:53 < jtanx> then do that other stuff
+13:57 < jtanx> egh
+13:57 < jtanx> finnicky
+13:57 < jtanx> ok I have to stop now
+14:14 -!- jtanx [~asfa@130.95.54.13] has quit [Ping timeout]
+14:15 -!- jtanx [~asfa@130.95.218.72] has joined #mctxuwa_softdev
+15:46 -!- jtanx [~asfa@130.95.218.72] has quit [Ping timeout]
+16:03 -!- jtanx [~asfa@130.95.218.72] has joined #mctxuwa_softdev
+16:04 < jtanx> well that was an interesting experience
+16:04 < jtanx> it's most reliable when you work directly with /sys/devices/ocp2.helper/PWM9_22*
+16:05 < jtanx> I think if you echo am33xx_pwm to the slots thing when it's already loaded
+16:05 < jtanx> weird shit can happen
+16:05 < jtanx> too
+16:07 < jtanx> setting the period via sysfs (eg /sys/class/pwm) didn't work most of the time either
+16:07 < jtanx> you could change duty but not period
+16:07 < jtanx> although I swear I had it working at one point
+16:07 < jtanx> via the other way I think it works ok
+16:08 < jtanx> oh yeah, and I was doing this using the demo image from http://elinux.org/BeagleBoardDebian
+16:09 < jtanx> the electrical group's one has been reflashed with that version as well
+16:09 < jtanx> (for ours I worked off my sd card)
+16:10 < jtanx> that image also enables the ethernet-over-usb 
+16:36 < jtanx> I think we have to be careful which pins we export/enable
+16:37 < jtanx> https://github.com/CircuitCo/BeagleBone-Black/blob/master/BBB_SRM.pdf?raw=true
+16:37 < jtanx> pages 80-82
+16:37 < jtanx> the pins have different meanings based on what mode they're in
+16:41 -!- jtanx [~asfa@130.95.218.72] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+17:59 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:05 < jtanx> ...so I brought the BBB home, even though I should be studying for 2402 :S
+18:05 < jtanx> the microphone came in today too
+18:19 < jtanx> ok
+18:19 < jtanx> so these documents: https://github.com/derekmolloy/boneDeviceTree/tree/master/docs
+18:19 < jtanx> describes what the pins are  used for by default
+19:00 < sam_moore> Ah... they already got the microphone
+19:00 < sam_moore> Welp. Guess we're stuck with it.
+19:00 < sam_moore> So... we can record <50Hz sounds reliably, maybe
+19:00 < sam_moore> How useful
+19:01 < sam_moore> Have I been missing out on an email stream where the sensors team actually clears things with us?
+19:04 < jtanx> not that I know of
+19:04 < jtanx> haha
+19:04 < jtanx> in other news
+19:04 < jtanx> the sensors team ordered a pressure sensor with no mount
+19:04 < jtanx> adrian had a spat because it'd cost something like $200 to make the mount
+19:05 < jtanx> for a $10 part
+19:05 < jtanx> so he said, order it from online , I don't care if it's from overseas
+19:05 < sam_moore> Oh boy
+19:06 < sam_moore> If there's an issue with the camera and/or microphone they'll blame us
+19:06 < jtanx> yeah
+19:06 < jtanx> about that camera
+19:06 < sam_moore> Oh dear...
+19:06 < sam_moore> Go ahead?
+19:06 < jtanx> still couldn't get it to work today
+19:06 < sam_moore> God dammit
+19:06 < jtanx> although I didn't spend much time on it
+19:06 < jtanx> I got pwm to work
+19:06 < jtanx> mostly
+19:06 < sam_moore> I thought it might be something like adding the user to the "video" group
+19:06 < sam_moore> That's good!
+19:07 < sam_moore> What was happening?
+19:07 < jtanx> yeah, the problem is it doesn't show up at all (the camera)
+19:07 < sam_moore> Hmm
+19:07 < jtanx> and partly because 3.8 has an issue with usb hotplugging
+19:07 < sam_moore> Haha
+19:07 < jtanx> about pwm
+19:07 < jtanx> it seems that the sysfs method is not so reliable
+19:07 < jtanx> you can get it to work
+19:07 < jtanx> you have to export those first
+19:07 < jtanx> so echo 0 > /sys/class/pwm/export
+19:08 < jtanx> then (and only then)
+19:08 < jtanx> can you do
+19:08 < jtanx> that echo to the slots
+19:08 < jtanx> for those pins
+19:08 < jtanx> then it seems to be happy
+19:08 < jtanx> if you echo am33xx_pwm to the slots when it's already enabled
+19:08 < jtanx> that also screws things up
+19:08 < sam_moore> Ok
+19:09 < sam_moore> Thanks for working that out
+19:09 < jtanx> yeah
+19:09 < sam_moore> If you want to change from sysfs to the other method that's fine
+19:09 < sam_moore> But sysfs was much simpler to code
+19:09 < jtanx> should have spent that time studying for mech2402 though :P
+19:09 < sam_moore> Because you just sprintf an integer to the path
+19:09 < jtanx> yeah
+19:09 < jtanx> witht he other way it's all that dynamic path crap
+19:09 < sam_moore> Rather than keeping track of "bone_pwm_test_P9_22.15.arbitrary_string" crap
+19:09 < sam_moore> Exactly :P
+19:09 < jtanx> but
+19:10 < jtanx> you can enable pwm and analogue on boot
+19:10 < jtanx> if I can find the link
+19:10 < sam_moore> Sure, if that's easy
+19:10 < sam_moore> I figured if we put them in the /etc/init.d script that'd be fine too
+19:10 < sam_moore> Actually... maybe we should put it in the /etc/init.d script
+19:11 < jtanx> oh yeah
+19:11 < jtanx> and the demo image from that rcn image
+19:11 < sam_moore> Because if someone gets a different beaglebone then they'd have to reenable it on boot
+19:11 < jtanx> is better than screwing around with recompiling kernels
+19:11 < sam_moore> Can you give a link?
+19:11 < jtanx> I think it's the first image that you had originally
+19:11 < jtanx> http://elinux.org/BeagleBoardDebian
+19:12 < jtanx> there's this script in /boot
+19:12 < sam_moore> Oh
+19:12 < jtanx> that allows you to copy the sd card to flash
+19:12 < jtanx> it also enables the usb over ethernet
+19:12 < sam_moore> Oh right, the image I downloaded before we used yours
+19:12 < sam_moore> Cool
+19:12 < jtanx> yeah
+19:12 < jtanx> I flashed electronics' one with that
+19:12 < sam_moore> Does PWM and stuff work on it?
+19:13 < jtanx> probably
+19:13 < jtanx> I was using the same image
+19:13 < jtanx> on ours
+19:13 < jtanx> you run this script and it copies exatly what's on the sd card to the internal flash
+19:13 < jtanx> resizes the partition as necessary
+19:13 < jtanx> http://digital-drive.com/?p=146
+19:13 < jtanx> that page shows how to enable on boot
+19:13 < jtanx> it's just a change to uEnv.txt in the boot partition
+19:18 < sam_moore> Good work
+19:19 < sam_moore> While I remember, for multiple logins and crap... can you just try to login as a local user account?
+19:19 < sam_moore> Then we could make a wrapper around adduser and deluser for the "administrator" account
+19:19 < jtanx> wow
+19:20 < jtanx> I don't know
+19:20 < sam_moore> I was just thinking
+19:20 < sam_moore> Linux has a user account system already
+19:20 < jtanx> yep, but is it a good idea to be making ~300 on a BBB?
+19:21 < sam_moore> Well... putting LDAP on the BBB probably won't be less intense
+19:21 < sam_moore> I know it's called "Lightweight"
+19:21 < sam_moore> But that's in comparison to "DAP"
+19:21 < jtanx> well to be perfectly honest, adrian is asking way too much
+19:21 < sam_moore> Which was designed in the 1980s by a telephone directory company and used the original OSI networking model
+19:21 < jtanx> you simply can't support a 300-odd user base on something like a BBB
+19:21 < sam_moore> Yeah
+19:22 < sam_moore> But maybe something like 30 users would work?
+19:22 < jtanx> yeah
+19:22 < jtanx> let's just keep it at that limit
+19:22 < sam_moore> Another thing regarding the crazy requirements...
+19:22 < sam_moore> If we have multiple Beaglebones running FastCGI
+19:23 < sam_moore> We can design our GUI so that it has links to the appropriate Beaglebone for each function
+19:23 < sam_moore> I don't think we actually need to do anything in nginx or the Beaglebone software
+19:24 < jtanx> hmm
+19:24 < sam_moore> At least in terms of displaying sensor data
+19:24 < sam_moore> For actuator control, we would need to introduce networking between individual beaglebones
+19:24 < jtanx> it actually depends on what he means by 'extensible' and/or distributed
+19:24 < jtanx> like
+19:24 < jtanx> you could say this BBB is for this experiement
+19:25 < jtanx> this other BBB is for this other experiment
+19:25 < sam_moore> But quite frankly you'd be mad to trust a distributed system with networking delays to coordinate control over hardware
+19:25 < jtanx> well yeah
+19:25 < sam_moore> Well at least something like this where we care about safety
+19:25 < sam_moore> But if you keep the actual control over hardware independent and on seperate devices
+19:25 < jtanx> but I mean
+19:26 < jtanx> wait 
+19:26 < jtanx> if we interpret it as meaning
+19:26 < jtanx> that each BBB runs an instance of the software
+19:26 < jtanx> then they would still be separate
+19:26 < jtanx> as in each BBB controls one 'experiment'
+19:26 < jtanx> you customise each BBB based on the experiment that needs to be done
+19:26 < sam_moore> Yes, that would work
+19:26 < sam_moore> Yep
+19:26 < jtanx> then there's no interaction between BBBS
+19:27 < jtanx> the only thing is you have some sort of control at the front
+19:27 < jtanx> that determines which BBB you connect to
+19:27 < sam_moore> Yes, if there's interaction between BBBs it gets problematic
+19:27 < jtanx> yeah
+19:27 < sam_moore> Yes, you have one BBB which gives the user the "main menu" part of the GUI
+19:27 < jtanx> I reckon that's a stupid requirement to ask
+19:27 < jtanx> yeah
+19:27 < sam_moore> Then the others just have customised GUIs or whatever
+19:28 < jtanx> once you have to get them to talk to each other, you're then having to try and invent a whole new protocol
+19:28 < jtanx> for that
+19:28 < sam_moore> Yeah, and it depends on exactly what the hardware is
+19:29 < sam_moore> You might be able to hack it onto the web protocol (eg: BeagleBone #1 sends http://beaglebone2/api/actuators?id=X?set=Y)
+19:29 < sam_moore> But... let's not think about that
+19:30 < sam_moore> It's clearly beyond the scope of this project
+19:31 < sam_moore> So, after all that, I reckon if we use snoopy for ADC/GPIO/PWM and spike for the dilatometer then that would be cool (probably not actually necessary though)
+19:31 < jtanx> yeah
+19:32 < sam_moore> The dilatomter... it's going to cause headaches if Kieren really wants to "return" an array of points
+19:33 < sam_moore> If the goal is to provide the user with a demonstration of what the dilatometer is doing, then you can just edit an image
+19:33 < sam_moore> If the goal is to provide more data... I don't see the point really
+19:34 < sam_moore> It's going to be the same sort of distribution every time
+19:34 < sam_moore> Realistically all anyone would do is average it
+19:34 < sam_moore> Maybe take a standard deviation
+19:36 < jtanx> I really don't know why a dilatometer's even needed
+19:36 < sam_moore> Educational reasons? :P
+19:37 < jtanx> haha sure
+19:37 < sam_moore> Anyway, hopefully Callum will deal with the dilatometer stuff
+19:37 < sam_moore> The interferometer code is a good starting point
+19:39 < jtanx> Yeah
+19:39 < jtanx> hopefully
+19:42 < sam_moore> We should arrange some meetings next week
+19:42 < sam_moore> Also I'd like to see more of the other group members committing to git and talking in this channel
+19:45 < sam_moore> People are missing a lot of design decisions here :S
+19:45 < jtanx> Yeah
+19:51 < jtanx> Ok
+19:51 < jtanx> so I made a LUT from pin number on the board to GPIO pin number
+19:52 < jtanx> so if you wanted to use P8_13
+19:52 < jtanx> you can use the lut to figure out what gpio number that corresponds to
+19:53 < jtanx> we should probably restrict which pins can be used
+19:53 < jtanx> because quite a few are reserved
+19:53 < sam_moore> Sure
+19:53 < sam_moore> Remove the #defines in bbb_pin_defines.h ?
+19:54 < sam_moore> Don't export those pins in pin_test.c
+19:54 < sam_moore> It is only really for testing anyway
+19:54 < jtanx> yeah
+19:55 < sam_moore> Although... I predict if we leave it in the software, *someone* at some point will try and control hardware directly through it :P
+19:55 < sam_moore> For all the educational stuff it's nice though
+19:56 < sam_moore> Oh, we could have an image of the pinout diagram
+19:56 < sam_moore> And when someone clicks on a part of the image they get to control that pin
+19:57 < sam_moore> Anyway... I really should study for MECH2402 or I will fail it
+19:57 < sam_moore> So bye
+19:57 < jtanx> yeah
+19:57 < jtanx> bye
+20:50 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+21:50 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
+--- Day changed Thu Sep 26 2013
+07:45 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+08:36 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
+09:36 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+10:47 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
+13:08 -!- jtanx [~asfa@130.95.54.13] has joined #mctxuwa_softdev
+16:26 -!- jtanx [~asfa@130.95.54.13] has quit [Ping timeout]
+17:04 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+17:52 < jtanx> http://www.ti.com/lit/ug/spruh73i/spruh73i.pdf p1986 (chapter 15) on pwm
+17:55 < jtanx> page 1996 on ePWM
+17:56 < jtanx> ahhhhh
+17:56 < jtanx> for ehrpwm0a/0b
+17:56 < jtanx> the frequency is linked
+18:08 < jtanx> ehrpwm is enhanced resolution pwm
+18:08 < jtanx> Implemented using the A signal path of PWM, that is, on the EPWMxA output. EPWMxB output has
+18:08 < jtanx> conventional PWM capabilities
+18:08 < jtanx> (p2053)
+19:06 < jtanx> if you want to make the pwm stuff not suck
+19:06 < jtanx> there's this file called pwm_test.c
+19:06 < jtanx> that's the driver
+19:59 < jtanx> for future ref: http://armsdr.blogspot.com.au/2013/04/archlinux-on-beaglebone-and-linux-38.html
+20:08 -!- jtanx_ [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+20:21 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
+21:19 < jtanx_> urgh wow
+21:19 < jtanx_> ok, so I think pwm1/3/5 shouldn't be used to avoid period conflicts
+21:19 < jtanx_> (pwm0/1 is for channel A/B of one pwm device, 3/4 another, 5/6 another)
+21:20 < jtanx_> btw the correspondence between pwmX and pin number is:
+21:21 < jtanx_> P9_22, P9_21, P9_42. P9_14, P9_16, P8_19, P8_13, P9_28
+21:23 < jtanx_> pwm 2/7 correspond to eCAP devices
+21:24 < jtanx_> which I think are to capture PWM input
+21:24 < jtanx_> but they can also be used to generate PWM output, afaik
+23:08 -!- jtanx_ [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+23:10 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
