@@ -118,9 +118,9 @@
 #define GPIO_DEVICE_PATH "/sys/class/gpio"
 
 /** Number of useable GPIO pins **/
-#define GPIO_NUM_PINS 44
+#define GPIO_NUM_PINS 43
 /** The max usable GPIO number **/
-#define GPIO_MAX_NUMBER 117
+#define GPIO_MAX_NUMBER 115
 
 /* Luts */
 extern const unsigned char g_pin_real_to_gpio[BBB_PIN_COUNT+1];

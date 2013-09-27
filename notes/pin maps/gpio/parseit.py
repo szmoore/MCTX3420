@@ -26,7 +26,7 @@ def doit(x):
     for i in range(0, 93):
         lutarr.append(lut.get(i, 0))
 
-    for i in range(0, 118): #Max safe GPIO is 117
+    for i in range(0, 116): #Max safe GPIO is 115
         reverselutarr.append(reverselut.get(i, 0))
         
     return (lutarr, reverselutarr)
