@@ -251,6 +251,11 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 		s->newest_data.time_stamp = d->time_stamp;
 		s->newest_data.value = d->value;
 	}
+
+#ifdef _BBB
+	//Not all cases have usleep, easiest here.
+	usleep(1000000);
+#endif
 	return result;
 }
 
