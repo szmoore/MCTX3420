@@ -4,6 +4,7 @@
  * THIS CODE IS NOT THREADSAFE
  */
 
+#define _BBB_PIN_SRC
 #include "bbb_pin.h"
 
 #include <sys/types.h>
