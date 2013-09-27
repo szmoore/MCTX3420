@@ -10,6 +10,11 @@
 #define _BSD_SOURCE
 #define _XOPEN_SOURCE 600
 
+/** Determine if we're running on the BBB **/
+#ifdef __arm__
+#define _BBB
+#endif
+
 /** The current API version **/
 #define API_VERSION 0
 

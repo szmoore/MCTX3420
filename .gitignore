@@ -11,5 +11,7 @@
 ehthumbs.db
 Thumbs.db
 
+__pycache__
+
 server/win32
 **/nbproject/private/
