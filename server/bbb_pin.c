@@ -480,3 +480,10 @@ bool ADC_Read(int id, int *value)
 	*value = strtol(adc_str, NULL, 10);
 	return true;
 }
+
+#ifndef _BBB
+//For running on systems that are not the BBB
+bool True_Stub(void *arg, ...) { return true; }
+bool ADC_Read_Stub(int *val, ...) { *val = 0; return true; }
+bool GPIO_Read_Stub(bool *val, ...) { *val = false; return true; }
+#endif

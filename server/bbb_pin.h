@@ -31,28 +31,28 @@ extern bool PWM_Set(int pin, bool polarity, long period, long duty); // period a
 extern bool PWM_Stop(int pin);
 
 #else
-//'Empty' defines so it compiles on any platform that's not the BBB
+//Horrible hacks to silence gcc when compiling on systems that are not the BBB
+extern bool True_Stub(void *arg, ...);
+extern bool ADC_Read_Stub(int *val, ...);
+extern bool GPIO_Read_Stub(bool *val, ...);
 
-extern bool GPIO_Export(int pin);
-extern void GPIO_Unexport(int pin);
+#define GPIO_Export(pin) True_Stub((void*)pin)
+#define GPIO_Unexport(pin) (void)0
 
-#define GPIO_Export(pin) true
-#define GPIO_Unexport(pin)
+#define PWM_Export(pin) True_Stub((void*)pin)
+#define PWM_Unexport(pin) (void)0
 
-#define PWM_Export(pin) true
-#define PWM_Unexport(pin)
+#define ADC_Export(pin) True_Stub((void*)pin)
+#define ADC_Unexport(pin) (void)0
 
-#define ADC_Export(pin) true
-#define ADC_Unexport(pin)
+#define GPIO_Read(pin, result) GPIO_Read_Stub(result, pin)
+#define GPIO_Set(pin, value) True_Stub((void*)pin, value)
 
-//Hack to both zero the result field (so it's never uninitialised) and return true
-#define GPIO_Read(pin, result) ((*(result) = 0) == 0)
-#define GPIO_Set(pin, value) true
+#define ADC_Read(id, value) ADC_Read_Stub(value, id)
 
-#define ADC_Read(id, value) ((*(value) = 0) == 0)
-
-#define PWM_Set(pin, polarity, period, duty) true
-#define PWM_Stop(pin) true
+#define PWM_Set(pin, polarity, period, duty) True_Stub((void*)pin, polarity, period, duty)
+#define PWM_Stop(pin) True_Stub((void*)(int)pin) 
+//yuck
 
 #endif //_BBB
 

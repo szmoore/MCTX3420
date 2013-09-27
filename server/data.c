@@ -13,9 +13,8 @@
 void Data_Init(DataFile * df)
 {
 	// Everything is NULL
-	df->filename = NULL;
+	memset(df, 0, sizeof(DataFile));
 	pthread_mutex_init(&(df->mutex), NULL);
-	df->file = NULL;
 }
 
 /**
