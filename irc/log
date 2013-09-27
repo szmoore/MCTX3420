@@ -3474,3 +3474,31 @@
 21:24 < jtanx_> but they can also be used to generate PWM output, afaik
 23:08 -!- jtanx_ [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
 23:10 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+--- Day changed Fri Sep 27 2013
+12:38 -!- jtanx [~asfa@130.95.54.13] has joined #mctxuwa_softdev
+13:29 < jtanx> so, apparently if we don't order stuff that we need before the mid semester break (ie today), adrian just won't order it
+13:29 < jtanx> in other news, I think I've mostly sorted out pwm
+13:43 < jtanx> trying to standardise the pin code
+15:05 -!- jtanx [~asfa@130.95.54.13] has quit [Ping timeout]
+15:41 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+16:09 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
+19:48 -!- jtanx_ [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+20:03 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
+20:10 < jtanx_> lol
+20:10 < jtanx_> we have a file authored '14 years ago'
+20:10 < jtanx_> in git
+20:10 < jtanx_> talk about commitment
+20:20 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:47 < jtanx_> so on non-BBB platforms, I disabled the pin code
+21:47 < jtanx_> required some pretty dubious hacks to stop gcc from complaining
+21:48 < jtanx_> 1st attempt: define the functions to nothing
+21:48 < jtanx_> gcc complains about statements that do nothing
+21:48 < jtanx_> various combinations later on statements that do nothing, I move to making function stubs
+21:49 < jtanx_> shaft all the parameters to the stubs
+21:49 < jtanx_> to stop complaints about unused variables
+21:49 < jtanx_> (eg if you did int freq=1000; PWM_Set(...,freq) where the define for PWM_Set doesn't use freq
+21:53 -!- jtanx_ [~asfa@220-253-203-242.dyn.iinet.net.au] has quit [">.>"]
+22:14 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
+22:17 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+22:20 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+23:12 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
