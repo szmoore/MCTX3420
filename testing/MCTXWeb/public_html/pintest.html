@@ -67,12 +67,12 @@
         </div>
         <div class="widget">
           <div class="title">Pin out diagram</div>
-          <p>To see the pin out diagram of the BBB, click <a href="">here</a>.</p>
+          <p>To see the pin out diagram of the BBB, click <a href="pinout-table.pdf" target="_blank">here</a>.</p>
         </div>
         <div class="widget">
-          <div class="title">Unexport?</div>
+          <div class="title">Export/Unexport?</div>
           <p>
-            To 'unexport' a pin means to disable it. Apart from the obvious
+            To export/unexport a pin means to enable/disable it. Apart from the obvious
             use case, sometimes this can be required if you use two PWM channels
             that share the same frequency base.
           </p>
@@ -83,13 +83,15 @@
         </div>
         <div class="widget">
           <div class="title">PWM explained</div>
+          <p>The frequency must be a decimal number greater than 0.</p>
           <p>
-            The BBB has up to 8 PWM channels, with 6 having enhanced 
-            resolution.
+            The duty cycle describes the proportion of off/on time per period.
+            This number is specified as a ratio, with values ranging from 0 to 1.
           </p>
           <p>
-            However, those 6 are paired, meaning that each pair must share the
-            same frequency (although the duty cycle can be different).
+            The polarity determines if the duty represents the 'active
+            high' or 'active low' portion. By default, the duty cycle
+            represents the 'active high' portion.
           </p>
         </div>
       </div>

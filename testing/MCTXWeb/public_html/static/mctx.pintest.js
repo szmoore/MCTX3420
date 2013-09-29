@@ -133,15 +133,14 @@ $.fn.setGPIOControl = function (number, menu) {
   dir.click(function () {
     dir.attr('disabled', true);
     var setOut = dir.val() === "In";
+    result.val("");
     if (setOut) {
       update = false;
       set.attr('disabled', false);
-      result.empty();
       dir.val("Out");
     } else {
       update = true;
       set.attr('disabled', true);
-      result.empty();
       dir.val("In");
     }
     dir.attr('disabled', false);
@@ -149,6 +148,7 @@ $.fn.setGPIOControl = function (number, menu) {
   
   set.click(function () {
     dir.attr("disabled", true);
+    set.attr("disabled", true);
     var val = (set.val() === "Off") ? 1 : 0;
     $.ajax({url : mctx.pintest.api, data : {type : "gpo", num : number, set : val}})
     .done(function (data) {
@@ -163,6 +163,7 @@ $.fn.setGPIOControl = function (number, menu) {
     })
     .always(function () {
       dir.attr("disabled", false);
+      set.attr("disabled", false);
     });
   });
   
@@ -230,7 +231,12 @@ $.fn.setADCControl = function() {
       if (update) {
          $.ajax({url : mctx.pintest.api, data : {type : "adc", num : number}})
          .done(function (data) {
-            result.val(data);
+            if (update) {
+              result.val(data);
+            }
+         })
+         .fail(function () {
+            result.val("fail - server not running?");
          })
          .always(function () {
             setTimeout(updater, mctx.pintest.refreshRate);

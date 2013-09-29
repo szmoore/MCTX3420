@@ -36,9 +36,8 @@ bool Pin_Configure(const char *type, int pin_export, int num)
 
 	if (strcmp(type, "gpo") == 0 || strcmp(type, "gpi") == 0)
 	{
-		if (pin_export < 0)
-			GPIO_Unexport(num);
-		else
+		//Don't allow unexport of gpio
+		if (pin_export > 0)
 			ret = GPIO_Export(num);
 	}
 	else if (strcmp(type, "pwm") == 0)
@@ -50,9 +49,8 @@ bool Pin_Configure(const char *type, int pin_export, int num)
 	}
 	else if (strcmp(type, "adc") == 0)
 	{
-		if (pin_export < 0)
-			ADC_Unexport(num);
-		else
+		//Don't allow unexport of adc
+		if (pin_export > 0)
 			ret = ADC_Export(num);
 	}
 	return ret;
@@ -172,7 +170,7 @@ void Pin_Handler(FCGIContext *context, char * params)
 		else
 		{
 			FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
-			FCGI_PrintRaw("ADC%d reads %d\n", num, raw_adc);
+			FCGI_PrintRaw("%d\n", raw_adc);
 		}
 	}
 	else if (strcmp(type, "pwm") == 0)
