@@ -15,3 +15,5 @@ __pycache__
 
 server/win32
 **/nbproject/private/
+
+*jquery-ui*
