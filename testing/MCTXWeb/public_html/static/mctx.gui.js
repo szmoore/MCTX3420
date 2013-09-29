@@ -195,3 +195,7 @@ $.fn.setErrorLog = function () {
   
   updater();
 };
+
+$(document).ajaxError(function (event, jqXHR) {
+  console.log("AJAX query failed with: " + jqXHR.status + " (" + jqXHR.statusText + ")");
+});
