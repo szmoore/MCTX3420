@@ -3516,3 +3516,434 @@
 18:53 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
 20:17 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
 21:36 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Log closed Sun Sep 29 08:28:33 2013
+--- Log opened Sun Sep 29 08:31:40 2013
+08:31 -!- matches [matches@motsugo.ucc.gu.uwa.edu.au] has joined #mctxuwa_softdev
+08:31 -!- Irssi: #mctxuwa_softdev: Total of 1 nicks [0 ops, 0 halfops, 0 voices, 1 normal]
+08:31 -!- Irssi: Join to #mctxuwa_softdev was synced in 2 secs
+08:31 -!- Irssi: #mctxuwa_softdev: Total of 1 nicks [0 ops, 0 halfops, 0 voices, 1 normal]
+08:31 -!- You're now known as sam_moore
+13:18 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:27 -!- Rowan [~Rowan@130.95.158.122] has joined #mctxuwa_softdev
+15:27 < Rowan> hey jeremy, did you upload the updated gui onto a github? i cant find it anywhere ??
+15:32 < sam_moore> Hi Rowan, I think it's in a few subdirectories
+15:33 < sam_moore> Ah, it's under "testing/MCTXWeb"
+15:33 < sam_moore> https://github.com/szmoore/MCTX3420/tree/master/testing/MCTXWeb/public_html
+15:37 < Rowan> thats the most uptodate version?
+15:39 < jtanx> um
+15:39 < jtanx> maybe
+15:39 < jtanx> I'll update with what I've got now
+15:42 < jtanx> ok
+15:42 < jtanx> updated
+15:42 < jtanx> pintest stuff still not complete
+15:42 < Rowan> are you guys busy?
+15:42 < Rowan> (will you be on here long?
+15:42 < jtanx> right now I'm working on that pintest page
+15:42 < jtanx> I'm here
+15:43 < Rowan> in g19?
+15:43 < jtanx> no
+15:43 < jtanx> I'm at home
+15:43 < Rowan> okay
+15:43 < sam_moore> jtanx: As in, the pin control code isn't working? I didn't think I screwed it up that badly?
+15:43 < jtanx> nah 
+15:43 < jtanx> the pin control web page
+15:43 < sam_moore> Oh, nice
+15:43 < jtanx> just thought it'd be easier to have a webpage to control stff
+15:43 < sam_moore> Yes
+15:43 < jtanx> especially for electronics
+15:43 < sam_moore> Yes, definitely
+15:44 < Rowan> are we going to make the gui UWA based or make it our own ?
+15:44 < Rowan> adrian made it sound like he wanted it UWA based with the logo and stuff
+15:44 < jtanx> we probably have to add uwa logo
+15:44 < sam_moore> We should probably put the UWA logo on it
+15:44 < sam_moore> Yes
+15:45 < Rowan> so make it similar to the main UWA page or make it similar to LMS?
+15:46 < Rowan> does anyone know if IT are in this week?
+15:46 < jtanx> we need to make it Colourful
+15:47 < jtanx> I don't think it needs to be exactly like UWA page or LMS
+15:47 < jtanx> just something similar would be good
+15:47 < sam_moore> I think LMS is probably a bad example, lots of people hate it
+15:48 < jtanx> haha
+15:48 < jtanx> I think LMS is fine, although there seems to be alot of problems with it on the backend
+15:48 < Rowan> yeah but adrian loves it
+15:48 < Rowan> keeting uses it for all 5 units hes teaching
+15:49 < Rowan> has anyone heard from james about the gui, i think he uploaded something to dropbox
+15:49 < jtanx> really
+15:49 < jtanx> I haven't checked db
+15:49 < jtanx> why's he not using git
+15:50 < Rowan> i dont know. has he uploaded anything to it/
+15:50 < Rowan> he might be.
+15:50 < Rowan> sometime last week he said he made up a gui todo list type thing but i dont know where he put it
+15:50 < sam_moore> It doesn't look like there is anything in dropbox
+15:50 < jtanx> right
+15:51 < Rowan> im trying to get in contact with him but i might just move on. so we want something somewhat related to lms?
+15:51 < Rowan> or no?
+15:52 < sam_moore> I think so, although it primarily needs to be able to control experiments
+15:52 < sam_moore> For the educational stuff, you could use a wiki style
+15:53 < sam_moore> https://github.com/szmoore/MCTX3420/wiki
+15:54 < Rowan> wiki isnt graphical enough
+15:54 < sam_moore> Yeah, probably
+15:54 < Rowan> its hard to say what adrian wants....
+15:54 < sam_moore> It looks like James has committed something to his own fork of the repository
+15:55 < jtanx> ok
+15:55 < sam_moore> https://github.com/firefields/MCTX3420/commit/e6a8120fdf1cef6d73421bd2b1edb1c45a6f3960
+15:55 < sam_moore> I can pull that into the main fork
+15:55 < sam_moore> Hopefully
+15:55 < jtanx> I think that may actually be
+15:56 < jtanx> sorry
+15:56 < jtanx> my computer decided to freeze at that instant
+15:57 < jtanx> but yeah that's the stuff
+15:57 < jtanx> he worked on 
+15:57 < sam_moore> Oh wow... there are a *lot* of files
+15:57 < jtanx> before mine
+15:57 < jtanx> it's all the jquery ui stuff
+15:57 < sam_moore> jquery-ui
+15:57 < sam_moore> Yes
+15:57 < jtanx> wich I  told him to get rid off
+15:57 < sam_moore> Dammit I just merged it :S
+15:57 < jtanx> but yeah, he hasn't committed anything since
+15:58 < jtanx> (that commit was done with me at the last meeting)
+15:58 < Rowan> so are we deciding on jeremys version it seems alot more complete
+15:59 < sam_moore> Yes, stick with Jeremy's and build on it
+15:59 < Rowan> sweet :)
+16:46 < Rowan> what was the password and username ?
+16:48 < jtanx> there's none
+16:48 < jtanx> if you haven't set up the htpasswd thing
+16:48 < jtanx> (ie it doesn't work)
+16:48 < jtanx> still not sure how to implement it either
+16:48 < jtanx> now that adrian wants it scalable to '300 students'
+16:53 < jtanx> I need another network switch...
+16:53 < Rowan> okay.
+16:53 < Rowan> i might make up a cover page, which links to the one we have after you log in
+16:54 < Rowan> like this but simpler: http://www.futureeffect.com.au/
+16:54 < Rowan> with a scrolling picture thing and stuff
+16:54 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+16:55 < MctxBot> I live again...
+16:55 < Rowan> whos mctxbot again?
+16:56 < jtanx> :P
+16:56 < jtanx> It does nothing
+16:56 < Rowan> its a cover page
+16:56 < Rowan> its what adrian said
+16:56 < jtanx> It connects whenever mctx.us.to is running
+16:57 < Rowan> what what
+16:57 < Rowan> ?
+16:58 -!- MctxBot changed the topic of #mctxuwa_softdev to: MCTX3420 - Software and co.
+16:59 < jtanx> mctxbot is no one, it's the server I operate
+17:02 < Rowan> hahahahah
+17:02 < Rowan> oh.
+17:03 < Rowan> ive put the uwa logo onto the gui
+17:09 < sam_moore> I'm looking at the login stuff
+17:10 < sam_moore> So... we probably don't want to use shell accounts, since once you have shell access you can do all sorts of things that are completely unrelated to this educational stuff
+17:10 < Rowan> could someone check ive forked it right
+17:10 < sam_moore> I think storing our own file in the same format as /etc/shadow is probably ok
+17:11 < Rowan> the gui.html & style.css
+17:12 < sam_moore> It looks like you've made a new branch for each of the files?
+17:12 < Rowan> i think so
+17:12 < Rowan> do you need to update the main file and i request it to you
+17:13 < Rowan> just so everything is uptodate and and organised
+17:13 < sam_moore> You submitted a pull request, that's fine
+17:13 < sam_moore> Yep
+17:13 < Rowan> both html and css files
+17:13 < sam_moore> You should probably keep edits in the "master" branch, or at least don't make a seperate branch for each file
+17:14 < sam_moore> (That way you only have to do one pull request for all of them, not one per file)
+17:14 < Rowan> how do i do that :|
+17:14 < sam_moore> Are you using a GUI or the command line?
+17:15 < Rowan> gui
+17:15 < jtanx> I think you were working on an old version
+17:15 < jtanx> before I pushed the new one
+17:15 < sam_moore> Hmm
+17:15 < jtanx> so some stuff got deleted
+17:15 < Rowan> S***
+17:15 < jtanx> https://github.com/szmoore/MCTX3420/commit/f43006da69d629d0c5421506c8a56d517b94924e
+17:15 < jtanx> it's ok
+17:16 < sam_moore> jtanx: It should have complained if there was a conflict?
+17:16 < jtanx> I dunno
+17:16 < Rowan> i only added 1 line to the css file anyways
+17:16 < jtanx> yeah
+17:16 < jtanx> so the form.controls, div.centre .bold etc
+17:16 < jtanx> stuff was added later
+17:18 < Rowan> when im home ill try put a cover page with pictures and the login page on it and link the login page to the gui we have atm.
+17:18 < Rowan> any constructive critism ?
+17:19 < Rowan> also ill try be on irc for the rest of the sem to keep up todate with you guys :)
+17:21 < sam_moore> The future effect looks cool
+17:21 < sam_moore> I guess we need to pick some relevant images though
+17:21 < Rowan> yeah ill talk to some other teams and see if they have any cool pics, like the can were testing, the cad model ect
+17:22 < Rowan> ttyl
+17:22 < jtanx> has this been pushed to your (sam's) repo?
+17:22 < sam_moore> I accepted a pull request a while ago
+17:22 < sam_moore> But I noticed Rowan has two branches in his fork; there's one file changed in each branch
+17:23 < jtanx> oh ok
+17:23 < jtanx> because I don't see any change except for some css stuff in your repo
+17:24 < sam_moore> Rowan: I'll try and get in earlier tomorrow to help with the "branching" stuff in git
+17:25 < sam_moore> It looks like your git GUI might have some wierd settings
+17:28 < MctxBot> damn ircnet
+17:29 < MctxBot> 'Too many user connections (local))'
+17:29 < MctxBot> so i'll steal mctxbot for now
+17:38 -!- Rowan [~Rowan@130.95.158.122] has quit [Ping timeout]
+17:42 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
+17:42 -!- jtanx_ [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+17:42 -!- jtanx_ is now known as jtanx
+17:43 < jtanx> finally
+17:52 < sam_moore> So, we can implement our own login system fairly easily, I'm not sure if we want to or not, although I'm leaning towards just doing it
+17:53 < sam_moore> It wouldn'
+17:54 < sam_moore> t necessarily be the best solution in terms of flexibility
+17:54 < sam_moore> But it's probably a hell of a lot more "lightweight" than LDAP
+17:55 < sam_moore> Using LDAP you'd have to dedicate processes just to being a login server
+17:56 < sam_moore> So... we provide some wrappers around a text file of usernames and password salts, and allow "admin" to use wrappers that change the files
+17:57 < sam_moore> ... I suppose we can have a "forgot password" functionality
+17:57 < sam_moore> Though it is certainly a pain
+17:59 < sam_moore> I feel like we should have "forgot password" but make it ridiculously painful to use, for revenge
+17:59 < sam_moore> ...errr I mean security reasons
+17:59 < sam_moore> Did I say "revenge?"
+18:00 < sam_moore> "Forgot password" should activate one of the ADC channels and record the average over 10s
+18:01 < sam_moore> And you have to enter what it was
+18:01 < sam_moore> No wait, any student could do that
+18:01 < sam_moore> Hmmm
+18:03 < sam_moore> "Your password has been sent via Australia Post to your registered address"
+18:04 < jtanx> hahaha
+18:04 < jtanx> evil
+18:04 < jtanx> I was kinda hoping there was some ready made
+18:04 < jtanx> gateway software
+18:05 < jtanx> like you know the SSO services that uwa uses
+18:05 < sam_moore> Yeah, that's an LDAP gateway
+18:05 < jtanx> yeah but like a simplified version
+18:05 < sam_moore> Haha
+18:05 < jtanx> that just uses an sql database or something
+18:05 < jtanx> slap it on and we're done
+18:06 < sam_moore> Yeah I guess we should look for that
+18:06 < sam_moore> Do we allow users to change their password?
+18:06 < sam_moore> Ooh
+18:06 < sam_moore> Our system is on the UWA network...
+18:06 < sam_moore> Could we just wrap to UWA's LDAP servers?
+18:06 < sam_moore> And... um...
+18:07 < jtanx> do they trust us that much?
+18:07 < sam_moore> They can't really stop us
+18:07 < sam_moore> You can bind to the LDAP servers already
+18:07 < sam_moore> It's not like they can...
+18:07 < jtanx> really?
+18:07 < sam_moore> Put in a login or something
+18:07 < sam_moore> That you have to go through first
+18:07 < jtanx> well then
+18:07 < sam_moore> :P
+18:08 < sam_moore> Hang on, there's some horribly verbose way to test it in a shell
+18:08 < jtanx> my god why is it so hard to vertically align content in css
+18:14 < sam_moore> ldapsearch -x -D cn=20503628,ou=Students,ou=Users,ou=UWA,dc=uwads,dc=uwa,dc=edu,dc=au -h ldap.pheme.uwa.edu.au -W -v -b cn=20503628,ou=Students,ou=Users,ou=UWA,dc=uwads,dc=uwa,dc=edu,dc=au
+18:14 < sam_moore> Replace 20503628 with your own student number
+18:14 < sam_moore> So
+18:14 < sam_moore> Basically we can wrap to ldapsearch using their username and password
+18:14 < jtanx> I wonder what adrian has to say about that
+18:15 < sam_moore> Well, obviously he doesn't want just *any* student being able to access it :S
+18:15 < sam_moore> But...
+18:15 < sam_moore> We could have a plain text file of students
+18:15 < sam_moore> That he can change
+18:15 < sam_moore> Also...
+18:16 < sam_moore> UWA IT might have a problem
+18:16 < sam_moore> It would be ridiculously easy to put a back door in to steal student's passwords :S
+18:16 < jtanx> yeah
+18:16 < sam_moore> But... I guess people would just use their pheme password anyway
+18:17 < sam_moore> I mean, I would
+18:18 < sam_moore> http://xkcd.com/792/
+18:18 < sam_moore> I reckon we implement the system to bind to UWA's ldap servers, obviously don't do anything unethical
+18:19 < jtanx> :P
+18:19 < jtanx> what about jellyfish, calmaeth
+18:19 < sam_moore> And warn Adrian that if he lets random students work on this they can potentially do unethical things
+18:19 < sam_moore> What do they use for login?
+18:20 < jtanx> they roll their own I think
+18:20 < jtanx> but obviously there's some way to import users
+18:20 < sam_moore> Hmm
+18:20 < sam_moore> I like the idea of using UWA's pheme server though
+18:21 < sam_moore> Just add a list of allowed student numbers in front of it
+18:21 < sam_moore> Actually, staff as well
+18:21 < jtanx> yeah true
+18:21 < sam_moore> No wait
+18:22 < sam_moore> That could end in the staff member accidentally deleting themselves
+18:22 < sam_moore> Um...
+18:22 < sam_moore> Just hard code in Adrian's staff number as always allowed :P
+18:22 < sam_moore> Ergh, so many annoying things that have nothing to do with blowing up a pressure vessel -_-0
+18:23 < sam_moore> Ok, I'll try do some more on the login tomorrow
+18:23 < jtanx> ok cool
+18:23 < jtanx> I'll try to come in early tomorrow too
+18:23 < jtanx> though I really should be working on my other projects too...
+18:24 < sam_moore> Well, we're doing alright on the list of things Todo
+18:24 < sam_moore> Not sure how well we're doing by Adrian's standards
+18:24 < sam_moore> Oh, all that GUI stuff isn't getting done very afst
+18:24 < sam_moore> *fast
+18:24 < jtanx> yeah
+18:25 < sam_moore> Also haven't heard anything about image processing from Callum
+18:25 < jtanx> I wonder if james has done anything at all
+18:25 < sam_moore> Oh well... I'll do logins this week
+18:25 < jtanx> Adrian doesn't seem to like how most of the groups are going
+18:26 < sam_moore> Well, not much has happened with other groups I suppose
+18:26 < sam_moore> We've written a lot of software, but it's all low level
+18:26 < jtanx> I also think he underappreciates the effort required for the software though
+18:27 < sam_moore> I think so
+18:27 < sam_moore> Though we really should have more GUI stuff done
+18:28 < jtanx> yeah
+18:28 < jtanx> we really do need to make progress on that
+18:52 -!- Rowan [~Rowan@220-253-165-231.dyn.iinet.net.au] has joined #mctxuwa_softdev
+19:12 < jtanx> firebug slows down my computer so much
+19:22 < jtanx> ok I just updated the gui stuff a bit
+19:22 < jtanx> ...now back to testing if this pin test html page works
+19:32 < jtanx> well hey
+19:32 < jtanx> it works
+19:33 < jtanx> Should probably do reference counting on the export/unexport stuff though
+19:36 < jtanx> actually maybe not
+19:40 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
+19:46 < sam_moore> I think DAP (which is what LDAP was based on) wasn't actually meant to be a login system when they designed it :P
+19:46 < sam_moore> But it's used for that more than anything else
+19:46 < sam_moore> Essentially it was supposed to be like an electronic telephone directory
+19:47 < sam_moore> Then they realised that it was a bad idea for any random person to be able to edit stuff, so authentication got added to it
+19:47 < sam_moore> And now it's pretty much just used for authentication
+19:48 < sam_moore> There seems to be a sane C library for it, so if we just implement a client and rely on the good IT staff at UWA to keep pheme working...
+19:49 < sam_moore> (Does UWA even still hire IT staff?)
+19:49 < sam_moore> (Someone told me they "integrated" the librarians into IT)
+19:50 < sam_moore> We'll need to put our login page under HTTPS at some point
+19:52 < jtanx> I was just thinking
+19:53 < jtanx> put the whole damn thing under ssl
+19:53 < jtanx> and be done with it
+19:54 < jtanx> hmm interesting
+19:54 < jtanx> if you query the adc on different channels 
+19:55 < jtanx> and you query too fast
+19:55 < jtanx> it'll spit back that it's temporarily unavailable
+19:55 < jtanx> probably can't change the mux that fast?
+19:56 < sam_moore> Maybe
+19:56 < sam_moore> It's kind of ironic that the ADC hardware has a multiplexer to give the extra channels
+19:57 < sam_moore> And then we are sticking another multiplexer on that
+19:57 < jtanx> :P
+19:57 < sam_moore> But I suppose if it means we don't need 4 of the same amplifier that's nice
+20:03 < jtanx> ok well the pintest page works good enough
+20:04 < jtanx> some race conditions
+20:04 < jtanx> but eh
+20:04 < jtanx> who cares
+20:04 < jtanx> ohhh I know what's slowing down the bb
+20:04 < jtanx> bbb*
+20:04 < jtanx> the crazy high sampling rate
+20:04 < jtanx> the test files also constantly eat up all the space on my 1gb sd card
+20:06 < jtanx> ..or maybe not
+20:55 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+20:57 < sam_moore> It turns out UWA uses LDAP to keep track of what units you're enrolled in
+20:57 < sam_moore> That's interesting...
+20:58 < sam_moore> Potentially we could restrict access to people enrolled in MXTC3420
+20:58 < sam_moore> That would mess with the new courses :P
+20:59 < sam_moore> And it appears you can connect to ldap.pheme.uwa.edu.au from UWA's network
+20:59 < sam_moore> But... it also appears to use the unsecured LDAP port?
+20:59 < sam_moore> Surely not
+20:59 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has quit [EOF From client]
+20:59 < jtanx> what
+21:00 < sam_moore> Or maybe (hopefully) they are doing TLS
+21:00 < sam_moore> http://wiki.wireshark.org/LDAP
+21:00 < jtanx> one would hope that there's some sort of encryption going on
+21:00 < sam_moore> Well, there's HTTPS on the SSO page
+21:01 < sam_moore> But if there isn't actually encryption on the ldap connection
+21:01 < sam_moore> You could just plug into a switch and do some packet sniffing and get everyone's passwords :O
+21:01 < jtanx> haha wow
+21:02 < sam_moore> I think they might be using TLS, because my test program doesn't work
+21:02 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:07 < sam_moore> ... Or I'm just deleting one more character than I should be in the password -_
+21:11 < sam_moore> Test program works now
+21:11 < sam_moore> Either the ldap library kindly handles TLS for you automagically, or they aren't using it
+21:12 < jtanx> :S
+21:12 < jtanx> if you used wireshark wouldn't it show whether or not it's encrypted
+21:16 < sam_moore> I've just run it through wireshark
+21:16 < sam_moore> It's not encrypted
+21:17 < sam_moore> My password for pheme appears plain as day
+21:17 < jtanx> well that sounds dodgy as hell
+21:18 < sam_moore> Well, you do have to have root access to a machine that can pick up the traffic
+21:18 < sam_moore> But yes, that sounds dodgy
+21:18 < sam_moore> Hang, on a minute
+21:18 < sam_moore> What about Unifi
+21:19 < sam_moore> Well...
+21:19 < sam_moore> I think this should be filed under "Not our problem"
+21:20 < jtanx> ._.
+21:21 < sam_moore> Surely there's some kind of handshake encryption on Unifi though
+21:22 < sam_moore> Anyway, I have a test function that returns true if you can login to pheme, so if we integrate that with our code and maybe modify it to look at enrolled units, that's a good start
+21:23 < sam_moore> Actually I also need to make it work without using deprecated functions
+21:25 < sam_moore> At least the library maintainers still keep the deprecated functions, but it's annoying when something that works perfectly fine and has tonnes of documentation is replaced by something that has almost no documentation
+21:25 < sam_moore> Almost like the new UWA courses...
+21:25 < jtanx> hahaha
+21:25 < jtanx> what's worse is where the new function is a PITA to use by design
+21:26 < sam_moore> Yes
+21:27 < sam_moore> The "deprecated" version has "LDAP * ld = ldap_init(host, port); ldap_set_options(ld, LDAP_OPT_PROTOCOL_VERSION, &version); and ldap_bind_s(ld, dn, password, authentication_method);"
+21:27 < sam_moore> That makes perfect sense to me
+21:27 < sam_moore> No doubt the new and improved version takes 100x as much code
+21:28 -!- Rowan [~Rowan@220-253-165-231.dyn.iinet.net.au] has quit [EOF From client]
+21:28 < sam_moore> Although admittedly I was confused as to why the ldap_set_options required a pointer to the integer instead of just passing the integer
+21:28 < sam_moore> It probably modifies it in some cases though
+21:31 < jtanx> which package installs ldap
+21:31 < sam_moore> libldap2-dev
+21:31 < jtanx> thanks
+21:31 < sam_moore> For development libraries
+21:32 < sam_moore> ldap-utils for tools like ldapsearch
+21:32 < sam_moore> At the moment I can only find documentation for libldap-dev (the deprecated stuff)
+21:32 < sam_moore> To get it to work, you just put a #define LDAP_DEPRECATED 1 before the #include <ldap.h>
+21:33 < jtanx> http://man.devl.cz/deb/l/libldap2-dev ?
+21:33 < sam_moore> Oh, well there you go
+21:33 < sam_moore> Thanks
+21:34 < sam_moore> No wait, it has all those functions the compiler was complaining about
+21:34 < sam_moore> ?
+21:34 < jtanx> ok then
+21:34 < sam_moore> Except there's this fsfuncLDAP instead of LDAP
+21:36 < sam_moore> ...
+21:36 < jtanx> oh that documentaiton is so terrible: http://www.openldap.org/doc/
+21:37 < jtanx> the html version is at least
+21:37 < sam_moore> Yeah
+21:38 < sam_moore> Um... given that the only documentation for libldap2 documents the "deprecated" functions, I'm going to continue using those functions
+21:39 < sam_moore> Installing libldap2-dev installed all those man pages
+21:39 < jtanx> yep
+21:39 < jtanx> >.>
+21:41 < jtanx> ldap_init(3) was obsoleted by ldap_initialize(3)
+21:41 < jtanx> http://www.openldap.org/lists/openldap-bugs/200509/msg00151.html
+21:42 < sam_moore> Seriously
+21:43 < sam_moore> Please tell me they changed more than just the name...
+21:44 < sam_moore> Oh great, they did, now I need to work out how to use it
+21:44 < jtanx>        int ldap_initialize(ldp, uri)
+21:44 < jtanx>        LDAP **ldp;
+21:44 < jtanx>        char *uri;
+21:44 < jtanx> wow, that's old school way of specifying the type of the input arguments
+21:45 < jtanx> I've only seen that style once elsewhere
+21:45 < jtanx> In code from the ~1990s
+21:45 < sam_moore> LDAP was invented in the 80s
+21:45 < sam_moore> So that would make sense
+21:45 < jtanx> you'd think they'd update the manpages by now though
+21:46 < sam_moore> They don't even note in the man page that ldap_init is depreated
+21:46 < jtanx> yeah
+21:46 < jtanx> the joys of poor documentation
+21:46 < sam_moore> At least the function names make sense
+21:46 < sam_moore> initialize
+21:47 < sam_moore> Obvious what that does
+21:47 < sam_moore> ... I think the "uri" includes the port
+21:47 < sam_moore> Like "ldap://server" or "ldaps://server"
+21:47 < jtanx> yep
+21:48 < jtanx> the whole ldap_init vs ldap_initialize reminds me of fopen vs fopen_s on windows
+21:48 < sam_moore> That's going to screw with anyone that puts their ldap server on a non-standard port for security-by-obscurity reasons
+21:48 < jtanx> couldn't you do
+21:48 < jtanx> ldap://server:port
+21:48 < sam_moore> Oh
+21:48 < sam_moore> Probably
+21:56 < sam_moore> Sigh... they deprecated ldap_bind and made ldap_simple_bind and then at some point that got deprecated too
+21:57 < sam_moore> Now it's ldap_sasl_bind_s
+21:57 < jtanx> what's with that naming convention
+21:57 < sam_moore> sasl stands for something
+21:57 < jtanx> _s for secure
+21:57 < jtanx> yey
+21:57 < sam_moore> The LDAP expert at UCC was basically like "It's terrible, no one ever uses it, but the LDAP standards wanted to put it in, so it's there"
+21:57 < sam_moore> And that's all I know
+21:58 < jtanx> gee ok
+21:59 < sam_moore> But as opposed to ldap_simple_bind(ld, dn, password)
+21:59 < sam_moore> You have something like 10 arguments?
+21:59 < sam_moore> Please let half of them be NULL...
+22:12 < jtanx> that's all for today
+22:12 < jtanx> bye
+22:12 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+23:07 -!- Rowan [~Rowan@220-253-165-231.dyn.iinet.net.au] has joined #mctxuwa_softdev
+23:19 < sam_moore> Hi Rowan
+23:19 < Rowan> hello
+23:19 < sam_moore> I'm working on getting logins with UWA's pheme system
+23:19 < sam_moore> So it will be kind of like LMS
+23:24 < Rowan> are we trying to keep the gui to only a few pages or can we use several.
+23:25 < Rowan> like a cover page(a link to just the stream, a link to dump data and a login). then the login page goes to the experiment page
+23:26 < sam_moore> I think several pages
+23:26 < sam_moore> Probably even one page per sensor?
+23:26 < Rowan> sweet, i shall enjoy this gui :)
+23:41 < sam_moore> See you tomorrow
+23:47 < Rowan> yep
