@@ -86,6 +86,7 @@ input[type="text"], input[type="password"] {
 
 #header {
   background-color: #2a2a2a;
+  border-top: 0.8em solid #1188DD;
   color: #f2f2f2;
   padding: 1.5em 2em;
   margin-top: -1em;
@@ -95,15 +96,44 @@ input[type="text"], input[type="password"] {
   transition: all 0.2s ease 0s;
 }
 
+#header input[type="button"], input[type="submit"] {
+  background-color: #808080;
+  border: 1px solid #808080;
+  box-shadow: none;
+  color: #f2f2f2;
+  cursor: pointer;
+}
+
+#header input[type="button"]:hover, input[type="submit"]:hover {
+  background-color: #606060;
+  border: 1px solid #606060;
+}
+
+#header #leftnav {
+  float: left;
+  display: table;
+}
+
+#header #leftnav a {
+  color: #2a2a2a;
+}
+
 #header #title {
-  font-family: "Open Sans", Arial;
   font-size: 30px;
-  margin-left: 50px;
+  display: table-cell;
+  vertical-align: middle;
+  padding-left: 1em;
 }
 
 #header #rightnav {
   float: right;
+  font-size: 15px;
   padding-top: 0.5em;
+  text-align: right;
+}
+
+#header #rightnav span {
+  margin-left: 1em;
 }
 
 #header #menu-container {
@@ -113,7 +143,6 @@ input[type="text"], input[type="password"] {
 }
 
 #header #date {
-  padding-top: 1em;
   font-size: 12px;
 }
 

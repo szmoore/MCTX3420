@@ -68,7 +68,7 @@ $.fn.exportPWM = function(menu) {
   var container = this;
  
   $.ajax({url : mctx.pintest.api, data : {type : "pwm", num : number, export : "1"}})
-  .fail(function () {
+  .done(function () {
     var form = $("<form/>", {"class" : "controls", action : "#", id : "pwm-" + number});
     var title = $("<div/>", {"class" : "centre bold", text : "PWM " + number});
     var table = $("<table/>", {"class" : "centre"});
@@ -102,7 +102,7 @@ $.fn.exportPWM = function(menu) {
     container.append(form);
     menu.find("option[value='" + number+"']").remove();
   })
-  .done(function (jqXHR) {
+  .fail(function (jqXHR) {
     alert("Failed to export PWM " + number + ". Is the server running?\n" +
           "Error code: " + jqXHR.status);
   });

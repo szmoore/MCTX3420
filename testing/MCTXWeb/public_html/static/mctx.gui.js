@@ -22,7 +22,8 @@ mctx.sensors = {
   2 : {name : "Strain gauge 3"},
   3 : {name : "Strain gauge 4"},
   4 : {name : "Pressure sensor 1"},
-  5 : {name : "Pressure sensor 2"}
+  5 : {name : "Pressure sensor 2"},
+  6 : {name : "Pressure sensor 3"}
 };
 
 mctx.actuators = {
@@ -81,8 +82,8 @@ $.fn.populateNavbar = function () {
     return {text : items[item].name, href : href};
   };
   
-  menu.populateSubmenu("Sensor data dump", mctx.sensors, sensorTranslator);
-  menu.populateSubmenu("Actuator data dump", mctx.actuators, actuatorTranslator);
+  menu.populateSubmenu("Sensor data", mctx.sensors, sensorTranslator);
+  menu.populateSubmenu("Actuator data", mctx.actuators, actuatorTranslator);
   menu.appendTo(this);
   return this;
 }
@@ -197,5 +198,5 @@ $.fn.setErrorLog = function () {
 };
 
 $(document).ajaxError(function (event, jqXHR) {
-  console.log("AJAX query failed with: " + jqXHR.status + " (" + jqXHR.statusText + ")");
+  //console.log("AJAX query failed with: " + jqXHR.status + " (" + jqXHR.statusText + ")");
 });
