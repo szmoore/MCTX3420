@@ -1,0 +1,156 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>BeagleBone Black Pin Test</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!--[if lte IE 8]>
+      <script language="javascript" type="text/javascript" src="static/excanvas.min.js"></script>
+    <![endif]-->
+    <script type="text/javascript" src="static/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript" src="static/jquery.flot.min.js"></script>
+    <script type="text/javascript" src="static/base64.js"></script>
+    <script type="text/javascript" src="static/mctx.gui.js"></script>
+    <script type="text/javascript" src="static/mctx.pintest.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="static/style.css">
+    <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $("#errorlog").setErrorLog();
+        $("#gpio-menu").populateDropdown(mctx.pintest.gpios, "GPIO ");
+        $("#pwm-menu").populateDropdown(mctx.pintest.pwms, "PWM ");
+        
+        $("#gpio-go").click(function () {
+          if ($("#gpio-menu").val()) {
+            $("#gpio-container").exportGPIO($("#gpio-menu"));
+          }
+        });
+        $("#pwm-go").click(function () {
+          if ($("#pwm-menu").val()) {
+            $("#pwm-container").exportPWM($("#pwm-menu"));
+          }
+        });
+      });
+    </script>
+  </head>
+  
+  <body>
+    <div id="header">
+      <span id="title">BBB pin test</span>
+      <div id="rightnav">
+        <div id="menu-container" class="nav-menu">
+        </div>
+        <span id="date">
+          <script type="text/javascript">getDate();</script>
+        </span>
+      </div>
+      <div class="clear"></div>
+    </div>
+    <!-- End header -->
+    
+    <div id="content">
+      <div id="sidebar">
+        <div class="widget">
+          <div class="title">Info</div>
+          <p>This test page gives control over the BBB's pins.
+          Select a pin that you wish to use from the relevant drop-down
+          menu and click 'Go'.</p>
+          <p>A new widget will appear with controls relevant to that pin.</p>
+          <p>Make sure to check the error log to see if something goes wrong.</p>
+        </div>
+        <div class="widget">
+          <div class="title">Pin out diagram</div>
+          <p>To see the pin out diagram of the BBB, click <a href="">here</a>.</p>
+        </div>
+        <div class="widget">
+          <div class="title">Unexport?</div>
+          <p>
+            To 'unexport' a pin means to disable it. Apart from the obvious
+            use case, sometimes this can be required if you use two PWM channels
+            that share the same frequency base.
+          </p>
+          <p>
+            You won't be able to change
+            the frequency until you unexport one of them.
+          </p>
+        </div>
+        <div class="widget">
+          <div class="title">PWM explained</div>
+          <p>
+            The BBB has up to 8 PWM channels, with 6 having enhanced 
+            resolution.
+          </p>
+          <p>
+            However, those 6 are paired, meaning that each pair must share the
+            same frequency (although the duty cycle can be different).
+          </p>
+        </div>
+      </div>
+      <!-- End sidebar -->
+
+      <div id="main">
+        <div class="widget">
+          <div class="title">Dashboard</div>
+          <table>
+            <tr>
+              <td>
+                GPIO <select id="gpio-menu"></select>
+                <input type="button" id="gpio-go" value="Go">
+              </td>
+              <td>
+                PWM <select id="pwm-menu"></select>
+                <input type="button" id="pwm-go" value="Go">
+              </td>
+            </tr>
+          </table>
+            
+          <div class="sub-title">Error log</div>
+          <textarea id="errorlog" wrap="off" rows="4" cols="30" readonly></textarea>
+        </div>
+
+        <div class="widget">
+          <div class="title">Analogue input (ADC)</div>
+          <form class="controls" action="#">
+            <table class="centre">
+              <tr>
+                <td>AIN</td><th>0</th><th>1</th><th>2</th><th>3</th>
+                <th>4</th><th>5</th><th>6</th><th>7</th>
+              </tr>
+              <tr>
+                <td>Value</td>
+                <td><input name="0" type="text" readonly></td>
+                <td><input name="1" type="text" readonly></td>
+                <td><input name="2" type="text" readonly></td>
+                <td><input name="3" type="text" readonly></td>
+                <td><input name="4" type="text" readonly></td>
+                <td><input name="5" type="text" readonly></td>
+                <td><input name="6" type="text" readonly></td>
+                <td><input name="7" type="text" readonly></td>
+              </tr>
+              <tr>
+                <td>Export</td>
+                <td><input name="0" type="checkbox"></td>
+                <td><input name="1" type="checkbox"></td>
+                <td><input name="2" type="checkbox"></td>
+                <td><input name="3" type="checkbox"></td>
+                <td><input name="4" type="checkbox"></td>
+                <td><input name="5" type="checkbox"></td>
+                <td><input name="6" type="checkbox"></td>
+                <td><input name="7" type="checkbox"></td>
+              </tr>
+            </table>
+          </form>
+        </div>
+        
+        <div class="widget" id="gpio-container">
+          <div class="title">GPIO controls</div>
+        </div>
+        
+        <div class="widget" id="pwm-container">
+          <div class="title">PWM controls</div>
+        </div>
+      </div>
+      <!-- End main content -->
+    </div>
+  </body>
+</html>
