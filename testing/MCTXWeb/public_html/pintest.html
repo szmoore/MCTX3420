@@ -30,13 +30,20 @@
             $("#pwm-container").exportPWM($("#pwm-menu"));
           }
         });
+        $("#adc-controls").trigger("reset").setADCControl();
       });
     </script>
   </head>
   
   <body>
     <div id="header">
-      <span id="title">BBB pin test</span>
+      <div id="leftnav">
+        <a href="http://www.uwa.edu.au/" target="_blank">
+          <img alt = "The University of Western Australia"
+          src="static/uwacrest-text.png">
+        </a>
+        <span id="title">BBB pin test</span>
+      </div>
       <div id="rightnav">
         <div id="menu-container" class="nav-menu">
         </div>
@@ -110,7 +117,7 @@
 
         <div class="widget">
           <div class="title">Analogue input (ADC)</div>
-          <form class="controls" action="#">
+          <form class="controls" action="#" id="adc-controls">
             <table class="centre">
               <tr>
                 <td>AIN</td><th>0</th><th>1</th><th>2</th><th>3</th>

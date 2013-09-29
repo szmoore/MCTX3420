@@ -22,16 +22,36 @@ hr {
   border-bottom: 1px solid gray;
 }
 
+form.controls {
+  background-color: #F9F9F9;
+  border: 1px solid #808080;
+  padding: 1em;
+  margin: 1em auto;
+}
+
+div.centre {
+  text-align: center;
+}
+
+.bold {
+  font-weight: bold;
+}
+
 table {
   border: none;
 }
 
 table.centre {
   margin: auto;
+  text-align: center;
 }
 
 table.status, table.status tr, table.status td {
     padding: 0.2em 0.75em;
+}
+
+td {
+  padding: 0 0.5em;
 }
 
 th {
@@ -50,6 +70,9 @@ input[type="button"], input[type="submit"] {
   border-radius: 3px;
   box-shadow: 1px 1px 1px #BBBBBB;
   transition: all 0.13s ease 0s;
+  padding: 0 0.5em;
+  min-width: 55px;
+  margin: 0.4em 0.1em;
 }
 
 input[type="button"]:active, input[type="submit"]:active {
@@ -63,6 +86,7 @@ input[type="text"], input[type="password"] {
 
 #header {
   background-color: #2a2a2a;
+  border-top: 0.8em solid #1188DD;
   color: #f2f2f2;
   padding: 1.5em 2em;
   margin-top: -1em;
@@ -72,15 +96,44 @@ input[type="text"], input[type="password"] {
   transition: all 0.2s ease 0s;
 }
 
+#header input[type="button"], input[type="submit"] {
+  background-color: #808080;
+  border: 1px solid #808080;
+  box-shadow: none;
+  color: #f2f2f2;
+  cursor: pointer;
+}
+
+#header input[type="button"]:hover, input[type="submit"]:hover {
+  background-color: #606060;
+  border: 1px solid #606060;
+}
+
+#header #leftnav {
+  float: left;
+  display: table;
+}
+
+#header #leftnav a {
+  color: #2a2a2a;
+}
+
 #header #title {
-  font-family: "Open Sans", Arial;
   font-size: 30px;
-  margin-left: 50px;
+  display: table-cell;
+  vertical-align: middle;
+  padding-left: 1em;
 }
 
 #header #rightnav {
   float: right;
+  font-size: 15px;
   padding-top: 0.5em;
+  text-align: right;
+}
+
+#header #rightnav span {
+  margin-left: 1em;
 }
 
 #header #menu-container {
@@ -90,7 +143,6 @@ input[type="text"], input[type="password"] {
 }
 
 #header #date {
-  padding-top: 1em;
   font-size: 12px;
 }
 
@@ -100,7 +152,7 @@ input[type="text"], input[type="password"] {
 
 #sidebar{
   float: right;
-  min-width: 22%;
+  max-width: 26%;
 }
 
 #sidebar .title {
@@ -124,7 +176,12 @@ input[type="text"], input[type="password"] {
   font-size: 24px;
   font-weight: bold;
   margin-bottom: 0.5em;
-  margin-left: 25%;
+}
+
+#main .sub-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 0.25em;
 }
 
 .graph {

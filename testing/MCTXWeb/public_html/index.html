@@ -15,7 +15,7 @@
     <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
     <script type="text/javascript">
       $(document).ready(function () {
-        $("#menu-container").populateNavbar();
+        //$("#menu-container").populateNavbar();
         $("#login").submit(function () {
           $("#login").login();
           return false;
@@ -34,13 +34,29 @@
   
   <body>
     <div id="header">
-      <span id="title">Exploding Cans</span>
+      <div id="leftnav">
+        <a href="http://www.uwa.edu.au/" target="_blank">
+          <img alt = "The University of Western Australia"
+          src="static/uwacrest-text.png">
+        </a>
+        <span id="title">Exploding Cans</span>
+      </div>
       <div id="rightnav">
         <div id="menu-container" class="nav-menu">
         </div>
+        <span id="welcome-container">
+          Welcome, Joe Bloggs!
+        </span>
         <span id="date">
           <script type="text/javascript">getDate();</script>
         </span>
+        <div id="logout-container">
+          <form action="#">
+            <div>
+              <input type="button" name="logout" value="Logout">
+            </div>
+          </form>
+        </div>
       </div>
       <div class="clear"></div>
     </div>
@@ -70,6 +86,7 @@
           </form>
         </div>
         
+        <!--Todo get rid of this and make a separate login page-->
         <div class="widget">
           <div class="title">Login</div>
           <div class="item">
