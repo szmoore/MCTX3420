@@ -118,7 +118,7 @@ void Pin_Handler(FCGIContext *context, char * params)
 
 	if (strcmp(type, "gpo") == 0)
 	{
-		if (num <= 0 || num > GPIO_NUM_PINS)
+		if (num <= 0 || num > GPIO_MAX_NUMBER)
 		{
 			FCGI_RejectJSON(context, "Invalid GPIO pin");
 			return;
@@ -137,7 +137,7 @@ void Pin_Handler(FCGIContext *context, char * params)
 	}
 	else if (strcmp(type, "gpi") == 0)
 	{
-		if (num < 0 || num >= GPIO_NUM_PINS)
+		if (num < 0 || num > GPIO_MAX_NUMBER)
 		{
 			FCGI_RejectJSON(context, "Invalid GPIO pin");
 			return;
