@@ -225,6 +225,7 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 			break;
 		case DIGITAL_REALTEST:
 		{
+			d->value = 0; //d->value must be something... valgrind...
 		// Can pass pin as argument, just using 20 as an example here
 		// Although since pins will be fixed, can just define it here if we need to
 			//d->value = pinRead(20);	//Pin 20 on the Beaglebone

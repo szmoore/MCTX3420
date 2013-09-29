@@ -81,8 +81,8 @@ $.fn.populateNavbar = function () {
     return {text : items[item].name, href : href};
   };
   
-  menu.populateSubmenu("Sensor data", mctx.sensors, sensorTranslator);
-  menu.populateSubmenu("Actuator data", mctx.actuators, actuatorTranslator);
+  menu.populateSubmenu("Sensor data dump", mctx.sensors, sensorTranslator);
+  menu.populateSubmenu("Actuator data dump", mctx.actuators, actuatorTranslator);
   menu.appendTo(this);
   return this;
 }
