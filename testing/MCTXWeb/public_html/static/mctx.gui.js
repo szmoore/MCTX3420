@@ -188,6 +188,9 @@ $.fn.setErrorLog = function () {
   var updater = function () {
     $.ajax({url : url}).done(function (data) {
       outdiv.text(data);
+      outdiv.scrollTop(
+        outdiv[0].scrollHeight - outdiv.height()
+      );
       setTimeout(updater, 1000);
     }).fail(function (jqXHR) {
       outdiv.text("Failed to retrieve the error log.");
