@@ -1,0 +1,74 @@
+<! DOCTYPE html>
+<!--VERSION 0.01.02-->
+<!--SEE CHANGELOG FOR CHANGES SINCE PREVIOUS VERSION-->
+<!--INTERFACE PAGE-->
+
+<html lan="us">
+<meta charset="utf-8"></meta>
+<title>
+REMOTEworks: Remote Experiment Interface 
+</title>
+
+
+<head>
+<script src="jquery-ui-1.10.3.custom/js/jquery-1.9.1.js"></script>
+<script src="jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.js"></script>
+<link rel="stylesheet" href="jquery-ui-1.10.3.custom/css/black-tie/jquery-ui-1.10.3.custom.css"></link>
+
+<script>
+	$( function() {
+	$("#about").click(function(e){
+	alert("REMOTEworks Version 0.01");
+	});	
+	});
+</script>
+
+</head>
+
+<body>
+
+
+<div id="container" style="width:1250px">
+
+<!--The title block holds the title and version number information-->
+	<div id="title block" style="background-color:grey;text-align:right;color:ivory;">
+		<p> REMOTEworks&#8482; Ver No: 0.01 </p>
+	</div>
+	
+	<div id="controlPane" style="background-color:lightgrey;width:200px;float:left;">
+
+
+		<form style="text-align:center;" name="input" action="html_form_action.asp" method="get">
+			Username: <input type="text" name="user"><br/>
+			Password: <input type="password" name="password"><br/>
+			<br/>
+			<input type="submit" value="Login">
+		</form>
+		<button style="width:90px;margin:4px;background-color:darkgrey;color:white;" id="button" class="ui-button ui-widgetui-state-default ui-corner-all ui-button-text-only" value="Request Access" role="button">
+			<span class="ui-button-text">
+				Access
+			</span>
+		</button>
+		<button style="width:90px;margin:4px;background-color:darkgrey;color:white;" id="about" class="ui-button ui-widgetui-state-default ui-corner-all ui-button-text-only" value="Request Access" role="button">
+			<span class="ui-button-text">
+				About
+			</span>
+		</button>
+	</div>
+	
+<!--Seperator to divide the controlpane and the contentpane-->	
+	<div id="seperator" style="background-color:black;width:50;">
+	</div>
+	
+<!--The contentpane is the main area for dispaying data-->
+<div id="contentpane">
+<p style="text-align:center;"> 
+	Welcome to REMOTEworks&#8482;. Please login to access the Experiment Interface.<br/>
+	If you do not have a login please select the access button and follow the prompts top request access<br/>
+	
+</p>
+
+
+
+</body>
+</html>
