@@ -96,7 +96,7 @@ input[type="text"], input[type="password"] {
   transition: all 0.2s ease 0s;
 }
 
-#header input[type="button"], input[type="submit"] {
+#header input[type="button"], #header input[type="submit"] {
   background-color: #808080;
   border: 1px solid #808080;
   box-shadow: none;
@@ -104,7 +104,7 @@ input[type="text"], input[type="password"] {
   cursor: pointer;
 }
 
-#header input[type="button"]:hover, input[type="submit"]:hover {
+#header input[type="button"]:hover, #header input[type="submit"]:hover {
   background-color: #606060;
   border: 1px solid #606060;
 }
