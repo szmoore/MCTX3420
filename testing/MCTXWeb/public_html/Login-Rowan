@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<Title> MCTX 3420 login</Title>
+		</head>
+
+	<body style>
+		<div id="window">
+			<div id= "container">
+				<h1><a href="http://www.uwa.edu.au/" target="_blank">
+      	<img alt = "The University of Western Australia"
+      	src="http://www.lms.uwa.edu.au/theme/image.php/uwa/theme/1378302164/uwacrest">
+      </a> </h1>
+			<div id="login-container">
+				<div id="login-section">
+					<form name="login-form" method="post" action="index.html" class="aui-login-form-container">
+						<h2> "log in"</h2>
+						<div id="action-messages">
+						</div>
+						<fieldset class="compact-form-feilds">
+							<div class="feild-group">
+								<label id="os_username"> Username </label>
+								<input type="text" name="os_username" id="os_username" class="text" data-focus="0">
+
+							</div>
+							<div class="feild-group"><label id="os-password-label" for="os_password"> "Password" </label>
+								<input type="password" name="os_password" id="os_password" class="password">
+							</div>
+							<div class="feild-group-form-buttons compact-form-buttons">
+								<input id="loginbutton" class="aui-button aui-style aui-button-primary" name="login" type="submit" value="Log In">
+
+							</div>
+						</fieldset>
+					</form>
+
+				</div>
+			</div>
+
+			</div>
+
+
+		</div>
+
+	</body>
+
+</html>
