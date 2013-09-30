@@ -193,7 +193,10 @@ $.fn.setErrorLog = function () {
       );
       setTimeout(updater, 1000);
     }).fail(function (jqXHR) {
-      outdiv.text("Failed to retrieve the error log.");
+      if (jqXHR.status === 502 || jqXHR.status === 0) {
+        outdiv.text("Failed to retrieve the error log.");
+      }
+      setTimeout(updater, 1500);
     });
   };
   
