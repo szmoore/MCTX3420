@@ -1,5 +1,21 @@
 server {
-	listen 80;
+	#Redirect HTTP to HTTPS
+	listen         [::]:80;
+	return 301 https://$host$request_uri;
+}
+
+server {
+	listen 443;
+
+	ssl on;
+	ssl_certificate /usr/share/nginx/conf/server.crt;
+	ssl_certificate_key /usr/share/nginx/conf/server.key;
+
+	ssl_session_timeout 5m;
+
+	ssl_protocols SSLv3 TLSv1;
+	ssl_ciphers ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv3:+EXP;
+	ssl_prefer_server_ciphers on;
 
 	#Change this to match your root directory
 	root /usr/share/nginx/www;
@@ -65,13 +81,13 @@ server {
 		}
 
 		#Program log
-		location ^~ /api/log {
+		location = /api/log {
 			alias /var/log/mctxserv.log;
 			default_type text/plain;
 		}
 
 		#Program error log
-		location ^~ /api/errorlog {
+		location = /api/errorlog {
 			alias /var/log/mctxserv-error.log;
 			default_type text/plain;
 		}
