@@ -81,13 +81,13 @@ server {
 		}
 
 		#Program log
-		location ^~ /api/log {
+		location = /api/log {
 			alias /var/log/mctxserv.log;
 			default_type text/plain;
 		}
 
 		#Program error log
-		location ^~ /api/errorlog {
+		location = /api/errorlog {
 			alias /var/log/mctxserv-error.log;
 			default_type text/plain;
 		}
