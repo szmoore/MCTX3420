@@ -3947,3 +3947,27 @@
 23:26 < Rowan> sweet, i shall enjoy this gui :)
 23:41 < sam_moore> See you tomorrow
 23:47 < Rowan> yep
+--- Day changed Mon Sep 30 2013
+03:31 -!- Rowan [~Rowan@220-253-165-231.dyn.iinet.net.au] has quit [Ping timeout]
+10:57 -!- jtanx [~asfa@130.95.54.13] has joined #mctxuwa_softdev
+11:10 -!- Rowan [~Rowan@220-253-165-231.dyn.iinet.net.au] has joined #mctxuwa_softdev
+11:17 < sam_moore> Hi Rowan, do you have anything we should put in the report?
+11:34 -!- Rowan [~Rowan@220-253-165-231.dyn.iinet.net.au] has quit [Ping timeout]
+11:58 -!- Rowan [~Rowan@130.95.158.122] has joined #mctxuwa_softdev
+11:59 < Rowan> ill have the outline of all the pages i wanted on git this afternoon
+12:05 < sam_moore> Ok
+12:42 -!- Rowan [~Rowan@130.95.158.122] has quit [Connection reset by peer]
+12:44 -!- Rowan [~Rowan@130.95.158.122] has joined #mctxuwa_softdev
+13:33 < Rowan> so far i have a cover page which links to a login page which links to the index page. but theres no styles for them and no security on the login
+14:09 < Rowan> im not sure the files ive added went into sams git. im pretty sure they all forked over to mine. :S
+14:58 -!- Rowan [~Rowan@130.95.158.122] has quit [Ping timeout]
+15:20 -!- Rowan [~Rowan@130.95.158.122] has joined #mctxuwa_softdev
+15:57 -!- Rowan [~Rowan@130.95.158.122] has quit [Ping timeout]
+16:18 -!- Rowan [~Rowan@220-253-165-231.dyn.iinet.net.au] has joined #mctxuwa_softdev
+16:18 -!- jtanx [~asfa@130.95.54.13] has quit [Ping timeout]
+16:31 -!- Rowan [~Rowan@220-253-165-231.dyn.iinet.net.au] has quit [EOF From client]
+18:20 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:55 -!- MctxBot [~twang@220-253-203-242.dyn.iinet.net.au] has quit [Ping timeout]
+21:18 -!- Rowan [~Rowan@220-253-165-231.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:44 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+22:06 -!- Rowan [~Rowan@220-253-165-231.dyn.iinet.net.au] has quit [EOF From client]
