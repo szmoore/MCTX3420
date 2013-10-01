@@ -3971,3 +3971,102 @@
 21:18 -!- Rowan [~Rowan@220-253-165-231.dyn.iinet.net.au] has joined #mctxuwa_softdev
 21:44 -!- jtanx [~asfa@220-253-203-242.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
 22:06 -!- Rowan [~Rowan@220-253-165-231.dyn.iinet.net.au] has quit [EOF From client]
+--- Day changed Tue Oct 01 2013
+08:50 -!- jtanx [~asfa@124-148-112-240.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:03 -!- jtanx [~asfa@124-148-112-240.dyn.iinet.net.au] has quit ["brb"]
+11:04 -!- jtanx [~asfa@124-148-112-240.dyn.iinet.net.au] has joined #mctxuwa_softdev
+13:40 < sam_moore> Another option for the login system (a really terrible option that I don't condone on any real world system, but it might just get us marks)
+13:40 < sam_moore> Is to provide some cgi scripts that wrap around "useradd" "userdel" and "usermod"
+13:40 < sam_moore> And have our "Login" function check /etc/shadow
+13:41 < sam_moore> I emailed UWA IT help desk about Pheme anyway
+13:41 < sam_moore> I wonder what they'll make of it...
+13:51 < jtanx> hehe
+13:52 < sam_moore> The more I think about it, the more I think LDAP is the way you'd do this properly though
+13:52 < sam_moore> It basically is a text file
+13:53 < jtanx> yeah
+13:53 < sam_moore> If you started with a text file, you'd quickly find yourself reinventing the wheel and probably converging with what LDAP already does
+13:53 < jtanx> I guess the real problem is that rolling our own solution is not really feasible in the time left, especially if you want to ensure it's at least ok in terms of security
+13:57 < sam_moore> Yes
+14:08 < sam_moore> For reference: http://www.debuntu.org/how-to-set-up-a-ldap-server-and-its-clients/
+14:09 < sam_moore> And http://mindref.blogspot.com.au/2010/12/openldap-create-user.html
+14:09 < sam_moore> (How to set up our own LDAP server)
+14:11 < jtanx> slapd
+14:12 < jtanx> what a weird choice of a name
+14:12 < sam_moore> Haha
+14:15 < jtanx> oh 
+14:15 < jtanx> if you set up an ldap server
+14:15 < jtanx> http://phpldapadmin.sourceforge.net/wiki/index.php/Main_Page
+14:15 < jtanx> get them to manage the ldap database themselves
+14:15 < jtanx> :P
+14:15 < jtanx> to add or remove users
+14:22 < sam_moore> Yeah, that's kind of how ldap was designed
+14:22 < sam_moore> Technically I can probably modify my UWA "pheme" password from a command line using ldappasswd
+14:22 < sam_moore> Unless they use kerberos
+14:23 < sam_moore> (We don't want to start going into kerberos...)
+14:54 < sam_moore> Welp, I've put an LDAP server on my laptop for testing purposes
+14:54 < sam_moore> With an account "snoopy"
+14:55 < sam_moore> Seems to work... now to test it with our software
+14:55 < sam_moore> Hey, maybe we could just put an LDAP server on the BeagleBone and get a GUI LDAP editor
+14:56 < sam_moore> Oh right, you suggested that at 14:15
+14:56 < sam_moore> I like it though
+14:58 < jtanx> yah not too bad
+14:58 < jtanx> say we had an ldap server on the bbb
+14:59 < jtanx> we could even write the password manager in a different language
+14:59 < jtanx> if we wanted to make one
+14:59 < sam_moore> Yeah, exactly
+14:59 < jtanx> because it only has to interact with the ldap database
+14:59 < sam_moore> We shouldn't do that in the FastCGI program
+14:59 < jtanx> yup
+15:00 < sam_moore> I sent an email about it to everyone, suggesting PHP or python CGI to wrap around LDAP
+15:01 < sam_moore> I wonder when this system is going to start being put together though
+15:02 < sam_moore> We'll end up with a server and no hardware to control
+15:02 < jtanx> Looks like it
+15:02 < sam_moore> Those images Justin sent us look nice
+15:02 < jtanx> Yeah they look quite good
+15:07 < sam_moore> With the FastCGI program
+15:07 < sam_moore> Do you think it's better to pass options through the command line
+15:07 < sam_moore> Or have a bunch of #defines that need to get configured?
+15:08 < sam_moore> eg: To specify the LDAP server
+15:08 < sam_moore> (At the moment it's just a #define)
+15:08 < jtanx> hmm
+15:08 < jtanx> It's probably better to pass as a command line
+15:09 < sam_moore> Ok
+15:09 < jtanx> unless we're absolutely sure that the ldap address is fixed
+15:10 < sam_moore> What we can do is write a bash script that sets a bunch of variables
+15:10 < sam_moore> Then run.sh sources that and passes them all as arguments
+15:10 < jtanx> sounds good
+15:35 < sam_moore> What about things like the path to the GPIO and ADC? I figure they should stay as #defines
+15:35 < sam_moore> Since they probably won't be changing
+15:36 < sam_moore> At least not until the next BeagleBone kernel comes out
+15:36 < jtanx> hehe
+15:36 < jtanx> yeah that should stay as defins
+15:36 < jtanx> if the path does change
+15:36 < jtanx> then that probably warrants a recompile anyway since stuff may have changed with how you access it
+15:36 < sam_moore> Ok, should I put all the defines that you might want to adjust on a recompile in the same place?
+15:37 < sam_moore> common.h?
+15:37 < jtanx> what defines do we have right now
+15:37 < jtanx> that may change
+15:39 < sam_moore> Nothing major, I just want it to be flexible
+15:39 < jtanx> hmm
+15:39 < jtanx> even if you did that
+15:39 < jtanx> if you needed to change the define
+15:39 < jtanx> you'd probably be looking at changing hte code anyway
+15:40 < sam_moore> Sure, but that doesn't mean you can't put the defines in an easy to find place
+15:40 < sam_moore> For example, say someone wants to recompile this for a RPi
+15:40 < jtanx> But for stuff like 'where's the pwm path'
+15:40 < sam_moore> Given the trouble we had with pwm path confusion
+15:41 < jtanx> I'd look in the header relevant to pin control
+15:41 < sam_moore> I think it's helpful to make it easy for someone to see what we're doing
+15:41 < sam_moore> I suppose
+15:42 < jtanx> ok I guess it doesn't matter if it goes in common.h or not
+15:42 < sam_moore> Yeah, but I think I agree with you now :P
+15:42 < jtanx> ( I guess this is what ./configure and configure.h are for :P )
+15:51 < sam_moore> Sigh...
+15:51 < sam_moore> I put in a #warning to generate a warning if you tried to compile the software on something that isn't the BeagleBone
+15:51 < sam_moore> ...
+15:51 < sam_moore> And the use of #warning caused a warning
+15:52 < sam_moore> warning: #warning is a GCC extension [enabled by default]
+16:05 < jtanx> :p
+16:08 < jtanx> because of the -pedantic flag
+21:13 -!- jtanx [~asfa@124-148-112-240.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+21:23 -!- MctxBot [~twang@124-148-112-240.dyn.iinet.net.au] has joined #mctxuwa_softdev
