@@ -6,17 +6,23 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
+/** Defines required to allow various C standard functions to be used **/
 #define _POSIX_C_SOURCE 200809L
 #define _BSD_SOURCE
 #define _XOPEN_SOURCE 600
 
 /** Determine if we're running on the BBB **/
 #ifdef __arm__
-#define _BBB
-#endif
+	#define _BBB
+#else
+	//#warning This software was designed for the BeagleBone Black. Some features may not work.
+#endif //__arm__
 
 /** The current API version **/
 #define API_VERSION 0
+
+
+
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,6 +43,9 @@
 #define TIMEVAL_TO_DOUBLE(tv) ((tv).tv_sec + 1e-6 * ((tv).tv_usec))
 /**Takes the tv1-tv2 between two timevals and returns the result as a double*/
 #define TIMEVAL_DIFF(tv1, tv2) ((tv1).tv_sec - (tv2).tv_sec + 1e-6 * ((tv1).tv_usec - (tv2).tv_usec))
+
+
+extern bool PathExists(const char * path);
 
 
 

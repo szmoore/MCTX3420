@@ -441,14 +441,15 @@ void * FCGI_RequestLoop (void *data)
 	while (FCGI_Accept() >= 0) {
 		
 		ModuleHandler module_handler = NULL;
-		char module[BUFSIZ], params[BUFSIZ], hack[BUFSIZ];
+		char module[BUFSIZ], params[BUFSIZ], cookie[BUFSIZ];
 		
 		//strncpy doesn't zero-truncate properly
 		snprintf(module, BUFSIZ, "%s", getenv("DOCUMENT_URI_LOCAL"));
 		snprintf(params, BUFSIZ, "%s", getenv("QUERY_STRING"));
-		snprintf(hack, BUFSIZ, "%s", getenv("QUERY_STRING"));
+		snprintf(cookie, BUFSIZ, "%s", getenv("COOKIE_STRING"));
 
 		Log(LOGDEBUG, "Got request #%d - Module %s, params %s", context.response_number, module, params);
+		Log(LOGDEBUG, "Cookie: %s", cookie);
 
 
 		
@@ -489,6 +490,20 @@ void * FCGI_RequestLoop (void *data)
 
 		if (module_handler) 
 		{
+			if (module_handler != Login_Handler)
+			{
+				if (cookie[0] == '\0')
+				{
+					FCGI_RejectJSON(&context, "Please login.");
+					continue;
+				}
+				if (!FCGI_HasControl(&context, cookie))
+				{
+					FCGI_RejectJSON(&context, "Invalid control key.");
+					continue;	
+				}
+			}
+
 			module_handler(&context, params);
 		} 
 		else 

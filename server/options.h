@@ -19,13 +19,19 @@ typedef struct
 	/** Time at which program exits **/
 	struct timeval end_time;
 
-	/** Path to ADC files **/
-	const char * adc_device_path;
+	/** Whether or not to enable the pin_test module **/
+	bool enable_pin;
+	
+	/** URI for authentication **/
+	const char * auth_uri;
 
-	/*** Horrible horrible hack ***/
-	int argc;
-	/*** Horrible horrible hack ***/
-	char ** argv;
+	/** Base DN for LDAP authentication **/
+	const char * ldap_base_dn;
+
+	/** Authentication method **/
+	enum {AUTH_NONE, AUTH_LDAP, AUTH_SHADOW} auth_method;
+
+	
 
 } Options;
 
