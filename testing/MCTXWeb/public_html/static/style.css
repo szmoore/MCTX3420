@@ -37,6 +37,16 @@ a:active {
   color: #0066BB;
 }
 
+.pass {
+  color: #7AE309;
+  font-weight: bold;
+}
+
+.fail {
+  color: #E30909;
+  font-weight: bold
+}
+
 div.centre {
   text-align: center;
 }
@@ -233,7 +243,7 @@ input[type="text"]:focus, input[type="password"]:focus {
 }
 
 /** For login.html **/
-#login {
+#login-container {
   margin: 0 auto;
   width: 400px;
   padding: 1.8em 0 0;
@@ -241,19 +251,23 @@ input[type="text"]:focus, input[type="password"]:focus {
   line-height: 1.8em;
 }
 
-#login form {
+#login-container form {
   padding: 1em 2em;
 }
 
-#login input {
+#login-container input {
   font-size: 24px;
 }
 
-#login label {
+#login-container label {
   font-size: 14px;
 }
 
-#login input[type=submit], #login input[type=submit] {
+#login-container input[type=submit] {
   font-size: inherit;
   padding: 0.4em 0.8em;
+}
+
+#login-container #result {
+  clear: both;
 }

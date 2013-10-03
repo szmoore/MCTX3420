@@ -3,9 +3,9 @@
  */
 
 mctx = {};
-mctx.api = location.protocol + "//" +  location.host + "/api/";
+mctx.location = location.protocol + "//" + location.host;
+mctx.api = mctx.location + "/api/";
 mctx.expected_api_version = 0;
-mctx.key = undefined;
 mctx.has_control = false;
 
 mctx.return_codes = {
@@ -154,30 +154,27 @@ $.fn.setStrainGraphs = function () {
 $.fn.login = function () {
   var username = this.find("input[name='username']").val();
   var password = this.find("input[name='pass']").val();
-  var force = this.find("input[name='force']").is(":checked");
-  var url = mctx.api + "control";
-  
-  var authFunc = function(xhr) {
-    xhr.setRequestHeader("Authorization",
-        "Basic " + base64.encode(username + ":" + password));
+  var out = this.find("#result");
+  var redirect = function () {
+    window.location.href = mctx.location;
   };
-
+  
+  out.removeAttr("class");
+  out.text("Logging in...");
+  
   $.ajax({
-    url : url,
-    data : {action : "lock", force : (force ? true : undefined)},
-    beforeSend : authFunc
+    url : mctx.api + "bind",
+    data : {user: username, pass : password}
   }).done(function (data) {
-    mctx.key = data.key;
-    if (data.status < 0) {
-      alert("no - " + data.description);
-    } else {
-      mctx.has_control = true;
-      alert("yes - " + mctx.key);
-    }
+    //todo: error check
+    mctx.has_control = true;
+    out.attr("class", "pass");
+    out.text("Login ok!");
+    setTimeout(redirect, 1000);
   }).fail(function (jqXHR) {
-    mctx.key = undefined;
     mctx.has_control = false;
-    alert("no");
+    out.attr("class", "fail");
+    out.text("Login request failed - connection issues.")
   });
 };
 

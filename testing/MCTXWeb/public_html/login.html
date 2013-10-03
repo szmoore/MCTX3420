@@ -15,7 +15,10 @@
     <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
     <script type="text/javascript">
       $(document).ready(function () {
-        
+        $("#login").submit(function () {
+          $("#login").login();
+          return false;
+        });
       });
     </script>
   </head>
@@ -38,9 +41,9 @@
     </div>
     <!-- End header -->
     
-    <div id="login">
+    <div id="login-container">
      <div class="widget">
-         <form id="login2" action="#">
+         <form id="login" action="#">
            <p>
              <label>
                Username<br>
@@ -58,6 +61,9 @@
            </p>
            <p style="float:right; margin:0;">
              <input type="submit" value="Log In">
+           </p>
+           <p id="result">
+             &nbsp;
            </p>
           </form>
      </div>
