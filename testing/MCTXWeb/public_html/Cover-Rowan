@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<title>"MCTX3420"</title>
+
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!--[if lte IE 8]>
+      <script language="javascript" type="text/javascript" src="static/excanvas.min.js"></script>
+    <![endif]-->
+
+	<script type="text/javascript" src="gui.js"></script>
+    <link rel="stylesheet" type="text/css" href="static/style-cover.css">
+
+    </script>
+
+	</head>
+	<body style>
+		<div id="Window">
+			<header>
+				<div id="header">
+					<div id="container">
+						<h1><a href="http://www.uwa.edu.au/" target="_blank">
+      	<img alt = "The University of Western Australia"
+      	src="http://www.lms.uwa.edu.au/theme/image.php/uwa/theme/1378302164/uwacrest">
+      </a> </h1>
+						<h2> "UWA Mechatronics"</h2>
+						<nav>
+							<div id="nav">
+								<div id="container">
+									<ul class="menu">
+										<li class="page-item">
+											<a rel="next" href="stream.html">Stream</a>
+										</li>
+										<li class="page-item">
+											<a>Upload</a>
+										</li>
+										<li class="page-item">
+											<a rel="next" href="Login.html"> Login </a>
+											</li>
+									</ul>
+								</div>
+							</div>
+						</nav>
+					</div>
+				</div>
+			</header>
+			<div id="slider-container">
+				<div id="slider-wrap">
+					<h1> PUT SLIDER HERE!! </h1>
+				</div>
+				<div class="slider=text">
+					<h1> "Mechatroincs design" </h1>
+					<p> "interesting stuff about a boring project"</p>
+				</div>
+			</div>
+		</div>
+<footer>
+				<div id="footer">
+					<div class="inner">
+						<div class="container">
+							<h6>special thanks:</h6>
+							<ul>
+								<li> UWA-Mechatronics wpic</li>
+								<li> Beaglebone wpic</li>
+								<li> otherthings we have used</li>
+							</ul>
+						</div>
+						</div>
+					<div class="container-social">
+						Copywrite-software team Mechatronics Design 2013</div>
+				</div>
+			</footer>
+
+	</body>
+</html>
