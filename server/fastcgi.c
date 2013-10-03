@@ -116,7 +116,8 @@ void FCGI_LockControl(FCGIContext *context, bool force) {
 bool FCGI_HasControl(FCGIContext *context, const char *key) {
 	time_t now = time(NULL);
 	int result = (now - context->control_timestamp) <= CONTROL_TIMEOUT &&
-				 key != NULL && !strcmp(context->control_key, key);
+			key != NULL && context->control_key[0] != '\0' &&
+			!strcmp(context->control_key, key);
 	if (result) {
 		context->control_timestamp = now; //Update the control_timestamp
 	}
