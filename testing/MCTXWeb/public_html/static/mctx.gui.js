@@ -3,12 +3,20 @@
  */
 
 mctx = {};
-mctx.location = location.protocol + "//" + location.host + "/";
-mctx.api = mctx.location + "/api/";
+//Don't use this in the final version
+mctx.location = window.location.pathname;
+mctx.location = mctx.location.substring(0, mctx.location.lastIndexOf('/')) + "/";
+//mctx.location = location.protocol + "//" + location.host + "/";
+mctx.api = location.protocol + "//" + location.host + "/" + "api/";
 mctx.expected_api_version = 0;
 mctx.has_control = false;
+//mctx.debug = true;
 
-mctx.return_codes = {
+mctx.statusCodes = {
+  STATUS_OK : 1
+}
+
+mctx.statusCodesDescription = {
   "1" : "Ok",
   "-1" : "General error",
   "-2" : "Unauthorized",
@@ -56,7 +64,9 @@ function runBeforeLoad(isLoginPage) {
   $.ajax({
     url : mctx.api + "identify"
   }).done(function (data) {
-    if (data.logged_in && isLoginPage) {
+    if (mctx.debug) {
+      debugLog("Redirect disabled!");
+    } else if (data.logged_in && isLoginPage) {
         window.location = mctx.location;
     } else if (!data.logged_in && !isLoginPage) {
       //Note: this only clears the nameless cookie
@@ -64,6 +74,7 @@ function runBeforeLoad(isLoginPage) {
       window.location = mctx.location + "login.html";
     } else {
       mctx.friendlyName = data.friendly_name;
+      $("#content").css("display", "block");
     }
   }).fail(function (jqHXR) {
     if (!isLoginPage) {
@@ -196,11 +207,17 @@ $.fn.login = function () {
     url : mctx.api + "bind",
     data : {user: username, pass : password}
   }).done(function (data) {
-    //todo: error check
-    mctx.has_control = true;
-    out.attr("class", "pass");
-    out.text("Login ok!");
-    setTimeout(redirect, 1000);
+    if (data.status < 0) {
+      mctx.has_control = false;
+      out.attr("class", "fail");
+      out.text("Login failed: " + data.description);
+    } else {
+      //todo: error check
+      mctx.has_control = true;
+      out.attr("class", "pass");
+      out.text("Login ok!");
+      setTimeout(redirect, 800);      
+    }
   }).fail(function (jqXHR) {
     mctx.has_control = false;
     out.attr("class", "fail");

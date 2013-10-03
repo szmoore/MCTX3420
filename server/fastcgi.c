@@ -45,6 +45,8 @@ static void IdentifyHandler(FCGIContext *context, char *params) {
 	FCGI_JSONPair("description", "MCTX3420 Server API (2013)");
 	FCGI_JSONPair("build_date", __DATE__ " " __TIME__);
 	FCGI_JSONLong("api_version", API_VERSION);
+	FCGI_JSONBool("logged_in", FCGI_HasControl(context, getenv("COOKIE_STRING")));
+	FCGI_JSONPair("friendly_name", "");
 
 	//Sensor and actuator information
 	if (ident_sensors) {
@@ -288,6 +290,25 @@ void FCGI_BeginJSON(FCGIContext *context, StatusCodes status_code)
 }
 
 /**
+ * Generic accept response in JSON format.
+ * @param context The context to work in
+ * @param description A short description.
+ * @param cookie Optional. If given, the cookie field is set to that value.
+ */
+void FCGI_AcceptJSON(FCGIContext *context, const char *description, const char *cookie)
+{
+	printf("Content-type: application/json; charset=utf-8\r\n");
+	if (cookie) {
+		printf("Set-Cookie: %s\r\n", cookie);
+	}
+	printf("\r\n{\r\n");
+	printf("\t\"module\" : \"%s\"", context->current_module);
+	FCGI_JSONLong("status", STATUS_OK);
+	FCGI_JSONPair("description", description);
+	FCGI_EndJSON();
+}
+
+/**
  * Adds a key/value pair to a JSON response. The response must have already
  * been initiated by FCGI_BeginJSON. Special characters are not escaped.
  * @param key The key of the JSON entry
@@ -441,16 +462,16 @@ void * FCGI_RequestLoop (void *data)
 	while (FCGI_Accept() >= 0) {
 		
 		ModuleHandler module_handler = NULL;
-		char module[BUFSIZ], params[BUFSIZ], cookie[BUFSIZ];
+		char module[BUFSIZ], params[BUFSIZ];
+		//Don't need to copy if we're not modifying string contents
+		const char *cookie = getenv("COOKIE_STRING");
 		
 		//strncpy doesn't zero-truncate properly
 		snprintf(module, BUFSIZ, "%s", getenv("DOCUMENT_URI_LOCAL"));
 		snprintf(params, BUFSIZ, "%s", getenv("QUERY_STRING"));
-		snprintf(cookie, BUFSIZ, "%s", getenv("COOKIE_STRING"));
 
 		Log(LOGDEBUG, "Got request #%d - Module %s, params %s", context.response_number, module, params);
 		Log(LOGDEBUG, "Cookie: %s", cookie);
-
 
 		
 		//Remove trailing slashes (if present) from module query
@@ -486,11 +507,9 @@ void * FCGI_RequestLoop (void *data)
 		context.current_module = module;
 		context.response_number++;
 		
-
-
 		if (module_handler) 
 		{
-			if (module_handler != Login_Handler)
+			if (module_handler != Login_Handler && module_handler != IdentifyHandler)
 			{
 				if (cookie[0] == '\0')
 				{

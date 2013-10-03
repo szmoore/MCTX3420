@@ -164,7 +164,7 @@ void Login_Handler(FCGIContext * context, char * params)
 
 	if (context->control_key[0] != '\0')
 	{
-		FCGI_RejectJSON(context, "Already logged in.");
+		FCGI_RejectJSON(context, "Someone is already logged in.");
 		return;
 	}
 
@@ -247,14 +247,12 @@ void Login_Handler(FCGIContext * context, char * params)
 	
 	if (!authenticated)
 	{
-		FCGI_RejectJSON(context, "Authentication failure.");
-		return;
+		FCGI_RejectJSONEx(context, STATUS_UNAUTHORIZED, "Authentication failure.");
 	}
-
-	FCGI_LockControl(context, false);
-	
-	// Give the user a cookie
-	FCGI_PrintRaw("Content-type: text\r\n");
-	FCGI_PrintRaw("Set-Cookie: %s\r\n\r\n", context->control_key);
-	FCGI_PrintRaw("Logged in");
+	else
+	{
+		FCGI_LockControl(context, false);
+		// Give the user a cookie
+		FCGI_AcceptJSON(context, "Logged in", context->control_key);
+	}
 }
