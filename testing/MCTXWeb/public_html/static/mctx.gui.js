@@ -37,11 +37,41 @@ mctx.strain_gauges = {};
 mctx.strain_gauges.ids = [0, 1, 2, 3];
 mctx.strain_gauges.time_limit = 20;
 
+function debugLog (msg) {
+  if (typeof console === "undefined" || typeof console.log === "undefined") {
+    alert(msg);
+  } else {
+    console.log(msg);
+  }
+}
+
 /**
  * Writes the current date to wherever it's called.
  */
 function getDate(){
 	document.write((new Date()).toDateString());
+}
+
+function runBeforeLoad(isLoginPage) {
+  $.ajax({
+    url : mctx.api + "identify"
+  }).done(function (data) {
+    if (data.logged_in && isLoginPage) {
+        window.location = mctx.location;
+    } else if (!data.logged_in && !isLoginPage) {
+      //Note: this only clears the nameless cookie
+      document.cookie = ""; 
+      window.location = mctx.location + "login.html";
+    } else {
+      mctx.friendlyName = data.friendly_name;
+    }
+  }).fail(function (jqHXR) {
+    if (!isLoginPage) {
+      window.location = mctx.location + "login.html";
+    } else {
+      debugLog("Failed to ident server. Is API running?")
+    }
+  });
 }
 
 /**
