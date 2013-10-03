@@ -28,15 +28,18 @@ Options g_options; // options passed to program through command line arguments
  */
 void ParseArguments(int argc, char ** argv)
 {
-	// horrible horrible hacks
-	g_options.argc = argc;
-	g_options.argv = argv;
+
 
 	g_options.program = argv[0]; // program name
 	g_options.verbosity = LOGDEBUG; // default log level
 	gettimeofday(&(g_options.start_time), NULL); // Start time
-	g_options.adc_device_path = ADC_DEVICE_PATH;
-	Log(LOGDEBUG, "Called as %s with %d arguments.", g_options.program, argc);
+
+
+	g_options.auth_method = AUTH_NONE;  // Don't use authentication
+	g_options.auth_uri = ""; // 
+	g_options.ldap_base_dn = "";
+	
+
 
 	for (int i = 1; i < argc; ++i)
 	{
@@ -49,18 +52,48 @@ void ParseArguments(int argc, char ** argv)
 		if (strlen(argv[i]) > 2)
 			Fatal("Human readable switches are not supported.");
 
+		char * end = NULL;
 		switch (argv[i][1])
 		{
-			case 'a':
-				g_options.adc_device_path = argv[i+1];
-				Log(LOGINFO, "ADC Device Path: %s", argv[i+1]);
-				++i;
+			// Set program verbosity
+			case 'v':
+				g_options.verbosity = strtol(argv[++i], &end, 10);
+				break;
+			// Enable/Disable pin test
+			case 'p':
+				g_options.enable_pin = !(strtol(argv[++i], &end, 10));
+				break;
+			// LDAP URI
+			case 'A':
+				g_options.auth_uri = argv[++i];
+				break;
+			// LDAP DN
+			case 'd':
+				g_options.ldap_base_dn = argv[++i];
 				break;
 			default:
 				Fatal("Unrecognised switch %s", argv[i]);
 				break;
 		}
+
+		if (end != NULL && *end != '\0')
+			Fatal("argv[%d] -%c requires an integer (got \"%s\" instead)", i-1, argv[i-1][0], argv[i]);
 	}	
+
+	Log(LOGDEBUG, "Verbosity: %d", g_options.verbosity);
+	Log(LOGDEBUG, "Pin Module Enabled: %d", g_options.enable_pin);
+	Log(LOGDEBUG, "Auth URI: %s", g_options.auth_uri);
+	Log(LOGDEBUG, "LDAP Base DN: %s", g_options.ldap_base_dn);
+
+	if (g_options.auth_uri[0] != '\0')
+	{
+		//HACK...
+		if (PathExists(g_options.auth_uri))
+			g_options.auth_method = AUTH_SHADOW;
+		else
+			g_options.auth_method = AUTH_LDAP;
+	}
+	
 }
 
 /**

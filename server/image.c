@@ -16,6 +16,18 @@ void Image_Handler(FCGIContext * context, char * params)
 
 	IplImage * frame = cvQueryFrame(capture);
 	assert(frame != NULL);
+
+//        CvMat stub;
+ //       CvMat * background = cvGetMat(frame, &stub, 0, 0);
+
+//	CvMat *cv8u = cvCreateMat(frame->width, frame->height, CV_8U);
+//	double min, max;
+//	CvPoint a,b;	
+//	cvMinMaxLoc(background, &min, &max, &a, &b, 0);
+	
+//	double ccscale = 255.0/(max-min);
+//	double ccshift = -min;
+	//cvCvtScale(frame, cv8u, ccscale, ccshift);
 	CvMat * jpg = cvEncodeImage(".jpg", frame, p);
 
 	// Will this work?

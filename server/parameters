@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# This script sets the options interpreted by the server at runtime.
+# Enclose any settings that have whitespace with "quotation marks".
+
+
+## DO NOT EDIT THESE OPTIONS
+LOGERR=0
+LOGWARN=1
+LOGNOTE=2
+LOGINFO=3
+LOGDEBUG=4
+
+## OPTIONS PASSED TO SERVER
+
+# Set the verbosity of log messages
+verbosity="$LOGDEBUG"
+
+# Set to 1/0 to enable/disable the pin module (gives direct control over GPIO/ADC/PWM)
+pin_test="0"
+
+# Set to the URI to use authentication
+auth_uri="ldap://192.168.1.1"
+#auth_uri="/etc/shadow"
+
+# Set to the dn of the LDAP server
+ldap_base_dn="ou=People,dc=daedalus"
+
+
+## OPTIONS TO BE PASSED TO SERVER; DO NOT EDIT
+parameters="-v $verbosity -p $pin_test -A $auth_uri -d $ldap_base_dn"

@@ -39,7 +39,19 @@ typedef struct FCGIValue {
 	unsigned flags;
 } FCGIValue;
 
-typedef struct FCGIContext FCGIContext;
+/**Contextual information related to FCGI requests*/
+typedef struct  
+{
+	/**The time of last valid user access possessing the control key*/
+	time_t control_timestamp;
+	char control_key[41];
+	char control_ip[16];
+	/**The name of the current module**/
+	const char *current_module;
+	/**For debugging purposes?**/
+	int response_number;
+} FCGIContext;
+
 typedef void (*ModuleHandler) (FCGIContext *context, char *params);
 
 extern void FCGI_LockControl(FCGIContext *context, bool force);

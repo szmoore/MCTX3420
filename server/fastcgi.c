@@ -17,21 +17,12 @@
 #include "options.h"
 #include "image.h"
 #include "pin_test.h"
+#include "login.h"
 
 /**The time period (in seconds) before the control key expires */
 #define CONTROL_TIMEOUT 180
 
-/**Contextual information related to FCGI requests*/
-struct FCGIContext {
-	/**The time of last valid user access possessing the control key*/
-	time_t control_timestamp;
-	char control_key[41];
-	char control_ip[16];
-	/**The name of the current module**/
-	const char *current_module;
-	/**For debugging purposes?**/
-	int response_number;
-};
+
 
 /**
  * Identifies build information and the current API version to the user.
@@ -94,7 +85,8 @@ void FCGI_LockControl(FCGIContext *context, bool force) {
 	time_t now = time(NULL);
 	bool expired = now - context->control_timestamp > CONTROL_TIMEOUT;
 	
-	if (force || !*(context->control_key) || expired) {
+	if (force || !*(context->control_key) || expired) 
+	{
 		SHA_CTX sha1ctx;
 		unsigned char sha1[20];
 		int i = rand();
@@ -108,18 +100,6 @@ void FCGI_LockControl(FCGIContext *context, bool force) {
 		for (i = 0; i < 20; i++)
 			sprintf(context->control_key + i * 2, "%02x", sha1[i]);
 		snprintf(context->control_ip, 16, "%s", getenv("REMOTE_ADDR"));
-		FCGI_BeginJSON(context, STATUS_OK);
-		FCGI_JSONPair("key", context->control_key);
-		FCGI_EndJSON();		
-	} else {
-		char buf[128];
-		strftime(buf, 128, "%H:%M:%S %d-%m-%Y",
-			localtime(&(context->control_timestamp))); 
-		FCGI_BeginJSON(context, STATUS_UNAUTHORIZED);
-		FCGI_JSONPair("description", "Another user already has control");
-		FCGI_JSONPair("current_user", context->control_ip); 
-		FCGI_JSONPair("when", buf);
-		FCGI_EndJSON();
 	}
 }
 
@@ -461,13 +441,17 @@ void * FCGI_RequestLoop (void *data)
 	while (FCGI_Accept() >= 0) {
 		
 		ModuleHandler module_handler = NULL;
-		char module[BUFSIZ], params[BUFSIZ];
+		char module[BUFSIZ], params[BUFSIZ], cookie[BUFSIZ];
 		
 		//strncpy doesn't zero-truncate properly
 		snprintf(module, BUFSIZ, "%s", getenv("DOCUMENT_URI_LOCAL"));
 		snprintf(params, BUFSIZ, "%s", getenv("QUERY_STRING"));
+		snprintf(cookie, BUFSIZ, "%s", getenv("COOKIE_STRING"));
 
 		Log(LOGDEBUG, "Got request #%d - Module %s, params %s", context.response_number, module, params);
+		Log(LOGDEBUG, "Cookie: %s", cookie);
+
+
 		
 		//Remove trailing slashes (if present) from module query
 		size_t lastchar = strlen(module) - 1;
@@ -493,15 +477,40 @@ void * FCGI_RequestLoop (void *data)
 			module_handler = Image_Handler;
 		} else if (!strcmp("pin", module)) { 
 			module_handler = Pin_Handler; // *Debug only* pin test module
+		} else if (!strcmp("bind", module)) {
+			module_handler = Login_Handler;
+		} else if (!strcmp("unbind", module)) {
+			module_handler = Logout_Handler;
 		}
 
 		context.current_module = module;
-		if (module_handler) {
+		context.response_number++;
+		
+
+
+		if (module_handler) 
+		{
+			if (module_handler != Login_Handler)
+			{
+				if (cookie[0] == '\0')
+				{
+					FCGI_RejectJSON(&context, "Please login.");
+					continue;
+				}
+				if (!FCGI_HasControl(&context, cookie))
+				{
+					FCGI_RejectJSON(&context, "Invalid control key.");
+					continue;	
+				}
+			}
+
 			module_handler(&context, params);
-		} else {
+		} 
+		else 
+		{
 			FCGI_RejectJSON(&context, "Unhandled module");
 		}
-		context.response_number++;
+		
 
 		
 	}

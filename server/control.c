@@ -15,7 +15,8 @@ typedef struct ControlData {
 
 ControlData g_controls = {CONTROL_STOP, PTHREAD_MUTEX_INITIALIZER, {0}};
 
-static bool PathExists(const char *path) {
+bool PathExists(const char *path) 
+{
 	FILE *fp = fopen(path, "r");
 	if (fp) {
 		fclose(fp);

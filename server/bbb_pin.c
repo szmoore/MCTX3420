@@ -272,7 +272,7 @@ bool ADC_Export(int pin)
 		return true;
 	}
 
-	sprintf(g_buffer, "%s/in_voltage%d_raw", g_options.adc_device_path, pin);
+	sprintf(g_buffer, "%s/in_voltage%d_raw", ADC_DEVICE_PATH, pin);
 	g_adc[pin].fd_value = open(g_buffer, O_RDONLY);
 	if (g_adc[pin].fd_value <0)
 	{
