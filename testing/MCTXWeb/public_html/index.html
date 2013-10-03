@@ -21,6 +21,10 @@
           return false;
         });
         
+        $("#logout").click(function () {
+          $("#logout").logout();
+        });
+        
         $("#main_controls").submit(function () {
           //Validate!
           return false;
@@ -52,7 +56,7 @@
         <div id="logout-container">
           <form action="#">
             <div>
-              <input type="button" name="logout" value="Logout">
+              <input type="button" id="logout" value="Logout">
             </div>
           </form>
         </div>

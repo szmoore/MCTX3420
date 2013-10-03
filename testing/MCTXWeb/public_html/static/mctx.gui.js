@@ -3,7 +3,7 @@
  */
 
 mctx = {};
-mctx.location = location.protocol + "//" + location.host;
+mctx.location = location.protocol + "//" + location.host + "/";
 mctx.api = mctx.location + "/api/";
 mctx.expected_api_version = 0;
 mctx.has_control = false;
@@ -177,6 +177,16 @@ $.fn.login = function () {
     out.text("Login request failed - connection issues.")
   });
 };
+
+$.fn.logout = function () {
+  $.ajax({
+    url : mctx.api + "unbind"
+  }).always(function () {
+    //Note: this only clears the nameless cookie
+    document.cookie = ""; 
+    window.location = mctx.location + "login.html";
+  });
+}
 
 $.fn.setErrorLog = function () {
   var url = mctx.api + "errorlog";
