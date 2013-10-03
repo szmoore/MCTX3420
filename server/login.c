@@ -168,9 +168,8 @@ void Login_Handler(FCGIContext * context, char * params)
 		return;
 	}
 
-	char * user = ""; // The username supplied through CGI
-	char * pass = ""; // The password supplied through CGI
-						//TODO: Make sure these are passed through HTTPS, *not* HTTP .... otherwise people can eavesdrop on the passwords
+	char * user; // The username supplied through CGI
+	char * pass; // The password supplied through CGI
 
 	FCGIValue values[] = {
 		{"user", &user, FCGI_REQUIRED(FCGI_STRING_T)},
@@ -191,16 +190,13 @@ void Login_Handler(FCGIContext * context, char * params)
 		return;
 	}
 
-
-	// Trim leading whitespace (the BUFSIZ check is to make sure incorrectly terminated strings don't cause an infinite loop)
+	// Trim leading whitespace
 	int i = 0;
-	for (i = 0; i < BUFSIZ && isspace(user[0]) && user[0] != '\0'; ++i,++user);
+	for (i = 0; isspace(user[0]) && user[0] != '\0'; ++i, ++user);
 
 	// Truncate string at first non alphanumeric character
-	for (i = 0; i < BUFSIZ && isalnum(user[i]) && user[i] != '\0'; ++i);
+	for (i = 0; isalnum(user[i]) && user[i] != '\0'; ++i);
 	user[i] = '\0';
-
-
 
 	
 	bool authenticated = true;
@@ -260,5 +256,5 @@ void Login_Handler(FCGIContext * context, char * params)
 	// Give the user a cookie
 	FCGI_PrintRaw("Content-type: text\r\n");
 	FCGI_PrintRaw("Set-Cookie: %s\r\n\r\n", context->control_key);
-	
+	FCGI_PrintRaw("Logged in");
 }
