@@ -220,6 +220,7 @@ void Login_Handler(FCGIContext * context, char * params)
 			if (len >= BUFSIZ)
 			{
 				FCGI_RejectJSON(context, "DN too long! Recompile with increased BUFSIZ");
+				return;
 			}
 		
 			authenticated = (Login_LDAP_Bind(g_options.auth_uri, dn, pass) == LDAP_SUCCESS);
@@ -247,6 +248,10 @@ void Login_Handler(FCGIContext * context, char * params)
 	{
 		if (FCGI_LockControl(context, false))
 		{
+			//Todo: change this to something better than the username if using LDAP.
+			snprintf(context->friendly_name, 31, "%s", user);
+			FCGI_EscapeText(context->friendly_name); //Don't break javascript pls
+
 			// Give the user a cookie
 			FCGI_AcceptJSON(context, "Logged in", context->control_key);
 		}

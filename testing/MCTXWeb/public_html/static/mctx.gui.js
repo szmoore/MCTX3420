@@ -60,27 +60,39 @@ function getDate(){
 	document.write((new Date()).toDateString());
 }
 
+/**
+ * Should be run before the load of any GUI page.
+ * To hook events to be called after this function runs,
+ * use the 'always' method, e.g runBeforeLoad().always(function() {my stuff});
+ * @param {type} isLoginPage
+ * @returns The return value of calling $.ajax
+ */
 function runBeforeLoad(isLoginPage) {
-  $.ajax({
+  return $.ajax({
     url : mctx.api + "identify"
   }).done(function (data) {
-    if (mctx.debug) {
-      debugLog("Redirect disabled!");
-    } else if (data.logged_in && isLoginPage) {
+    if (data.logged_in && isLoginPage) {
+      if (mctx.debug) {
+        debugLog("Redirect disabled!");
+      } else {
         window.location = mctx.location;
+      }
     } else if (!data.logged_in && !isLoginPage) {
-      //Note: this only clears the nameless cookie
-      document.cookie = ""; 
-      window.location = mctx.location + "login.html";
+      if (mctx.debug) {
+        debugLog("Redirect disabled!");
+      } else {
+        //Note: this only clears the nameless cookie
+        document.cookie = ""; 
+        window.location = mctx.location + "login.html";
+      }
     } else {
       mctx.friendlyName = data.friendly_name;
-      $("#content").css("display", "block");
     }
   }).fail(function (jqHXR) {
-    if (!isLoginPage) {
-      window.location = mctx.location + "login.html";
-    } else {
+    if (mctx.debug) {
       debugLog("Failed to ident server. Is API running?")
+    } else if (!isLoginPage) {
+      window.location = mctx.location + "login.html";
     }
   });
 }

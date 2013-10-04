@@ -14,25 +14,28 @@
     <link rel="stylesheet" type="text/css" href="static/style.css">
     <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
     <script type="text/javascript">
-      runBeforeLoad();
-      $(document).ready(function () {
-        //$("#menu-container").populateNavbar();
-        $("#login").submit(function () {
-          $("#login").login();
-          return false;
-        });
-        
-        $("#logout").click(function () {
-          $("#logout").logout();
-        });
-        
-        $("#main_controls").submit(function () {
-          //Validate!
-          return false;
-        });
-        
-        $("#errorlog").setErrorLog();
-      });
+      runBeforeLoad().always(function () {
+        $(document).ready(function () {
+         //Show the content!
+         $("#content").css("display", "block");
+         //Set the welcome bar
+         var name = " " + (mctx.friendlyName ? mctx.friendlyName : "");
+         $("#welcome-container").text("Welcome"+ name + "!");
+         //$("#menu-container").populateNavbar();
+
+         $("#logout").click(function () {
+           $("#logout").logout();
+         });
+
+         $("#main_controls").submit(function () {
+           //Validate!
+           return false;
+         });
+
+         $("#errorlog").setErrorLog();
+       });       
+      })
+
     </script>
   </head>
   
@@ -49,7 +52,6 @@
         <div id="menu-container" class="nav-menu">
         </div>
         <span id="welcome-container">
-          Welcome, Joe Bloggs!
         </span>
         <span id="date">
           <script type="text/javascript">getDate();</script>

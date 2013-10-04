@@ -33,7 +33,7 @@
  */ 
 static void IdentifyHandler(FCGIContext *context, char *params) {
 	bool ident_sensors = false, ident_actuators = false;
-
+	bool has_control = FCGI_HasControl(context, getenv("COOKIE_STRING"));
 	int i;
 
 	FCGIValue values[2] = {{"sensors", &ident_sensors, FCGI_BOOL_T},
@@ -45,8 +45,8 @@ static void IdentifyHandler(FCGIContext *context, char *params) {
 	FCGI_JSONPair("description", "MCTX3420 Server API (2013)");
 	FCGI_JSONPair("build_date", __DATE__ " " __TIME__);
 	FCGI_JSONLong("api_version", API_VERSION);
-	FCGI_JSONBool("logged_in", FCGI_HasControl(context, getenv("COOKIE_STRING")));
-	FCGI_JSONPair("friendly_name", "");
+	FCGI_JSONBool("logged_in", has_control);
+	FCGI_JSONPair("friendly_name", has_control ? context->friendly_name : "");
 
 	//Sensor and actuator information
 	if (ident_sensors) {
@@ -384,7 +384,7 @@ void FCGI_RejectJSONEx(FCGIContext *context, StatusCodes status, const char *des
 	FCGI_BeginJSON(context, status);
 	FCGI_JSONPair("description", description);
 	FCGI_JSONLong("responsenumber", context->response_number);
-	//FCGI_JSONPair("params", getenv("QUERY_STRING"));
+	//FCGI_JSONPair("params", getenv("QUERY_STRING")); //A bad idea if contains password but also if contains unescaped stuff
 	FCGI_JSONPair("host", getenv("SERVER_HOSTNAME"));
 	FCGI_JSONPair("user", getenv("REMOTE_USER"));
 	FCGI_JSONPair("ip", getenv("REMOTE_ADDR"));
@@ -480,9 +480,6 @@ void * FCGI_RequestLoop (void *data)
 		if (lastchar > 0 && module[lastchar] == '/')
 			module[lastchar] = 0;
 
-		//Escape all special characters
-		FCGI_EscapeText(params);
-
 		//Default to the 'identify' module if none specified
 		if (!*module) 
 			strcpy(module, "identify");
@@ -517,11 +514,16 @@ void * FCGI_RequestLoop (void *data)
 					FCGI_RejectJSON(&context, "Please login.");
 					continue;
 				}
+
 				if (!FCGI_HasControl(&context, cookie))
 				{
 					FCGI_RejectJSON(&context, "Invalid control key.");
 					continue;	
 				}
+
+				//Escape all special characters.
+				//Don't escape for login (password may have special chars?)
+				FCGI_EscapeText(params);
 			}
 
 			module_handler(&context, params);

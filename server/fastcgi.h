@@ -42,10 +42,14 @@ typedef struct FCGIValue {
 /**Contextual information related to FCGI requests*/
 typedef struct  
 {
-	/**The time of last valid user access possessing the control key*/
+	/**The time of last valid user access possessing the control key**/
 	time_t control_timestamp;
+	/**A SHA-1 hash that is the control key, determining who is logged in**/
 	char control_key[41];
+	/**The IPv4 address of the logged-in user**/
 	char control_ip[16];
+	/**A friendly name for the logged-in user. Max length 30**/
+	char friendly_name[31];
 	/**The name of the current module**/
 	const char *current_module;
 	/**For debugging purposes?**/
