@@ -4073,3 +4073,104 @@
 --- Day changed Wed Oct 02 2013
 17:34 -!- Rowan [~Rowan@106-68-70-204.dyn.iinet.net.au] has joined #mctxuwa_softdev
 21:54 -!- Rowan [~Rowan@106-68-70-204.dyn.iinet.net.au] has quit [Ping timeout]
+--- Day changed Thu Oct 03 2013
+09:30 -!- jtanx [~asfa@124-148-112-240.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:30 -!- jtanx [~asfa@124-148-112-240.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+09:32 -!- MctxBot_ [~twang@124.149.138.201] has joined #mctxuwa_softdev
+09:45 -!- Rowan [~Rowan@130.95.51.202] has joined #mctxuwa_softdev
+09:47 -!- MctxBot [~twang@124-148-112-240.dyn.iinet.net.au] has quit [Ping timeout]
+10:26 -!- MctxBot_ is now known as MctxBot
+10:37 -!- MctxBot [~twang@124.149.138.201] has quit ["leaving"]
+10:44 -!- MctxBot [~twang@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+10:45 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+10:45 < jtanx> finally
+11:02 -!- Rowan [~Rowan@130.95.51.202] has quit [EOF From client]
+12:09 < MctxBot> guh
+12:09 < MctxBot> crappy laptop keeps crashing
+12:17 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit [Ping timeout]
+12:20 -!- jtanx_ [~asfa@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+12:20 -!- jtanx_ is now known as jtanx
+12:28 < jtanx> about login_handler
+12:28 < jtanx> The result from FCGI_ParseRequest
+12:28 < jtanx> for string types
+12:28 < jtanx> should be treated as const char*
+12:29 < jtanx> I guess it really doesn't matter, unless it returns an empty string
+12:29 < jtanx> it's also not true that user/pass would be of max length BUFSIZ
+12:30 < jtanx> because of how it was defined, params has a max length of BUFSIZ
+12:30 < jtanx> but user/pass may be anywhere in that string
+12:30 < jtanx> so their max length < BUFSIZ
+12:30 < jtanx> so the bounds check makes no sense
+12:31 < jtanx> (sure, it prevents an infinite loop, but by that stage, you could be writing to locations where you don't want to anyway)
+12:31 < jtanx> besides, FCGI_ParseRequest should guarantee that they're null terminated
+12:38 < jtanx> also, whitespace (>.< :P)
+12:38 < sam_moore> True, but this is the whole "defensive" programming thing where you assume that some future unspecified developer is going to do something stupid and you attempt to minimise the damage they can cause :P
+12:38 < jtanx> while (*user && isspace(*user)) user++;
+12:38 < jtanx> char *ptr = user;
+12:38 < jtanx> while (*ptr && isalnum(*ptr)) ptr++;
+12:38 < jtanx> *ptr = 0;
+12:39 < jtanx> well
+12:39 < jtanx> by that stage you're screwed anyway
+12:39 < jtanx> not much point doing something that doesn't make sense too
+12:39 < sam_moore> You're more screwed if your program is writing to undefined locations in an infinite loop than if it's writing to a finite number of undefined locations
+12:39 < jtanx> still
+12:39 < jtanx> at least if it's infinite
+12:39 < jtanx> you'll know it crashes
+12:40 < jtanx> actually that's hardly the case
+12:40 < jtanx> because it will come across a zero at some point
+12:40 < jtanx> more often than not
+12:40 < jtanx> but anyway...
+12:40 < jtanx> does valgrind pick that up?
+12:41 < sam_moore> Hah
+12:41 < jtanx> and to be honest, by adding the BUFSIZ check, that's implying their max length when it's actually not
+12:41 < jtanx> which may be confusing in itself
+12:41 < sam_moore> The operating system should pick up a segfault on the first invalid write anyway
+12:41 < jtanx> unless
+12:41 < jtanx> the following region is writeable too
+12:42 < jtanx> eg you have a struct, members follow each other
+12:43 < sam_moore> If you really want to remove the bounds check go ahead
+12:43 < sam_moore> Either way that code does what it's meant to
+12:43 < jtanx> ok, well yeah
+12:44 < jtanx> hmm
+12:44 < jtanx> problem
+12:44 < jtanx> anyone can logout the currently logged in user
+12:44 < jtanx> oh wait
+12:45 < jtanx> sorry
+12:48 < sam_moore> My network is being terrible so I can't say much
+12:48 < sam_moore> One last argument in favour of the BUFSIZ check... if someone modifies the function that "should" be guaranteed to null terminate the string and doesn't... then you fall into an infinite loop
+12:49 < jtanx> well that's a case of too bad
+12:49 < jtanx> if it infinite loops
+12:49 < jtanx> then it shows you've done something wrong, so it'd be a good case to check what you've done
+12:50 < jtanx> if you hide that with a BUFSIZ check, you may not know there's a problem until later down the track
+12:50 < sam_moore> If you port the code to run in a kernel module or something, it's a case of instead of getting a seg fault, you suddenly wipe out all your memory
+12:50 < jtanx> with a kernel module, you'd be testing it pretty rigorously in a vm, i would think :P
+12:51 < sam_moore> Yeah, but it pays not to assume things about the sanity of other programmers
+12:51 < sam_moore> That's why all that extremely irritating "public, private" stuff is used
+12:52 < jtanx> to be honest, I'd rather have it fail fast than come up with weird issues that may/may not happen all the time
+12:52 < sam_moore> Anyway, just remove the bounds check, this is getting ridiciluos
+13:31 < jtanx> hmmm
+13:31 < jtanx> if ($http_cookie ~* "id=([^;] +)(?:;|$)" ) {
+13:31 < jtanx>   set  $id  $1;
+13:31 < jtanx> }
+13:32 < jtanx> right now, only the control key can be sent as the one and only cookie
+13:38 < jtanx> we could get nginx to extract the desired cookie
+14:33 < jtanx> actually nah
+15:02 -!- MctxBot [~twang@106-68-47-96.dyn.iinet.net.au] has quit [Ping timeout]
+16:27 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit [Connection reset by peer]
+21:16 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:17 < jtanx> herp derp
+21:17 < jtanx> was idling in mctxuwa
+21:17 < jtanx> not mctxuwa_softdev
+21:40 < jtanx> anyway...
+21:40 < jtanx> a (the) login/logout functionality is almost done for the gui
+21:40 < jtanx> to make it work, I need to add the identify module to the modules that doesn't need login
+21:41 < jtanx> also, maybe fields to indicate if logged in or not when ident is called + if logged in, a 'human friendly' name to display for the user
+22:34 < jtanx> ok
+22:34 < jtanx> it's just about done. It auto redirects you (via javascript) to the login page if you're logged out (and vice versa)
+22:34 < jtanx> this can be disabled for debugging purposes by changing mctx.debug=true in mctx.gui.js
+22:34 < jtanx> it works quite well, I think
+22:35 < jtanx> I still haven't implemented the whole 'friendly name' thing though
+22:35 < jtanx> (e.g the 'Welcome Joe Bloggs' with the actual user name or something)
+22:40 < jtanx> test at: https://mctx.us.to:8043/test/
+22:42 < jtanx> except now there's a logout bug grr...
+22:46 < jtanx> fixed
+23:32 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
