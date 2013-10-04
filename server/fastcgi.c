@@ -79,14 +79,14 @@ static void IdentifyHandler(FCGIContext *context, char *params) {
  * the system at any one time. The key can be forcibly generated, revoking
  * any previous control keys. To be used in conjunction with HTTP 
  * basic authentication.
- * This function will generate a JSON response that indicates success/failure.
  * @param context The context to work in
  * @param force Whether to force key generation or not.
- */ 
-void FCGI_LockControl(FCGIContext *context, bool force) {
+ * @return true on success, false otherwise (eg someone else already in control)
+ */
+bool FCGI_LockControl(FCGIContext *context, bool force) {
 	time_t now = time(NULL);
 	bool expired = now - context->control_timestamp > CONTROL_TIMEOUT;
-	
+
 	if (force || !*(context->control_key) || expired) 
 	{
 		SHA_CTX sha1ctx;
@@ -102,7 +102,9 @@ void FCGI_LockControl(FCGIContext *context, bool force) {
 		for (i = 0; i < 20; i++)
 			sprintf(context->control_key + i * 2, "%02x", sha1[i]);
 		snprintf(context->control_ip, 16, "%s", getenv("REMOTE_ADDR"));
+		return true;
 	}
+	return false;
 }
 
 /**
@@ -131,8 +133,6 @@ bool FCGI_HasControl(FCGIContext *context, const char *key) {
  */
 void FCGI_ReleaseControl(FCGIContext *context) {
 	*(context->control_key) = 0;
-	FCGI_BeginJSON(context, STATUS_OK);
-	FCGI_EndJSON();
 	return;
 }
 

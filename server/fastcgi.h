@@ -54,7 +54,7 @@ typedef struct
 
 typedef void (*ModuleHandler) (FCGIContext *context, char *params);
 
-extern void FCGI_LockControl(FCGIContext *context, bool force);
+extern bool FCGI_LockControl(FCGIContext *context, bool force);
 extern void FCGI_ReleaseControl(FCGIContext *context);
 extern bool FCGI_HasControl(FCGIContext *context, const char *key);
 extern char *FCGI_KeyPair(char *in, const char **key, const char **value);

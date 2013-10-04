@@ -149,8 +149,9 @@ int Login_LDAP_Bind(const char * uri, const char * dn, const char * pass)
  * @param params - Parameter string, UNUSED
  */
 void Logout_Handler(FCGIContext * context, char * params)
-{		
+{
 	FCGI_ReleaseControl(context);
+	FCGI_AcceptJSON(context, "Logged out", "0");
 }
 
 
@@ -161,13 +162,6 @@ void Logout_Handler(FCGIContext * context, char * params)
  */
 void Login_Handler(FCGIContext * context, char * params)
 {
-
-	if (context->control_key[0] != '\0')
-	{
-		FCGI_RejectJSON(context, "Someone is already logged in.");
-		return;
-	}
-
 	char * user; // The username supplied through CGI
 	char * pass; // The password supplied through CGI
 
@@ -251,8 +245,14 @@ void Login_Handler(FCGIContext * context, char * params)
 	}
 	else
 	{
-		FCGI_LockControl(context, false);
-		// Give the user a cookie
-		FCGI_AcceptJSON(context, "Logged in", context->control_key);
+		if (FCGI_LockControl(context, false))
+		{
+			// Give the user a cookie
+			FCGI_AcceptJSON(context, "Logged in", context->control_key);
+		}
+		else
+		{
+			FCGI_RejectJSON(context, "Someone else is already logged in");
+		}
 	}
 }
