@@ -4174,3 +4174,56 @@
 22:42 < jtanx> except now there's a logout bug grr...
 22:46 < jtanx> fixed
 23:32 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Fri Oct 04 2013
+14:50 -!- jtanx [~asfa@130.95.54.13] has joined #mctxuwa_softdev
+14:50 < jtanx> so i'm in uni right now
+14:50 < jtanx> and was playing with the webcam
+14:50 < jtanx> If I followed this: http://www.raspberrypi.org/phpBB3/viewtopic.php?t=35689&p=314596
+14:51 < jtanx> It actually displays something and not the black image
+14:51 < jtanx> the problem is that it only displays maybe the top 5% of the image
+14:51 < jtanx> the rest is nothing
+14:51 < jtanx> I think the next step from here is to try compiling the latest version of the uvcvideo driver ourselves
+14:51 < jtanx> see if it helps
+14:59 < jtanx> google 'uvcvideo beaglebone issues'
+14:59 < jtanx> I wonder how we didn't see that before
+15:00 < jtanx> http://e2e.ti.com/support/arm/sitara_arm/f/791/t/223368.aspx
+15:03 < jtanx> so many issues getting the camera to work
+15:03 < jtanx> https://groups.google.com/forum/#!msg/beagleboard/sgCwaP5RVUo/aFPBOk02A7IJ
+15:04 < jtanx> fwiw I'm not sure we'll be able to support cameras at all, at this rate
+15:04 < jtanx> although some seem to have success with UVC video. no idea why
+15:08 < jtanx> except I was testing it on angstrom 
+15:08 < jtanx> when i boot off the sd card, there's no modprobe and no rmmod
+15:08 < jtanx> tf
+15:08 < jtanx> wtf
+15:10 < jtanx> derp
+15:10 < jtanx> not root
+15:20 < jtanx> well crap, I got it working with ffmpeg
+15:20 < jtanx>  ffmpeg -f video4linux2 -input_format mjpeg -i /dev/video0 -vcodec copy o.mjpg
+15:21 < jtanx> along with the 'uvcvideo nodrop=1 timeout=5000 quriks=0x80'
+15:21 < jtanx> it spits out a bunch of warnings though
+15:26 < jtanx> ahh
+15:26 < jtanx> if set to rawvideo
+15:27 < jtanx> 640x480 is not supported
+15:27 < jtanx> it must be that it's such a large resolution that only mjpg is supported
+15:27 < jtanx> 320x240 works fine
+15:32 < jtanx> ah well
+15:32 < jtanx> that's alll for now
+15:32 -!- jtanx [~asfa@130.95.54.13] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+16:16 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:25 -!- MctxBot [~twang@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+22:15 < jtanx> I got user friendly names working
+22:15 < jtanx> 'except by user friendly I mean their usernames
+22:16 < jtanx> I guess for LDAP we could look up their real name? but I don't know how to do that.
+22:19 < sam_moore> I'm not sure how, but it can be done
+22:20 < sam_moore> However it's probably a fair amount of work
+22:20 < sam_moore> So I'd make it low priority
+22:20 < jtanx> yeah ok
+22:20 < sam_moore> Afterall, *they* know who they are
+22:20 < sam_moore> Good work with the camera
+22:20 < sam_moore> I'll be in tomorrow morning I guess
+22:20 < sam_moore> Working on another project now
+22:21 < jtanx> Yeah, the camera's still not finished though - it's really buggy and I only got it working with ffmpeg and not opencv
+22:21 < sam_moore> Anything is progress
+22:23 < sam_moore> 0/away
+22:24 < sam_moore> Stupid network lag
+23:13 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
