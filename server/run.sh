@@ -1,27 +1,24 @@
 #!/bin/bash
-# Use this to quickly test run the server in valgrind
-#spawn-fcgi -p9005 -n ./valgrind.sh
-# Use this to run the server normally
-#./stream &
+
+# Check existence of program
+if [ ! -e "server" ]; then
+        (echo "Rebuild server.") 1>&2;
+        exit 1
+fi
+
 
 if [[ "$(uname -m)" != *arm*  ]]; then
         echo Not running on the BBB
         # Use this to quickly test run the server in valgrind
         spawn-fcgi -p9005 -n ./valgrind.sh
         # Use this to run the server normally
-        #./stream &
+        #spawn-fcgi -p9005 -n ./server
         exit 0
 fi
 
 # Check running as root
 if [ "$(whoami)" != "root" ]; then
         (echo "Run $0 as root.") 1>&2
-        exit 1
-fi
-
-# Check existence of program
-if [ ! -e "server" ]; then
-        (echo "Rebuild server.") 1>&2;
         exit 1
 fi
 

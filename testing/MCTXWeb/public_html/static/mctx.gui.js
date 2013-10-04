@@ -3,12 +3,20 @@
  */
 
 mctx = {};
-mctx.api = location.protocol + "//" +  location.host + "/api/";
+//Don't use this in the final version
+mctx.location = window.location.pathname;
+mctx.location = mctx.location.substring(0, mctx.location.lastIndexOf('/')) + "/";
+//mctx.location = location.protocol + "//" + location.host + "/";
+mctx.api = location.protocol + "//" + location.host + "/" + "api/";
 mctx.expected_api_version = 0;
-mctx.key = undefined;
 mctx.has_control = false;
+//mctx.debug = true;
 
-mctx.return_codes = {
+mctx.statusCodes = {
+  STATUS_OK : 1
+}
+
+mctx.statusCodesDescription = {
   "1" : "Ok",
   "-1" : "General error",
   "-2" : "Unauthorized",
@@ -37,11 +45,44 @@ mctx.strain_gauges = {};
 mctx.strain_gauges.ids = [0, 1, 2, 3];
 mctx.strain_gauges.time_limit = 20;
 
+function debugLog (msg) {
+  if (typeof console === "undefined" || typeof console.log === "undefined") {
+    alert(msg);
+  } else {
+    console.log(msg);
+  }
+}
+
 /**
  * Writes the current date to wherever it's called.
  */
 function getDate(){
 	document.write((new Date()).toDateString());
+}
+
+function runBeforeLoad(isLoginPage) {
+  $.ajax({
+    url : mctx.api + "identify"
+  }).done(function (data) {
+    if (mctx.debug) {
+      debugLog("Redirect disabled!");
+    } else if (data.logged_in && isLoginPage) {
+        window.location = mctx.location;
+    } else if (!data.logged_in && !isLoginPage) {
+      //Note: this only clears the nameless cookie
+      document.cookie = ""; 
+      window.location = mctx.location + "login.html";
+    } else {
+      mctx.friendlyName = data.friendly_name;
+      $("#content").css("display", "block");
+    }
+  }).fail(function (jqHXR) {
+    if (!isLoginPage) {
+      window.location = mctx.location + "login.html";
+    } else {
+      debugLog("Failed to ident server. Is API running?")
+    }
+  });
 }
 
 /**
@@ -154,32 +195,45 @@ $.fn.setStrainGraphs = function () {
 $.fn.login = function () {
   var username = this.find("input[name='username']").val();
   var password = this.find("input[name='pass']").val();
-  var force = this.find("input[name='force']").is(":checked");
-  var url = mctx.api + "control";
-  
-  var authFunc = function(xhr) {
-    xhr.setRequestHeader("Authorization",
-        "Basic " + base64.encode(username + ":" + password));
+  var out = this.find("#result");
+  var redirect = function () {
+    window.location.href = mctx.location;
   };
-
+  
+  out.removeAttr("class");
+  out.text("Logging in...");
+  
   $.ajax({
-    url : url,
-    data : {action : "lock", force : (force ? true : undefined)},
-    beforeSend : authFunc
+    url : mctx.api + "bind",
+    data : {user: username, pass : password}
   }).done(function (data) {
-    mctx.key = data.key;
     if (data.status < 0) {
-      alert("no - " + data.description);
+      mctx.has_control = false;
+      out.attr("class", "fail");
+      out.text("Login failed: " + data.description);
     } else {
+      //todo: error check
       mctx.has_control = true;
-      alert("yes - " + mctx.key);
+      out.attr("class", "pass");
+      out.text("Login ok!");
+      setTimeout(redirect, 800);      
     }
   }).fail(function (jqXHR) {
-    mctx.key = undefined;
     mctx.has_control = false;
-    alert("no");
+    out.attr("class", "fail");
+    out.text("Login request failed - connection issues.")
   });
 };
+
+$.fn.logout = function () {
+  $.ajax({
+    url : mctx.api + "unbind"
+  }).always(function () {
+    //Note: this only clears the nameless cookie
+    document.cookie = ""; 
+    window.location = mctx.location + "login.html";
+  });
+}
 
 $.fn.setErrorLog = function () {
   var url = mctx.api + "errorlog";
