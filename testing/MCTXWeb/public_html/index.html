@@ -14,6 +14,7 @@
     <link rel="stylesheet" type="text/css" href="static/style.css">
     <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
     <script type="text/javascript">
+      runBeforeLoad();
       $(document).ready(function () {
         //$("#menu-container").populateNavbar();
         $("#login").submit(function () {
@@ -21,12 +22,15 @@
           return false;
         });
         
+        $("#logout").click(function () {
+          $("#logout").logout();
+        });
+        
         $("#main_controls").submit(function () {
           //Validate!
           return false;
         });
-        //$("#cam1").setCamera();
-        //$("#strain-graphs").setStrainGraphs();
+        
         $("#errorlog").setErrorLog();
       });
     </script>
@@ -53,7 +57,7 @@
         <div id="logout-container">
           <form action="#">
             <div>
-              <input type="button" name="logout" value="Logout">
+              <input type="button" id="logout" value="Logout">
             </div>
           </form>
         </div>
@@ -84,26 +88,6 @@
             Pressure level <input type="text" name="pressurelevel"><br>
             <input type="submit" value="Submit">
           </form>
-        </div>
-        
-        <!--Todo get rid of this and make a separate login page-->
-        <div class="widget">
-          <div class="title">Login</div>
-          <div class="item">
-            <form id="login" action="#">
-              <table class="centre">
-                <tr><td>Username</td><td><input name="username" type="text"></td></tr>
-                <tr><td>Password</td><td><input name="pass" type="password"></td></tr>
-                <tr>
-                  <td></td>
-                  <td>
-                    <input type="submit" value="Submit">
-                    <input type="checkbox" name="force"> Force
-                  </td>
-                </tr>
-              </table>
-            </form>
-          </div>
         </div>
       </div>
       <!-- End sidebar -->

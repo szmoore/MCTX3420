@@ -149,8 +149,9 @@ int Login_LDAP_Bind(const char * uri, const char * dn, const char * pass)
  * @param params - Parameter string, UNUSED
  */
 void Logout_Handler(FCGIContext * context, char * params)
-{		
+{
 	FCGI_ReleaseControl(context);
+	FCGI_AcceptJSON(context, "Logged out", "0");
 }
 
 
@@ -161,16 +162,8 @@ void Logout_Handler(FCGIContext * context, char * params)
  */
 void Login_Handler(FCGIContext * context, char * params)
 {
-
-	if (context->control_key[0] != '\0')
-	{
-		FCGI_RejectJSON(context, "Already logged in.");
-		return;
-	}
-
-	char * user = ""; // The username supplied through CGI
-	char * pass = ""; // The password supplied through CGI
-						//TODO: Make sure these are passed through HTTPS, *not* HTTP .... otherwise people can eavesdrop on the passwords
+	char * user; // The username supplied through CGI
+	char * pass; // The password supplied through CGI
 
 	FCGIValue values[] = {
 		{"user", &user, FCGI_REQUIRED(FCGI_STRING_T)},
@@ -191,16 +184,13 @@ void Login_Handler(FCGIContext * context, char * params)
 		return;
 	}
 
-
-	// Trim leading whitespace (the BUFSIZ check is to make sure incorrectly terminated strings don't cause an infinite loop)
+	// Trim leading whitespace
 	int i = 0;
-	for (i = 0; i < BUFSIZ && isspace(user[0]) && user[0] != '\0'; ++i,++user);
+	for (i = 0; isspace(user[0]) && user[0] != '\0'; ++i, ++user);
 
 	// Truncate string at first non alphanumeric character
-	for (i = 0; i < BUFSIZ && isalnum(user[i]) && user[i] != '\0'; ++i);
+	for (i = 0; isalnum(user[i]) && user[i] != '\0'; ++i);
 	user[i] = '\0';
-
-
 
 	
 	bool authenticated = true;
@@ -251,14 +241,18 @@ void Login_Handler(FCGIContext * context, char * params)
 	
 	if (!authenticated)
 	{
-		FCGI_RejectJSON(context, "Authentication failure.");
-		return;
+		FCGI_RejectJSONEx(context, STATUS_UNAUTHORIZED, "Authentication failure.");
 	}
-
-	FCGI_LockControl(context, false);
-	
-	// Give the user a cookie
-	FCGI_PrintRaw("Content-type: text\r\n");
-	FCGI_PrintRaw("Set-Cookie: %s\r\n\r\n", context->control_key);
-	
+	else
+	{
+		if (FCGI_LockControl(context, false))
+		{
+			// Give the user a cookie
+			FCGI_AcceptJSON(context, "Logged in", context->control_key);
+		}
+		else
+		{
+			FCGI_RejectJSON(context, "Someone else is already logged in");
+		}
+	}
 }

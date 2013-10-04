@@ -54,12 +54,13 @@ typedef struct
 
 typedef void (*ModuleHandler) (FCGIContext *context, char *params);
 
-extern void FCGI_LockControl(FCGIContext *context, bool force);
+extern bool FCGI_LockControl(FCGIContext *context, bool force);
 extern void FCGI_ReleaseControl(FCGIContext *context);
 extern bool FCGI_HasControl(FCGIContext *context, const char *key);
 extern char *FCGI_KeyPair(char *in, const char **key, const char **value);
 extern bool FCGI_ParseRequest(FCGIContext *context, char *params, FCGIValue values[], size_t count);
 extern void FCGI_BeginJSON(FCGIContext *context, StatusCodes status_code);
+extern void FCGI_AcceptJSON(FCGIContext *context, const char *description, const char *cookie);
 extern void FCGI_JSONPair(const char *key, const char *value);
 extern void FCGI_JSONLong(const char *key, long value);
 extern void FCGI_JSONDouble(const char *key, double value);
