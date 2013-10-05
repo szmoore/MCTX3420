@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
   <head>
-    <title>BeagleBone Black Pin Test</title>
+    <title>MCTX3420 Web Interface</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <!--[if lte IE 8]>
       <script language="javascript" type="text/javascript" src="static/excanvas.min.js"></script>
@@ -15,23 +15,54 @@
     <link rel="stylesheet" type="text/css" href="static/style.css">
     <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
     <script type="text/javascript">
-      $(document).ready(function () {
-        $("#errorlog").setErrorLog();
-        $("#gpio-menu").populateDropdown(mctx.pintest.gpios, "GPIO ");
-        $("#pwm-menu").populateDropdown(mctx.pintest.pwms, "PWM ");
+      runBeforeLoad().done(function () {
+        //Ensure stuff is unloaded before leaving the page
+        $(window).unload(function(){
+          $("#adc-controls").find("input[type='checkbox']")
+          .each(function () {
+            if ($(this).is(":checked")) {
+              $(this).trigger("click");
+            }
+          });
+          $("#gpio-container").find("input[name='unexport']")
+          .each(function () {
+            $(this).trigger("click");
+          });
+          $("#pwm-container").find("input[name='unexport']")
+          .each(function () {
+            $(this).trigger("click");
+          });
+        });
         
-        $("#gpio-go").click(function () {
-          if ($("#gpio-menu").val()) {
-            $("#gpio-container").exportGPIO($("#gpio-menu"));
-          }
-        });
-        $("#pwm-go").click(function () {
-          if ($("#pwm-menu").val()) {
-            $("#pwm-container").exportPWM($("#pwm-menu"));
-          }
-        });
-        $("#adc-controls").trigger("reset").setADCControl();
-      });
+        $(document).ready(function () {
+         //Set the welcome bar
+         var name = " " + (mctx.friendlyName ? mctx.friendlyName : "");
+         $("#welcome-container").text("Welcome"+ name + "!");
+         $("#content").css("display", "block");
+
+         $("#logout").click(function () {
+           $("#logout").logout();
+         });
+
+         $("#gpio-menu").populateDropdown(mctx.pintest.gpios, "GPIO ");
+         $("#pwm-menu").populateDropdown(mctx.pintest.pwms, "PWM ");
+
+         $("#gpio-go").click(function () {
+           if ($("#gpio-menu").val()) {
+             $("#gpio-container").exportGPIO($("#gpio-menu"));
+           }
+         });
+         $("#pwm-go").click(function () {
+           if ($("#pwm-menu").val()) {
+             $("#pwm-container").exportPWM($("#pwm-menu"));
+           }
+         });
+         $("#adc-controls").trigger("reset").setADCControl();
+
+         $("#errorlog").setErrorLog();
+       });
+      })
+
     </script>
   </head>
   
@@ -42,14 +73,23 @@
           <img alt = "The University of Western Australia"
           src="static/uwacrest-text.png">
         </a>
-        <span id="title">BBB pin test</span>
+        <span id="title">BBB Pin test (debug only)</span>
       </div>
       <div id="rightnav">
         <div id="menu-container" class="nav-menu">
         </div>
+        <span id="welcome-container">
+        </span>
         <span id="date">
           <script type="text/javascript">getDate();</script>
         </span>
+        <div id="logout-container">
+          <form action="#">
+            <div>
+              <input type="button" id="logout" value="Logout">
+            </div>
+          </form>
+        </div>
       </div>
       <div class="clear"></div>
     </div>
