@@ -49,12 +49,18 @@
 
          $("#gpio-go").click(function () {
            if ($("#gpio-menu").val()) {
-             $("#gpio-container").exportGPIO($("#gpio-menu"));
+             $(this).attr("disabled", true);
+             $("#gpio-container").exportGPIO($("#gpio-menu")).always(function () {
+               $("#gpio-go").attr("disabled", false);
+             });
            }
          });
          $("#pwm-go").click(function () {
            if ($("#pwm-menu").val()) {
-             $("#pwm-container").exportPWM($("#pwm-menu"));
+             $(this).attr("disabled", true);
+             $("#pwm-container").exportPWM($("#pwm-menu")).always(function () {
+               $("#pwm-go").attr("disabled", false);
+             });
            }
          });
          $("#adc-controls").trigger("reset").setADCControl();
