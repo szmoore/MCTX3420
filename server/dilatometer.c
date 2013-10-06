@@ -8,13 +8,6 @@
 #include "dilatometer.h"
 #include <math.h>
 
-/*-------------------------------------------------------------------
-
-compile with:
--I/usr/include/opencv -I/usr/include/opencv2/highgui -L/usr/lib -lopencv_highgui -lopencv_core -lopencv_ml -lopencv_imgproc -std=c99 -Wall -pedantic 
-
---------------------------------------------------------------------*/
-
 /** Buffer for storing image data. Stored as a  **/
 static CvMat * g_data = NULL;
 
