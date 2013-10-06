@@ -1,5 +1,11 @@
 /**
  * MCTX3420 2013 GUI stuff.
+ * Coding style:
+ *  - Always end statements with semicolons
+ *  - Egyptian brackets are highly recommended (*cough*).
+ *  - Don't use synchronous stuff - hook events into callbacks
+ *  - $.fn functions should return either themselves or some useful object
+ *    to allow for chaining of method calls
  */
 
 mctx = {};
@@ -14,7 +20,7 @@ mctx.has_control = false;
 
 mctx.statusCodes = {
   STATUS_OK : 1
-}
+};
 
 mctx.statusCodesDescription = {
   "1" : "Ok",
@@ -45,18 +51,28 @@ mctx.strain_gauges = {};
 mctx.strain_gauges.ids = [0, 1, 2, 3];
 mctx.strain_gauges.time_limit = 20;
 
-function debugLog (msg) {
-  if (typeof console === "undefined" || typeof console.log === "undefined") {
-    alert(msg);
-  } else {
-    console.log(msg);
+/**
+ * Logs a message if mctx.debug is enabled. This function takes
+ * a variable number of arguments and passes them 
+ * to alert or console.log (based on browser support).
+ * @returns {undefined}
+ */
+function debugLog () {
+  if (mctx.debug) {
+    if (typeof console === "undefined" || typeof console.log === "undefined") {
+      for (var i = 0; i < arguments.length; i++) {
+        alert(arguments[i]);
+      }
+    } else {
+      console.log.apply(this, arguments);
+    }
   }
 }
 
 /**
  * Writes the current date to wherever it's called.
  */
-function getDate(){
+function getDate() {
 	document.write((new Date()).toDateString());
 }
 
@@ -143,6 +159,7 @@ $.fn.populateNavbar = function () {
 
 /**
  * Sets the camera autoupdater
+ * Obsolete?
  * @returns {$.fn}
  */
 $.fn.setCamera = function () {
@@ -172,6 +189,10 @@ $.fn.setCamera = function () {
   return this;
 };
 
+/**
+ * Sets the strain graphs to graph stuff. Obsolete?
+ * @returns {$.fn}
+ */
 $.fn.setStrainGraphs = function () {
   var sensor_url = mctx.api + "sensors";
   var graphdiv = this;
@@ -204,6 +225,9 @@ $.fn.setStrainGraphs = function () {
   return this;
 };
 
+/**
+ * Performs a login attempt.
+ * @returns The AJAX object of the login request */
 $.fn.login = function () {
   var username = this.find("input[name='username']").val();
   var password = this.find("input[name='pass']").val();
@@ -215,7 +239,7 @@ $.fn.login = function () {
   out.removeAttr("class");
   out.text("Logging in...");
   
-  $.ajax({
+  return $.ajax({
     url : mctx.api + "bind",
     data : {user: username, pass : password}
   }).done(function (data) {
@@ -237,16 +261,25 @@ $.fn.login = function () {
   });
 };
 
+/**
+ * Performs a logout request. The nameless cookie is
+ * always cleared and the browser redirected to the login page,
+ * independent of whether or not logout succeeded.
+ * @returns  The AJAX object of the logout request.
+ */
 $.fn.logout = function () {
-  $.ajax({
+  return $.ajax({
     url : mctx.api + "unbind"
   }).always(function () {
     //Note: this only clears the nameless cookie
     document.cookie = ""; 
     window.location = mctx.location + "login.html";
   });
-}
+};
 
+/**
+ * Sets the error log to continuously update.
+ * @returns itself */
 $.fn.setErrorLog = function () {
   var url = mctx.api + "errorlog";
   var outdiv = this;
@@ -257,16 +290,17 @@ $.fn.setErrorLog = function () {
       outdiv.scrollTop(
         outdiv[0].scrollHeight - outdiv.height()
       );
-      setTimeout(updater, 1000);
+      setTimeout(updater, 2000);
     }).fail(function (jqXHR) {
       if (jqXHR.status === 502 || jqXHR.status === 0) {
         outdiv.text("Failed to retrieve the error log.");
       }
-      setTimeout(updater, 1500);
+      setTimeout(updater, 4000);
     });
   };
   
   updater();
+  return this;
 };
 
 $(document).ajaxError(function (event, jqXHR) {

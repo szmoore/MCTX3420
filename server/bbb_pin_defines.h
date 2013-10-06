@@ -123,7 +123,6 @@
 #define GPIO_MAX_NUMBER 115
 
 /* Luts */
-extern const unsigned char g_pin_real_to_gpio[BBB_PIN_COUNT+1];
 extern const unsigned char g_pin_gpio_to_index[GPIO_MAX_NUMBER+1];
 extern const unsigned char g_pin_index_to_gpio[GPIO_NUM_PINS];
 
@@ -156,14 +155,8 @@ extern const unsigned char g_pin_index_to_gpio[GPIO_NUM_PINS];
 /** Number of PWM pins **/
 #define PWM_NUM_PINS 8
 
-/** Number of PWM pins which are guaranteed not to interfere with one another **/
-#define PWM_NUM_SAFE_PINS 5
-
 /** Path to PWM sysfs **/
 #define PWM_DEVICE_PATH "/sys/class/pwm"
-
-/** Maps internal pin number to safe 'pwmX' number **/
-extern const unsigned char g_pin_safe_pwm[PWM_NUM_SAFE_PINS];
 
 #endif //_BBB_PIN_DEFINES_H
 
