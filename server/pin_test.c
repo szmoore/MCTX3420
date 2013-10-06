@@ -27,7 +27,7 @@ void Pin_Close()
 		ADC_Unexport(i);
 
 	for (int i = 0; i < PWM_NUM_PINS; ++i)
-		PWM_Unexport(g_pin_safe_pwm[i]);
+		PWM_Unexport(i);
 }
 
 bool Pin_Configure(const char *type, int pin_export, int num)
