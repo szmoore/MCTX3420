@@ -4240,3 +4240,110 @@
 13:17 -!- MctxBot [~twang@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
 18:06 < jtanx> now... to do some work on this gui
 21:15 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Sun Oct 06 2013
+08:52 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+11:17 < jtanx> slight problem: http://i.imgur.com/D28SHaQ.png
+11:17 < jtanx> 100% cpu usage on idle
+11:18 < jtanx> that memory usage too doesn't look too healthy
+11:18 < sam_moore> Damn
+11:20 < jtanx> I also probably figured out why valgrind crashes with the --trace-origins option - not enough memory on my system :P
+11:30 < jtanx> It's probably because in read data all the cases except one have a sleep in them
+11:31 < sam_moore> I'd say so
+11:31 < sam_moore> There are like 8 threads
+11:31 < sam_moore> We don't need 8 threads
+11:39 < sam_moore> Are you in G19?
+11:39 < jtanx> no
+11:40 < sam_moore> Alright
+11:40 < sam_moore> I suppose I should do some work on this
+11:40 < sam_moore> CITS3003 is funner though
+11:40 < sam_moore> I'll look into the performance issues
+11:41 < jtanx> hehe
+11:42 < sam_moore> My "Incident" with UWA IS is now Moderate Priority
+11:42 < sam_moore> It's been assigned!
+11:42 < sam_moore> I suppose I should wait for this guy to email me and say "What the hell are you on about?"
+11:42 < sam_moore> (Re: Using Pheme)
+11:42 < sam_moore> They classified it as a "Request for service"
+11:43 < sam_moore> Which I suppose is true, except they don't really have to do anything
+11:43 < jtanx> o.o
+11:44 < jtanx> I hope it goes through
+11:44 < sam_moore> Yes, no one's going to do a user management system
+11:44 < jtanx> Yep
+11:44 < sam_moore> When people complain they have nothing to do though...
+11:44 < sam_moore> That's like a semester of work right there
+12:40 < sam_moore> um... that image you linked
+12:40 < sam_moore> That's not actually running on the BeagleBone is it?
+12:40 < sam_moore> Because on the BeagleBone
+12:40 < sam_moore> It's like 0.7%
+12:41 < sam_moore> Actually 0.3% CPU 1.1% memory
+12:50 < jtanx> no
+12:50 < jtanx> that's because there's a conditional #ifdef
+12:50 < jtanx> beaglebone to sleep
+12:50 < jtanx> I got that condition around the wrong way
+12:50 < jtanx> Initially I thought you wanted to test the absolute maximum sampling rate on the BBB
+12:53 < jtanx> I just updated the repo to really remove that pwm array reference
+12:54 < jtanx> (about the cpu) It's because of this: https://github.com/szmoore/MCTX3420/blob/master/server/sensor.c#L257
+12:55 < jtanx> That ifdef should be removed anyway, just put in an unconditional sleep for 0.1s
+12:55 < jtanx> then remove the individual sleeps from each sensor case
+13:17 < sam_moore> Sure
+13:17 < sam_moore> Light has been shed on the PWM thing
+13:18 < sam_moore> They are using some RC circuit which I believe averages out the PWM to give you a constant signal
+13:18 < sam_moore> I thought it was some kind of IC that took a PWM input
+13:21 < jtanx> oh ok
+13:22 < jtanx> yeah that's what I thought too
+13:22 < jtanx> so no dac I guess
+13:22 < jtanx> (dac ic that is)
+13:24 < sam_moore> I have my doubts that electronics will be able to make this custom DAC
+13:24 < sam_moore> And of course, no DAC means no Pressure control
+13:24 < sam_moore> But oh well
+13:24 < jtanx> ^_^
+13:24 < jtanx> homebrew DAC
+13:25 < jtanx> how will this ever be calibrated
+13:26 < sam_moore> We should probably include a calibration routine in software
+13:27 < sam_moore> I'm looking a bit more into the RT linux stuff
+13:27 < sam_moore> It doesn't look too crazy
+13:27 < sam_moore> Our program pretty much looks the same
+13:27 < sam_moore> With a function at initialisation to set it's priority and stuff
+13:27 < sam_moore> But otherwise, you just use usleep, sleep, pthreads, everything as normal
+13:28 < jtanx> ok
+13:28 < jtanx> as long as it works on the bbb I guess
+13:30 < sam_moore> I think I should port from gettimeofday to clock_gettime too
+13:35 < sam_moore> https://rt.wiki.kernel.org/index.php/RT_PREEMPT_HOWTO
+13:35 < sam_moore> I'll compile us a kernel and see if it works
+13:46 -!- Callum [~chatzilla@106-69-25-112.dyn.iinet.net.au] has joined #mctxuwa_softdev
+14:09 < sam_moore> Yeah, it looks like RT Linux won't work on the BBB
+14:09 < sam_moore> Oh well
+14:17 < jtanx> damn
+15:34 < Callum> Hey guys, sorry i havent been in touch lately. done a bit of work on dilatometer but its not quite complete.  Uploaded what iv done but i got a test i tomorrow i should go study for now
+16:29 < jtanx> hahaha
+16:30 < jtanx> interactive sbd
+16:31 < jtanx> hmm dialatometer
+16:45 < jtanx> Justin's idea with the system diagram was pretty good
+16:55 < jtanx> test run: https://mctx.us.to:8043/test/
+16:55 < jtanx> no links yet
+16:55 < jtanx> no descriptions either
+16:55 < jtanx> logout when you're done
+16:55 < jtanx> no auth so type anything you want in login field
+17:24 < Callum> looks pretty good
+17:27 -!- Rowan [~Rowan@130.95.133.71] has joined #mctxuwa_softdev
+17:44 -!- MctxBot [~twang@106-68-47-96.dyn.iinet.net.au] has quit ["leaving"]
+17:47 -!- MctxBot [~twang@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+17:49 -!- MctxBot [~twang@106-68-47-96.dyn.iinet.net.au] has quit ["again"]
+18:12 < jtanx> I stuffed up /etc/fstab and now the root filesystem is readonly :(
+18:19 < jtanx> ...and I just wasted time booting off ubuntu 7.04, which doesn't support ext4...
+18:30 -!- Callum_ [~chatzilla@106-69-19-128.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:42 -!- Callum [~chatzilla@106-69-25-112.dyn.iinet.net.au] has quit [Ping timeout]
+18:43 -!- Callum_ is now known as Callum
+18:52 -!- MctxBot [~twang@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+19:30 < jtanx> I've just enabled personal webspace for everyone
+19:30 < jtanx> check your emails for details
+19:35 -!- Callum [~chatzilla@106-69-19-128.dyn.iinet.net.au] has quit [EOF From client]
+19:50 -!- Rowan [~Rowan@130.95.133.71] has quit [Ping timeout]
+19:52 < jtanx> :(
+21:11 < sam_moore> Cool
+21:11 < sam_moore> Sorry, I'm trying to finish CITS3003
+21:14 -!- Rowan [~Rowan@106-68-70-204.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:25 < jtanx> Yep no problem
+21:38 < jtanx> nice: http://cssmenumaker.com
+22:09 < jtanx> weird, getting http 500 when trying to access our github repo
+23:16 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+23:27 -!- Rowan [~Rowan@106-68-70-204.dyn.iinet.net.au] has quit [EOF From client]
