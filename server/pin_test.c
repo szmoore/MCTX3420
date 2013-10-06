@@ -175,7 +175,7 @@ void Pin_Handler(FCGIContext *context, char * params)
 	}
 	else if (strcmp(type, "pwm") == 0)
 	{
-		if (num < 0 || num >= PWM_NUM_SAFE_PINS)
+		if (num < 0 || num >= PWM_NUM_PINS)
 		{
 			FCGI_RejectJSON(context, "Invalid PWM pin");
 			return;
@@ -201,7 +201,7 @@ void Pin_Handler(FCGIContext *context, char * params)
 		else
 		{
 			Log(LOGDEBUG, "Stopping PWM%d",num);
-			PWM_Stop(g_pin_safe_pwm[num]);
+			PWM_Stop(num);
 			FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
 			FCGI_PrintRaw("PWM%d stopped",num);
 		}		
