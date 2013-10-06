@@ -27,7 +27,7 @@ $.fn.exportGPIO = function(menu) {
   var number = menu.val();
   var container = this;
   
-  $.ajax({url : mctx.pintest.api, data : {type : "gpi", num : number, export : 1}})
+  return $.ajax({url : mctx.pintest.api, data : {type : "gpi", num : number, export : 1}})
   .done(function () {
     var form = $("<form/>", {"class" : "controls", action : "#", id : "gpio-" + number});
     var title = $("<div/>", {"class" : "centre bold", text : "GPIO " + number});
@@ -60,14 +60,13 @@ $.fn.exportGPIO = function(menu) {
     alert("Failed to export GPIO " + number + ". Is the server running?\n" +
           "Error code: " + jqXHR.status);
   });
-  return this;
 };
 
 $.fn.exportPWM = function(menu) {
   var number = menu.val();
   var container = this;
  
-  $.ajax({url : mctx.pintest.api, data : {type : "pwm", num : number, export : "1"}})
+  return $.ajax({url : mctx.pintest.api, data : {type : "pwm", num : number, export : "1"}})
   .done(function () {
     var form = $("<form/>", {"class" : "controls", action : "#", id : "pwm-" + number});
     var title = $("<div/>", {"class" : "centre bold", text : "PWM " + number});
@@ -106,7 +105,6 @@ $.fn.exportPWM = function(menu) {
     alert("Failed to export PWM " + number + ". Is the server running?\n" +
           "Error code: " + jqXHR.status);
   });
-  return this;
 };
 
 $.fn.setGPIOControl = function (number, menu) {

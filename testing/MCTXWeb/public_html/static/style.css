@@ -176,7 +176,7 @@ input[type="text"]:focus, input[type="password"]:focus {
 
 #content  {
   padding: 1em 2em;
-  /* display: none;  Enable in non-debug mode*/
+  /*display: none;  Enable in non-debug mode*/
 }
 
 #sidebar{
