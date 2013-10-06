@@ -37,6 +37,10 @@ a:active {
   color: #0066BB;
 }
 
+img {
+  border: none;
+}
+
 .pass {
   color: #7AE309;
   font-weight: bold;
@@ -49,6 +53,7 @@ a:active {
 
 div.centre {
   text-align: center;
+  margin: auto;
 }
 
 .bold {
@@ -170,6 +175,11 @@ input[type="text"]:focus, input[type="password"]:focus {
   display: inline-block;
 }
 
+#header #logout-container {
+  /* Hide until activated by JavaScript */
+  display: none;
+}
+
 #header #date {
   font-size: 12px;
 }
@@ -186,7 +196,6 @@ input[type="text"]:focus, input[type="password"]:focus {
 
 #sidebar .title {
   font-size: 20px;
-  font-weight: bold;
 }
 
 #sidebar .item {
@@ -200,16 +209,16 @@ input[type="text"]:focus, input[type="password"]:focus {
   min-width: 400px;
 }
 
-#main .title {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 0.5em;
-}
-
 #main .sub-title {
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 0.25em;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 0.5em;
 }
 
 .graph {
