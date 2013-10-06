@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="550"
+   height="300"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.1 "
+   sodipodi:docname="sbd.svg"
+   inkscape:export-filename="C:\Documents and Settings\tanjj\My Documents\2013\MCTX3420\sbd2.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.55900001"
+     inkscape:cx="108.64221"
+     inkscape:cy="-15.359074"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer2"
+     showgrid="false"
+     inkscape:window-width="1024"
+     inkscape:window-height="712"
+     inkscape:window-x="-4"
+     inkscape:window-y="-4"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Overlays"
+     style="display:inline"
+     sodipodi:insensitive="true">
+    <path
+       transform="translate(0,-752.36218)"
+       style="fill:#000000;fill-opacity:1;stroke:none"
+       d="m 231.125,783.23716 0,68.3125 -115.125,0 0,194.81254 407.3125,0 0,-165.71879 0,-29.09375 0,-68.3125 -292.1875,0 z"
+       id="rect4101"
+       inkscape:connector-curvature="0" />
+    <rect
+       transform="translate(0,-752.36218)"
+       style="fill:#00a1d1;fill-opacity:1;stroke:none"
+       id="rect4106"
+       width="341"
+       height="119"
+       x="116"
+       y="927.36218" />
+  </g>
+  <g
+     inkscape:label="System Block Diagram"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-752.36218)">
+    <path
+       style="fill:none;stroke:#ae3707;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 237.57213,820.31959 -60.57626,0"
+       id="path4339"
+       inkscape:connector-curvature="0" />
+    <g
+       id="g4067"
+       transform="matrix(0.99802066,0,0,0.99606872,38.092325,-14.387791)">
+      <rect
+         y="813.64459"
+         x="39.946739"
+         height="49.19833"
+         width="99.198326"
+         id="rect2985"
+         style="fill:#e04608;fill-opacity:1;stroke:#962f05;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+      <text
+         id="text3016"
+         y="844.49719"
+         x="54.183109"
+         style="font-size:18px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+         xml:space="preserve"><tspan
+           y="844.49719"
+           x="54.183109"
+           id="tspan3018"
+           sodipodi:role="line">Client PC</tspan></text>
+    </g>
+    <path
+       style="fill:none;stroke:#84be07;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 397.57858,820.31959 -60.47537,0"
+       id="path4337"
+       inkscape:connector-curvature="0" />
+    <path
+       id="path4335"
+       style="fill:none;stroke:#84be07;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 443.22018,882.93139 -105.78364,0 m 61.83125,36.22541 0,16.48006 m 44.27549,-90.38436 0,73.45707 -264.7585,0 0,16.99929"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccccc" />
+    <path
+       style="fill:none;stroke:#04455e;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 61.982525,206.4321 0,-21.5425 -55.6577776,0 0,108.15318 508.5096926,0 0,-225.793486 -17.59071,0"
+       id="path4095"
+       inkscape:connector-curvature="0"
+       transform="translate(0,752.36218)"
+       sodipodi:nodetypes="ccccccc" />
+    <g
+       id="g4062"
+       transform="matrix(0.99801079,0,0,0.99606882,43.233434,-12.459269)">
+      <rect
+         style="fill:#e04608;fill-opacity:1;stroke:#962f05;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+         id="rect2987"
+         width="99.198326"
+         height="49.19833"
+         x="195.01532"
+         y="811.70837" />
+      <text
+         id="text3020"
+         y="840.51752"
+         x="197.97971"
+         style="font-size:18px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+         xml:space="preserve"><tspan
+           y="840.51752"
+           x="197.97971"
+           id="tspan3022"
+           sodipodi:role="line">Beaglebone</tspan></text>
+    </g>
+    <g
+       id="g4046"
+       transform="matrix(0.99804036,0,0,0.99602925,277.71048,-77.796731)">
+      <rect
+         style="fill:#9ce008;fill-opacity:1;stroke:#77ab06;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+         id="rect2991"
+         width="99.198326"
+         height="49.19833"
+         x="120.48514"
+         y="877.34003" />
+      <text
+         id="text3024"
+         y="896.94263"
+         x="169.71077"
+         style="font-size:18px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+         xml:space="preserve"><tspan
+           y="896.94263"
+           x="169.71077"
+           id="tspan3026"
+           sodipodi:role="line">Electronics</tspan><tspan
+           id="tspan3028"
+           y="919.44263"
+           x="169.71077"
+           sodipodi:role="line">board</tspan></text>
+    </g>
+    <g
+       id="g4057"
+       transform="matrix(0.99802066,0,0,0.99606872,-46.971827,-18.856246)">
+      <rect
+         y="878.367"
+         x="285.49692"
+         height="49.19833"
+         width="99.198326"
+         id="rect2989"
+         style="fill:#08a5e0;fill-opacity:1;stroke:#0788b8;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+      <text
+         id="text3030"
+         y="909.2196"
+         x="334.72253"
+         style="font-size:18px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+         xml:space="preserve"><tspan
+           y="909.2196"
+           x="334.72253"
+           id="tspan3032"
+           sodipodi:role="line">Pneumatics</tspan></text>
+    </g>
+    <path
+       id="path4343"
+       style="fill:none;stroke:#078ec0;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 283.83442,1016.2051 -56.7491,0 m 57.24508,-110.80054 0,110.80054 62.61181,0"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc" />
+    <g
+       id="g3091"
+       transform="translate(25,0)">
+      <g
+         transform="translate(12.460986,3.198911)"
+         id="g4247">
+        <g
+           id="g4041"
+           transform="matrix(0.99802066,0,0,0.99606872,23.960182,-6.2774541)">
+          <rect
+             y="942.84277"
+             x="66.670303"
+             height="49.19833"
+             width="99.198326"
+             id="rect2995"
+             style="fill:#7a1ca5;fill-opacity:1;stroke:#561474;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+          <text
+             id="text3034"
+             y="973.32184"
+             x="116.0805"
+             style="font-size:18px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+             xml:space="preserve"><tspan
+               y="973.32184"
+               x="116.0805"
+               id="tspan3036"
+               sodipodi:role="line">Sensors</tspan></text>
+        </g>
+        <g
+           id="g4036"
+           transform="matrix(0.99802066,0,0,0.99606872,23.960182,-7.7895251)">
+          <rect
+             style="fill:#ebad00;fill-opacity:1;stroke:#bf9300;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+             id="rect2993"
+             width="99.198326"
+             height="49.19833"
+             x="66.670303"
+             y="999.57837" />
+          <text
+             id="text3038"
+             y="1030.4309"
+             x="116.3222"
+             style="font-size:18px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+             xml:space="preserve"><tspan
+               y="1030.4309"
+               x="116.3222"
+               id="tspan3040"
+               sodipodi:role="line">Strain can</tspan></text>
+        </g>
+      </g>
+      <g
+         transform="translate(12.460986,3.198911)"
+         id="g4236">
+        <g
+           id="g4052"
+           transform="matrix(0.99802066,0,0,0.99606872,25.25229,-6.2774541)">
+          <rect
+             y="942.84277"
+             x="285.81195"
+             height="49.19833"
+             width="99.198326"
+             id="rect3014"
+             style="fill:#7a1ca5;fill-opacity:1;stroke:#561474;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+          <text
+             id="text3042"
+             y="973.32178"
+             x="335.55173"
+             style="font-size:18px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+             xml:space="preserve"><tspan
+               y="973.32178"
+               x="335.55173"
+               id="tspan3044"
+               sodipodi:role="line">Camera</tspan></text>
+        </g>
+        <g
+           id="g4030"
+           transform="matrix(0.99802066,0,0,0.99606864,25.25229,-7.7894457)">
+          <rect
+             style="fill:#ebad00;fill-opacity:1;stroke:#bf9300;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+             id="rect3012"
+             width="99.198326"
+             height="49.198334"
+             x="285.81195"
+             y="999.57837" />
+          <text
+             id="text3046"
+             y="1019.1809"
+             x="335.28806"
+             style="font-size:18px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+             xml:space="preserve"><tspan
+               y="1019.1809"
+               x="335.28806"
+               id="tspan3048"
+               sodipodi:role="line">Exploding</tspan><tspan
+               id="tspan3928"
+               y="1041.6809"
+               x="335.28806"
+               sodipodi:role="line">can</tspan></text>
+        </g>
+      </g>
+    </g>
+    <path
+       style="fill:none;stroke:#078ec0;stroke-width:2.0462451;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 237.65948,882.56109 -184.098315,0"
+       id="path4368"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <g
+       transform="translate(197.18753,3.198911)"
+       id="g4376">
+      <text
+         xml:space="preserve"
+         style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+         x="170.07347"
+         y="810.32239"
+         id="text4378"><tspan
+           sodipodi:role="line"
+           id="tspan4380"
+           x="170.07347"
+           y="810.32239"
+           style="font-size:10px">Controls &amp;</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+         x="170.01634"
+         y="830.39722"
+         id="text4382"><tspan
+           sodipodi:role="line"
+           id="tspan4384"
+           x="170.01634"
+           y="830.39722"
+           style="font-size:10px">Data Signals</tspan></text>
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:#ae3707;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+       x="93.287064"
+       y="875.77576"
+       id="text4386"><tspan
+         sodipodi:role="line"
+         id="tspan4388"
+         x="93.287064"
+         y="875.77576"
+         style="stroke:none">Pressurised air</tspan></text>
+    <g
+       id="g4390"
+       transform="translate(223.83105,65.810717)">
+      <g
+         id="g4414">
+        <text
+           xml:space="preserve"
+           style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+           x="170.07347"
+           y="810.32239"
+           id="text4392"><tspan
+             id="tspan4410"
+             sodipodi:role="line"
+             x="170.07347"
+             y="810.32239">Control Signals</tspan></text>
+      </g>
+    </g>
+    <g
+       id="g4400"
+       transform="translate(37.187295,3.198911)">
+      <text
+         id="text4402"
+         y="810.32239"
+         x="170.07347"
+         style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+         xml:space="preserve"><tspan
+           style="font-size:10px"
+           y="810.32239"
+           x="170.07347"
+           id="tspan4404"
+           sodipodi:role="line">Controls &amp;</tspan></text>
+      <text
+         id="text4406"
+         y="830.39722"
+         x="170.01634"
+         style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+         xml:space="preserve"><tspan
+           style="font-size:10px"
+           y="830.39722"
+           x="170.01634"
+           id="tspan4408"
+           sodipodi:role="line">Data Signals</tspan></text>
+    </g>
+    <g
+       id="g4422"
+       transform="translate(77.401707,114.11125)">
+      <text
+         xml:space="preserve"
+         style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+         x="119.98402"
+         y="796.01111"
+         id="text4424"><tspan
+           id="tspan4426"
+           sodipodi:role="line"
+           x="119.98402"
+           y="796.01111">Data Signals</tspan></text>
+      <text
+         id="text4432"
+         y="796.01111"
+         x="323.8407"
+         style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+         xml:space="preserve"><tspan
+           y="796.01111"
+           x="323.8407"
+           sodipodi:role="line"
+           id="tspan4434">Data Signals</tspan></text>
+    </g>
+    <text
+       id="text4441"
+       y="1029.6218"
+       x="286.53769"
+       style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:#ae3707;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+       xml:space="preserve"><tspan
+         style="stroke:none"
+         y="1029.6218"
+         x="286.53769"
+         id="tspan4443"
+         sodipodi:role="line">Pressurised air</tspan></text>
+    <path
+       inkscape:connector-curvature="0"
+       id="path4447"
+       style="fill:none;stroke:#84be07;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 446.22664,795.49848 0,-17.66548 -392.665475,0 m 73.121645,17.66548 0,-17.44186" />
+    <text
+       xml:space="preserve"
+       style="font-size:10px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+       x="97.401009"
+       y="770.60065"
+       id="text4455"><tspan
+         sodipodi:role="line"
+         id="tspan4457"
+         x="97.401009"
+         y="770.60065"
+         style="font-size:13px">Mains electricity</tspan></text>
+    <g
+       id="g4085"
+       transform="translate(8,10.967403)">
+      <g
+         transform="translate(0,-1.9073486e-6)"
+         id="g4075">
+        <rect
+           y="947.95496"
+           x="5.0623178"
+           height="24.296906"
+           width="99.295929"
+           id="rect4039"
+           style="fill:#04455e;fill-opacity:1;stroke:#0788b8;stroke-width:0.70309472;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+        <text
+           id="text4041"
+           y="967.27856"
+           x="54.35881"
+           style="font-size:17.94679642px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+           xml:space="preserve"
+           transform="scale(1.0009793,0.99902165)"><tspan
+             y="967.27856"
+             x="54.358807"
+             id="tspan4043"
+             sodipodi:role="line">Enclosure</tspan></text>
+      </g>
+      <g
+         transform="translate(0,-11.707627)"
+         id="g4080">
+        <rect
+           style="fill:#04455e;fill-opacity:1;stroke:#0788b8;stroke-width:0.70309472;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+           id="rect4047"
+           width="99.295929"
+           height="24.296906"
+           x="5.0623159"
+           y="993.64166" />
+        <text
+           xml:space="preserve"
+           style="font-size:17.94679642px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+           x="54.534073"
+           y="1010.9726"
+           id="text4049"
+           transform="scale(1.0009793,0.99902165)"><tspan
+             sodipodi:role="line"
+             id="tspan4051"
+             x="54.534073"
+             y="1010.9726">Mounting</tspan></text>
+      </g>
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Corbel;-inkscape-font-specification:Corbel Bold"
+       x="31.997599"
+       y="931.61084"
+       id="text4097"><tspan
+         sodipodi:role="line"
+         id="tspan4099"
+         x="31.997599"
+         y="931.61084">Interlocks</tspan></text>
+  </g>
+</svg>

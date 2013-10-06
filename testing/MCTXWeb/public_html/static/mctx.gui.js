@@ -16,7 +16,7 @@ mctx.location = mctx.location.substring(0, mctx.location.lastIndexOf('/')) + "/"
 mctx.api = location.protocol + "//" + location.host + "/" + "api/";
 mctx.expected_api_version = 0;
 mctx.has_control = false;
-//mctx.debug = true;
+mctx.debug = true;
 
 mctx.statusCodes = {
   STATUS_OK : 1

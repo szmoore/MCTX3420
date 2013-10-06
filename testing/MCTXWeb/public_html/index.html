@@ -3,12 +3,7 @@
   <head>
     <title>MCTX3420 Web Interface</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <!--[if lte IE 8]>
-      <script language="javascript" type="text/javascript" src="static/excanvas.min.js"></script>
-    <![endif]-->
     <script type="text/javascript" src="static/jquery-1.10.1.min.js"></script>
-    <script type="text/javascript" src="static/jquery.flot.min.js"></script>
-    <script type="text/javascript" src="static/base64.js"></script>
     <script type="text/javascript" src="static/mctx.gui.js"></script>
     
     <link rel="stylesheet" type="text/css" href="static/style.css">
@@ -21,18 +16,10 @@
          //Set the welcome bar
          var name = " " + (mctx.friendlyName ? mctx.friendlyName : "");
          $("#welcome-container").text("Welcome"+ name + "!");
-         //$("#menu-container").populateNavbar();
-
+         $("#logout-container").css("display", "block");
          $("#logout").click(function () {
            $("#logout").logout();
          });
-
-         $("#main_controls").submit(function () {
-           //Validate!
-           return false;
-         });
-
-         $("#errorlog").setErrorLog();
        });       
       })
 
@@ -49,8 +36,6 @@
         <span id="title">Exploding Cans</span>
       </div>
       <div id="rightnav">
-        <div id="menu-container" class="nav-menu">
-        </div>
         <span id="welcome-container">
         </span>
         <span id="date">
@@ -68,79 +53,95 @@
     </div>
     <!-- End header -->
     
+    <noscript>
+      <div class="widget centre">
+        <div class="title">JavaScript required</div>
+        This website requires JavaScript to function correctly.
+        Please enable JavaScript to use this site.
+      </div>
+    </noscript>
+    
     <div id="content">
       <div id="sidebar">
         <div class="widget">
-          <div class="title">Status</div>
-          <div class="item">
-            <table class="status centre">
-              <tr><th>Module</th> <th>State</th></tr>
-              <tr><td>Server API</td> <td>PASS</td></tr>
-              <tr><td>Enclosure interlock</td> <td>FAIL</td></tr>
-              <tr><td>Pressure level</td> <td>PASS</td></tr>
-            </table>
-            <hr>
-            Software mode: <span id="server_mode">off</span>
-          </div>         
+          <div class="title">Navigation menu</div>
+                  
         </div>
-        
         <div class="widget">
-          <div class="title">Pressure controls</div>
-          <form action="#">
-            Pressure level <input type="text" name="pressurelevel"><br>
-            <input type="submit" value="Submit">
-          </form>
+          <div class="title">Help</div>
+          
         </div>
       </div>
       <!-- End sidebar -->
 
       <div id="main">
         <div class="widget">
-          <div class="title">Dashboard</div>
-          <!--<img class="centre" src="overview.png" alt="Overview">-->
-          <b>Main controls</b>
-          <form id="main_controls" action="">
-            <table>
-              <tr>
-                <td>Experiment name</td>
-                <td><input name="experiment_name" type="text"></td>
-              </tr>
-              <tr>
-                <td>Experiment mode</td>
-                <td>
-                  <input name="experiment_type" value="strain" type="radio"> Strain it
-                  <input name="experiment_type" value="explode" type="radio"> Explode it
-                </td>
-              </tr>
-              <tr>
-                <td>
-                </td>
-                <td align="right">
-                  <input type="submit" value="Start">
-                  <input type="submit" value="Pause">
-                  <input type="submit" value="Stop">
-                </td>
-              </tr>
-            </table>
-          </form>
-          <b>Error and warning messages</b><br>
-          <textarea id="errorlog" wrap="off" rows="4" cols="30" readonly></textarea>
+          <div class="title centre">Welcome</div>
+            <p>
+              Welcome to the MCTX3420 remote pressure vessel experiment site!
+            </p>
+            <p>
+              To explore how this system works, hover over the elements of the
+              system diagram below. Clicking each element will lead to a new
+              page that describes that component of the system.
+            </p>
+            <p>
+              To begin a new experiment, use the left navigation pane.
+            </p>
         </div>
-        
         <div class="widget">
-          <div class="title">Strain gauges</div>
-          <div id="strain-graphs" class="graph">
-            <!-- Strain graph placeholder -->
-          </div>
-        </div>
-        
-        <div class="widget">
-          <div class="title">Camera Feed</div>
-          <img src="" alt="Camera 1" id="cam1" class="centre">
+          <div class="title">System diagram</div>
+          <img id="sbd" src="static/sbd.png" class="centre" alt="System diagram" usemap="#sbd-map">
+          <map name="sbd-map">
+            <area shape="rect" coords="78,44,178,94" href="#" alt="Client PC" title="You">
+            <area shape="rect" coords="238,44,338,94" href="#" alt="BBB">
+            <area shape="rect" coords="398,44,498,94" href="#" alt="Electronics">
+            <area shape="rect" coords="238,104,338,154" href="#" alt="Pneumatics">
+            <area shape="rect" coords="128,184,228,234" href="#" alt="Sensors">
+            <area shape="rect" coords="348,184,448,234" href="#" alt="Camera">
+            <area shape="rect" coords="128,238,228,288" href="#" alt="Strain Can">
+            <area shape="rect" coords="348,238,448,288" href="#" alt="Explode Can" title="Won't happen">
+            <area shape="rect" coords="13,206,113,231" href="#" alt="Enclosure" id="enclosure-btn">
+            <area shape="rect" coords="13,240,113,265" href="#" alt="Mounting" id="mounting-btn">
+            <area shape="rect" coords="116,175,457,294" alt="Mounting Area" id="mounting-area">
+            <area shape="poly" coords="230,30,524,30,524,294,115,294,115,100,230,100,230,30" alt="Enclosure Area" id="enclosure-area">
+          </map>
+          <script type="text/javascript" src="static/jquery.maphilight.min.js">
+            
+          </script>
+          <script type="text/javascript">
+            $("#sbd").maphilight({
+              fillOpacity: 0.4,
+              strokeColor: '000000',
+              strokeOpacity: 0.7
+            });
+            
+            $.fn.hilightToggle = function (on) {
+              var data = $(this).data("maphilight") || {};
+              data.neverOn = !on;
+              $(this).data("maphilight", data);
+              return this;
+            };
+            
+            $("#mounting-area").hilightToggle(false);
+            $("#enclosure-area").hilightToggle(false);
+            
+            $("#mounting-btn").mouseover(function () {
+              $("#mounting-area").hilightToggle(true).mouseover();
+            }).mouseout(function () {
+              $("#mounting-area").hilightToggle(false);
+            });
+            
+            $("#enclosure-btn").mouseover(function () {
+              $("#enclosure-area").hilightToggle(true).mouseover();
+            }).mouseout(function () {
+              $("#enclosure-area").hilightToggle(false);
+            });
+          
+          </script>
         </div>
       </div>
       <!-- End main content -->
-      
     </div>
   </body>
 </html>
