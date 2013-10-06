@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>MCTX3420 Web Interface</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!--[if lte IE 8]>
+      <script language="javascript" type="text/javascript" src="static/excanvas.min.js"></script>
+    <![endif]-->
+    <script type="text/javascript" src="static/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript" src="static/jquery.flot.min.js"></script>
+    <script type="text/javascript" src="static/mctx.gui.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="static/style.css">
+    <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
+    <script type="text/javascript">
+      runBeforeLoad().done(function () {
+        $(document).ready(function () {
+         //Show the content!
+         $("#content").css("display", "block");
+         //Set the welcome bar
+         var name = " " + (mctx.friendlyName ? mctx.friendlyName : "");
+         $("#welcome-container").text("Welcome"+ name + "!");
+         $("#logout-container").css("display", "block");
+         //$("#menu-container").populateNavbar();
+
+         $("#logout").click(function () {
+           $("#logout").logout();
+         });
+
+         $("#main_controls").submit(function () {
+           //Validate!
+           return false;
+         });
+
+         $("#errorlog").setErrorLog();
+       });       
+      })
+
+    </script>
+  </head>
+  
+  <body>
+    <div id="header">
+      <div id="leftnav">
+        <a href="http://www.uwa.edu.au/" target="_blank">
+          <img alt = "The University of Western Australia"
+          src="static/uwacrest-text.png">
+        </a>
+        <span id="title">Exploding Cans</span>
+      </div>
+      <div id="rightnav">
+        <span id="welcome-container">
+        </span>
+        <span id="date">
+          <script type="text/javascript">getDate();</script>
+        </span>
+        <div id="logout-container">
+          <form action="#">
+            <div>
+              <input type="button" id="logout" value="Logout">
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="clear"></div>
+    </div>
+    <!-- End header -->
+    
+    <noscript>
+      <div class="widget centre">
+        <div class="title">JavaScript required</div>
+        This website requires JavaScript to function correctly.
+        Please enable JavaScript to use this site.
+      </div>
+    </noscript>
+    
+    <div id="content">
+      <div id="sidebar">
+        <div class="widget">
+          <div class="title">Navigation menu</div>
+                  
+        </div>
+        <div class="widget">
+          <div class="title">Help</div>
+          
+        </div>
+      </div>
+      <!-- End sidebar -->
+
+      <div id="main">
+        <div class="widget">
+          <div class="title">Controls</div>
+          <b>Main controls</b>
+          <form id="main_controls" action="">
+            <table>
+              <tr>
+                <td>Experiment name</td>
+                <td><input name="experiment_name" type="text"></td>
+              </tr>
+              <tr>
+                <td>Experiment mode</td>
+                <td>
+                  <input name="experiment_type" value="strain" type="radio"> Strain it
+                  <input name="experiment_type" value="explode" type="radio"> Explode it
+                </td>
+              </tr>
+              <tr>
+                <td>
+                </td>
+                <td align="right">
+                  <input type="submit" value="Start">
+                  <input type="submit" value="Pause">
+                  <input type="submit" value="Stop">
+                </td>
+              </tr>
+            </table>
+          </form>
+          <b>Error and warning messages</b><br>
+          <textarea id="errorlog" wrap="off" rows="4" cols="30" readonly></textarea>
+        </div>
+      </div>
+      <!-- End main content -->
+      
+    </div>
+  </body>
+</html>
