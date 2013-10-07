@@ -33,6 +33,7 @@
          });
 
          $("#errorlog").setErrorLog();
+         $("#strain-graphs").setStrainGraphs();
        });       
       })
 
@@ -127,6 +128,12 @@
             </form>
             <b>Error and warning messages</b><br>
             <textarea id="errorlog" wrap="off" rows="4" cols="30" readonly></textarea>
+          </div>
+          <div class="widget">
+            <div class="title">Strain gauges</div>
+            <div id="strain-graphs" class="graph">
+              <!-- Strain graph placeholder -->
+            </div>
           </div>
         </div>
         <!-- End main content -->
