@@ -4347,3 +4347,122 @@
 22:09 < jtanx> weird, getting http 500 when trying to access our github repo
 23:16 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
 23:27 -!- Rowan [~Rowan@106-68-70-204.dyn.iinet.net.au] has quit [EOF From client]
+--- Day changed Mon Oct 07 2013
+10:44 -!- Rowan [~Rowan@130.95.117.19] has joined #mctxuwa_softdev
+12:45 -!- callum [~chatzilla@130.95.91.11] has joined #mctxuwa_softdev
+12:47 < callum> you guys in g19?
+14:46 -!- callum [~chatzilla@130.95.91.11] has quit [Ping timeout]
+14:55 -!- callum [~chatzilla@130.95.54.13] has joined #mctxuwa_softdev
+14:59 -!- Rowan [~Rowan@130.95.117.19] has quit [Ping timeout]
+16:11 -!- callum [~chatzilla@130.95.54.13] has quit [Ping timeout]
+18:22 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:44 < jtanx> ha, you can clone a wiki
+18:45 < jtanx> git clone https://github.com/szmoore/MCTX3420.wiki.git
+20:50 < sam_moore> Yeah, I know
+20:51 < sam_moore> I don't really think it's great to be relying on the BeagleBone to serve all these additional requirements
+20:51 < jtanx> Yeah, probably not
+20:52 < jtanx> I've just been playing around with django for my CITS2232 project
+20:52 < jtanx> it's like a python based cms
+20:53 < sam_moore> That might work
+20:53 < jtanx> It's actually not too bad
+20:53 < jtanx> but incredibly annoying to learn how to use
+20:53 < jtanx> it's got its own inbuilt user system
+20:54 < sam_moore> How could we query it from our server though?
+20:54 < jtanx> as in?
+20:54 < jtanx> you can still query directly from the browser
+20:54 < jtanx> from django itself
+20:54 < jtanx> I'm definitely sure there's a json parsing library
+20:55 < jtanx> (python at least should have one)
+20:56 < sam_moore> As in, if we want to "login"
+20:56 < sam_moore> How do we authenticate?
+20:57 < sam_moore> From within the FastCGI process
+20:57 < jtanx> Okay, there's two approaches I guess
+20:58 < jtanx> if you want to continue to use fastcgi to login I guess you could get django to figure out
+20:58 < jtanx> who's logged in
+20:58 < jtanx> If you use django's login system
+20:58 < jtanx> hmm
+21:00 < jtanx> but one thing I haven't done yet is how do you prevent concurrent access in django
+21:01 < jtanx> but say this:
+21:01 < sam_moore> I think binding to an LDAP server is pretty standard for this sort of thing
+21:01 < sam_moore> I think Django can even let you bind to LDAP for using it
+21:01 < jtanx> probably
+21:01 < jtanx> I think class2go was built using django
+21:01 < jtanx> if you've ever used that crappy website
+21:02 < jtanx> say for the fastcgi process we revert to
+21:02 < jtanx>  /api/control?lock
+21:02 < jtanx>  /api/control?unlock
+21:02 < jtanx> etc
+21:02 < jtanx> but /api/control is only visible to django
+21:02 < sam_moore> Ah, I see
+21:02 < sam_moore> Um...
+21:02 < jtanx> then django can query it
+21:02 < jtanx> and conditionally return the control key?
+21:03 < jtanx> i dunno
+21:03 < sam_moore> I'd be slightly nervous about adding additional systems that have to work together though
+21:03 < jtanx> yeah
+21:03 < jtanx> that's the problem
+21:03 < sam_moore> I mean, if it works, it's fine
+21:03 < sam_moore> If it breaks, suddenly anyone (or noone) can access the real underlying hardware
+21:03 < jtanx> Yeah
+21:04 < jtanx> especially if someone screws up the server config
+21:04 < sam_moore> I think I'd prefer to stick with the current login handler
+21:04 < sam_moore> There's some flexibility with how you actually do the authentication
+21:04 < jtanx> Sure
+21:06 < jtanx> I'm just thinking, how would we implement the 'admin' features
+21:06 < jtanx> you'd then have to have some sort of list distinguishing normal users from admins
+21:06 < jtanx> unless you hardcode admins?...
+21:07 < sam_moore> With LDAP you can store admin as a user field and check it
+21:08 < sam_moore> With /etc/shadow, have 2 files
+21:08 < sam_moore> One for admin, one for regular users
+21:08 < sam_moore> (When I say /etc/shadow I just mean the style of auth, not necessarily actually using *the* /etc/shadow)
+21:08 < sam_moore> In fact
+21:09 < sam_moore> We could possibly do a minimalist user management with python cgi and a custom /etc/shadow style file
+21:10 < jtanx> say what
+21:11 < jtanx> so use the python cgi to modify it
+21:11 < sam_moore> Yeah
+21:11 < jtanx> our c fastcgi to read
+21:11 < sam_moore> Yes
+21:11 < jtanx> that could work
+21:11 < jtanx> have a look at flask
+21:11 < sam_moore> It's also probably possible to easily do a lot of the things Adam wanted
+21:12 < jtanx> flask is like the simpler version of django
+21:12 < sam_moore> At least, you can get python cgi to send emails to people with a temporary password and ask them to change it
+21:12 < jtanx> i think I still have an example too
+21:15 < sam_moore> If you want and it doesn't require rewriting large parts of the FastCGI process
+21:15 < sam_moore> Personally I don't think I have the time
+21:16 < jtanx> well if it's completely separate from the fastcgi process
+21:16 < sam_moore> Sure
+21:17 < jtanx> hmm
+21:18 < sam_moore> Just a simple CGI script might do the job though
+21:18 < jtanx> yeah
+21:18 < jtanx> except nginx doesn't have normal cgi
+21:19 < sam_moore> Wat
+21:19 < jtanx> only fastcgi
+21:19 < sam_moore> Damn
+21:19 < sam_moore> And I guess apache2 only has normal cgi and not fastcgi?
+21:19 < jtanx> there may be mod_fastcgi
+21:19 < jtanx> but
+21:19 < jtanx> before we get ahead of ourselves
+21:20 < jtanx> okay no, nginx doesn't have fastcgi
+21:20 < jtanx> sorry cgi*
+21:20 < jtanx> we could do it in php
+21:21 < jtanx> urgh
+21:21 < sam_moore> urgh indeed...
+21:21 < sam_moore> I dunno
+21:22 < sam_moore> We *did* tell Adam that we wouldn
+21:22 < sam_moore> 't be able to do the user management system
+21:22 < jtanx> haha
+21:23 < sam_moore> I really think getting our program to interface with an LDAP server is reasonable
+21:23 < jtanx> yeah
+21:23 < sam_moore> Ok, I need to fix CITS3003 some more
+22:46 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+22:53 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+22:53 < jtanx> brainspark: we can probably use django to proxy api requests
+22:53 < jtanx> so it goes like this: user <-> django <-> server api
+22:54 < jtanx> then you don't even have to expose the server api at all
+22:54 < jtanx> although if I ever end up trying this I don't know
+22:55 < jtanx> (by expose I mean that django can conditionally pass on the results from queries to the api)
+22:55 < jtanx> but yeah, it's probably best to leave it how it is right now
+22:55 < jtanx> as I doubt I have the time to  implement this
+23:10 < jtanx> it would definitely add overhead too
+23:40 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
