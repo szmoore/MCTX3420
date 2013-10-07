@@ -68,148 +68,160 @@
   </head>
   
   <body>
-    <div id="header">
-      <div id="leftnav">
-        <a href="http://www.uwa.edu.au/" target="_blank">
-          <img alt = "The University of Western Australia"
-          src="static/uwacrest-text.png">
-        </a>
-        <span id="title">BBB Pin test (debug only)</span>
-      </div>
-      <div id="rightnav">
-        <span id="welcome-container">
-        </span>
-        <span id="date">
-          <script type="text/javascript">getDate();</script>
-        </span>
-        <div id="logout-container">
-          <form action="#">
-            <div>
-              <input type="button" id="logout" value="Logout">
-            </div>
-          </form>
+    <div id="header-wrap">
+      <div id="header">
+        <div id="leftnav">
+          <a href="http://www.uwa.edu.au/" target="_blank">
+            <img alt = "The University of Western Australia"
+            src="static/uwacrest-text.png">
+          </a>
+          <span id="title">BBB Pin test (debug only)</span>
         </div>
+        <div id="rightnav">
+          <span id="welcome-container">
+          </span>
+          <span id="date">
+            <script type="text/javascript">getDate();</script>
+          </span>
+          <div id="logout-container">
+            <form action="#">
+              <div>
+                <input type="button" id="logout" value="Logout">
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="clear"></div>
       </div>
-      <div class="clear"></div>
     </div>
     <!-- End header -->
     
-    <div id="content">
-      <div id="sidebar">
-        <div class="widget">
-          <div class="title">Navigation menu</div>
-          <div class="nav-menu">
-          <ul>
-             <li><a href="index.html"><span>Home</span></a></li>
-             <li><a href="control.html"><span>Experiment control</span></a></li>
-             <li><a href="pintest.html"><span>Pin debugging</span></a></li>
-             <li class="last"><a href="#"><span>Help</span></a></li>
-          </ul>
+    <div id="content-wrap">
+      <noscript>
+        <div class="widget centre">
+          <div class="title">JavaScript required</div>
+          This website requires JavaScript to function correctly.
+          Please enable JavaScript to use this site.
+        </div>
+      </noscript>
+      
+      <div id="content">
+        <div id="sidebar">
+          <div class="widget">
+            <div class="title">Navigation menu</div>
+            <div class="nav-menu">
+            <ul>
+               <li><a href="index.html"><span>Home</span></a></li>
+               <li><a href="control.html"><span>Experiment control</span></a></li>
+               <li><a href="pintest.html"><span>Pin debugging</span></a></li>
+               <li class="last"><a href="#"><span>Help</span></a></li>
+            </ul>
+            </div>
+          </div>
+          <div class="widget">
+            <div class="title">Info</div>
+            <p>This test page gives control over the BBB's pins.
+            Select a pin that you wish to use from the relevant drop-down
+            menu and click 'Go'.</p>
+            <p>A new widget will appear with controls relevant to that pin.</p>
+            <p>Make sure to check the error log to see if something goes wrong.</p>
+          </div>
+          <div class="widget">
+            <div class="title">Pin out diagram</div>
+            <p>To see the pin out diagram of the BBB, click <a href="pinout-table.pdf" target="_blank">here</a>.</p>
+          </div>
+          <div class="widget">
+            <div class="title">Export/Unexport?</div>
+            <p>
+              To export/unexport a pin means to enable/disable it. Apart from the obvious
+              use case, sometimes this can be required if you use two PWM channels
+              that share the same frequency base.
+            </p>
+            <p>
+              You won't be able to change
+              the frequency until you unexport one of them.
+            </p>
+          </div>
+          <div class="widget">
+            <div class="title">PWM explained</div>
+            <p>The frequency must be a decimal number greater than 0.</p>
+            <p>
+              The duty cycle describes the proportion of off/on time per period.
+              This number is specified as a ratio, with values ranging from 0 to 1.
+            </p>
+            <p>
+              The polarity determines if the duty represents the 'active
+              high' or 'active low' portion. By default, the duty cycle
+              represents the 'active high' portion.
+            </p>
           </div>
         </div>
-        <div class="widget">
-          <div class="title">Info</div>
-          <p>This test page gives control over the BBB's pins.
-          Select a pin that you wish to use from the relevant drop-down
-          menu and click 'Go'.</p>
-          <p>A new widget will appear with controls relevant to that pin.</p>
-          <p>Make sure to check the error log to see if something goes wrong.</p>
-        </div>
-        <div class="widget">
-          <div class="title">Pin out diagram</div>
-          <p>To see the pin out diagram of the BBB, click <a href="pinout-table.pdf" target="_blank">here</a>.</p>
-        </div>
-        <div class="widget">
-          <div class="title">Export/Unexport?</div>
-          <p>
-            To export/unexport a pin means to enable/disable it. Apart from the obvious
-            use case, sometimes this can be required if you use two PWM channels
-            that share the same frequency base.
-          </p>
-          <p>
-            You won't be able to change
-            the frequency until you unexport one of them.
-          </p>
-        </div>
-        <div class="widget">
-          <div class="title">PWM explained</div>
-          <p>The frequency must be a decimal number greater than 0.</p>
-          <p>
-            The duty cycle describes the proportion of off/on time per period.
-            This number is specified as a ratio, with values ranging from 0 to 1.
-          </p>
-          <p>
-            The polarity determines if the duty represents the 'active
-            high' or 'active low' portion. By default, the duty cycle
-            represents the 'active high' portion.
-          </p>
-        </div>
-      </div>
-      <!-- End sidebar -->
+        <!-- End sidebar -->
 
-      <div id="main">
-        <div class="widget">
-          <div class="title">Dashboard</div>
-          <table>
-            <tr>
-              <td>
-                GPIO <select id="gpio-menu"></select>
-                <input type="button" id="gpio-go" value="Go">
-              </td>
-              <td>
-                PWM <select id="pwm-menu"></select>
-                <input type="button" id="pwm-go" value="Go">
-              </td>
-            </tr>
-          </table>
-            
-          <div class="sub-title">Error log</div>
-          <textarea id="errorlog" wrap="off" rows="4" cols="30" readonly></textarea>
-        </div>
-
-        <div class="widget">
-          <div class="title">Analogue input (ADC)</div>
-          <form class="controls" action="#" id="adc-controls">
-            <table class="centre">
+        <div id="main">
+          <div class="widget">
+            <div class="title">Dashboard</div>
+            <table>
               <tr>
-                <td>AIN</td><th>0</th><th>1</th><th>2</th><th>3</th>
-                <th>4</th><th>5</th><th>6</th><th>7</th>
-              </tr>
-              <tr>
-                <td>Value</td>
-                <td><input name="0" type="text" readonly></td>
-                <td><input name="1" type="text" readonly></td>
-                <td><input name="2" type="text" readonly></td>
-                <td><input name="3" type="text" readonly></td>
-                <td><input name="4" type="text" readonly></td>
-                <td><input name="5" type="text" readonly></td>
-                <td><input name="6" type="text" readonly></td>
-                <td><input name="7" type="text" readonly></td>
-              </tr>
-              <tr>
-                <td>Export</td>
-                <td><input name="0" type="checkbox"></td>
-                <td><input name="1" type="checkbox"></td>
-                <td><input name="2" type="checkbox"></td>
-                <td><input name="3" type="checkbox"></td>
-                <td><input name="4" type="checkbox"></td>
-                <td><input name="5" type="checkbox"></td>
-                <td><input name="6" type="checkbox"></td>
-                <td><input name="7" type="checkbox"></td>
+                <td>
+                  GPIO <select id="gpio-menu"></select>
+                  <input type="button" id="gpio-go" value="Go">
+                </td>
+                <td>
+                  PWM <select id="pwm-menu"></select>
+                  <input type="button" id="pwm-go" value="Go">
+                </td>
               </tr>
             </table>
-          </form>
+
+            <div class="sub-title">Error log</div>
+            <textarea id="errorlog" wrap="off" rows="4" cols="30" readonly></textarea>
+          </div>
+
+          <div class="widget">
+            <div class="title">Analogue input (ADC)</div>
+            <form class="controls" action="#" id="adc-controls">
+              <table class="centre">
+                <tr>
+                  <td>AIN</td><th>0</th><th>1</th><th>2</th><th>3</th>
+                  <th>4</th><th>5</th><th>6</th><th>7</th>
+                </tr>
+                <tr>
+                  <td>Value</td>
+                  <td><input name="0" type="text" readonly></td>
+                  <td><input name="1" type="text" readonly></td>
+                  <td><input name="2" type="text" readonly></td>
+                  <td><input name="3" type="text" readonly></td>
+                  <td><input name="4" type="text" readonly></td>
+                  <td><input name="5" type="text" readonly></td>
+                  <td><input name="6" type="text" readonly></td>
+                  <td><input name="7" type="text" readonly></td>
+                </tr>
+                <tr>
+                  <td>Export</td>
+                  <td><input name="0" type="checkbox"></td>
+                  <td><input name="1" type="checkbox"></td>
+                  <td><input name="2" type="checkbox"></td>
+                  <td><input name="3" type="checkbox"></td>
+                  <td><input name="4" type="checkbox"></td>
+                  <td><input name="5" type="checkbox"></td>
+                  <td><input name="6" type="checkbox"></td>
+                  <td><input name="7" type="checkbox"></td>
+                </tr>
+              </table>
+            </form>
+          </div>
+
+          <div class="widget" id="gpio-container">
+            <div class="title">GPIO controls</div>
+          </div>
+
+          <div class="widget" id="pwm-container">
+            <div class="title">PWM controls</div>
+          </div>
         </div>
-        
-        <div class="widget" id="gpio-container">
-          <div class="title">GPIO controls</div>
-        </div>
-        
-        <div class="widget" id="pwm-container">
-          <div class="title">PWM controls</div>
-        </div>
+        <!-- End main content -->
       </div>
-      <!-- End main content -->
     </div>
   </body>
 </html>
