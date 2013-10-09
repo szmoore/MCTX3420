@@ -17,6 +17,8 @@
 #include <sys/signal.h>
 #include <ctype.h>
 
+#include <float.h> // Defines DBL_MAX_10_EXP
+
 
 typedef struct
 {
@@ -64,26 +66,44 @@ bool Piped_Init(const char * name, int id)
 	return true;
 	
 }
-
+/**
+ * This function looks evil, but I swear it's legit
+ * @param id - The Piped process to read from
+ * @param value - Stores the value read (if successful)
+ * @returns true on success, false on failure
+ */
 bool Piped_Read(int id, double * value)
 {
 	if (g_piped[id].stream == NULL)
 		return false;
 
-	static char line[BUFSIZ];
-	
-	fgets(line, BUFSIZ, g_piped[id].stream);
-	int len = strlen(line);
-	//Log(LOGDEBUG, "Read %s (%d) chars", line, len);
-	while (--len >= 0 && len < BUFSIZ && isspace(line[len]))
+	// So need a buffer size big enough to fit all doubles but not too much bigger
+	static char buf[DBL_MAX_10_EXP+1]; 
+
+	// Using BUFSIZ is a bad idea, since we want to read near the end of the file
+
+	// Seek back from the end of the file
+	fseek(g_piped[id].stream, -DBL_MAX_10_EXP, SEEK_END);	
+	int len = fread(buf, 1, DBL_MAX_10_EXP, g_piped[id].stream); // Fill the buffer, note the length count
+	int count = 0;
+	int i = len-1;
+	for (i = len-1; i >= 0; --i) // Search for the last non-empty line in the buffer
 	{
-		line[len] = '\0';
+		if (buf[i] == '\n')
+		{
+			if (count++ > 1)
+			{
+				++i;
+				break;
+			}
+			else
+				buf[i] = '\0';
+		}
 	}
-	char * end = line;
-	*value = strtod(line, &end);
-	if (*end != '\0')
+	// Now sscanf a double from the string
+	if (sscanf(buf+i, "%lf", value) != 1)
 	{
-		Log(LOGERR, "Couldn't interpret %s as double - %s", line, strerror(errno));
+		Log(LOGDEBUG, "Can't interpret %s as double", buf);
 		return false;
 	}
 	return true;
