@@ -212,25 +212,25 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 		//TODO: Strain gauges should have their own critical section, rest of sensors probably don't need to be in a critical section
 		case STRAIN0:
 			success &= GPIO_Set(GPIO0_30, true);
-			success &= ADC_Read(ADC0);
+			success &= ADC_Read(ADC0, &value);
 			success &= GPIO_Set(GPIO0_30, false);
 			if (!success)
 				Fatal("Error reading strain gauge 0");
 			break;
 		case STRAIN1:
 			success &= GPIO_Set(GPIO1_28, true);
-			success &= ADC_Read(ADC0);
+			success &= ADC_Read(ADC0, &value);
 			success &= GPIO_Set(GPIO1_28, false);
 			if (!success)
 				Fatal("Error reading strain gauge 1");
 			break;
 		case STRAIN2:
 			success &= GPIO_Set(GPIO0_31, true);
-			success &= ADC_Read(ADC0);
+			success &= ADC_Read(ADC0, &value);
 			success &= GPIO_Set(GPIO0_31, false);
 		case STRAIN3:
 			success &= GPIO_Set(GPIO1_16, true);
-			success &= ADC_Read(ADC0);
+			success &= ADC_Read(ADC0, &value);
 			success &= GPIO_Set(GPIO1_16, false);
 			if (!success)
 				Fatal("Error reading strain gauge 2");	
