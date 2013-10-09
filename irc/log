@@ -4240,3 +4240,233 @@
 13:17 -!- MctxBot [~twang@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
 18:06 < jtanx> now... to do some work on this gui
 21:15 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Sun Oct 06 2013
+08:52 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+11:17 < jtanx> slight problem: http://i.imgur.com/D28SHaQ.png
+11:17 < jtanx> 100% cpu usage on idle
+11:18 < jtanx> that memory usage too doesn't look too healthy
+11:18 < sam_moore> Damn
+11:20 < jtanx> I also probably figured out why valgrind crashes with the --trace-origins option - not enough memory on my system :P
+11:30 < jtanx> It's probably because in read data all the cases except one have a sleep in them
+11:31 < sam_moore> I'd say so
+11:31 < sam_moore> There are like 8 threads
+11:31 < sam_moore> We don't need 8 threads
+11:39 < sam_moore> Are you in G19?
+11:39 < jtanx> no
+11:40 < sam_moore> Alright
+11:40 < sam_moore> I suppose I should do some work on this
+11:40 < sam_moore> CITS3003 is funner though
+11:40 < sam_moore> I'll look into the performance issues
+11:41 < jtanx> hehe
+11:42 < sam_moore> My "Incident" with UWA IS is now Moderate Priority
+11:42 < sam_moore> It's been assigned!
+11:42 < sam_moore> I suppose I should wait for this guy to email me and say "What the hell are you on about?"
+11:42 < sam_moore> (Re: Using Pheme)
+11:42 < sam_moore> They classified it as a "Request for service"
+11:43 < sam_moore> Which I suppose is true, except they don't really have to do anything
+11:43 < jtanx> o.o
+11:44 < jtanx> I hope it goes through
+11:44 < sam_moore> Yes, no one's going to do a user management system
+11:44 < jtanx> Yep
+11:44 < sam_moore> When people complain they have nothing to do though...
+11:44 < sam_moore> That's like a semester of work right there
+12:40 < sam_moore> um... that image you linked
+12:40 < sam_moore> That's not actually running on the BeagleBone is it?
+12:40 < sam_moore> Because on the BeagleBone
+12:40 < sam_moore> It's like 0.7%
+12:41 < sam_moore> Actually 0.3% CPU 1.1% memory
+12:50 < jtanx> no
+12:50 < jtanx> that's because there's a conditional #ifdef
+12:50 < jtanx> beaglebone to sleep
+12:50 < jtanx> I got that condition around the wrong way
+12:50 < jtanx> Initially I thought you wanted to test the absolute maximum sampling rate on the BBB
+12:53 < jtanx> I just updated the repo to really remove that pwm array reference
+12:54 < jtanx> (about the cpu) It's because of this: https://github.com/szmoore/MCTX3420/blob/master/server/sensor.c#L257
+12:55 < jtanx> That ifdef should be removed anyway, just put in an unconditional sleep for 0.1s
+12:55 < jtanx> then remove the individual sleeps from each sensor case
+13:17 < sam_moore> Sure
+13:17 < sam_moore> Light has been shed on the PWM thing
+13:18 < sam_moore> They are using some RC circuit which I believe averages out the PWM to give you a constant signal
+13:18 < sam_moore> I thought it was some kind of IC that took a PWM input
+13:21 < jtanx> oh ok
+13:22 < jtanx> yeah that's what I thought too
+13:22 < jtanx> so no dac I guess
+13:22 < jtanx> (dac ic that is)
+13:24 < sam_moore> I have my doubts that electronics will be able to make this custom DAC
+13:24 < sam_moore> And of course, no DAC means no Pressure control
+13:24 < sam_moore> But oh well
+13:24 < jtanx> ^_^
+13:24 < jtanx> homebrew DAC
+13:25 < jtanx> how will this ever be calibrated
+13:26 < sam_moore> We should probably include a calibration routine in software
+13:27 < sam_moore> I'm looking a bit more into the RT linux stuff
+13:27 < sam_moore> It doesn't look too crazy
+13:27 < sam_moore> Our program pretty much looks the same
+13:27 < sam_moore> With a function at initialisation to set it's priority and stuff
+13:27 < sam_moore> But otherwise, you just use usleep, sleep, pthreads, everything as normal
+13:28 < jtanx> ok
+13:28 < jtanx> as long as it works on the bbb I guess
+13:30 < sam_moore> I think I should port from gettimeofday to clock_gettime too
+13:35 < sam_moore> https://rt.wiki.kernel.org/index.php/RT_PREEMPT_HOWTO
+13:35 < sam_moore> I'll compile us a kernel and see if it works
+13:46 -!- Callum [~chatzilla@106-69-25-112.dyn.iinet.net.au] has joined #mctxuwa_softdev
+14:09 < sam_moore> Yeah, it looks like RT Linux won't work on the BBB
+14:09 < sam_moore> Oh well
+14:17 < jtanx> damn
+15:34 < Callum> Hey guys, sorry i havent been in touch lately. done a bit of work on dilatometer but its not quite complete.  Uploaded what iv done but i got a test i tomorrow i should go study for now
+16:29 < jtanx> hahaha
+16:30 < jtanx> interactive sbd
+16:31 < jtanx> hmm dialatometer
+16:45 < jtanx> Justin's idea with the system diagram was pretty good
+16:55 < jtanx> test run: https://mctx.us.to:8043/test/
+16:55 < jtanx> no links yet
+16:55 < jtanx> no descriptions either
+16:55 < jtanx> logout when you're done
+16:55 < jtanx> no auth so type anything you want in login field
+17:24 < Callum> looks pretty good
+17:27 -!- Rowan [~Rowan@130.95.133.71] has joined #mctxuwa_softdev
+17:44 -!- MctxBot [~twang@106-68-47-96.dyn.iinet.net.au] has quit ["leaving"]
+17:47 -!- MctxBot [~twang@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+17:49 -!- MctxBot [~twang@106-68-47-96.dyn.iinet.net.au] has quit ["again"]
+18:12 < jtanx> I stuffed up /etc/fstab and now the root filesystem is readonly :(
+18:19 < jtanx> ...and I just wasted time booting off ubuntu 7.04, which doesn't support ext4...
+18:30 -!- Callum_ [~chatzilla@106-69-19-128.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:42 -!- Callum [~chatzilla@106-69-25-112.dyn.iinet.net.au] has quit [Ping timeout]
+18:43 -!- Callum_ is now known as Callum
+18:52 -!- MctxBot [~twang@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+19:30 < jtanx> I've just enabled personal webspace for everyone
+19:30 < jtanx> check your emails for details
+19:35 -!- Callum [~chatzilla@106-69-19-128.dyn.iinet.net.au] has quit [EOF From client]
+19:50 -!- Rowan [~Rowan@130.95.133.71] has quit [Ping timeout]
+19:52 < jtanx> :(
+21:11 < sam_moore> Cool
+21:11 < sam_moore> Sorry, I'm trying to finish CITS3003
+21:14 -!- Rowan [~Rowan@106-68-70-204.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:25 < jtanx> Yep no problem
+21:38 < jtanx> nice: http://cssmenumaker.com
+22:09 < jtanx> weird, getting http 500 when trying to access our github repo
+23:16 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+23:27 -!- Rowan [~Rowan@106-68-70-204.dyn.iinet.net.au] has quit [EOF From client]
+--- Day changed Mon Oct 07 2013
+10:44 -!- Rowan [~Rowan@130.95.117.19] has joined #mctxuwa_softdev
+12:45 -!- callum [~chatzilla@130.95.91.11] has joined #mctxuwa_softdev
+12:47 < callum> you guys in g19?
+14:46 -!- callum [~chatzilla@130.95.91.11] has quit [Ping timeout]
+14:55 -!- callum [~chatzilla@130.95.54.13] has joined #mctxuwa_softdev
+14:59 -!- Rowan [~Rowan@130.95.117.19] has quit [Ping timeout]
+16:11 -!- callum [~chatzilla@130.95.54.13] has quit [Ping timeout]
+18:22 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:44 < jtanx> ha, you can clone a wiki
+18:45 < jtanx> git clone https://github.com/szmoore/MCTX3420.wiki.git
+20:50 < sam_moore> Yeah, I know
+20:51 < sam_moore> I don't really think it's great to be relying on the BeagleBone to serve all these additional requirements
+20:51 < jtanx> Yeah, probably not
+20:52 < jtanx> I've just been playing around with django for my CITS2232 project
+20:52 < jtanx> it's like a python based cms
+20:53 < sam_moore> That might work
+20:53 < jtanx> It's actually not too bad
+20:53 < jtanx> but incredibly annoying to learn how to use
+20:53 < jtanx> it's got its own inbuilt user system
+20:54 < sam_moore> How could we query it from our server though?
+20:54 < jtanx> as in?
+20:54 < jtanx> you can still query directly from the browser
+20:54 < jtanx> from django itself
+20:54 < jtanx> I'm definitely sure there's a json parsing library
+20:55 < jtanx> (python at least should have one)
+20:56 < sam_moore> As in, if we want to "login"
+20:56 < sam_moore> How do we authenticate?
+20:57 < sam_moore> From within the FastCGI process
+20:57 < jtanx> Okay, there's two approaches I guess
+20:58 < jtanx> if you want to continue to use fastcgi to login I guess you could get django to figure out
+20:58 < jtanx> who's logged in
+20:58 < jtanx> If you use django's login system
+20:58 < jtanx> hmm
+21:00 < jtanx> but one thing I haven't done yet is how do you prevent concurrent access in django
+21:01 < jtanx> but say this:
+21:01 < sam_moore> I think binding to an LDAP server is pretty standard for this sort of thing
+21:01 < sam_moore> I think Django can even let you bind to LDAP for using it
+21:01 < jtanx> probably
+21:01 < jtanx> I think class2go was built using django
+21:01 < jtanx> if you've ever used that crappy website
+21:02 < jtanx> say for the fastcgi process we revert to
+21:02 < jtanx>  /api/control?lock
+21:02 < jtanx>  /api/control?unlock
+21:02 < jtanx> etc
+21:02 < jtanx> but /api/control is only visible to django
+21:02 < sam_moore> Ah, I see
+21:02 < sam_moore> Um...
+21:02 < jtanx> then django can query it
+21:02 < jtanx> and conditionally return the control key?
+21:03 < jtanx> i dunno
+21:03 < sam_moore> I'd be slightly nervous about adding additional systems that have to work together though
+21:03 < jtanx> yeah
+21:03 < jtanx> that's the problem
+21:03 < sam_moore> I mean, if it works, it's fine
+21:03 < sam_moore> If it breaks, suddenly anyone (or noone) can access the real underlying hardware
+21:03 < jtanx> Yeah
+21:04 < jtanx> especially if someone screws up the server config
+21:04 < sam_moore> I think I'd prefer to stick with the current login handler
+21:04 < sam_moore> There's some flexibility with how you actually do the authentication
+21:04 < jtanx> Sure
+21:06 < jtanx> I'm just thinking, how would we implement the 'admin' features
+21:06 < jtanx> you'd then have to have some sort of list distinguishing normal users from admins
+21:06 < jtanx> unless you hardcode admins?...
+21:07 < sam_moore> With LDAP you can store admin as a user field and check it
+21:08 < sam_moore> With /etc/shadow, have 2 files
+21:08 < sam_moore> One for admin, one for regular users
+21:08 < sam_moore> (When I say /etc/shadow I just mean the style of auth, not necessarily actually using *the* /etc/shadow)
+21:08 < sam_moore> In fact
+21:09 < sam_moore> We could possibly do a minimalist user management with python cgi and a custom /etc/shadow style file
+21:10 < jtanx> say what
+21:11 < jtanx> so use the python cgi to modify it
+21:11 < sam_moore> Yeah
+21:11 < jtanx> our c fastcgi to read
+21:11 < sam_moore> Yes
+21:11 < jtanx> that could work
+21:11 < jtanx> have a look at flask
+21:11 < sam_moore> It's also probably possible to easily do a lot of the things Adam wanted
+21:12 < jtanx> flask is like the simpler version of django
+21:12 < sam_moore> At least, you can get python cgi to send emails to people with a temporary password and ask them to change it
+21:12 < jtanx> i think I still have an example too
+21:15 < sam_moore> If you want and it doesn't require rewriting large parts of the FastCGI process
+21:15 < sam_moore> Personally I don't think I have the time
+21:16 < jtanx> well if it's completely separate from the fastcgi process
+21:16 < sam_moore> Sure
+21:17 < jtanx> hmm
+21:18 < sam_moore> Just a simple CGI script might do the job though
+21:18 < jtanx> yeah
+21:18 < jtanx> except nginx doesn't have normal cgi
+21:19 < sam_moore> Wat
+21:19 < jtanx> only fastcgi
+21:19 < sam_moore> Damn
+21:19 < sam_moore> And I guess apache2 only has normal cgi and not fastcgi?
+21:19 < jtanx> there may be mod_fastcgi
+21:19 < jtanx> but
+21:19 < jtanx> before we get ahead of ourselves
+21:20 < jtanx> okay no, nginx doesn't have fastcgi
+21:20 < jtanx> sorry cgi*
+21:20 < jtanx> we could do it in php
+21:21 < jtanx> urgh
+21:21 < sam_moore> urgh indeed...
+21:21 < sam_moore> I dunno
+21:22 < sam_moore> We *did* tell Adam that we wouldn
+21:22 < sam_moore> 't be able to do the user management system
+21:22 < jtanx> haha
+21:23 < sam_moore> I really think getting our program to interface with an LDAP server is reasonable
+21:23 < jtanx> yeah
+21:23 < sam_moore> Ok, I need to fix CITS3003 some more
+22:46 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+22:53 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+22:53 < jtanx> brainspark: we can probably use django to proxy api requests
+22:53 < jtanx> so it goes like this: user <-> django <-> server api
+22:54 < jtanx> then you don't even have to expose the server api at all
+22:54 < jtanx> although if I ever end up trying this I don't know
+22:55 < jtanx> (by expose I mean that django can conditionally pass on the results from queries to the api)
+22:55 < jtanx> but yeah, it's probably best to leave it how it is right now
+22:55 < jtanx> as I doubt I have the time to  implement this
+23:10 < jtanx> it would definitely add overhead too
+23:40 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Tue Oct 08 2013
+18:01 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+19:37 -!- MctxBot [~twang@106-68-47-96.dyn.iinet.net.au] has quit [Ping timeout]
+21:16 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
