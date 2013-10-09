@@ -8,21 +8,27 @@
 
 #include "data.h"
 
+
+
 /** Number of sensors **/
-#define NUMSENSORS 8
+#define NUMSENSORS 10
 
 /** Sensor ids - there should be correspondence with the names in g_sensor_names **/
 typedef enum SensorId 
 {
-	ANALOG_TEST0,
-	ANALOG_TEST1,
-	ANALOG_REALTEST,
-	ANALOG_FAIL0,
-	DIGITAL_TEST0,
-	DIGITAL_TEST1,
-	DIGITAL_REALTEST,
-	DIGITAL_FAIL0
+	STRAIN0,
+	STRAIN1,
+	STRAIN2,
+	STRAIN3,
+	PRESSURE0,
+	PRESSURE1,
+	PRESSURE_FEEDBACK,
+	MICROPHONE,
+	ENCLOSURE.
+	DILATOMETER
 } SensorId;
+
+
 
 /** Human readable names for the sensors **/
 extern const char * g_sensor_names[NUMSENSORS];
@@ -40,6 +46,8 @@ typedef struct
 	pthread_t thread;
 	/** Most recently recorded data **/
 	DataPoint newest_data;
+	
+	
 } Sensor;
 
 // Structure to define the warning and error thresholds of the sensors

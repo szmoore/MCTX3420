@@ -210,11 +210,13 @@ void Login_Handler(FCGIContext * context, char * params)
 			char dn[BUFSIZ];
 		
 			// On a simple LDAP server:
-			int len = sprintf(dn, "uid=%s,%s", user, g_options.ldap_base_dn);
+			//int len = sprintf(dn, "uid=%s,%s", user, g_options.ldap_base_dn);
 	
 			// At UWA (hooray)
-			//char * user_type = (user[0] != '0') : "Students" ? "Staff";
-			//int len = sprintf(dn, "cn=%s,ou=%s", user, user_type, g_options.ldap_dn_base);
+			char * user_type = "Students";
+			if (user[0] == '0')
+				user_type = "Staff";
+			int len = sprintf(dn, "cn=%s,ou=%s,%s", user, user_type, g_options.ldap_base_dn);
 		
 
 			if (len >= BUFSIZ)

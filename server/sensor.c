@@ -16,22 +16,28 @@ static Sensor g_sensors[NUMSENSORS]; //global to this file
 /** Array of sensor threshold structures defining the safety values of each sensor**/
 const SensorThreshold thresholds[NUMSENSORS]= {
 	//Max Safety, Min safety, Max warning, Min warning
-	{1,-1,1,-1},		// ANALOG_TEST0
-	{500,0,499,0},		// ANALOG_TEST1
-	{5000,0,5000,0},		// ANALOG_REALTEST
-	{5,-5,4,-4},		// ANALOG_FAIL0
-	{1,0,1,0},			// DIGITAL_TEST0
-	{1,0,1,0},			// DIGITAL_TEST1
-	{1,0,1,0},			// DIGITAL_REALTEST
-	{1,0,1,0}			// DIGITAL_FAIL0
+	{5000,0,5000,0},
+	{5000,0,5000,0},
+	{5000,0,5000,0},
+	{5000,0,5000,0},
+	{5000,0,5000,0},
+	{5000,0,5000,0},
+	{5000,0,5000,0},
+	{5000,0,5000,0},
+	{1, 1, 1, 1}
 };
 
 /** Human readable names for the sensors **/
 const char * g_sensor_names[NUMSENSORS] = {	
-	"analog_test0", "analog_test1", 
-	"analog_realtest", "analog_fail0",
-	"digital_test0", "digital_test1", 
-	"digital_realtest", "digital_fail0"
+	"strain0",
+	"strain1",
+	"strain2",
+	"strain3",
+	"pressure0",
+	"pressure1",
+	"pressure_feedback",
+	"microphone",
+	"enclosure"
 };
 
 /**
@@ -45,13 +51,27 @@ void Sensor_Init()
 		Data_Init(&(g_sensors[i].data_file));
 	}
 
-	// Get the required ADCs
-	ADC_Export(0);
 
-	// GPIO1_28 used as a pulse for sampling
-	//GPIO_Export(GPIO1_28);
-	// GPIO0_30 toggled during sampling
-	//GPIO_Export(GPIO0_30);
+
+	// Get the required ADCs
+	ADC_Export(ADC0); // Strain gauges x 4
+	ADC_Export(ADC1); // Pressure sensor 1
+	ADC_Export(ADC2); // Pressure sensor 2
+	// ADC3 still unused (!?)
+	ADC_Export(ADC4); // Pressure regulator feedback(?) signal
+	ADC_Export(ADC5); // Microphone
+
+	// Get GPIO pins //TODO: Confirm pins used with Electronics Team
+	GPIO_Export(GPIO0_30); // Mux A (strain 1)
+	GPIO_Set(GPIO0_30, false);
+	GPIO_Export(GPIO1_28); // Mux B (strain 2)
+	GPIO_Set(GPIO1_28, false);
+	GPIO_Export(GPIO0_31); // Mux C (strain 3)
+	GPIO_Set(GPIO0_31, false);
+	GPIO_Export(GPIO1_16); // Mux D (strain 4)
+	GPIO_Set(GPIO1_16, false);
+
+	GPIO_Export(GPIO0_31); // Enclosure switch
 }
 
 /**
@@ -144,13 +164,13 @@ void Sensor_CheckData(SensorId id, double value)
 {
 	if( value > thresholds[id].max_error || value < thresholds[id].min_error)
 	{
-		Log(LOGERR, "Sensor %s at %f is above or below its safety value of %f or %f\n", value, g_sensor_names[id],thresholds[id].max_error, thresholds[id].min_error);
+		Log(LOGERR, "Sensor %s at %f is above or below its safety value of %f or %f\n", g_sensor_names[id],value, thresholds[id].max_error, thresholds[id].min_error);
 		//new function that stops actuators?
 		//Control_SetMode(CONTROL_EMERGENCY, NULL)
 	}
 	else if( value > thresholds[id].max_warn || value < thresholds[id].min_warn)
 	{
-		Log(LOGWARN, "Sensor %s at %f is above or below its warning value of %f or %f\n", value, g_sensor_names[id],thresholds[id].max_warn, thresholds[id].min_warn);	
+		Log(LOGWARN, "Sensor %s at %f is above or below its warning value of %f or %f\n", g_sensor_names[id],value,thresholds[id].max_warn, thresholds[id].min_warn);	
 	}
 }
 
@@ -164,83 +184,89 @@ void Sensor_CheckData(SensorId id, double value)
 bool Sensor_Read(Sensor * s, DataPoint * d)
 {
 	
+
+
+	static bool result = true;
+
+	//TODO: Remove this, code should be refactored to not use so many threads
+	// Although... if it works, it works...
+	static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; 
+
+	pthread_mutex_lock(&mutex); //TODO: Reduce the critical section
+
+	usleep(10);
+
 	// Set time stamp
 	struct timeval t;
 	gettimeofday(&t, NULL);
-	d->time_stamp = TIMEVAL_DIFF(t, *Control_GetStartTime());
-
-	static bool result = true;
-	
+	d->time_stamp = TIMEVAL_DIFF(t, *Control_GetStartTime());	
 	
 	// Read value based on Sensor Id
+	int value; bool success = true;
+	//TODO: Can probably do this nicer than a switch (define a function pointer for each sensor)
+	//		Can probably make the whole sensor thing a lot nicer with a linked list of sensors...
+	//		(Then to add more sensors to the software, someone just writes an appropriate read function and calls Sensor_Add(...) at init)
+	//		(I will do this. Don't do it before I get a chance, I don't trust you :P)
 	switch (s->id)
 	{
-		case 2:
+		//TODO: Strain gauges should have their own critical section, rest of sensors probably don't need to be in a critical section
+		case STRAIN0:
+			success &= GPIO_Set(GPIO0_30, true);
+			success &= ADC_Read(ADC0);
+			success &= GPIO_Set(GPIO0_30, false);
+			if (!success)
+				Fatal("Error reading strain gauge 0");
+			break;
+		case STRAIN1:
+			success &= GPIO_Set(GPIO1_28, true);
+			success &= ADC_Read(ADC0);
+			success &= GPIO_Set(GPIO1_28, false);
+			if (!success)
+				Fatal("Error reading strain gauge 1");
+			break;
+		case STRAIN2:
+			success &= GPIO_Set(GPIO0_31, true);
+			success &= ADC_Read(ADC0);
+			success &= GPIO_Set(GPIO0_31, false);
+		case STRAIN3:
+			success &= GPIO_Set(GPIO1_16, true);
+			success &= ADC_Read(ADC0);
+			success &= GPIO_Set(GPIO1_16, false);
+			if (!success)
+				Fatal("Error reading strain gauge 2");	
+			break;		
+		case PRESSURE0:
+			success &= ADC_Read(ADC1, &value);
+			break;
+		case PRESSURE1:
+			success &= ADC_Read(ADC5, &value);
+			break;
+		case PRESSURE_FEEDBACK:
+			success &= ADC_Read(ADC4, &value);
+			break;
+		case MICROPHONE:
+			success &= ADC_Read(ADC2, &value);
+			break;
+		case ENCLOSURE:
 		{
-			static bool set = false;
-			int raw_adc = 0;
-			//GPIO_Set(GPIO0_30, true);
-			ADC_Read(ADC0, &raw_adc);
-			d->value = (double)raw_adc;	//ADC #0 on the Beaglebone
-			//Log(LOGDEBUG, "Got value %f from ADC0", d->value);
-			//GPIO_Set(GPIO0_30, false);
-			set = !set;
-			//GPIO_Set(GPIO1_28, set);
-
-			usleep(100000);
-			
+			bool why_do_i_need_to_do_this = false;
+			success &= GPIO_Read(GPIO0_31, &why_do_i_need_to_do_this);
+			value = (int)why_do_i_need_to_do_this;
+			break;
+		}
+		case DILATOMETER:
+		{
+			// Will definitely cause issues included in the same critical section as ADC reads
+			// (since it will be the longest sensor to sample, everything else will have to keep waiting on it)
+			value = 0;
 			break;
 		}
 		
-		default:
-			d->value = rand() % 2;
-			usleep(1000000);
-			break;
-		
-
-		case ANALOG_TEST0:
-		{
-			d->value = (double)(rand() % 100) / 100;
-			break;
-		}
-		case ANALOG_TEST1:
-		{
-			static int count = 0;
-			count %= 500;
-			d->value = count++;
-			break;
-		}
-
-		case ANALOG_FAIL0:
-			d->value = 0;
-			//d->value = (double)(rand() % 6) * -( rand() % 2) / ( rand() % 100 + 1);
-			//Gives a value between -5 and 5
-			break;
-		case DIGITAL_TEST0:
-			d->value = t.tv_sec % 2;
-
-			break;
-		case DIGITAL_TEST1:
-			d->value = (t.tv_sec+1)%2;
-			break;
-		case DIGITAL_REALTEST:
-		{
-			d->value = 0; //d->value must be something... valgrind...
-		// Can pass pin as argument, just using 20 as an example here
-		// Although since pins will be fixed, can just define it here if we need to
-			//d->value = pinRead(20);	//Pin 20 on the Beaglebone
-			break;
-		}
-		case DIGITAL_FAIL0:
-			if( rand() % 100 > 98)
-				d->value = 2;
-			d->value = rand() % 2; 
-			//Gives 0 or 1 or a 2 every 1/100 times
-			break;
-		//default:
-		//	Fatal("Unknown sensor id: %d", s->id);
-		//	break;
 	}	
+
+	d->value = (double)(value); //TODO: Calibration? Or do calibration in GUI
+
+	pthread_mutex_unlock(&mutex); //TODO: Reduce the critical section
 	
 
 	// Perform sanity check based on Sensor's ID and the DataPoint
@@ -256,9 +282,18 @@ bool Sensor_Read(Sensor * s, DataPoint * d)
 
 #ifdef _BBB
 	//Not all cases have usleep, easiest here.
-	usleep(1000000);
+	//TODO: May want to add a control option to adjust the sampling rate for each sensor?
+	//		Also, we can get a more accurate sampling rate if instead of a fixed sleep, we calculate how long to sleep each time.
+	usleep(100000);
 #endif
-	return result;
+
+	/*
+	if (success)
+		Log(LOGDEBUG, "Successfully read sensor %d (for once)", s->id);
+	else
+		Log(LOGDEBUG, "Failed to read sensor %d (again)", s->id);
+	*/
+	return result && success;
 }
 
 /**

@@ -25,8 +25,8 @@ int storeFrame( CvCapture* capture)
 	frame = cvQueryFrame(capture);
 	if( frame == NULL)
 		return 0;	//error
-	//cvSaveImage("../web/images/test.JPG",frame,p);
-	jpg = cvEncodeImage(".jpg", frame,p); 
+	cvSaveImage("../web/images/test.JPG",frame,p);
+	//jpg = cvEncodeImage(".jpg", frame,p); 
 	/*pass buf to client, write to file on client*/
 	//fwrite(jpg->data.ptr,1,jpg->rows*jpg->cols, fp);
 	
@@ -35,7 +35,7 @@ int storeFrame( CvCapture* capture)
 			
 	//cvWaitKey(0);
 	cvReleaseImageHeader(&frame);
-	cvReleaseMat(&jpg);
+	//cvReleaseMat(&jpg);
 	//fclose( fp);
 	return 1;
 }
@@ -51,10 +51,14 @@ int main (int argc, char** argv)
 	if( capture == NULL)
 		return -1;
 
+	cvSetCaptureProperty (capture, CV_CAP_PROP_FOURCC, 'MJPEG');
+
 	while(1)
 	{
 		if( !storeFrame( capture))
 			return -1;
+		printf("enter to continue");
+		getchar();
 		//sleep(1);	//for now just to make the camera take 1 shot a second, as that's all my camera seems to be able to take/save (camera or function causing this? is 1 second per frame enough?)
 	}
 	

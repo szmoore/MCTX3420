@@ -511,7 +511,7 @@ void * FCGI_RequestLoop (void *data)
 			{
 				if (cookie[0] == '\0')
 				{
-					FCGI_RejectJSON(&context, "Please login.");
+					FCGI_RejectJSONEx(&context, STATUS_UNAUTHORIZED, "Please login.");
 					continue;
 				}
 
