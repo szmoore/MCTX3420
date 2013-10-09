@@ -16,6 +16,7 @@
 #include <syslog.h> // for system logging
 #include <signal.h> // for signal handling
 
+
 // --- Variable definitions --- //
 Options g_options; // options passed to program through command line arguments
 
@@ -97,29 +98,14 @@ void ParseArguments(int argc, char ** argv)
 }
 
 /**
- * Handle a signal
- * @param signal - The signal number
- */
-//TODO: Something that gets massively annoying with threads is that you can't predict which one gets the signal
-// There are ways to deal with this, but I can't remember them
-// Probably sufficient to just call Thread_QuitProgram here
-void SignalHandler(int signal)
-{
-	// At the moment just always exit.
-	// Call `exit` so that Cleanup will be called to... clean up.
-	Log(LOGWARN, "Got signal %d (%s). Exiting.", signal, strsignal(signal));
-
-	//exit(signal);
-}
-
-/**
  * Cleanup before the program exits
  */
 void Cleanup()
 {
 	Log(LOGDEBUG, "Begin cleanup.");
+	Sensor_Cleanup();
+	//Actuator_Cleanup();
 	Log(LOGDEBUG, "Finish cleanup.");
-
 }
 
 /**
@@ -135,24 +121,13 @@ int main(int argc, char ** argv)
 	openlog("mctxserv", LOG_PID | LOG_PERROR, LOG_USER);
 	Log(LOGINFO, "Server started");
 
-	ParseArguments(argc, argv);
+	ParseArguments(argc, argv); // Setup the g_options structure from program arguments
 
-	//Open the system log
-
-	// signal handler
-	//TODO: Make this work
-	/*
-	int signals[] = {SIGINT, SIGSEGV, SIGTERM};
-	for (int i = 0; i < sizeof(signals)/sizeof(int); ++i)
-	{
-		signal(signals[i], SignalHandler);
-	}
-	*/
 	Sensor_Init();
 	Actuator_Init();
 	Pin_Init();
-	//Sensor_StartAll("test");
-	//Actuator_StartAll("test");
+	
+	// Try and start things
 	const char *ret;
 	if ((ret = Control_SetMode(CONTROL_START, "test")) != NULL)
 		Fatal("Control_SetMode failed with '%s'", ret);

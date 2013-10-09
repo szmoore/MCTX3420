@@ -83,6 +83,9 @@ echo "Parameters are: $parameters"
 # Run the program with parameters
 # TODO: Can tell spawn-fcgi to run the program as an unprivelaged user?
 # But first will have to work out how to set PWM/GPIO as unprivelaged user
+# NOTE: Having the program automatically restart itself after a *FATAL ERROR* doesn't seem like such a good idea now
+# (Some things that call Fatal happen under circumstances where they will just keep calling Fatal every time the program starts)
+# Change the number of fails to 1 for now. We can potentially use different error codes for different types of errors, but that seems overkill.
 fails=0
 while [ $fails -lt 1 ]; do
         spawn-fcgi -p9005 -n -- ./server $parameters

@@ -11,67 +11,86 @@
 #include <math.h>
 
 /** Array of sensors, initialised by Sensor_Init **/
-static Sensor g_sensors[NUMSENSORS]; //global to this file
+static Sensor g_sensors[SENSORS_MAX];
+/** The number of sensors **/
+int g_num_sensors = 0;
 
-/** Array of sensor threshold structures defining the safety values of each sensor**/
-const SensorThreshold thresholds[NUMSENSORS]= {
-	//Max Safety, Min safety, Max warning, Min warning
-	{5000,0,5000,0},
-	{5000,0,5000,0},
-	{5000,0,5000,0},
-	{5000,0,5000,0},
-	{5000,0,5000,0},
-	{5000,0,5000,0},
-	{5000,0,5000,0},
-	{5000,0,5000,0},
-	{1, 1, 1, 1}
-};
 
-/** Human readable names for the sensors **/
-const char * g_sensor_names[NUMSENSORS] = {	
-	"strain0",
-	"strain1",
-	"strain2",
-	"strain3",
-	"pressure0",
-	"pressure1",
-	"pressure_feedback",
-	"microphone",
-	"enclosure"
-};
+
+/** 
+ * Add and initialise a Sensor
+ * @param name - Human readable name of the sensor
+ * @param read - Function to call whenever the sensor should be read
+ * @param init - Function to call to initialise the sensor (may be NULL)
+ * @param max_error - Maximum error threshold; program will exit if this is exceeded for the sensor reading
+ * @param min_error - Minimum error threshold; program will exit if the sensor reading falls below this value
+ * @param max_warn - Maximum warning threshold; program will log warnings if the value exceeds this threshold
+ * @param min_warn - Minimum warning threshold; program will log warnings if the value falls below this threshold
+ * @returns Number of the sensor added
+ */
+int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn cleanup, double max_error, double min_error, double max_warn, double min_warn)
+{
+	if (++g_num_sensors > SENSORS_MAX)
+	{
+		Fatal("Too many sensors; Increase SENSORS_MAX from %d in sensor.h and recompile", SENSORS_MAX);
+		// We could design the program to use realloc(3)
+		// But since someone who adds a new sensor has to recompile the program anyway...
+	}
+	Sensor * s = &(g_sensors[g_num_sensors-1]);
+
+	s->id = g_num_sensors-1;
+	s->user_id = user_id;
+	Data_Init(&(s->data_file));
+	s->name = name;
+	s->read = read; // Set read function
+	s->init = init; // Set init function
+	if (init != NULL)
+		init(name, user_id); // Call it
+
+	// Set warning/error thresholds
+	s->thresholds.max_error = max_error;
+	s->thresholds.min_error = min_error;
+	s->thresholds.max_warn = max_warn;
+	s->thresholds.min_warn = min_warn;
+
+	return g_num_sensors;
+}
 
 /**
- * One off initialisation of *all* sensors
+ * Initialise all sensors used by the program
+ * TODO: Edit this to add any extra sensors you need
+ * TODO: Edit the includes as well
  */
+#include "sensors/resource.h"
+#include "sensors/strain.h"
+#include "sensors/piped.h"
 void Sensor_Init()
 {
-	for (int i = 0; i < NUMSENSORS; ++i)
+	Sensor_Add("cpu_stime", RESOURCE_CPU_SYS, Resource_Read, NULL, NULL, 1e50,-1e50,1e50,-1e50);	
+	Sensor_Add("cpu_utime", RESOURCE_CPU_USER, Resource_Read, NULL, NULL, 1e50,-1e50,1e50,-1e50);	
+	//Sensor_Add("../testing/count.py", 0, Piped_Read, Piped_Init, Piped_Cleanup, 1e50,-1e50,1e50,-1e50);
+	//Sensor_Add("strain0", STRAIN0, Strain_Read, Strain_Init, 5000,0,5000,0);
+	//Sensor_Add("strain1", STRAIN1, Strain_Read, Strain_Init, 5000,0,5000,0);
+	//Sensor_Add("strain2", STRAIN2, Strain_Read, Strain_Init, 5000,0,5000,0);
+	//Sensor_Add("strain3", STRAIN3, Strain_Read, Strain_Init, 5000,0,5000,0);
+	//Sensor_Add("pressure0", PRESSURE0, Pressure_Read, Pressure_Init, 5000,0,5000,0);
+	//Sensor_Add("pressure1", PRESSURE1, Pressure_Read, Pressure_Init, 5000,0,5000,0);
+	//Sensor_Add("pressure_feedback", PRESSURE_FEEDBACK, Pressure_Read, Pressure_Init, 5000,0,5000,0);
+	//Sensor_Add("enclosure", ENCLOSURE, Enclosure_Read, Enclosure_Init, 1,1,1,1);
+	//Sensor_Add("dilatometer", DILATOMETER, Dilatometer_Read, Dilatometer_Init, -1,-1,-1,-1);
+}
+
+/**
+ * Cleanup all sensors
+ */
+void Sensor_Cleanup()
+{
+	for (int i = 0; i < g_num_sensors; ++i)
 	{
-		g_sensors[i].id = i;
-		Data_Init(&(g_sensors[i].data_file));
+		Sensor * s = g_sensors+i;
+		if (s->cleanup != NULL)
+			s->cleanup(s->user_id);
 	}
-
-
-
-	// Get the required ADCs
-	ADC_Export(ADC0); // Strain gauges x 4
-	ADC_Export(ADC1); // Pressure sensor 1
-	ADC_Export(ADC2); // Pressure sensor 2
-	// ADC3 still unused (!?)
-	ADC_Export(ADC4); // Pressure regulator feedback(?) signal
-	ADC_Export(ADC5); // Microphone
-
-	// Get GPIO pins //TODO: Confirm pins used with Electronics Team
-	GPIO_Export(GPIO0_30); // Mux A (strain 1)
-	GPIO_Set(GPIO0_30, false);
-	GPIO_Export(GPIO1_28); // Mux B (strain 2)
-	GPIO_Set(GPIO1_28, false);
-	GPIO_Export(GPIO0_31); // Mux C (strain 3)
-	GPIO_Set(GPIO0_31, false);
-	GPIO_Export(GPIO1_16); // Mux D (strain 4)
-	GPIO_Set(GPIO1_16, false);
-
-	GPIO_Export(GPIO0_31); // Enclosure switch
 }
 
 /**
@@ -93,7 +112,7 @@ void Sensor_SetMode(Sensor * s, ControlModes mode, void * arg)
 				char filename[BUFSIZ];
 				const char *experiment_name = (const char*) arg;
 
-				if (snprintf(filename, BUFSIZ, "%s_s%d", experiment_name, s->id) >= BUFSIZ)
+				if (snprintf(filename, BUFSIZ, "%s_%d", experiment_name, s->id) >= BUFSIZ)
 				{
 					Fatal("Experiment name \"%s\" too long (>%d)", experiment_name, BUFSIZ);
 				}
@@ -133,8 +152,6 @@ void Sensor_SetMode(Sensor * s, ControlModes mode, void * arg)
 			}
 
 			Data_Close(&(s->data_file)); // Close DataFile
-			s->newest_data.time_stamp = 0;
-			s->newest_data.value = 0;
 			Log(LOGDEBUG, "Stopped sensor %d", s->id);
 		break;
 		default:
@@ -150,7 +167,7 @@ void Sensor_SetMode(Sensor * s, ControlModes mode, void * arg)
  */
 void Sensor_SetModeAll(ControlModes mode, void * arg)
 {
-	for (int i = 0; i < NUMSENSORS; i++)
+	for (int i = 0; i < g_num_sensors; i++)
 		Sensor_SetMode(&g_sensors[i], mode, arg);
 }
 
@@ -160,141 +177,20 @@ void Sensor_SetModeAll(ControlModes mode, void * arg)
  * @param sensor_id - The ID of the sensor
  * @param value - The value from the sensor to test
  */
-void Sensor_CheckData(SensorId id, double value)
+void Sensor_CheckData(Sensor * s, double value)
 {
-	if( value > thresholds[id].max_error || value < thresholds[id].min_error)
+	if( value > s->thresholds.max_error || value < s->thresholds.min_error)
 	{
-		Log(LOGERR, "Sensor %s at %f is above or below its safety value of %f or %f\n", g_sensor_names[id],value, thresholds[id].max_error, thresholds[id].min_error);
+		Log(LOGERR, "Sensor %s at %f is above or below its safety value of %f or %f\n",s->name,value, s->thresholds.max_error, s->thresholds.min_error);
 		//new function that stops actuators?
 		//Control_SetMode(CONTROL_EMERGENCY, NULL)
 	}
-	else if( value > thresholds[id].max_warn || value < thresholds[id].min_warn)
+	else if( value > s->thresholds.max_warn || value < s->thresholds.min_warn)
 	{
-		Log(LOGWARN, "Sensor %s at %f is above or below its warning value of %f or %f\n", g_sensor_names[id],value,thresholds[id].max_warn, thresholds[id].min_warn);	
+		Log(LOGWARN, "Sensor %s at %f is above or below its warning value of %f or %f\n", s->name,value,s->thresholds.max_warn, s->thresholds.min_warn);	
 	}
 }
 
-
-/**
- * Read a DataPoint from a Sensor; block until value is read
- * @param id - The ID of the sensor
- * @param d - DataPoint to set
- * @returns True if the DataPoint was different from the most recently recorded.
- */
-bool Sensor_Read(Sensor * s, DataPoint * d)
-{
-	
-
-
-	static bool result = true;
-
-	//TODO: Remove this, code should be refactored to not use so many threads
-	// Although... if it works, it works...
-	static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; 
-
-	pthread_mutex_lock(&mutex); //TODO: Reduce the critical section
-
-	usleep(10);
-
-	// Set time stamp
-	struct timeval t;
-	gettimeofday(&t, NULL);
-	d->time_stamp = TIMEVAL_DIFF(t, *Control_GetStartTime());	
-	
-	// Read value based on Sensor Id
-	int value; bool success = true;
-	//TODO: Can probably do this nicer than a switch (define a function pointer for each sensor)
-	//		Can probably make the whole sensor thing a lot nicer with a linked list of sensors...
-	//		(Then to add more sensors to the software, someone just writes an appropriate read function and calls Sensor_Add(...) at init)
-	//		(I will do this. Don't do it before I get a chance, I don't trust you :P)
-	switch (s->id)
-	{
-		//TODO: Strain gauges should have their own critical section, rest of sensors probably don't need to be in a critical section
-		case STRAIN0:
-			success &= GPIO_Set(GPIO0_30, true);
-			success &= ADC_Read(ADC0, &value);
-			success &= GPIO_Set(GPIO0_30, false);
-			if (!success)
-				Fatal("Error reading strain gauge 0");
-			break;
-		case STRAIN1:
-			success &= GPIO_Set(GPIO1_28, true);
-			success &= ADC_Read(ADC0, &value);
-			success &= GPIO_Set(GPIO1_28, false);
-			if (!success)
-				Fatal("Error reading strain gauge 1");
-			break;
-		case STRAIN2:
-			success &= GPIO_Set(GPIO0_31, true);
-			success &= ADC_Read(ADC0, &value);
-			success &= GPIO_Set(GPIO0_31, false);
-		case STRAIN3:
-			success &= GPIO_Set(GPIO1_16, true);
-			success &= ADC_Read(ADC0, &value);
-			success &= GPIO_Set(GPIO1_16, false);
-			if (!success)
-				Fatal("Error reading strain gauge 2");	
-			break;		
-		case PRESSURE0:
-			success &= ADC_Read(ADC1, &value);
-			break;
-		case PRESSURE1:
-			success &= ADC_Read(ADC5, &value);
-			break;
-		case PRESSURE_FEEDBACK:
-			success &= ADC_Read(ADC4, &value);
-			break;
-		case MICROPHONE:
-			success &= ADC_Read(ADC2, &value);
-			break;
-		case ENCLOSURE:
-		{
-			bool why_do_i_need_to_do_this = false;
-			success &= GPIO_Read(GPIO0_31, &why_do_i_need_to_do_this);
-			value = (int)why_do_i_need_to_do_this;
-			break;
-		}
-		case DILATOMETER:
-		{
-			// Will definitely cause issues included in the same critical section as ADC reads
-			// (since it will be the longest sensor to sample, everything else will have to keep waiting on it)
-			value = 0;
-			break;
-		}
-		
-	}	
-
-	d->value = (double)(value); //TODO: Calibration? Or do calibration in GUI
-
-	pthread_mutex_unlock(&mutex); //TODO: Reduce the critical section
-	
-
-	// Perform sanity check based on Sensor's ID and the DataPoint
-	Sensor_CheckData(s->id, d->value);
-
-	// Update latest DataPoint if necessary
-	
-	if (result)
-	{
-		s->newest_data.time_stamp = d->time_stamp;
-		s->newest_data.value = d->value;
-	}
-
-#ifdef _BBB
-	//Not all cases have usleep, easiest here.
-	//TODO: May want to add a control option to adjust the sampling rate for each sensor?
-	//		Also, we can get a more accurate sampling rate if instead of a fixed sleep, we calculate how long to sleep each time.
-	usleep(100000);
-#endif
-
-	/*
-	if (success)
-		Log(LOGDEBUG, "Successfully read sensor %d (for once)", s->id);
-	else
-		Log(LOGDEBUG, "Failed to read sensor %d (again)", s->id);
-	*/
-	return result && success;
-}
 
 /**
  * Record data from a single Sensor; to be run in a seperate thread
@@ -310,41 +206,43 @@ void * Sensor_Loop(void * arg)
 	while (s->activated)
 	{
 		DataPoint d;
-		//Log(LOGDEBUG, "Sensor %d reads data [%f,%f]", s->id, d.time_stamp, d.value);
-		if (Sensor_Read(s, &d)) // If new DataPoint is read:
+		d.value = 0;
+		bool success = s->read(s->user_id, &(d.value));
+
+		struct timeval t;
+		gettimeofday(&t, NULL);
+		d.time_stamp = TIMEVAL_DIFF(t, *Control_GetStartTime());	
+		
+		if (success)
 		{
-			//Log(LOGDEBUG, "Sensor %d saves data [%f,%f]", s->id, d.time_stamp, d.value);
+
+
+			Sensor_CheckData(s, d.value);
 			Data_Save(&(s->data_file), &d, 1); // Record it
 		}
+		else
+			Log(LOGWARN, "Failed to read sensor %s (%d,%d)", s->name, s->id,s->user_id);
+
+		usleep(1e5); //TODO: Adjust appropriately 
 	}
 	
 	// Needed to keep pthreads happy
-
-	Log(LOGDEBUG, "Sensor %d finished", s->id);
+	Log(LOGDEBUG, "Sensor %s (%d,%d) finished", s->name,s->id,s->user_id);
 	return NULL;
 }
 
 /**
- * Get a Sensor given an ID string
- * @param id_str ID string
- * @returns Sensor* identified by the string; NULL on error
+ * Get a Sensor given its name
+ * @returns Sensor with the given name, NULL if there isn't one
  */
-Sensor * Sensor_Identify(const char * id_str)
-{
-	char * end;
-	// Parse string as integer
-	int id = strtol(id_str, &end, 10);
-	if (*end != '\0')
+Sensor * Sensor_Identify(const char * name)
+{	
+	for (int i = 0; i < g_num_sensors; ++i)
 	{
-		return NULL;
+		if (strcmp(g_sensors[i].name, name) == 0)
+			return &(g_sensors[i]);
 	}
-	// Bounds check
-	if (id < 0 || id >= NUMSENSORS)
-		return NULL;
-
-
-	Log(LOGDEBUG, "Sensor \"%s\" identified", g_sensor_names[id]);
-	return g_sensors+id;
+	return NULL;
 }
 
 /**
@@ -353,15 +251,16 @@ Sensor * Sensor_Identify(const char * id_str)
  * @param id - ID of sensor
  * @param format - Format
  */
-void Sensor_BeginResponse(FCGIContext * context, SensorId id, DataFormat format)
+void Sensor_BeginResponse(FCGIContext * context, Sensor * s, DataFormat format)
 {
 	// Begin response
 	switch (format)
 	{
 		case JSON:
 			FCGI_BeginJSON(context, STATUS_OK);
-			FCGI_JSONLong("id", id);
-			FCGI_JSONPair("name", g_sensor_names[id]);
+			FCGI_JSONLong("id", s->id);
+			FCGI_JSONLong("user_id", s->user_id); //NOTE: Might not want to expose this?
+			FCGI_JSONPair("name", s->name);
 			break;
 		default:
 			FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
@@ -375,7 +274,7 @@ void Sensor_BeginResponse(FCGIContext * context, SensorId id, DataFormat format)
  * @param id - ID of the sensor
  * @param format - Format
  */
-void Sensor_EndResponse(FCGIContext * context, SensorId id, DataFormat format)
+void Sensor_EndResponse(FCGIContext * context, Sensor * s, DataFormat format)
 {
 	// End response
 	switch (format)
@@ -400,13 +299,15 @@ void Sensor_Handler(FCGIContext *context, char * params)
 	double current_time = TIMEVAL_DIFF(now, *Control_GetStartTime());
 
 	int id = 0;
+	const char * name = "";
 	double start_time = 0;
 	double end_time = current_time;
 	const char * fmt_str;
 
 	// key/value pairs
 	FCGIValue values[] = {
-		{"id", &id, FCGI_REQUIRED(FCGI_INT_T)}, 
+		{"id", &id, FCGI_INT_T}, 
+		{"name", &name, FCGI_STRING_T},
 		{"format", &fmt_str, FCGI_STRING_T}, 
 		{"start_time", &start_time, FCGI_DOUBLE_T}, 
 		{"end_time", &end_time, FCGI_DOUBLE_T},
@@ -415,6 +316,7 @@ void Sensor_Handler(FCGIContext *context, char * params)
 	// enum to avoid the use of magic numbers
 	typedef enum {
 		ID,
+		NAME,
 		FORMAT,
 		START_TIME,
 		END_TIME,
@@ -427,24 +329,46 @@ void Sensor_Handler(FCGIContext *context, char * params)
 		return;
 	}
 
-	// Error checking on sensor id
-	if (id < 0 || id >= NUMSENSORS)
+	Sensor * s = &(g_sensors[id]); // If id was not supplied, this defaults to &(g_sensors[0])
+	if (FCGI_RECEIVED(values[NAME].flags))
 	{
-		FCGI_RejectJSON(context, "Invalid sensor id");
+		if (FCGI_RECEIVED(values[ID].flags))
+		{
+			FCGI_RejectJSON(context, "Can't supply both sensor id and name");
+			return;
+		}
+		s = Sensor_Identify(name);
+		if (s == NULL)
+		{
+			FCGI_RejectJSON(context, "Unknown sensor name");
+			return;
+		}
+	}
+	else if (!FCGI_RECEIVED(values[ID].flags))
+	{
+		FCGI_RejectJSON(context, "No sensor id or name supplied");
 		return;
 	}
-	Sensor * s = g_sensors+id;
 
 	DataFormat format = Data_GetFormat(&(values[FORMAT]));
 
 	// Begin response
-	Sensor_BeginResponse(context, id, format);
+	Sensor_BeginResponse(context, s, format);
 
 	// Print Data
 	Data_Handler(&(s->data_file), &(values[START_TIME]), &(values[END_TIME]), format, current_time);
 	
 	// Finish response
-	Sensor_EndResponse(context, id, format);
+	Sensor_EndResponse(context, s, format);
+}
+
+/**
+ * Get the Name of a Sensor
+ * @param id - ID number
+ */
+const char * Sensor_GetName(int id)
+{
+	return g_sensors[id].name;
 }
 
 

@@ -1,0 +1,20 @@
+To add a new type of sensor to the program:
+
+1. Create a .c and .h file
+2. In the .h file, define an enum representing the id number of each sensor of that type (you can skip this if you only need a single sensor)
+3. Implement a function for reading a sensor value; it should be of the form: bool Read(int id, double * value)
+   - id indicates which of the sensors of that type is being read (if you only have a single sensor you can ignore it)
+   - The function stores the result in the double pointed to by value
+   - It returns true on success and false on a (non fatal) error
+4. Optionally add an initialisation function: bool Init(int id, char * name)
+5. In ../sensor.c make a call to Sensor_Add in the Sensor_Init function, passing the appropriate arguments.
+   - They are: The name of the sensor (passed to Init, see 4.)
+   - The id number according to the enum (just pass 0 if you don't need more than one sensor)
+   - The Read function
+   - The Init function (or NULL if you don't need one)
+   - Threshold values in the order:
+     max_error, min_error, max_warn, min_warn (as documented in ../sensor.h)
+     - If your sensor doesn't have/need safety thresholds, just pass ridiculous values like 1e50 or 1e-50
+	 - Yeah, it's hacky, but it works.
+   - You may need to increase SENSORS_MAX in ../sensor.h if you go insane with sensor adding power
+6. Add the .o file to Makefile (the OBJ variable)

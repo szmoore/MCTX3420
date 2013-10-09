@@ -52,11 +52,11 @@ static void IdentifyHandler(FCGIContext *context, char *params) {
 	if (ident_sensors) {
 		FCGI_JSONKey("sensors");
 		FCGI_JSONValue("{\n\t\t");
-		for (i = 0; i < NUMSENSORS; i++) {
+		for (i = 0; i < g_num_sensors; i++) {
 			if (i > 0) {
 				FCGI_JSONValue(",\n\t\t");
 			}
-			FCGI_JSONValue("\"%d\" : \"%s\"", i, g_sensor_names[i]); 
+			FCGI_JSONValue("\"%d\" : \"%s\"", i, Sensor_GetName(i)); 
 		}
 		FCGI_JSONValue("\n\t}");
 	}
