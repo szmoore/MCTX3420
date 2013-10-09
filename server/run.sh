@@ -84,7 +84,7 @@ echo "Parameters are: $parameters"
 # TODO: Can tell spawn-fcgi to run the program as an unprivelaged user?
 # But first will have to work out how to set PWM/GPIO as unprivelaged user
 fails=0
-while [ $fails -lt 10 ]; do
+while [ $fails -lt 1 ]; do
         spawn-fcgi -p9005 -n -- ./server $parameters
 		error=$?
         if [ "$error" == "0" ]; then
