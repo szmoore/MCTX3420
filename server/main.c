@@ -128,15 +128,19 @@ int main(int argc, char ** argv)
 	Pin_Init();
 	
 	// Try and start things
+	/*
 	const char *ret;
 	if ((ret = Control_SetMode(CONTROL_START, "test")) != NULL)
 		Fatal("Control_SetMode failed with '%s'", ret);
+	*/
 
 	// run request thread in the main thread
 	FCGI_RequestLoop(NULL);
 
+	/*
 	if ((ret = Control_SetMode(CONTROL_STOP, "test")) != NULL)
 		Fatal("Control_SetMode failed with '%s'", ret);
+	*/
 	//Sensor_StopAll();
 	//Actuator_StopAll();
 

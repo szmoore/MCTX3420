@@ -20,13 +20,14 @@ int g_num_sensors = 0;
 /** 
  * Add and initialise a Sensor
  * @param name - Human readable name of the sensor
+ * @param user_id - User identifier
  * @param read - Function to call whenever the sensor should be read
  * @param init - Function to call to initialise the sensor (may be NULL)
  * @param max_error - Maximum error threshold; program will exit if this is exceeded for the sensor reading
  * @param min_error - Minimum error threshold; program will exit if the sensor reading falls below this value
  * @param max_warn - Maximum warning threshold; program will log warnings if the value exceeds this threshold
  * @param min_warn - Minimum warning threshold; program will log warnings if the value falls below this threshold
- * @returns Number of the sensor added
+ * @returns Number of actuators added so far
  */
 int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn cleanup, double max_error, double min_error, double max_warn, double min_warn)
 {
@@ -46,6 +47,10 @@ int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn
 	s->init = init; // Set init function
 	if (init != NULL)
 		init(name, user_id); // Call it
+
+	// Start by averaging values taken over a second
+	s->sample_us = 1e6;
+	s->averages = 1;
 
 	// Set warning/error thresholds
 	s->thresholds.max_error = max_error;
@@ -223,7 +228,7 @@ void * Sensor_Loop(void * arg)
 		else
 			Log(LOGWARN, "Failed to read sensor %s (%d,%d)", s->name, s->id,s->user_id);
 
-		usleep(1e5); //TODO: Adjust appropriately 
+		usleep(s->sample_us);
 	}
 	
 	// Needed to keep pthreads happy
@@ -303,6 +308,7 @@ void Sensor_Handler(FCGIContext *context, char * params)
 	double start_time = 0;
 	double end_time = current_time;
 	const char * fmt_str;
+	double sample_s = 0;
 
 	// key/value pairs
 	FCGIValue values[] = {
@@ -311,6 +317,7 @@ void Sensor_Handler(FCGIContext *context, char * params)
 		{"format", &fmt_str, FCGI_STRING_T}, 
 		{"start_time", &start_time, FCGI_DOUBLE_T}, 
 		{"end_time", &end_time, FCGI_DOUBLE_T},
+		{"sample_s", &sample_s, FCGI_DOUBLE_T}
 	};
 
 	// enum to avoid the use of magic numbers
@@ -320,6 +327,7 @@ void Sensor_Handler(FCGIContext *context, char * params)
 		FORMAT,
 		START_TIME,
 		END_TIME,
+		SAMPLE_S
 	} SensorParams;
 	
 	// Fill values appropriately
@@ -329,7 +337,7 @@ void Sensor_Handler(FCGIContext *context, char * params)
 		return;
 	}
 
-	Sensor * s = &(g_sensors[id]); // If id was not supplied, this defaults to &(g_sensors[0])
+	Sensor * s = NULL;
 	if (FCGI_RECEIVED(values[NAME].flags))
 	{
 		if (FCGI_RECEIVED(values[ID].flags))
@@ -349,7 +357,28 @@ void Sensor_Handler(FCGIContext *context, char * params)
 		FCGI_RejectJSON(context, "No sensor id or name supplied");
 		return;
 	}
+	else if (id < 0 || id >= g_num_sensors)
+	{
+		FCGI_RejectJSON(context, "Invalid sensor id");
+		return;
+	}
+	else
+	{
+		s = &(g_sensors[id]);
+	}
 
+	// Adjust sample rate if necessary
+	if (FCGI_RECEIVED(values[SAMPLE_S].flags))
+	{
+		if (sample_s < 0)
+		{
+			FCGI_RejectJSON(context, "Negative sampling speed!");
+			return;
+		}		
+		s->sample_us = 1e6*sample_s;
+	}
+	
+	
 	DataFormat format = Data_GetFormat(&(values[FORMAT]));
 
 	// Begin response
@@ -360,6 +389,7 @@ void Sensor_Handler(FCGIContext *context, char * params)
 	
 	// Finish response
 	Sensor_EndResponse(context, s, format);
+
 }
 
 /**

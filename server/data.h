@@ -53,4 +53,5 @@ extern int Data_FindByTime(DataFile * df, double time_stamp, DataPoint * closest
 extern void Data_Handler(DataFile * df, FCGIValue * start, FCGIValue * end, DataFormat format, double current_time); // Helper; given FCGI params print data
 extern DataFormat Data_GetFormat(FCGIValue * fmt); // Helper; convert human readable format string to DataFormat
 
+
 #endif //_DATAPOINT_H

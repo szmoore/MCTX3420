@@ -8,37 +8,44 @@
 
 #include "common.h"
 #include "data.h"
+#include "device.h"
 
-//NOTE: Functionality is very similar to Sensor stuff
-//		BUT it's probably very unwise to try and generalise Sensors and Actuators to the same thing (ie: Device)
-//		Might be OK in C++ but not easy in C
 
-/** Number of actuators **/
-#define NUMACTUATORS 3
+/** 
+ * Maximum number of actuators program can be compiled with
+ * (If you get an error "Increase ACTUATORS_MAX from %d" this is what it refers to)
+ */
+#define ACTUATORS_MAX 5
+extern int g_num_actuators; // in actuator.c
 
-/** List of actuator ids (should be of size NUMACTUATORS) **/
-typedef enum
-{
-	ACTUATOR_TEST0,
-	ACTUATOR_TEST1,
-	ACTUATOR_TEST2
-} ActuatorId;
 
-/** Human readable names for the Actuators **/
-extern const char * g_actuator_names[NUMACTUATORS];
 
 /** Control structure for Actuator setting **/
 typedef struct
 {
 	//TODO: Add functionality as needed
-	/** Simple value for Actuator **/
-	double value;
+	// Currently implements a simple piecewise step increase
+	// Would be cool to have a function specified as a string... eg: "1.0 + 0.5*s^2" with "s" the step number, and then give "stepwait" and "steps"
+	//	... But that, like so many things, is probably overkill
+	/** Current value of Actuator **/
+	double start;
+	/** Time to maintain Actuator at each value **/
+	double stepwait;
+	/**	Amount to increase/decrease Actuator on each step **/
+	double stepsize;
+	/** Number of steps still to perform **/
+	int steps; // Note that after it is first set, this will be decremented until it is zero
+
 } ActuatorControl;
 
 typedef struct
 {
 	/** ID number of the actuator **/
-	ActuatorId id;
+	int id;
+	/** User ID number **/
+	int user_id;
+	/** Name **/
+	const char * name;
 	/** Control parameters for the Actuator **/
 	ActuatorControl control;
 	/** Flag indicates if ActuatorControl has been changed **/
@@ -53,7 +60,15 @@ typedef struct
 	pthread_cond_t cond;
 	/** Indicates whether the Actuator is running **/
 	bool activated;
-
+	/** Initialisation function **/
+	InitFn init;
+	/** Set function **/
+	SetFn set;
+	/** Sanity check function **/
+	SanityFn sanity;
+	/** Cleanup function **/
+	CleanFn clean;
+	
 } Actuator;
 
 extern void Actuator_Init(); // One off initialisation of *all* Actuators
@@ -67,6 +82,7 @@ extern void Actuator_SetControl(Actuator * a, ActuatorControl * c); // Set the c
 extern Actuator * Actuator_Identify(const char * str); // Identify a Sensor from a string Id
 
 extern void Actuator_Handler(FCGIContext *context, char * params); // Handle a FCGI request for Actuator control
+extern const char * Actuator_GetName(int id);
 
 #endif //_ACTUATOR_H
 

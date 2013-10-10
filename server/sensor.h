@@ -7,6 +7,7 @@
 #define _SENSOR_H
 
 #include "data.h"
+#include "device.h"
 
 
 /** 
@@ -18,6 +19,7 @@ extern int g_num_sensors; // in sensor.c
 
 
 /** Structure to define the warning and error thresholds of the sensors **/
+//TODO: Replace with a call to an appropriate "Sanity" function? (see the actuator code)
 typedef struct
 {
 	/** Maximum safe value **/
@@ -29,13 +31,6 @@ typedef struct
 	/** Minimum value before a warning is reported **/
 	double min_warn;
 } SensorThreshold;
-
-/** Function pointer for sensor reading **/
-typedef bool (*ReadFn)(int, double * val);
-/** Function pointer for sensor initialisation **/
-typedef bool (*InitFn)(const char *, int);
-/** Function pointer for sensor cleanup **/
-typedef bool (*CleanFn)(int);
 
 /** Structure to represent a sensor **/
 typedef struct
@@ -60,6 +55,11 @@ typedef struct
 	const char * name;
 	/** Thresholds on the sensor **/
 	SensorThreshold thresholds;
+	/** Sampling rate **/
+	int sample_us;
+	/** Averages per DataPoint **/
+	int averages;
+
 	
 } Sensor;
 
