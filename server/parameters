@@ -20,11 +20,13 @@ verbosity="$LOGDEBUG"
 pin_test="0"
 
 # Set to the URI to use authentication
-auth_uri="ldap://192.168.1.1"
-#auth_uri="/etc/shadow"
+#auth_uri="ldap://192.168.1.1"
+#auth_uri="ldaps://ldap.pheme.uwa.edu.au" #UWA
+auth_uri="/etc/shadow"
 
 # Set to the dn of the LDAP server
-ldap_base_dn="ou=People,dc=daedalus"
+ldap_base_dn="ou=People,dc=daedalus" # Testing
+#ldap_base_dn="ou=Users,ou=UWA,dc=uwads,dc=uwa,dc=edu,dc=au" #UWA
 
 
 ## OPTIONS TO BE PASSED TO SERVER; DO NOT EDIT

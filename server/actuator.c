@@ -9,30 +9,52 @@
 #include "bbb_pin.h"
 
 
-/** Array of Actuators (global to this file) initialised by Actuator_Init **/
-static Actuator g_actuators[NUMACTUATORS];
 
-/** Human readable names for the Actuators **/
-const char * g_actuator_names[NUMACTUATORS] = {	
-	"actuator_test0", "gpio1_16", "EHRPWM0A_duty@60Hz"
-};
+
+/** Number of actuators **/
+int g_num_actuators = 0;
+
+/** Array of Actuators (global to this file) initialised by Actuator_Init **/
+static Actuator g_actuators[ACTUATORS_MAX];
+/** 
+ * Add and initialise an Actuator
+ * @param name - Human readable name of the actuator
+ * @param read - Function to call whenever the actuator should be read
+ * @param init - Function to call to initialise the actuator (may be NULL)
+ * @returns Number of actuators added so far
+ */
+int Actuator_Add(const char * name, int user_id, SetFn set, InitFn init, CleanFn cleanup, SanityFn sanity)
+{
+	if (++g_num_actuators > ACTUATORS_MAX)
+	{
+		Fatal("Too many sensors; Increase ACTUATORS_MAX from %d in actuator.h and recompile", ACTUATORS_MAX);
+	}
+	Actuator * a = &(g_actuators[g_num_actuators-1]);
+	a->id = g_num_actuators-1;
+	a->user_id = user_id;
+	Data_Init(&(a->data_file));
+	a->name = name;
+	a->set = set; // Set read function
+	a->init = init; // Set init function
+	if (init != NULL)
+		init(name, user_id); // Call it
+	a->sanity = sanity;
+
+	pthread_mutex_init(&(a->mutex), NULL);
+
+	return g_num_actuators;
+}
+
 
 /**
  * One off initialisation of *all* Actuators
  */
+#include "actuators/ledtest.h"
+#include "actuators/filetest.h"
 void Actuator_Init()
 {
-	for (int i = 0; i < NUMACTUATORS; ++i)
-	{
-		g_actuators[i].id = i;
-		Data_Init(&(g_actuators[i].data_file));
-		pthread_mutex_init(&(g_actuators[i].mutex), NULL);
-	}
-
-	// Initialise pins used
-	GPIO_Export(GPIO1_16);
-	PWM_Export(EHRPWM0A);
-	
+	//Actuator_Add("ledtest",0,  Ledtest_Set, NULL,NULL,NULL);
+	Actuator_Add("filetest", 0, Filetest_Set, Filetest_Init, Filetest_Cleanup, Filetest_Sanity);
 }
 
 /**
@@ -112,7 +134,7 @@ void Actuator_SetMode(Actuator * a, ControlModes mode, void *arg)
  */
 void Actuator_SetModeAll(ControlModes mode, void * arg)
 {
-	for (int i = 0; i < NUMACTUATORS; i++)
+	for (int i = 0; i < ACTUATORS_MAX; i++)
 		Actuator_SetMode(&g_actuators[i], mode, arg);
 }
 
@@ -138,7 +160,23 @@ void * Actuator_Loop(void * arg)
 		if (!a->activated)
 			break;
 
-		Actuator_SetValue(a, a->control.value);
+		Actuator_SetValue(a, a->control.start);
+		// Currently does discrete steps after specified time intervals
+		while (a->control.steps > 0 && a->activated)
+		{
+			usleep(1e6*(a->control.stepwait));
+			a->control.start += a->control.stepsize;
+			Actuator_SetValue(a, a->control.start);
+			
+			a->control.steps--;
+		}
+		usleep(1e6*(a->control.stepwait));
+
+		//TODO:
+		// Note that although this loop has a sleep in it which would seem to make it hard to enforce urgent shutdowns,
+		//	You can call the Actuator's cleanup function immediately (and this loop should later just exit)
+		//	tl;dr This function isn't/shouldn't be responsible for the emergency Actuator stuff
+		// (That should be handled by the Fatal function... at some point)
 	}
 
 	//TODO: Cleanup?
@@ -170,53 +208,21 @@ void Actuator_SetControl(Actuator * a, ActuatorControl * c)
  */
 void Actuator_SetValue(Actuator * a, double value)
 {
+	if (a->sanity != NULL && !a->sanity(a->user_id, value))
+	{
+		//ARE YOU INSANE?
+		Fatal("Insane value %lf for actuator %s", value, a->name);
+	}
+	if (!(a->set(a->user_id, value)))
+	{
+		Fatal("Failed to set actuator %s to %lf", a->name, value);
+	}
+
 	// Set time stamp
 	struct timeval t;
 	gettimeofday(&t, NULL);
-
+	// Record and save DataPoint
 	DataPoint d = {TIMEVAL_DIFF(t, *Control_GetStartTime()), value};
-	//TODO: Set actuator
-	switch (a->id)
-	{
-		case ACTUATOR_TEST0: 
-			{
-			// Onboard LEDs test actuator
-				FILE *led_handle = NULL;	//code reference: http://learnbuildshare.wordpress.com/2013/05/19/beaglebone-black-controlling-user-leds-using-c/
-				const char *led_format = "/sys/class/leds/beaglebone:green:usr%d/brightness";
-				char buf[50];
-				bool turn_on = value;
-
-				for (int i = 0; i < 4; i++) 
-				{
-					snprintf(buf, 50, led_format, i);
-					if ((led_handle = fopen(buf, "w")) != NULL)
-					{
-						if (turn_on)
-							fwrite("1", sizeof(char), 1, led_handle);
-						else
-							fwrite("0", sizeof(char), 1, led_handle);
-						fclose(led_handle);
-					}
-					else
-						Log(LOGDEBUG, "LED fopen failed: %s", strerror(errno)); 
-				}
-			}
-			break;
-		case ACTUATOR_TEST1:
-			GPIO_Set(GPIO1_16, (bool)(value));
-			break;
-		case ACTUATOR_TEST2:
-		{
-			// PWM analogue actuator (currently generates one PWM signal with first PWM module)
-			static long freq = 16666666; // This is 60Hz
-			PWM_Set(EHRPWM0A, true, freq, value * freq); // Set the duty cycle
-			break;
-		}
-	}
-
-	Log(LOGDEBUG, "Actuator %s set to %f", g_actuator_names[a->id], value);
-
-	// Record the value
 	Data_Save(&(a->data_file), &d, 1);
 }
 
@@ -226,15 +232,16 @@ void Actuator_SetValue(Actuator * a, double value)
  * @param format - Format
  * @param id - ID of Actuator
  */
-void Actuator_BeginResponse(FCGIContext * context, ActuatorId id, DataFormat format)
+void Actuator_BeginResponse(FCGIContext * context, Actuator * a, DataFormat format)
 {
 	// Begin response
 	switch (format)
 	{
 		case JSON:
 			FCGI_BeginJSON(context, STATUS_OK);
-			FCGI_JSONLong("id", id);
-			FCGI_JSONPair("name", g_actuator_names[id]);
+			FCGI_JSONLong("id", a->id);
+			FCGI_JSONLong("user_id", a->user_id); //TODO: Don't need to show this?
+			FCGI_JSONPair("name", a->name);
 			break;
 		default:
 			FCGI_PrintRaw("Content-type: text/plain\r\n\r\n");
@@ -248,7 +255,7 @@ void Actuator_BeginResponse(FCGIContext * context, ActuatorId id, DataFormat for
  * @param id - ID of the Actuator
  * @param format - Format
  */
-void Actuator_EndResponse(FCGIContext * context, ActuatorId id, DataFormat format)
+void Actuator_EndResponse(FCGIContext * context, Actuator * a, DataFormat format)
 {
 	// End response
 	switch (format)
@@ -273,15 +280,17 @@ void Actuator_Handler(FCGIContext * context, char * params)
 	gettimeofday(&now, NULL);
 	double current_time = TIMEVAL_DIFF(now, *Control_GetStartTime());
 	int id = 0;
-	double set = 0;
+	char * name = "";
+	char * set = "";
 	double start_time = 0;
 	double end_time = current_time;
 	char * fmt_str;
 
 	// key/value pairs
 	FCGIValue values[] = {
-		{"id", &id, FCGI_REQUIRED(FCGI_INT_T)}, 
-		{"set", &set, FCGI_DOUBLE_T},
+		{"id", &id, FCGI_INT_T},
+		{"name", &name, FCGI_STRING_T}, 
+		{"set", &set, FCGI_STRING_T},
 		{"start_time", &start_time, FCGI_DOUBLE_T},
 		{"end_time", &end_time, FCGI_DOUBLE_T},
 		{"format", &fmt_str, FCGI_STRING_T}
@@ -290,6 +299,7 @@ void Actuator_Handler(FCGIContext * context, char * params)
 	// enum to avoid the use of magic numbers
 	typedef enum {
 		ID,
+		NAME,
 		SET,
 		START_TIME,
 		END_TIME,
@@ -305,34 +315,100 @@ void Actuator_Handler(FCGIContext * context, char * params)
 
 	// Get the Actuator identified
 	Actuator * a = NULL;
-	if (id < 0 || id >= NUMACTUATORS)
+
+	if (FCGI_RECEIVED(values[NAME].flags))
+	{
+		if (FCGI_RECEIVED(values[ID].flags))
+		{
+			FCGI_RejectJSON(context, "Can't supply both id and name");
+			return;
+		}
+		a = Actuator_Identify(name);
+		if (a == NULL)
+		{
+			FCGI_RejectJSON(context, "Unknown actuator name");
+			return;
+		}
+		
+	}
+	else if (!FCGI_RECEIVED(values[ID].flags))
+	{
+		FCGI_RejectJSON(context, "No id or name supplied");
+		return;
+	}
+	else if (id < 0 || id >= ACTUATORS_MAX)
 	{
 		FCGI_RejectJSON(context, "Invalid Actuator id");
 		return;
 	}
+	else
+	{
+		a = &(g_actuators[id]);
+	}
 	
-	a = g_actuators+id;
 
 	DataFormat format = Data_GetFormat(&(values[FORMAT]));
 
-	// Begin response
-	Actuator_BeginResponse(context, id, format);
 
-	// Set?
+
+
 	if (FCGI_RECEIVED(values[SET].flags))
 	{
-		if (format == JSON)
-			FCGI_JSONDouble("set", set);
+		
 	
-		ActuatorControl c;
-		c.value = set;
-
+		ActuatorControl c = {0.0, 0.0, 0.0, 0}; // Need to set default values (since we don't require them all)
+		// sscanf returns the number of fields successfully read...
+		int n = sscanf(set, "%lf,%lf,%lf,%d", &(c.start), &(c.stepwait), &(c.stepsize), &(c.steps)); // Set provided values in order
+		if (n != 4)
+		{
+			//	If the user doesn't provide all 4 values, the Actuator will get set *once* using the first of the provided values
+			//	(see Actuator_Loop)
+			//  Not really a problem if n = 1, but maybe generate a warning for 2 <= n < 4 ?
+			Log(LOGDEBUG, "Only provided %d values (expect %d) for Actuator setting", n);
+		}
+		// SANITY CHECKS
+		if (c.stepwait < 0 || c.steps < 0 || (a->sanity != NULL && !a->sanity(a->user_id, c.start)))
+		{
+			FCGI_RejectJSON(context, "Bad Actuator setting");
+			return;
+		}
 		Actuator_SetControl(a, &c);
+
 	}
+	
+	// Begin response
+	Actuator_BeginResponse(context, a, format);
+	if (format == JSON)
+		FCGI_JSONPair("set", set);
 
 	// Print Data
 	Data_Handler(&(a->data_file), &(values[START_TIME]), &(values[END_TIME]), format, current_time);
 	
 	// Finish response
-	Actuator_EndResponse(context, id, format);
+	Actuator_EndResponse(context, a, format);
+}
+
+/**
+ * Get the name of an Actuator given its id
+ * @param id - ID of the actuator
+ * @returns The Actuator's name
+ */
+const char * Actuator_GetName(int id)
+{
+	return g_actuators[id].name;
+}
+
+/**
+ * Identify an Actuator from its name string
+ * @param name - The name of the Actuator
+ * @returns Actuator
+ */
+Actuator * Actuator_Identify(const char * name)
+{
+	for (int i = 0; i < g_num_actuators; ++i)
+	{
+		if (strcmp(g_actuators[i].name, name) == 0)
+			return &(g_actuators[i]);
+	}
+	return NULL;
 }

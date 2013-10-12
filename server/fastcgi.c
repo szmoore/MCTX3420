@@ -52,22 +52,22 @@ static void IdentifyHandler(FCGIContext *context, char *params) {
 	if (ident_sensors) {
 		FCGI_JSONKey("sensors");
 		FCGI_JSONValue("{\n\t\t");
-		for (i = 0; i < NUMSENSORS; i++) {
+		for (i = 0; i < g_num_sensors; i++) {
 			if (i > 0) {
 				FCGI_JSONValue(",\n\t\t");
 			}
-			FCGI_JSONValue("\"%d\" : \"%s\"", i, g_sensor_names[i]); 
+			FCGI_JSONValue("\"%d\" : \"%s\"", i, Sensor_GetName(i)); 
 		}
 		FCGI_JSONValue("\n\t}");
 	}
 	if (ident_actuators) {
 		FCGI_JSONKey("actuators");
 		FCGI_JSONValue("{\n\t\t");
-		for (i = 0; i < NUMACTUATORS; i++) {
+		for (i = 0; i < g_num_actuators; i++) {
 			if (i > 0) {
 				FCGI_JSONValue(",\n\t\t");
 			}
-			FCGI_JSONValue("\"%d\" : \"%s\"", i, g_actuator_names[i]); 
+			FCGI_JSONValue("\"%d\" : \"%s\"", i, Actuator_GetName(i)); 
 		}
 		FCGI_JSONValue("\n\t}");
 	}
@@ -507,11 +507,12 @@ void * FCGI_RequestLoop (void *data)
 		
 		if (module_handler) 
 		{
-			if (module_handler != Login_Handler && module_handler != IdentifyHandler)
+			//if (module_handler != Login_Handler && module_handler != IdentifyHandler)
+			if (false) // Testing
 			{
 				if (cookie[0] == '\0')
 				{
-					FCGI_RejectJSON(&context, "Please login.");
+					FCGI_RejectJSONEx(&context, STATUS_UNAUTHORIZED, "Please login.");
 					continue;
 				}
 

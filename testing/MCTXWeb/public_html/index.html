@@ -27,133 +27,139 @@
   </head>
   
   <body>
-    <div id="header">
-      <div id="leftnav">
-        <a href="http://www.uwa.edu.au/" target="_blank">
-          <img alt = "The University of Western Australia"
-          src="static/uwacrest-text.png">
-        </a>
-        <span id="title">Exploding Cans</span>
-      </div>
-      <div id="rightnav">
-        <span id="welcome-container">
-        </span>
-        <span id="date">
-          <script type="text/javascript">getDate();</script>
-        </span>
-        <div id="logout-container">
-          <form action="#">
-            <div>
-              <input type="button" id="logout" value="Logout">
-            </div>
-          </form>
+    <div id="header-wrap">
+      <div id="header">
+        <div id="leftnav">
+          <a href="http://www.uwa.edu.au/" target="_blank">
+            <img alt = "The University of Western Australia"
+            src="static/uwacrest-text.png">
+          </a>
+          <span id="title">Exploding Cans</span>
         </div>
+        <div id="rightnav">
+          <span id="welcome-container">
+          </span>
+          <span id="date">
+            <script type="text/javascript">getDate();</script>
+          </span>
+          <div id="logout-container">
+            <form action="#">
+              <div>
+                <input type="button" id="logout" value="Logout">
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="clear"></div>
       </div>
-      <div class="clear"></div>
     </div>
     <!-- End header -->
     
-    <noscript>
-      <div class="widget centre">
-        <div class="title">JavaScript required</div>
-        This website requires JavaScript to function correctly.
-        Please enable JavaScript to use this site.
-      </div>
-    </noscript>
-    
-    <div id="content">
-      <div id="sidebar">
-        <div class="widget">
-          <div class="title">Navigation menu</div>
-          <div class="nav-menu">
-          <ul>
-             <li><a href="index.html"><span>Home</span></a></li>
-             <li><a href="control.html"><span>Experiment control</span></a></li>
-             <li><a href="pintest.html"><span>Pin debugging</span></a></li>
-             <li class="last"><a href="#"><span>Help</span></a></li>
-          </ul>
+    <div id="content-wrap">
+      <noscript>
+        <div class="widget centre">
+          <div class="title">JavaScript required</div>
+          This website requires JavaScript to function correctly.
+          Please enable JavaScript to use this site.
+        </div>
+      </noscript>
+
+      <div id="content">
+        <div id="sidebar">
+          <div class="widget">
+            <div class="title">Navigation menu</div>
+            <div class="nav-menu">
+            <ul>
+               <li><a href="index.html"><span>Home</span></a></li>
+               <li><a href="control.html"><span>Experiment control</span></a></li>
+               <li><a href="pintest.html"><span>Pin debugging</span></a></li>
+               <li class="last"><a href="#"><span>Help</span></a></li>
+            </ul>
+            </div>
+          </div>
+          <div class="widget">
+            <div class="title">Help</div>
+
           </div>
         </div>
-        <div class="widget">
-          <div class="title">Help</div>
-          
-        </div>
-      </div>
-      <!-- End sidebar -->
+        <!-- End sidebar -->
 
-      <div id="main">
-        <div class="widget">
-          <div class="title centre">Welcome</div>
-            <p>
-              Welcome to the MCTX3420 remote pressure vessel experiment site!
-            </p>
-            <p>
-              To explore how this system works, hover over the elements of the
-              system diagram below. Clicking each element will lead to a new
-              page that briefly describes that component of the system.
-            </p>
-            <p>
-              For the full documentation, see the project wiki at:
-              <a href="https://github.com/szmoore/MCTX3420/wiki">
-                https://github.com/szmoore/MCTX3420/wiki
-              </a>
-            </p>
-            <p>
-              To begin a new experiment, use the left navigation pane.
-            </p>
-        </div>
-        <div class="widget">
-          <div class="title">System diagram</div>
-          <img id="sbd" src="static/sbd.png" class="centre" alt="System diagram" usemap="#sbd-map">
-          <map name="sbd-map">
-            <area shape="rect" coords="78,44,178,94" href="#" alt="Client PC" title="You">
-            <area shape="rect" coords="238,44,338,94" href="#" alt="BBB">
-            <area shape="rect" coords="398,44,498,94" href="#" alt="Electronics">
-            <area shape="rect" coords="238,104,338,154" href="#" alt="Pneumatics">
-            <area shape="rect" coords="128,184,228,234" href="#" alt="Sensors">
-            <area shape="rect" coords="348,184,448,234" href="#" alt="Camera">
-            <area shape="rect" coords="128,238,228,288" href="#" alt="Strain Can">
-            <area shape="rect" coords="348,238,448,288" href="#" alt="Explode Can" title="Won't happen">
-            <area shape="rect" coords="13,206,113,231" href="#" alt="Enclosure" id="enclosure-btn">
-            <area shape="rect" coords="13,240,113,265" href="#" alt="Mounting" id="mounting-btn">
-            <area shape="rect" coords="116,175,457,294" alt="Mounting Area" id="mounting-area">
-            <area shape="poly" coords="230,30,524,30,524,294,115,294,115,100,230,100,230,30" alt="Enclosure Area" id="enclosure-area">
-          </map>
-          <script type="text/javascript" src="static/jquery.maphilight.min.js">
-            
-          </script>
-          <script type="text/javascript">
-            $("#sbd").maphilight({
-              fillOpacity: 0.4,
-              strokeColor: '000000',
-              strokeOpacity: 0.7
-            });
-            
-            $.fn.hilightToggle = function (on) {
-              var data = $(this).data("maphilight") || {};
-              data.neverOn = !on;
-              $(this).data("maphilight", data);
-              return this;
-            };
-            
-            $("#mounting-area").hilightToggle(false);
-            $("#enclosure-area").hilightToggle(false);
-            
-            $("#mounting-btn").mouseover(function () {
-              $("#mounting-area").hilightToggle(true).mouseover();
-            }).mouseout(function () {
+        <div id="main">
+          <div class="widget">
+            <div class="title centre">Welcome</div>
+              <p>
+                Welcome to the MCTX3420 remote pressure vessel experiment site!
+              </p>
+              <p>
+                To explore how this system works, hover over the elements of the
+                system diagram below. Clicking each element will lead to a new
+                page that briefly describes that component of the system.
+              </p>
+              <p>
+                For the full documentation, see the project wiki at:
+                <a href="https://github.com/szmoore/MCTX3420/wiki">
+                  https://github.com/szmoore/MCTX3420/wiki
+                </a>
+              </p>
+              <p>
+                To begin a new experiment, use the left navigation pane.
+              </p>
+          </div>
+          <div class="widget">
+            <div class="title">System diagram</div>
+            <img id="sbd" src="static/sbd4.png" class="centre" alt="System diagram" usemap="#sbd-map">
+            <map name="sbd-map">
+              <area shape="rect" coords="8,72,105,118" href="#" alt="Client PC" title="You">
+              <area shape="rect" coords="176,72,275,118" href="#" alt="BBB">
+              <area shape="rect" coords="298,53,395,145" href="#" alt="Electronics">
+              <area shape="rect" coords="446,53,543,145" href="#" alt="Pneumatics">
+              <area shape="rect" coords="218,191,315,237" href="#" alt="Sensors">
+              <area shape="rect" coords="418,191,515,237" href="#" alt="Camera">
+              <area shape="rect" coords="218,237,315,285" href="#" alt="Strain Can">
+              <area shape="rect" coords="418,237,515,285" href="#" alt="Explode Can" title="Won't happen">
+              <area shape="rect" coords="87,191,183,237" href="#" alt="Case" id="case-btn">
+              <area shape="rect" coords="87,257,183,303" href="#" alt="Mounting" id="mounting-btn">
+              <area shape="rect" coords="210,182,540,317" alt="Mounting Area" id="mounting-area">
+              <area shape="poly" coords="172,27,548,27,548,317,212,317,212,156,172,156" alt="case Area" id="case-area">
+            </map>
+            <script type="text/javascript" src="static/jquery.maphilight.min.js">
+
+            </script>
+            <script type="text/javascript">
+              $("#sbd").maphilight({
+                fillOpacity: 0.4,
+                strokeColor: '000000',
+                strokeOpacity: 0.7
+              });
+
+              $.fn.hilightToggle = function (on) {
+                var data = $(this).data("maphilight") || {};
+                data.neverOn = !on;
+                $(this).data("maphilight", data);
+                return this;
+              };
+
               $("#mounting-area").hilightToggle(false);
-            });
+              $("#case-area").hilightToggle(false);
+
+              $("#mounting-btn").mouseover(function () {
+                $("#mounting-area").hilightToggle(true).mouseover();
+              }).mouseout(function () {
+                $("#mounting-area").hilightToggle(false);
+              });
+
+              $("#case-btn").mouseover(function () {
+                $("#case-area").hilightToggle(true).mouseover();
+              }).mouseout(function () {
+                $("#case-area").hilightToggle(false);
+              });
+
+            </script>
             
-            $("#enclosure-btn").mouseover(function () {
-              $("#enclosure-area").hilightToggle(true).mouseover();
-            }).mouseout(function () {
-              $("#enclosure-area").hilightToggle(false);
-            });
-          
-          </script>
+            <div class="clear"></div>
+          </div>
         </div>
-      </div>
+    </div>
       <!-- End main content -->
     </div>
   </body>

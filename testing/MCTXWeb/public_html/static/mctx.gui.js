@@ -218,7 +218,7 @@ $.fn.setStrainGraphs = function () {
       }
       $.plot(graphdiv, data);
       setTimeout(updater, 500);
-    }, function () {alert("It crashed");});
+    }, function () {debugLog("It crashed");});
   };
   
   updater();
