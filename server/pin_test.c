@@ -1,6 +1,6 @@
 /**
  * @file pin_test.c
- * @purpose Implementations to allow direct control over pins through FastCGI
+ * @brief Implementations to allow direct control over pins through FastCGI
  */
 
 #include "pin_test.h"

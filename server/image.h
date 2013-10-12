@@ -1,6 +1,6 @@
 /**
  * @file image.h
- * @purpose Helper functions for image processing
+ * @brief Helper functions for image processing
  */
 
 #ifndef _IMAGE_H

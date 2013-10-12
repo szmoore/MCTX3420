@@ -1,6 +1,7 @@
 /**
  * @file bbb_pin.c
- * @purpose Implementation of BBB pin control functions and structures
+ * @brief Implementation of BBB pin control functions and structures
+ * On non-beaglebone (actually non-arm) platforms, this code is disabled.
  * THIS CODE IS NOT THREADSAFE
  */
 

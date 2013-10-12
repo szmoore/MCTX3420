@@ -1,6 +1,6 @@
 /**
  * @file dilatometer.h
- * @purpose Declarations for functions to deal with dilatometer
+ * @brief Declarations for functions to deal with dilatometer
  */
 
 #include "common.h"
