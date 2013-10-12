@@ -32,13 +32,19 @@ bool PathExists(const char *path)
  * @param params The input parameters
  */
 void Control_Handler(FCGIContext *context, char *params) {
-	const char *action, *key = "", *name = "";
+	const char *action = "";
+	const char *name = "";
 	bool force = false;
 	ControlModes desired_mode;
 
+
+
+	// Login/auth now handled entirely in fastcgi.c and login.c
+	//TODO: Need to not have the ability for any user to stop someone else' experiment...
+	// (achieve by storing the username of the person running the current experiment, even when they log out?)
+	// (Our program should only realisitically support a single experiment at a time, so that should be sufficient)
 	FCGIValue values[4] = {
 		{"action", &action, FCGI_REQUIRED(FCGI_STRING_T)},
-		{"key", &key, FCGI_STRING_T},
 		{"force", &force, FCGI_BOOL_T},
 		{"name", &name, FCGI_STRING_T}
 	};
@@ -51,27 +57,22 @@ void Control_Handler(FCGIContext *context, char *params) {
 		return;
 	} else if (!strcmp(action, "emergency")) {
 		desired_mode = CONTROL_EMERGENCY;
-	} else if (FCGI_HasControl(context, key)) {
-		if (!strcmp(action, "release")) {
-			FCGI_ReleaseControl(context);
-		} else if (!strcmp(action, "start")) {
-			desired_mode = CONTROL_START;
-		} else if (!strcmp(action, "pause")) {
-			desired_mode = CONTROL_PAUSE;
-		} else if (!strcmp(action, "resume")) {
-			desired_mode = CONTROL_RESUME;
-		} else if (!strcmp(action, "stop")) {
-			desired_mode = CONTROL_STOP;
-		} else {
-			FCGI_RejectJSON(context, "Unknown action specified.");
-			return;
-		}
+	}
+	else if (!strcmp(action, "release")) {
+		FCGI_ReleaseControl(context);
+	} else if (!strcmp(action, "start")) {
+		desired_mode = CONTROL_START;
+	} else if (!strcmp(action, "pause")) {
+		desired_mode = CONTROL_PAUSE;
+	} else if (!strcmp(action, "resume")) {
+		desired_mode = CONTROL_RESUME;
+	} else if (!strcmp(action, "stop")) {
+		desired_mode = CONTROL_STOP; 
 	} else {
-		FCGI_RejectJSONEx(context, STATUS_UNAUTHORIZED, 
-			"Invalid control key specified.");
+		FCGI_RejectJSON(context, "Unknown action specified.");
 		return;
 	}
-
+	
 	void *arg = NULL;
 	if (desired_mode == CONTROL_START) {
 		if (PathExists(name) && !force) {

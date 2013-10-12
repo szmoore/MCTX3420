@@ -4470,3 +4470,461 @@
 18:01 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
 19:37 -!- MctxBot [~twang@106-68-47-96.dyn.iinet.net.au] has quit [Ping timeout]
 21:16 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Wed Oct 09 2013
+08:29 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:20 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit [Ping timeout]
+09:54 -!- MctxBot [~twang@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+10:52 -!- jtanx [~asfa@130.95.133.152] has joined #mctxuwa_softdev
+10:55 -!- jtanx_ [~asfa@130.95.54.13] has joined #mctxuwa_softdev
+10:56 < jtanx_> welp the usb microscope arrived
+10:56 < jtanx_> it uses uvcvideo too
+11:07 -!- jtanx [~asfa@130.95.133.152] has quit [Connection reset by peer]
+12:00 < jtanx_> shit, we have to coordinate one report across the whole cohort
+12:02 < sam_moore> Yeah, shit
+12:03 < sam_moore> This unit has not been run very well
+12:03 < sam_moore> Except the tutorials
+12:06 < sam_moore> If I still cared I
+12:06 < sam_moore> d try and take charge of putting the report together
+12:07 < sam_moore> But I know that if no one else does it we'll all pass anyway since you can't fail an entire class
+12:07 < sam_moore> So terrible
+12:07 < sam_moore> We should just start writing a chapter on the software
+12:09 < sam_moore> I wonder if we could use the wiki format and export it as a pdf somehow
+12:11 < sam_moore> https://github.com/szmoore/MCTX3420/wiki/Hardware:-Pneumatics
+12:11 < sam_moore> Hilarious
+12:41 < jtanx_> ~.~
+12:41 < jtanx_> our final report will be the wiki!
+12:42 < jtanx_> made some progress on the camera
+12:42 < jtanx_> lowering the resolution to 352x288
+12:42 < jtanx_> and it will work with openc
+12:42 < jtanx_> opencv
+12:42 < jtanx_> ffmpeg's fine with 640x480 though
+12:42 < jtanx_> opencv just sucks
+12:57 < jtanx_> good 'ol stream.html
+13:05 < jtanx_> those fatal checks in sensor.c are bad
+13:05 < jtanx_> because half the time adc reads will fail and the whole program just crashes
+13:07 < jtanx_> oh right I saw your email, nevermind
+13:08 < jtanx_> I'm not getting the warnings that you're seeing either
+13:12 < sam_moore> Yeah, those warnings were actually on my laptop though, they don't seem to appear on the BeagleBone
+13:12 < sam_moore> I'm redoing the sensors code a fair bit
+13:12 < sam_moore> You'll probably hate it :P
+13:12 < sam_moore> Well, it's not really redoing the structure of how they work
+13:13 < sam_moore> Just separating the logic of how sensors get read from all that control loop stuf
+13:14 < sam_moore> I'm going to keep with the "one thread per sensor" idea, because that is definitely the simplest
+13:16 < sam_moore> Did you tell Omid that they shouldn't assume anything about the state of the GPIO pins before the software starts?
+13:16 < sam_moore> Which means that if (unlikely, but I don't know what they're doing) having two pins on at once would cause a catastrophic failure...
+13:16 < sam_moore> By murphy's law, it will almost certainly happen
+13:33 -!- jtanx_ [~asfa@130.95.54.13] has quit [Ping timeout]
+13:59 -!- jtanx [~asfa@130.95.121.247] has joined #mctxuwa_softdev
+13:59 -!- jtanx [~asfa@130.95.121.247] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+14:51 -!- jtanx [~asfa@130.95.248.194] has joined #mctxuwa_softdev
+14:52 < jtanx> oh yah, somehow electronics ordered a non-powered usb hub
+14:52 < jtanx> I'm pretty sure we told them to get a powered usb hub...
+14:57 < sam_moore> Yep, and I remember them saying that is what they were going to get
+14:57 < sam_moore> Dammit, I'm stuck trying to pick the best name for something -_-
+14:57 < sam_moore> The worst place to be stuck
+15:19 < jtanx> ??
+15:19 < jtanx> thesaurus.com
+15:23 < sam_moore> Hahaha
+15:23 < sam_moore> I decided the thing didn't really need to exist
+15:23 < sam_moore> Problem solved
+15:24 < sam_moore> If someone who knows absolutely nothing about programming tries to add sensors to our program they will still be confused
+15:24 < jtanx> Hahaha
+15:24 < sam_moore> But I hope I've made it easier for someone who knows what they're doing
+15:24 < jtanx> Okay
+15:24 < jtanx> what were the compiler warnings that you got
+15:25 < sam_moore> pin_test.c:41:10: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+15:25 < sam_moore> pin_test.c:48:10: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+15:25 < sam_moore> More on lines 54, 128, 190,204
+15:25 < jtanx> weird
+15:25 < jtanx> I never saw any of those
+15:25 < sam_moore> Also I think the code I just wrote for the Strain sensors gives some as well
+15:25 < sam_moore> Yes, it does
+15:26 < jtanx> did you change GPIO_Export to use int type
+15:26 < jtanx> wait 
+15:26 < jtanx> what am I saying
+15:26 < sam_moore> It already uses int type?
+15:26 < sam_moore> But it's something like that
+15:26 < sam_moore> It looks like you're using unsigned char for something
+15:27 < sam_moore> 	int gpio_num = Strain_To_GPIO(id);
+15:27 < sam_moore> 	GPIO_Export(gpio_num);
+15:27 < sam_moore> Is the sort of thing that causes the warning
+15:27 < sam_moore> But I have "bool GPIO_Export(int pin)" in bbb_pin.c
+15:27 < jtanx> oh right
+15:27 < sam_moore> So it makes no sense
+15:28 < jtanx> hmm
+15:29 < sam_moore> Ooh
+15:29 < sam_moore> It must be something to do with the "stub" functions
+15:29 < jtanx> Is this on compilation on the BBB
+15:29 < sam_moore> No, BBB was fine last time I checked
+15:29 < jtanx> okay,w ell I'm not getting any warnings
+15:29 < sam_moore> Compiling on my laptop because it's faster
+15:30 < sam_moore> #define GPIO_Export(pin) True_Stub((void*)pin)
+15:30 < sam_moore> That means the int is getting cast to a void*
+15:30 < jtanx> yeah on my computer it's not putting out any warnings
+15:30 < jtanx> int to void* is fine
+15:30 < jtanx> anything to void* is fine
+15:30 < jtanx> actually
+15:30 < jtanx> is your system 64 bit
+15:30 < sam_moore> 64 bit
+15:31 < jtanx> yeah
+15:31 < sam_moore> (You still have 32 bit :P)
+15:31 < jtanx> well that would explain it
+15:31 < sam_moore> Ok, it doesn't matter
+15:31 < sam_moore> The stub function doesn't actually do anything with the value
+15:31 < jtanx> cast int to int64 or whatever it is
+15:32 < sam_moore> That would cause warnings on the BBB though?
+15:32 < jtanx> only for the stub functions
+15:32 < jtanx> and only for 64 bit
+15:32 < jtanx> more ifdefs, yay
+15:32 < sam_moore> ...
+15:32 < jtanx> or we could get rid of the stubs 
+15:32 < sam_moore> I'm just going to ignore the warnings
+15:32 < sam_moore> That could also work
+15:32 < sam_moore> It doesn't really matter
+15:32 < jtanx> and just do Wno-unsued-function or someting
+15:32 < jtanx> yeah, oh well
+15:35 < jtanx> One of the suggestions for the dilatometer was to just take a photo at the start and at the end
+15:35 < jtanx> then do comparison
+15:35 < sam_moore> Um, ok
+15:35 < sam_moore> If they just want 2 data points
+15:35 < jtanx> well
+15:35 < jtanx> if we can find something other than opencv
+15:36 < sam_moore> Ah
+15:36 < sam_moore> How slow is it?
+15:36 < jtanx> that may help, because right now opencv only plays nice with 352x288 or some other crap resolution
+15:36 < jtanx> it's not that it's slow
+15:36 < jtanx> is that it only works if the resolution is ~ 350 pixels x 2xx pixels
+15:37 < jtanx> ffmpeg is fine with 640x480 afaik
+15:37 < jtanx> it could probably do higher but haven't tested that
+15:38 < sam_moore> http://libccv.org/
+15:38 < sam_moore> Maybe
+15:39 < jtanx> or what if we framegrabbed with some external softare
+15:39 < jtanx> then used opencv to process the saved image
+15:39 < sam_moore> Yes, I was about to suggest that
+15:39 < sam_moore> I'm assuming the problem with OpenCV is that it doesn't like taking images from cameras directly of that resolution
+15:39 < sam_moore> And not some underlying problem with having large CvMats or something
+15:40 < jtanx> no idea why
+15:40 < jtanx> some obscure setting can probably fix it or something
+15:40 < jtanx> but I'm not about to trawl though opencv documentaiton now
+15:40 < sam_moore> Actually OpenCV works with my 640x480 webcam, so it's probably some low level arm specific problem
+15:40 < sam_moore> Which would probably mean that other image processing libraries would also suck
+15:40 < jtanx> it may be that too
+15:41 < jtanx> I know that with ffmpeg it was spitting warnings at 640x480
+15:41 < jtanx> like non-monotonically increasing timestamp
+15:41 < jtanx> and some other crap
+15:41 < jtanx> I was running guvcview though
+15:42 < jtanx> and it seemed to take 640x480 just fine
+15:42 < jtanx> it was quite slow with x-forwarding and all, but at least it worked
+15:44 < sam_moore> Hmm
+15:44 < sam_moore> I would be inclined to say that taking a bunch of data points at low resolution is probably more useful than taking 2 data points at high resolution
+15:45 < sam_moore> The best solution is to find some way of reading at the higher resolution though
+15:46 < sam_moore> ... I'm worried about what Kieran is going to produce if he writes this dilatometer algorithm
+15:46 < sam_moore> It's going to return an array isn't it...
+15:46 < sam_moore> I have no idea why
+15:47 < jtanx> :3
+15:47 < jtanx> brb ~5 mins while I relocate to a lecture theatre
+15:47 < sam_moore> Ok
+15:47 -!- jtanx [~asfa@130.95.248.194] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+15:54 -!- jtanx [~asfa@130.95.248.194] has joined #mctxuwa_softdev
+16:13 < sam_moore> Ok, this is both terrible and awesome
+16:13 < sam_moore> But I've written a test "sensor" that is essentially just an external program
+16:17 < sam_moore> So... if anyone complains about not being able to use python... they can use python
+16:17 < sam_moore> And they don't have to reinvent all of our FastCGI stuff
+16:17 < sam_moore> Although apparently that's easy in python anyway
+16:17 < sam_moore> It's the thought that counts
+16:21 < jtanx> :P
+16:21 < jtanx> flup
+16:30 < jtanx> http://zacharyvoase.com/2009/09/08/sendfile/
+16:30 < jtanx> this could be interesting
+16:31 < jtanx> replace static with our fastcgi app
+16:31 < jtanx> http://wiki.nginx.org/XSendfile
+17:00 -!- jtanx [~asfa@130.95.248.194] has quit [Ping timeout]
+17:52 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:07 < jtanx> mmm feature creep
+18:08 < sam_moore> Meh, it was better than dealing with that switch statement
+18:09 < jtanx> yeah
+18:09 < sam_moore> Also it made it really easy to decide where to put mutexes
+18:10 -!- MctxBot [~twang@106-68-47-96.dyn.iinet.net.au] has quit [Ping timeout]
+18:10 < sam_moore> Given that I would have had to write a "strain.c" and do about the same amount of work anyway, I think the solution is a good one
+18:10 < jtanx> it kind o makes sense though
+18:11 < jtanx> you can't particularly generalise that much to each sensor type
+18:11 < jtanx> so it makes sense to separate out based on what type of sensor it is
+18:11 < sam_moore> Yes
+18:11 < sam_moore> The Piped sensor is definitely feature creep though :P
+18:12 < jtanx> ^-^
+18:12 < sam_moore> Although...
+18:13 < sam_moore> If we wanted to distribute the sensors with a "master slave" system
+18:13 < sam_moore> The code would end up looking  alot like that
+18:13 < sam_moore> Except with a network socket instead of a unix domain socket
+18:14 < sam_moore> Also I'm not sure why I called it piped given that it doesn't use a pipe
+18:14 < sam_moore> I suppose it sounds cooler than "uds"
+18:20 < jtanx> So with electronics
+18:20 < jtanx> the reason why they were having issues with getting the psu approved 
+18:20 < jtanx> was because they wanted to cut the leads and solder directly to the board
+18:21 < jtanx> Oliver suggested that they use extension connectors
+18:21 < jtanx> and cut the lead on the extension
+18:21 < jtanx> but why they didn't think of that first, I don't know
+18:37 -!- MctxBot [~twang@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:45 < jtanx> now to watch this week's lecture...
+21:31 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Thu Oct 10 2013
+08:11 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:40 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+13:30 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+23:04 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Fri Oct 11 2013
+08:21 -!- Rowan [~Rowan@130.95.129.225] has joined #mctxuwa_softdev
+08:42 -!- Rowan [~Rowan@130.95.129.225] has quit [EOF From client]
+09:19 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:59 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+15:09 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:10 < jtanx> urgh
+15:10 < jtanx> burning the midnight oil trying to get my cits2232 project done
+15:10 < jtanx> but
+15:10 < jtanx> it has taught me a lot about django
+15:10 < jtanx> which may be of use, especially for the whole admin stuff
+15:11 < jtanx> one possibility is that we have two separate 'logins'
+15:11 < jtanx> one gains you access to the site
+15:11 < jtanx> one gains control over the bbb (eg the server api)
+15:12 < jtanx> what you could do is keep the 'bind' functionality for the api, but make it check against the django user database for credentials
+15:12 < jtanx> I'll look into it, if not today then probably tomorrow
+19:39 < sam_moore> That sounds good
+19:48 < sam_moore> Should we do something like this: http://stackoverflow.com/questions/8988855/include-another-html-file-in-a-html-file (The accepted answer) to do with our sidebar/menu stuff
+19:48 < sam_moore> Although...
+19:48 < jtanx> well 
+19:48 < jtanx> if we use django it has really cool templating stuff
+19:48 < sam_moore> That solution is actually about as much as just copy/pasting the sidebar at the moment
+19:48 < jtanx> yeah
+19:49 < sam_moore> So Django does parts of our GUI as well as the user management system?
+19:49 < jtanx> Well yeah
+19:49 < jtanx> so django would be ui mostly
+19:49 < jtanx> then tack on to that our api
+19:49 < jtanx> which remains exactly the same
+19:49 < jtanx> except that it uses the django database for checking authorizaiton
+19:50 < jtanx> so right before you commence an experiment, you try to 'gain control' of the bbb, you resupply your login creds
+19:50 < sam_moore> Sure, that's a good solution, I thought django would just do user management though (rather than replace the JavaScript GUI)
+19:50 < jtanx> well if you do use django
+19:50 < jtanx> it's a good idea to change some of it, because of the templating system
+19:51 < jtanx> and that it can conditionally show content 
+19:51 < sam_moore> Ok
+19:51 < jtanx> some of the javascript stuff will stay though, definitely
+19:51 < jtanx> especially all the live update stuff
+19:51 < jtanx> but this is getting ahead of myself, because i'm not even sure if this will work
+19:51 < sam_moore> Hahaha
+19:52 < sam_moore> You're entering a territory where I can't help much
+19:52 < jtanx> yeah, well all of this 'web development' is new area for me too :P
+19:52 < jtanx> I'm supposed to be majoring in computation, not web tech...
+19:52 < sam_moore> You know more/better jQuery than me
+19:52 < jtanx> jquery is pretty easy to learn though
+19:53 < jtanx> i picked it up completely from this project
+19:53 < sam_moore> Well, that's one reason why we went with it, since I used it briefly for something and it wasn't too hard, and James said he'd used it before too
+19:54 < jtanx> Yeah
+19:54 < sam_moore> If you want to replace stuff with django, I'm ok with that, if it's simpler
+19:55 < jtanx> I'll see how it goes, hopefully it shouldn't be too hard to setup
+19:55 < sam_moore> It just seems silly to copy/paste this Navigation Menu into every file
+19:55 < jtanx> yep
+19:55 < sam_moore> But copy/pasting the code (stack overflow) to automatically make it is also annoying
+19:55 < jtanx> We can roll with the jquery soln if I don't get this working
+19:56 < sam_moore> Unless you could include that in the "runBeforeLoad()" ?
+19:56 < jtanx> can't you just have a placeholder
+19:56 < jtanx> and on document load, you load it?
+19:56 < sam_moore> Yeah
+19:56 < jtanx> It'll look a bit crap because you'll see it before the sidebar loads
+19:56 < sam_moore> Actually that's how you're doing other things
+19:56 < jtanx> yeah
+19:56 < sam_moore> But the navigation menu is hard coded html
+19:56 < sam_moore> I'm just reading the existing code :P
+19:56 < jtanx> haha
+19:57 < jtanx> yeah it's hardcoded - it's the easiest solution
+19:57 < jtanx> I've got my case study for 2402 this/next week too
+19:57 < sam_moore> Um... I think it's fairly easy to call load from a file
+19:57 < sam_moore> I'll look into that
+19:57 < jtanx> ok
+19:58 < sam_moore> The case study was reasonable, although he wanted a lot more detail from us
+19:58 < jtanx> what did you do?
+19:58 < sam_moore> Despite struggling to cram it into 4 pages
+19:58 < sam_moore> The pencil
+19:58 < sam_moore> That's a good one
+19:58 < jtanx> ah
+19:58 < sam_moore> Lots of youtube videos
+19:58 < jtanx> we're doing pet bottles
+19:58 < jtanx> there's this megafactories one on the coke plant which was prettyc ool
+19:58 < jtanx> but yeah the pencil one also has a lot 
+19:58 < jtanx> i think i saw the how its made one
+19:59 < jtanx> Ha
+19:59 < jtanx> http://wiki.nginx.org/HttpSsiModule
+19:59 < jtanx> if you want to get server specific
+19:59 < jtanx> you can do ssi
+19:59 < jtanx> let's not do that if possible :P
+20:00 < sam_moore> Wait...
+20:00 < sam_moore> It looks like you put html comments and they get sent to the server?
+20:00 < sam_moore> How is that a thing?
+20:00 < jtanx> <!--# include file="footer.html" -->
+20:00 < jtanx> nah what happens
+20:00 < jtanx> is the server reads the html file
+20:00 < jtanx> and where there's special placeholders
+20:00 < jtanx> it does stuff
+20:00 < sam_moore> Ah
+20:01 < sam_moore> No, do it client side
+20:01 < jtanx> yeah
+20:01 < sam_moore> There's like jQuery.load
+20:01 < sam_moore> I'd probably keep django for user auth to start with
+20:01 < sam_moore> But I think jQuery should be sufficient for the GUI
+20:02 < jtanx> I think if you roll with django
+20:02 < jtanx> you should use jQuery for all the interactive stuff
+20:02 < jtanx> (which you'd have to anyway)
+20:02 < jtanx> but you should use the templating system that django's got
+20:03 < sam_moore> Ok, what does django give you exactly then, I'm not quite sure what the "template" stuff is, I assume it's nothing like a C++ template
+20:03 < jtanx> OK
+20:03 < jtanx> hmm
+20:03 < jtanx> I'll give you access to my cits2232 repo temporarily
+20:03 < jtanx> so you can see
+20:03 < sam_moore> If it lets you easily include bits of html that's cool, but jQuery looks to be able to do that easily as well
+20:03 < sam_moore> Alright
+20:04 < jtanx> actually you know what
+20:04 < jtanx> i'll just post it on pastebin or something
+20:05 < jtanx> http://privatepaste.com/ec22ba7238
+20:05 < jtanx> That's the base template
+20:05 < jtanx> http://privatepaste.com/07499e4a19
+20:05 < jtanx> That's the index
+20:05 < jtanx> {{variable_name}} will display a variable name
+20:05 < jtanx> sorry, the contents of that variable
+20:06 < jtanx> {% %} blocks are for control
+20:06 < sam_moore> Hmm
+20:07 < jtanx> the base template got a bit out of hand for that project
+20:07 < sam_moore> Well, if you want to use something like that I'm ok with it
+20:07 < sam_moore> Although I think the thing that I was originally complaining about can be solved in jQuery :P
+20:08 < jtanx> yeah
+20:08 < sam_moore> But you should probably ask everyone else involved with the GUI for input too
+20:08 < jtanx> Yeah, good point
+20:09 < sam_moore> ... Really I didn't want to be involved with the GUI, but I kind of need to mess around with at least some basic graph stuff to work out if I need to change the server sensors/actuators api
+20:09 < jtanx> well let's just say that i did not envision doing the gui either
+20:09 < sam_moore> I'll try and keep what I do consistent with the overall style though
+20:09 < sam_moore> Which is how I got sidetracked complaining about copy/pasting things :P
+20:10 < sam_moore> I think the GUI we have so far is pretty good
+20:10 < jtanx> hehehe
+20:10 < jtanx> yeah it's not too bad
+20:11 < jtanx> the only thing that I wouldn't know how to do is that admin stuff
+20:11 < sam_moore> user admin or experiment admin?
+20:11 < jtanx> um
+20:11 < jtanx> I dunno, whatever that 'admin' functionality needs to be
+20:11 < jtanx> like 'access the full logs'
+20:11 < sam_moore> Oh, right
+20:12 < jtanx> unless you start implementing permissions in the api
+20:12 < sam_moore> Hmm, we might have to
+20:13 < sam_moore> It should just be an enum for the user type that gets returned/set by the authentication handler and checked for certain operations
+20:13 < sam_moore> But as you mentioned the other day, you don't want someone to be able to login after someone else has started an experiment and cancel it
+20:13 < sam_moore> Actually
+20:13 < sam_moore> Do you?
+20:13 < jtanx> admin only?
+20:13 < sam_moore> Exactly
+20:14 < jtanx> how difficult is that to do though
+20:14 < sam_moore> Store the username of who owns the current experiment
+20:14 < sam_moore> Store an enum of the user type of whoever is currently logged in
+20:14 < sam_moore> If someone tries to stop the experiment, unless their username matches, or they are an admin, refuse
+20:14 < sam_moore> There could be a safety issue there?
+20:15 < jtanx> the only thing is
+20:15 < sam_moore> If someone needs to stop the experiment but isn't an admin?
+20:15 < jtanx> everything's based off the control key
+20:15 < sam_moore> Meh... add another cookie
+20:15 < sam_moore> ... That escalated quickly
+20:15 < jtanx> you've already used the nameless cookie
+20:15 < jtanx> if you add another cookie
+20:15 < jtanx> you have to do string parsing
+20:15 < jtanx> and have named cookies
+20:16 < sam_moore> Hmmm
+20:16 < sam_moore> "Beyond the scope of the project" ?
+20:16 < jtanx> i think the format was
+20:16 < jtanx> key=value; key=value2
+20:16 < jtanx> yeah, beyond the scope :P
+20:16 < sam_moore> Yeah, that is ever so annoying
+20:16 < jtanx> let's leave it for now
+20:16 < jtanx> come back to it
+20:16 < sam_moore> Because if it were something like "key=value&key=value2" you could potentially reuse the FCGI parser
+20:17 < jtanx> yeah
+20:17 < jtanx> you could modify it
+20:17 < sam_moore> That would be the way to go
+20:17 < jtanx> generalise it
+20:17 < sam_moore> But it's low priority now
+20:17 < jtanx> yep
+20:17 < jtanx> wow i'm getting seriously sidetracked
+20:18 < jtanx> this mechatronics project is more interesting than any of my other projects though
+20:18 < sam_moore> Haha
+20:19 < sam_moore> I know what you mean
+20:19 < sam_moore> I want to compile a RT linux kernel on my laptop (since they have x86 versions)
+20:19 < sam_moore> So that I can look at how much the consistency in sample rate could theoretically improve...
+20:20 < sam_moore> If someone managed to port the RT linux kernel to the BeagleBone
+20:20 < jtanx> RT linux on your computer
+20:20 < jtanx> isn't that generally bad
+20:20 < jtanx> because RT screws up other stuff
+20:21 < sam_moore> Like what?
+20:21 < jtanx> decreased performance to meet the deadlines
+20:21 < sam_moore> Also, I don't have to permanently replace my existing kernel, just add another bootloader entry
+20:22 < sam_moore> If it screws up nginx that would be annoying though
+20:23 < jtanx> while you're at it, try running the bfs scheduler instead of the cfs scheduler :P
+20:23 < sam_moore> Maybe
+20:42 < sam_moore> Ok, the solution to the copy/paste is just something like $("#sidebar").load("static/sidebar.html")
+20:42 < sam_moore> However, whilst running this in the document.ready function on a test page works, running it in index.html appears to have no effect
+20:43 < sam_moore> Oh
+20:43 < sam_moore> I know why
+20:43 < sam_moore> Because runBeforeLoad is failing
+20:43 < sam_moore> Presumably you still want to load content like the navigation bar even if the server isn't running
+20:44 < sam_moore> So... there is ".done()" and ".fail()" ... is there ".either()"?
+20:46 < sam_moore> Ahahaha
+20:47 < sam_moore> Of course, there is ".always()"
+20:49 < sam_moore> Hmm, I wouldn't want to design any sort of large system with a language like this, but it is an interesting style
+20:51 < jtanx> haha
+20:52 < sam_moore> So, a lot of the header stuff can be moved into .html files and just jQuery.loaded, which should make things cleaner
+20:52 < sam_moore> I will refrain from doing that now though
+20:53 < jtanx> don't be too tempted to do a lot of templating with javascript
+20:53 < jtanx> because it will load asynchronously, stuff will look weird
+20:53 < jtanx> and if the js breaks
+20:53 < jtanx> well, your page is more screwed than before
+20:54 < sam_moore> Ok... but you could still potentially have at least one html file in the static directory
+20:54 < sam_moore> With all the header and navigation stuff
+20:55 < sam_moore> Just have a .fail() function!
+20:55 < sam_moore> That's what it's for, right :P
+20:56 < sam_moore> $("#thing").load("static/thing.html").fail($("#thing").html("<p> Something fucked up </p>")
+20:56 < sam_moore> Oh dear
+20:58 < jtanx> ~.~
+20:58 < jtanx> django here: https://mctx.us.to:8043/databases
+20:58 < jtanx> login with testuser:testuser
+20:58 < jtanx> ignore that it looks a lot like our gui
+20:58 < jtanx> except it doesnt work anymore
+21:00 < sam_moore> Well, django's used for UCC for member administration
+21:01 < sam_moore> Except it's entirely seperate from LDAP which we use for authentication
+21:01 < sam_moore> Except it's not really because it binds to LDAP for authentication :S
+21:01 < sam_moore> Wheels within wheels...
+21:02 < jtanx> ookay
+21:04 < sam_moore> You need LDAP for shell access
+21:04 < sam_moore> In fact...
+21:04 < sam_moore> We could potentially give pheme users shell access to the BeagleBone
+21:04 < sam_moore> But there's not really any point
+21:04 < jtanx> is that a good idea
+21:05 < sam_moore> No
+21:05 < sam_moore> It's an awful idea
+21:05 < sam_moore> Just saying it's possible :P
+21:06 < sam_moore> Someone could do this: :(){ :|:& };:
+21:06 < sam_moore> And break the entire thing
+21:08 < jtanx> is that the fork bomb
+21:09 < jtanx> ok the site works now
+21:09 < jtanx> sort of
+21:10 < sam_moore> 400 Bad Request
+21:10 < jtanx> hurr
+21:10 < sam_moore> I think iceweasel is being dumb and ignoring https:// ?
+21:10 < sam_moore> Although it was fine before
+21:11 < jtanx> nah probably screwed up the nginx config
+21:11 < sam_moore> No, it works, I just had to type the https:// instead of copy paste
+21:11 < sam_moore> Wierd
+21:11 < sam_moore> The test login doesn't work though
+21:11 < jtanx> testuser doesn't work for some reason
+21:11 < jtanx> yeah just register
+21:12 < sam_moore> Will it actually send an email?
+21:12 < jtanx> urgh
+21:12 < jtanx> no
+21:12 < sam_moore> haha
+21:12 < jtanx> okay no the config is still broken
+21:16 < sam_moore> I'll have to come back to this tomorrow
+21:16 < sam_moore> Bye
+21:17 < jtanx> ok bye
+23:09 -!- jtanx [~asfa@106-68-47-96.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
