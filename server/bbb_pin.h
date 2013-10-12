@@ -32,26 +32,26 @@ extern bool PWM_Stop(int pin);
 
 #else
 //Horrible hacks to silence gcc when compiling on systems that are not the BBB
-extern bool True_Stub(void *arg, ...);
+extern bool True_Stub(int arg, ...);
 extern bool ADC_Read_Stub(int *val, ...);
 extern bool GPIO_Read_Stub(bool *val, ...);
 
-#define GPIO_Export(pin) True_Stub((void*)pin)
+#define GPIO_Export(pin) True_Stub((int)pin)
 #define GPIO_Unexport(pin) (void)0
 
-#define PWM_Export(pin) True_Stub((void*)pin)
+#define PWM_Export(pin) True_Stub((int)pin)
 #define PWM_Unexport(pin) (void)0
 
-#define ADC_Export(pin) True_Stub((void*)pin)
+#define ADC_Export(pin) True_Stub((int)pin)
 #define ADC_Unexport(pin) (void)0
 
 #define GPIO_Read(pin, result) GPIO_Read_Stub(result, pin)
-#define GPIO_Set(pin, value) True_Stub((void*)pin, value)
+#define GPIO_Set(pin, value) True_Stub((int)pin, value)
 
 #define ADC_Read(id, value) ADC_Read_Stub(value, id)
 
-#define PWM_Set(pin, polarity, period, duty) True_Stub((void*)pin, polarity, period, duty)
-#define PWM_Stop(pin) True_Stub((void*)(int)pin) 
+#define PWM_Set(pin, polarity, period, duty) True_Stub((int)pin, polarity, period, duty)
+#define PWM_Stop(pin) True_Stub((int)pin) 
 //yuck
 
 #endif //_BBB
