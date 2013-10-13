@@ -1,6 +1,6 @@
 /**
  * @file pin_test.h
- * @purpose Declarations to allow direct control over pins through FastCGI
+ * @brief Declarations to allow direct control over pins through FastCGI
  */
 
 #ifndef _PIN_MODULE_H

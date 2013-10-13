@@ -1,6 +1,6 @@
 /**
  * @file dilatometer.c
- * @purpose Implementation of dilatometer related functions
+ * @brief Implementation of dilatometer related functions
  */
 
 #include "cv.h"

@@ -52,14 +52,8 @@ void Control_Handler(FCGIContext *context, char *params) {
 	if (!FCGI_ParseRequest(context, params, values, 4))
 		return;
 	
-	if (!strcmp(action, "lock")) {
-		FCGI_LockControl(context, force);
-		return;
-	} else if (!strcmp(action, "emergency")) {
+	if (!strcmp(action, "emergency")) {
 		desired_mode = CONTROL_EMERGENCY;
-	}
-	else if (!strcmp(action, "release")) {
-		FCGI_ReleaseControl(context);
 	} else if (!strcmp(action, "start")) {
 		desired_mode = CONTROL_START;
 	} else if (!strcmp(action, "pause")) {
