@@ -336,7 +336,7 @@ void Actuator_Handler(FCGIContext * context, char * params)
 		FCGI_RejectJSON(context, "No id or name supplied");
 		return;
 	}
-	else if (id < 0 || id >= ACTUATORS_MAX)
+	else if (id < 0 || id >= g_num_actuators)
 	{
 		FCGI_RejectJSON(context, "Invalid Actuator id");
 		return;
@@ -364,7 +364,7 @@ void Actuator_Handler(FCGIContext * context, char * params)
 			//	If the user doesn't provide all 4 values, the Actuator will get set *once* using the first of the provided values
 			//	(see Actuator_Loop)
 			//  Not really a problem if n = 1, but maybe generate a warning for 2 <= n < 4 ?
-			Log(LOGDEBUG, "Only provided %d values (expect %d) for Actuator setting", n);
+			Log(LOGDEBUG, "Only provided %d values (expect %d) for Actuator setting", n, 4);
 		}
 		// SANITY CHECKS
 		if (c.stepwait < 0 || c.steps < 0 || (a->sanity != NULL && !a->sanity(a->user_id, c.start)))
@@ -373,7 +373,6 @@ void Actuator_Handler(FCGIContext * context, char * params)
 			return;
 		}
 		Actuator_SetControl(a, &c);
-
 	}
 	
 	// Begin response
