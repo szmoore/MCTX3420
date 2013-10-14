@@ -3,14 +3,17 @@
  * @brief Handles all client control requests (admin related)
  */
 #include "common.h"
+#include "options.h"
 #include "control.h"
 #include "sensor.h"
 #include "actuator.h"
+#include <dirent.h>
 
 typedef struct ControlData {
 	ControlModes current_mode;
 	pthread_mutex_t mutex;
 	struct timeval start_time;
+	char user_name[31]; // The user who owns the currently running experiment
 } ControlData;
 
 ControlData g_controls = {CONTROL_STOP, PTHREAD_MUTEX_INITIALIZER, {0}};
@@ -36,6 +39,9 @@ void Control_Handler(FCGIContext *context, char *params) {
 	const char *name = "";
 	bool force = false;
 	ControlModes desired_mode;
+	
+	
+	
 
 
 	// Login/auth now handled entirely in fastcgi.c and login.c
@@ -48,8 +54,47 @@ void Control_Handler(FCGIContext *context, char *params) {
 		{"name", &name, FCGI_STRING_T}
 	};
 
+
 	if (!FCGI_ParseRequest(context, params, values, 3))
 		return;
+
+	//HACKETY HACK HACK (should really be a seperate function)
+	if (strcmp(action, "list") == 0)
+	{
+		DIR * dir = opendir(context->user_name);
+		if (dir == NULL)
+		{
+			FCGI_RejectJSON(context, "Failed to open user directory");
+			return;
+		}
+		struct dirent * ent;
+		FCGI_BeginJSON(context, STATUS_OK);
+		FCGI_JSONKey("experiments");
+		FCGI_PrintRaw("[");
+
+		bool first = true;
+		while ((ent = readdir(dir)) != NULL)
+		{
+			char * c;
+			for (c = ent->d_name; *c != '\0' && *c != '.'; ++c);
+
+			if (*c != '\0' && strcmp(c, ".exp") == 0)
+			{
+				if (!first)
+					FCGI_PrintRaw(",");
+				*c = '\0'; // Ummm... probably not a great idea
+				FCGI_PrintRaw(ent->d_name);
+				first = false;
+			}
+		}
+		FCGI_PrintRaw("]");
+		FCGI_EndJSON();
+		
+		return; // Dear god this is terrible
+	}
+	//TODO: Need a "load" action to set data files (but not run) from a past experiment
+
+	//TODO: Need a "delete" action so that people can overwrite experiments (without all this "force" shenanigans)
 	
 	if (!strcmp(action, "emergency")) {
 		desired_mode = CONTROL_EMERGENCY;
@@ -65,25 +110,68 @@ void Control_Handler(FCGIContext *context, char *params) {
 		FCGI_RejectJSON(context, "Unknown action specified.");
 		return;
 	}
+
+	if (*g_controls.user_name != '\0' && strcmp(g_controls.user_name,context->user_name) != 0)
+	{
+		if (context->user_type != USER_ADMIN)
+		{
+			FCGI_RejectJSON(context, "Another user has an experiment in progress.");
+			return;
+		}
+		
+		if (!force)
+		{
+			Log(LOGERR, "User %s is currently running an experiment!", g_controls.user_name);
+			FCGI_RejectJSON(context, "Pass \"force\" to take control over another user's experiment");
+			return;
+		}
+	}
+
 	
+	
+	//HACK
+	chdir(context->user_name);
+
 	void *arg = NULL;
 	if (desired_mode == CONTROL_START) {
 		if (PathExists(name) && !force) {
 			FCGI_RejectJSON(context, "An experiment with that name already exists.");
+			chdir(g_options.root_dir); // REVERSE HACK
 			return;
 		}
-
+		char * c = (char*)name;
+		for (c = (char*)name; *c != '\0' && *c != '.'; ++c);
+		if (*c == '.')
+		{
+			FCGI_RejectJSON(context, "Can't include '.' characters in experiment names (at this point we don't care anymore, go find someone who does).");
+			chdir(g_options.root_dir); // REVERSE HACK
+			return;
+		}
 		arg = (void*)name;
 	}
 
+	
+
 	const char *ret;
-	if ((ret = Control_SetMode(desired_mode, arg)) != NULL) {
+	if ((ret = Control_SetMode(desired_mode, arg)) != NULL) 
+	{
 		FCGI_RejectJSON(context, ret);
-	} else {
+	} 
+	else 
+	{
+		if (desired_mode == CONTROL_STOP)
+			g_controls.user_name[0] = '\0';
+		else
+		{
+			snprintf(g_controls.user_name, sizeof(g_controls.user_name), context->user_name);
+		}
 		FCGI_BeginJSON(context, STATUS_OK);
 		FCGI_JSONPair("description", "ok");
 		FCGI_EndJSON();
 	}
+
+	//REVERSE HACK
+	chdir(g_options.root_dir);
 }
 
 /**
@@ -130,7 +218,7 @@ const char* Control_SetMode(ControlModes desired_mode, void * arg)
 		break;
 		case CONTROL_EMERGENCY:
 			if (g_controls.current_mode != CONTROL_START) //pfft
-				ret = "Not running so how can there be an emergency.";
+				ret = "Not running so how can there be an emergency?";
 		break;
 		default:
 		break;

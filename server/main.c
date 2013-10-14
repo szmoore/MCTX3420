@@ -33,6 +33,10 @@ void ParseArguments(int argc, char ** argv)
 
 	g_options.program = argv[0]; // program name
 	g_options.verbosity = LOGDEBUG; // default log level
+	// Set the main directory
+	if (getcwd(g_options.root_dir, sizeof(g_options.root_dir)) == NULL)
+		Fatal("Couldn't get current working directory - %s", strerror(errno));
+
 	gettimeofday(&(g_options.start_time), NULL); // Start time
 
 
@@ -85,6 +89,7 @@ void ParseArguments(int argc, char ** argv)
 	Log(LOGDEBUG, "Pin Module Enabled: %d", g_options.enable_pin);
 	Log(LOGDEBUG, "Auth URI: %s", g_options.auth_uri);
 	Log(LOGDEBUG, "LDAP Base DN: %s", g_options.ldap_base_dn);
+	Log(LOGDEBUG, "Root directory: %s", g_options.root_dir);
 
 	if (g_options.auth_uri[0] != '\0')
 	{
@@ -128,19 +133,19 @@ int main(int argc, char ** argv)
 	Pin_Init();
 	
 	// Try and start things
-	
+	/*
 	const char *ret;
 	if ((ret = Control_SetMode(CONTROL_START, "test")) != NULL)
 		Fatal("Control_SetMode failed with '%s'", ret);
-	
+	*/
 
 	// run request thread in the main thread
 	FCGI_RequestLoop(NULL);
 
-	
+	/*
 	if ((ret = Control_SetMode(CONTROL_STOP, "test")) != NULL)
 		Fatal("Control_SetMode failed with '%s'", ret);
-	
+	*/
 	//Sensor_StopAll();
 	//Actuator_StopAll();
 

@@ -36,11 +36,16 @@ int Actuator_Add(const char * name, int user_id, SetFn set, InitFn init, CleanFn
 	a->name = name;
 	a->set = set; // Set read function
 	a->init = init; // Set init function
-	if (init != NULL)
-		init(name, user_id); // Call it
+
 	a->sanity = sanity;
 
 	pthread_mutex_init(&(a->mutex), NULL);
+
+	if (init != NULL)
+	{
+		if (!init(name, user_id))
+			Fatal("Couldn't initialise actuator %s", name);
+	}
 
 	Actuator_SetValue(a, initial_value, false);
 

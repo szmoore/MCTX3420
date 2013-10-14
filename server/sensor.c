@@ -45,8 +45,6 @@ int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn
 	s->name = name;
 	s->read = read; // Set read function
 	s->init = init; // Set init function
-	if (init != NULL)
-		init(name, user_id); // Call it
 
 	// Start by averaging values taken over a second
 	s->sample_us = 1e6;
@@ -54,6 +52,14 @@ int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn
 
 	// Set sanity function
 	s->sanity = sanity;
+
+	if (init != NULL)
+	{
+		if (!init(name, user_id))
+			Fatal("Couldn't init sensor %s", name);
+	}
+
+
 	return g_num_sensors;
 }
 
