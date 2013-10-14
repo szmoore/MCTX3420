@@ -136,6 +136,9 @@ extern const unsigned char g_pin_index_to_gpio[GPIO_NUM_PINS];
 #define ADC5 5
 #define ADC6 6
 #define ADC7 7
+#define ADC_VOLTAGE_MAX 1800
+#define ADC_RAW_MAX (2 << ADC_BITS)
+#define ADC_TO_MVOLTS(x) ((double)((x)/2 << ADC_BITS) * (double)ADC_VOLTAGE_MAX)
 
 /** Number of ADC pins **/
 #define ADC_NUM_PINS 8

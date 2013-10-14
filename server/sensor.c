@@ -68,11 +68,14 @@ int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn
  */
 #include "sensors/resource.h"
 #include "sensors/strain.h"
-#include "sensors/piped.h"
+#include "sensors/pressure.h"
 void Sensor_Init()
 {
 	Sensor_Add("cpu_stime", RESOURCE_CPU_SYS, Resource_Read, NULL, NULL, 1e50,-1e50,1e50,-1e50);	
 	Sensor_Add("cpu_utime", RESOURCE_CPU_USER, Resource_Read, NULL, NULL, 1e50,-1e50,1e50,-1e50);	
+	Sensor_Add("pressure_high0", PRES_HIGH0, Pressure_Read, Pressure_Init, Pressure_Cleanup, 800, 110, 800, 110);
+	Sensor_Add("pressure_high1", PRES_HIGH1, Pressure_Read, Pressure_Init, Pressure_Cleanup, 800, 110, 800, 110);
+	Sensor_Add("pressure_low0", PRES_LOW0, Pressure_Read, Pressure_Init, Pressure_Cleanup, 250, 110, 250, 110);
 	//Sensor_Add("../testing/count.py", 0, Piped_Read, Piped_Init, Piped_Cleanup, 1e50,-1e50,1e50,-1e50);
 	//Sensor_Add("strain0", STRAIN0, Strain_Read, Strain_Init, 5000,0,5000,0);
 	//Sensor_Add("strain1", STRAIN1, Strain_Read, Strain_Init, 5000,0,5000,0);
