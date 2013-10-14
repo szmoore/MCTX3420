@@ -29,7 +29,7 @@ int g_num_sensors = 0;
  * @param min_warn - Minimum warning threshold; program will log warnings if the value falls below this threshold
  * @returns Number of actuators added so far
  */
-int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn cleanup, double max_error, double min_error, double max_warn, double min_warn)
+int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn cleanup, SanityFn sanity)
 {
 	if (++g_num_sensors > SENSORS_MAX)
 	{
@@ -52,12 +52,8 @@ int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn
 	s->sample_us = 1e6;
 	s->averages = 1;
 
-	// Set warning/error thresholds
-	s->thresholds.max_error = max_error;
-	s->thresholds.min_error = min_error;
-	s->thresholds.max_warn = max_warn;
-	s->thresholds.min_warn = min_warn;
-
+	// Set sanity function
+	s->sanity = sanity;
 	return g_num_sensors;
 }
 
@@ -71,11 +67,11 @@ int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn
 #include "sensors/pressure.h"
 void Sensor_Init()
 {
-	Sensor_Add("cpu_stime", RESOURCE_CPU_SYS, Resource_Read, NULL, NULL, 1e50,-1e50,1e50,-1e50);	
-	Sensor_Add("cpu_utime", RESOURCE_CPU_USER, Resource_Read, NULL, NULL, 1e50,-1e50,1e50,-1e50);	
-	Sensor_Add("pressure_high0", PRES_HIGH0, Pressure_Read, Pressure_Init, Pressure_Cleanup, 800, 110, 800, 110);
-	Sensor_Add("pressure_high1", PRES_HIGH1, Pressure_Read, Pressure_Init, Pressure_Cleanup, 800, 110, 800, 110);
-	Sensor_Add("pressure_low0", PRES_LOW0, Pressure_Read, Pressure_Init, Pressure_Cleanup, 250, 110, 250, 110);
+	Sensor_Add("cpu_stime", RESOURCE_CPU_SYS, Resource_Read, NULL, NULL, NULL);	
+	Sensor_Add("cpu_utime", RESOURCE_CPU_USER, Resource_Read, NULL, NULL, NULL);	
+	Sensor_Add("pressure_high0", PRES_HIGH0, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
+	Sensor_Add("pressure_high1", PRES_HIGH1, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
+	Sensor_Add("pressure_low0", PRES_LOW0, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
 	//Sensor_Add("../testing/count.py", 0, Piped_Read, Piped_Init, Piped_Cleanup, 1e50,-1e50,1e50,-1e50);
 	//Sensor_Add("strain0", STRAIN0, Strain_Read, Strain_Init, 5000,0,5000,0);
 	//Sensor_Add("strain1", STRAIN1, Strain_Read, Strain_Init, 5000,0,5000,0);
@@ -181,26 +177,6 @@ void Sensor_SetModeAll(ControlModes mode, void * arg)
 
 
 /**
- * Checks the sensor data for unsafe or unexpected results 
- * @param sensor_id - The ID of the sensor
- * @param value - The value from the sensor to test
- */
-void Sensor_CheckData(Sensor * s, double value)
-{
-	if( value > s->thresholds.max_error || value < s->thresholds.min_error)
-	{
-		Log(LOGERR, "Sensor %s at %f is above or below its safety value of %f or %f\n",s->name,value, s->thresholds.max_error, s->thresholds.min_error);
-		//new function that stops actuators?
-		//Control_SetMode(CONTROL_EMERGENCY, NULL)
-	}
-	else if( value > s->thresholds.max_warn || value < s->thresholds.min_warn)
-	{
-		Log(LOGWARN, "Sensor %s at %f is above or below its warning value of %f or %f\n", s->name,value,s->thresholds.max_warn, s->thresholds.min_warn);	
-	}
-}
-
-
-/**
  * Record data from a single Sensor; to be run in a seperate thread
  * @param arg - Cast to Sensor* - Sensor that the thread will handle
  * @returns NULL (void* required to use the function with pthreads)
@@ -223,9 +199,13 @@ void * Sensor_Loop(void * arg)
 		
 		if (success)
 		{
-
-
-			Sensor_CheckData(s, d.value);
+			if (s->sanity != NULL)
+			{
+				if (!s->sanity(s->user_id, d.value))
+				{
+					Fatal("Sensor %s (%d,%d) reads unsafe value", s->name, s->id, s->user_id);
+				}
+			}
 			Data_Save(&(s->data_file), &d, 1); // Record it
 		}
 		else

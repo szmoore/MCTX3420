@@ -68,6 +68,8 @@ typedef struct
 	SanityFn sanity;
 	/** Cleanup function **/
 	CleanFn clean;
+	/** Last setting **/
+	DataPoint last_setting;
 	
 } Actuator;
 
@@ -77,7 +79,7 @@ extern void Actuator_SetModeAll(ControlModes mode, void *arg);
 extern void Actuator_SetMode(Actuator * a, ControlModes mode, void *arg);
 
 extern void * Actuator_Loop(void * args); // Main loop for a thread that handles an Actuator
-extern void Actuator_SetValue(Actuator * a, double value); // Set an actuator by value
+extern void Actuator_SetValue(Actuator * a, double value, bool record); // Set an actuator by value
 extern void Actuator_SetControl(Actuator * a, ActuatorControl * c); // Set the control for an Actuator
 extern Actuator * Actuator_Identify(const char * str); // Identify a Sensor from a string Id
 
