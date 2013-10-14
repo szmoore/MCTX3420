@@ -46,6 +46,8 @@ typedef struct
 	time_t control_timestamp;
 	/**A SHA-1 hash that is the control key, determining who is logged in**/
 	char control_key[41];
+	/**Determines if the user is an admin or not**/
+	bool is_admin;
 	/**The IPv4 address of the logged-in user**/
 	char control_ip[16];
 	/**A friendly name for the logged-in user. Max length 30**/

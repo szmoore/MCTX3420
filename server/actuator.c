@@ -349,7 +349,7 @@ void Actuator_Handler(FCGIContext * context, char * params)
 		FCGI_RejectJSON(context, "No id or name supplied");
 		return;
 	}
-	else if (id < 0 || id >= ACTUATORS_MAX)
+	else if (id < 0 || id >= g_num_actuators)
 	{
 		FCGI_RejectJSON(context, "Invalid Actuator id");
 		return;
@@ -386,7 +386,6 @@ void Actuator_Handler(FCGIContext * context, char * params)
 			return;
 		}
 		Actuator_SetControl(a, &c);
-
 	}
 	
 	// Begin response

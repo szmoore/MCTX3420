@@ -510,15 +510,9 @@ void * FCGI_RequestLoop (void *data)
 			//if (module_handler != Login_Handler && module_handler != IdentifyHandler)
 			if (false) // Testing
 			{
-				if (cookie[0] == '\0')
-				{
-					FCGI_RejectJSONEx(&context, STATUS_UNAUTHORIZED, "Please login.");
-					continue;
-				}
-
 				if (!FCGI_HasControl(&context, cookie))
 				{
-					FCGI_RejectJSON(&context, "Invalid control key.");
+					FCGI_RejectJSON(&context, "Please login. Invalid control key.");
 					continue;	
 				}
 
@@ -533,9 +527,6 @@ void * FCGI_RequestLoop (void *data)
 		{
 			FCGI_RejectJSON(&context, "Unhandled module");
 		}
-		
-
-		
 	}
 
 	Log(LOGDEBUG, "Thread exiting.");

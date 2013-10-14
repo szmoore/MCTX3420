@@ -38,18 +38,17 @@ void Control_Handler(FCGIContext *context, char *params) {
 	ControlModes desired_mode;
 
 
-
 	// Login/auth now handled entirely in fastcgi.c and login.c
 	//TODO: Need to not have the ability for any user to stop someone else' experiment...
 	// (achieve by storing the username of the person running the current experiment, even when they log out?)
 	// (Our program should only realisitically support a single experiment at a time, so that should be sufficient)
-	FCGIValue values[4] = {
+	FCGIValue values[3] = {
 		{"action", &action, FCGI_REQUIRED(FCGI_STRING_T)},
 		{"force", &force, FCGI_BOOL_T},
 		{"name", &name, FCGI_STRING_T}
 	};
 
-	if (!FCGI_ParseRequest(context, params, values, 4))
+	if (!FCGI_ParseRequest(context, params, values, 3))
 		return;
 	
 	if (!strcmp(action, "emergency")) {
