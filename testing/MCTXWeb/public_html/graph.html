@@ -8,9 +8,9 @@
     <![endif]-->
     <script type="text/javascript" src="static/jquery-1.10.1.min.js"></script>
     <script type="text/javascript" src="static/jquery.flot.min.js"></script>
+    
     <script type="text/javascript" src="static/mctx.gui.js"></script>
     <script type="text/javascript" src="static/mctx.graph.js"></script>
-    
     <link rel="stylesheet" type="text/css" href="static/style.css">
     <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
     <script type="text/javascript">
@@ -29,7 +29,6 @@
       }).always(function () {
         $(document).ready(function () {
           $("#graph-controls").setDevices();
-          //$("#graph-run").runButton();
         });
       });
 
@@ -96,8 +95,12 @@
           <div class="widget">
             <div class="title">Graph</div>
               <div id="graph" class="plot">
-                <!-- graph placeholder -->
+              
               </div>
+              <!-- graph placeholder -->
+              <!--<div id="graph" class="plot">
+                
+              </div>-->
           </div>
           <div class="widget" id="graph-controls">
               <!--<div class="title">Visualise</div>-->
@@ -122,8 +125,18 @@
                 </div>
                 <input type="button" value="Run" id="graph-run" onClick="$('#graph-run').runButton()">
                 <input type="button" value="Open New Graph" disabled>
-                <input type="button" value="Save Graph Image" disabled>
+                <input type="button" value="Save Graph Image" id="saveimage">
                 <input type="button" value="Dump Raw Data" disabled>
+                <script>
+                  $("#saveimage").click(function () {
+                    $("canvas").each(function () {
+                      var image = new Image();
+                      
+                      window.open(this.toDataURL("image/png"));
+                      $("#graph-controls").append(image);
+                    });
+                  });
+                </script>
             </div>
         
         <!-- TODO: Put this on its own page? 

@@ -15,6 +15,7 @@ mctx.graph.dependent = null;
 mctx.graph.independent = null;
 mctx.graph.timer = null;
 mctx.graph.running = false;
+mctx.graph.chart = null;
 
 /**
  * Helper - Calculate pairs of (dependent, independent) values
@@ -89,7 +90,7 @@ $.fn.setDevices = function() {
     $("#xaxis").deployDevices("radio", false, 'xaxis');
     $("#yaxis").deployDevices("checkbox", true, 'yaxis');
     $("#current_time").val(data.running_time);
-    //Add event listeners for when the inputs are changed
+    //Add event listeners for when the
     $(".change input").change(function () {
       $("#graph").setGraph();
     });
@@ -164,7 +165,14 @@ function graphUpdater() {
         }
       });
       
-      $.plot("#graph", plot_data);
+      //$.plot("#graph", plot_data);
+      if (mctx.graph.chart !== null) {
+        mctx.graph.chart.setData(plot_data);
+        mctx.graph.chart.setupGrid(); 
+        mctx.graph.chart.draw();
+      } else {
+        mctx.graph.chart = $.plot("#graph", plot_data);
+      }
       if (mctx.graph.running) {
         mctx.graph.timer = setTimeout(updater, 1000);
       }
