@@ -39,19 +39,21 @@ typedef struct FCGIValue {
 	unsigned flags;
 } FCGIValue;
 
+typedef enum {USER_UNAUTH, USER_NORMAL, USER_ADMIN} UserType;
+
 /**Contextual information related to FCGI requests*/
 typedef struct  
 {
 	/**The time of last valid user access possessing the control key**/
 	time_t control_timestamp;
 	/**A SHA-1 hash that is the control key, determining who is logged in**/
-	char control_key[41];
-	/**Determines if the user is an admin or not**/
-	bool is_admin;
+	char control_key[41]; 
 	/**The IPv4 address of the logged-in user**/
 	char control_ip[16];
-	/**A friendly name for the logged-in user. Max length 30**/
-	char friendly_name[31];
+	/**Determines if the user is an admin or not**/
+	UserType user_type;
+	/**Name of the logged in user**/
+	char user_name[31];
 	/**The name of the current module**/
 	const char *current_module;
 	/**For debugging purposes?**/
@@ -60,7 +62,7 @@ typedef struct
 
 typedef void (*ModuleHandler) (FCGIContext *context, char *params);
 
-extern bool FCGI_LockControl(FCGIContext *context, bool force);
+extern bool FCGI_LockControl(FCGIContext *context, const char * user_name, UserType user_type);
 extern void FCGI_ReleaseControl(FCGIContext *context);
 extern bool FCGI_HasControl(FCGIContext *context, const char *key);
 extern char *FCGI_KeyPair(char *in, const char **key, const char **value);

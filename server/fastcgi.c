@@ -9,6 +9,8 @@
 #include <fcgi_stdio.h>
 #include <openssl/sha.h>
 #include <stdarg.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "common.h"
 #include "sensor.h"
@@ -46,7 +48,7 @@ static void IdentifyHandler(FCGIContext *context, char *params) {
 	FCGI_JSONPair("build_date", __DATE__ " " __TIME__);
 	FCGI_JSONLong("api_version", API_VERSION);
 	FCGI_JSONBool("logged_in", has_control);
-	FCGI_JSONPair("friendly_name", has_control ? context->friendly_name : "");
+	FCGI_JSONPair("user_name", has_control ? context->user_name : "");
 
 	//Sensor and actuator information
 	if (ident_sensors) {
@@ -75,36 +77,61 @@ static void IdentifyHandler(FCGIContext *context, char *params) {
 }
 
 /**
- * Gives the user a key that determines who has control over
- * the system at any one time. The key can be forcibly generated, revoking
- * any previous control keys. To be used in conjunction with HTTP 
- * basic authentication.
+ * Given an authorised user, attempt to set the control over the system.
+ * Modifies members in the context structure appropriately if successful.
  * @param context The context to work in
- * @param force Whether to force key generation or not.
- * @return true on success, false otherwise (eg someone else already in control)
+ * @param user_name - Name of the user
+ * @param user_type - Type of the user, passed after successful authentication
+ * @return true on success, false otherwise (eg someone else  already in control)
  */
-bool FCGI_LockControl(FCGIContext *context, bool force) {
+bool FCGI_LockControl(FCGIContext *context, const char * user_name, UserType user_type) 
+{
+	// Get current time
 	time_t now = time(NULL);
 	bool expired = now - context->control_timestamp > CONTROL_TIMEOUT;
 
-	if (force || !*(context->control_key) || expired) 
+	// Can't lock control if: User not actually logged in (sanity), or key is still valid and the user is not an admin
+	if (user_type == USER_UNAUTH || 
+		(user_type != USER_ADMIN && !expired && *(context->control_key) != '\0'))
+		return false;
+
+	// Release any existing control (if any)
+	FCGI_ReleaseControl(context);
+
+	// Set timestamp
+	context->control_timestamp = now;
+
+	// Generate a SHA1 hash for the user
+	SHA_CTX sha1ctx;
+	unsigned char sha1[20];
+	int i = rand();
+	SHA1_Init(&sha1ctx);
+	SHA1_Update(&sha1ctx, &now, sizeof(now));
+	SHA1_Update(&sha1ctx, &i, sizeof(i));
+	SHA1_Final(sha1, &sha1ctx);
+	for (i = 0; i < sizeof(sha1); i++)
+		sprintf(context->control_key + i * 2, "%02x", sha1[i]);
+
+	// Set the IP address
+	snprintf(context->control_ip, 16, "%s", getenv("REMOTE_ADDR"));
+	// Set the user name
+	int uname_len = strlen(user_name);
+	if (snprintf(context->user_name, sizeof(context->user_name), "%s", user_name) < uname_len)
 	{
-		SHA_CTX sha1ctx;
-		unsigned char sha1[20];
-		int i = rand();
-
-		SHA1_Init(&sha1ctx);
-		SHA1_Update(&sha1ctx, &now, sizeof(now));
-		SHA1_Update(&sha1ctx, &i, sizeof(i));
-		SHA1_Final(sha1, &sha1ctx);
-
-		context->control_timestamp = now;
-		for (i = 0; i < 20; i++)
-			sprintf(context->control_key + i * 2, "%02x", sha1[i]);
-		snprintf(context->control_ip, 16, "%s", getenv("REMOTE_ADDR"));
-		return true;
+		Log(LOGERR, "Username at %d characters too long (limit %d)", uname_len, sizeof(context->user_name));
+		return false; // :-(
 	}
-	return false;
+	// Set the user type
+	context->user_type = user_type;
+	// Create directory
+	if (mkdir(user_name, 0777) != 0 && errno != EEXIST)
+	{
+		Log(LOGERR, "Couldn't create user directory %s/%s - %s", g_options.root_dir, user_name, strerror(errno));
+		return false; // :-(
+	}
+
+
+	return true; // :-)
 }
 
 /**
@@ -133,6 +160,7 @@ bool FCGI_HasControl(FCGIContext *context, const char *key) {
  */
 void FCGI_ReleaseControl(FCGIContext *context) {
 	*(context->control_key) = 0;
+	// Note: context->user_name should *not* be cleared
 	return;
 }
 
@@ -507,8 +535,8 @@ void * FCGI_RequestLoop (void *data)
 		
 		if (module_handler) 
 		{
-			//if (module_handler != Login_Handler && module_handler != IdentifyHandler)
-			if (false) // Testing
+			if (module_handler != Login_Handler && module_handler != IdentifyHandler && module_handler)
+			//if (false) // Testing
 			{
 				if (!FCGI_HasControl(&context, cookie))
 				{

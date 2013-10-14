@@ -23,7 +23,7 @@ static Actuator g_actuators[ACTUATORS_MAX];
  * @param init - Function to call to initialise the actuator (may be NULL)
  * @returns Number of actuators added so far
  */
-int Actuator_Add(const char * name, int user_id, SetFn set, InitFn init, CleanFn cleanup, SanityFn sanity)
+int Actuator_Add(const char * name, int user_id, SetFn set, InitFn init, CleanFn cleanup, SanityFn sanity, double initial_value)
 {
 	if (++g_num_actuators > ACTUATORS_MAX)
 	{
@@ -36,11 +36,18 @@ int Actuator_Add(const char * name, int user_id, SetFn set, InitFn init, CleanFn
 	a->name = name;
 	a->set = set; // Set read function
 	a->init = init; // Set init function
-	if (init != NULL)
-		init(name, user_id); // Call it
+
 	a->sanity = sanity;
 
 	pthread_mutex_init(&(a->mutex), NULL);
+
+	if (init != NULL)
+	{
+		if (!init(name, user_id))
+			Fatal("Couldn't initialise actuator %s", name);
+	}
+
+	Actuator_SetValue(a, initial_value, false);
 
 	return g_num_actuators;
 }
@@ -54,7 +61,7 @@ int Actuator_Add(const char * name, int user_id, SetFn set, InitFn init, CleanFn
 void Actuator_Init()
 {
 	//Actuator_Add("ledtest",0,  Ledtest_Set, NULL,NULL,NULL);
-	Actuator_Add("filetest", 0, Filetest_Set, Filetest_Init, Filetest_Cleanup, Filetest_Sanity);
+	Actuator_Add("filetest", 0, Filetest_Set, Filetest_Init, Filetest_Cleanup, Filetest_Sanity, 0);
 }
 
 /**
@@ -160,16 +167,18 @@ void * Actuator_Loop(void * arg)
 		if (!a->activated)
 			break;
 
-		Actuator_SetValue(a, a->control.start);
+		Actuator_SetValue(a, a->control.start, true);
 		// Currently does discrete steps after specified time intervals
-		while (a->control.steps > 0 && a->activated)
+		while (!a->control_changed && a->control.steps > 0 && a->activated)
 		{
 			usleep(1e6*(a->control.stepwait));
 			a->control.start += a->control.stepsize;
-			Actuator_SetValue(a, a->control.start);
+			Actuator_SetValue(a, a->control.start, true);
 			
 			a->control.steps--;
 		}
+		if (a->control_changed)
+			continue;
 		usleep(1e6*(a->control.stepwait));
 
 		//TODO:
@@ -206,12 +215,13 @@ void Actuator_SetControl(Actuator * a, ActuatorControl * c)
  * @param a - The Actuator
  * @param value - The value to set
  */
-void Actuator_SetValue(Actuator * a, double value)
+void Actuator_SetValue(Actuator * a, double value, bool record)
 {
 	if (a->sanity != NULL && !a->sanity(a->user_id, value))
 	{
 		//ARE YOU INSANE?
-		Fatal("Insane value %lf for actuator %s", value, a->name);
+		Log(LOGERR,"Insane value %lf for actuator %s", value, a->name);
+		return;
 	}
 	if (!(a->set(a->user_id, value)))
 	{
@@ -221,9 +231,17 @@ void Actuator_SetValue(Actuator * a, double value)
 	// Set time stamp
 	struct timeval t;
 	gettimeofday(&t, NULL);
-	// Record and save DataPoint
-	DataPoint d = {TIMEVAL_DIFF(t, *Control_GetStartTime()), value};
-	Data_Save(&(a->data_file), &d, 1);
+	DataPoint d = {TIMEVAL_DIFF(t, *Control_GetStartTime()), a->last_setting.value};
+	// Record value change
+	if (record)
+	{	
+		d.time_stamp -= 1e-6;
+		Data_Save(&(a->data_file), &d, 1);
+		d.value = value;
+		d.time_stamp += 1e-6;
+		Data_Save(&(a->data_file), &d, 1);
+	}
+	a->last_setting = d;
 }
 
 /**
