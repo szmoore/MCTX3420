@@ -26,17 +26,6 @@ void Dilatometer_TestImage()
 	
 	CvMat *g_dataRGB;
 	g_dataRGB = cvCreateMat(480, 640, CV_8UC3);
-	//Make sure left and right positions are sane
-	if( test_left < 0)
-		test_left = 0;
-	if( test_right > 639)
-		test_right = 639;
-	if( test_left > test_right)
-	{
-		int tmp = test_right;
-		test_right = test_left;
-		test_left = tmp;
-	}
 
 	for( int x = 0; x < 640; ++x)
 	{
@@ -45,7 +34,7 @@ void Dilatometer_TestImage()
 			CvScalar s; 
 			for( int i = 0; i < 3; ++i)
 			{
-				s.val[i]  =  220 + (rand() % 1000) * 1e-2 - (rand() % 1000) * 1e-2;
+				s.val[i]  =  210 + (rand() % 1000) * 1e-0 - (rand() % 1000) * 1e-0;
 				// Produce an exponential decay around left edge
 				if( x < test_left)
 					s.val[i] *= exp( (x - test_left) / 25);
@@ -199,6 +188,19 @@ int main(int argc, char ** argv)
 	{
 		test_left  -= i * (rand() % 1000) * 1e-3;
 		test_right += i * (rand() % 1000) * 1e-3;
+
+		//Make sure left and right positions are sane
+		if( test_left < 0)
+			test_left = 0;
+		if( test_right > 639)
+			test_right = 639;
+		if( test_left > test_right)
+		{
+			int tmp = test_right;
+			test_right = test_left;
+			test_left = tmp;
+		}
+
 		width = Dilatometer_Read(5);
 		cvNamedWindow( "display", CV_WINDOW_AUTOSIZE);
 		cvShowImage("display", g_data);
