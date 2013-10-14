@@ -4944,3 +4944,33 @@
 22:41 -!- Irssi: #mctxuwa_softdev: Total of 2 nicks [0 ops, 0 halfops, 0 voices, 2 normal]
 22:41 -!- Irssi: Join to #mctxuwa_softdev was synced in 2 secs
 22:41 -!- You're now known as sam_moore
+--- Day changed Sun Oct 13 2013
+08:30 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
+10:18 < jtanx> yeah, about the django stuff, I'm not sure if we should do that now
+10:18 < jtanx> two options I considered:
+10:19 < jtanx> if you kept the 'bind' module, but added a method to authenticate against the django database, that could work, but it's a lot of effort
+10:19 < jtanx> - there's two ways - one is to manually do it via interaction with the sqlite database and parsing the user string etc etc
+10:20 < jtanx> the other way is to call the python function from c
+10:20 < jtanx> I explored the 'call python from c' option and it does work, but it's quite cumbersome
+10:20 < jtanx> I didn't bother exploring the 'manual interaction with sqlite' because that would be even more cumbersome
+10:21 < jtanx> The other way, which I got working quite easily
+10:21 < jtanx> is to protect one of the modules with nginx
+10:21 < jtanx> say /api/control now becomes an 'internal' only module
+10:21 < jtanx> so it's not usually accessible from outside
+10:22 < jtanx> with django, say you got the address /databases/control
+10:23 < jtanx> it can send back a request with header 'X-Accel-Redirect' to /api/control
+10:23 < jtanx> Because it was sent by django, which is an internal application, it works
+10:23 < jtanx> such that /databases/control looks like /api/control to the user
+10:24 < jtanx> the problem with this setup is that then your api becomes entirely dependent on django to work
+10:24 < jtanx> I guess you could replace 'django' with any other authrorization frontend
+10:31 < jtanx> let's just stick with what we've got
+10:36 < jtanx> hahahaha and that x-accel-redirect just crashed my server after I held down f5
+10:36 -!- MctxBot [~twang@220-253-133-241.dyn.iinet.net.au] has quit [Connection reset by peer]
+10:39 -!- MctxBot [~twang@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
+19:19 < jtanx> I think I'll try to get in early tomorrow to work on whatever needs to be done
+19:56 < jtanx> For the actuators, do you really want it to crash (Fatal) if the user supplies a step say of 0,1,40000,2?
+21:19 < jtanx> working on the graphs now
+23:29 < jtanx> ookay
+23:29 < jtanx> too tired to check, but I refactored it and I think it still works
+23:30 < jtanx> I'll just leave it in my fork for now
+23:30 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has quit ["bye"]
