@@ -102,43 +102,43 @@
           <div class="widget" id="graph-controls">
               <!--<div class="title">Visualise</div>-->
               <b>X-Axis</b>
-                <form id="xaxis" onChange=$("#graph").setGraph()>
-                  <input type="radio" name="xaxis" alt="time" id="time" checked="yes">time</input>
+                <form id="xaxis" class="change">
+                  <input type="radio" name="xaxis" alt="time" id="time" checked="checked">
+                  <label for="time">time</label>
                 </form>
                 <b>Y-Axis</b>
-                <form id="yaxis" onChange=$("#graph").setGraph()>  </form>
+                <form id="yaxis" class="change">  </form>
                 <!--b>Right Y-Axis</b>
-                <form id="y2axis" onChange=$("#graph").setGraph()> <input type="radio" name="y2axis" value="none" id="none" checked="yes">none</input></form>-->
+                <form id="y2axis" onChange=$("#graph").setGraph()> <input type="radio" name="y2axis" value="none" id="none" checked="yes">none</form>-->
 
                 <div> 
-                  <form id="time_range" onChange=$("#graph").setGraph()>
+                  <form id="time_range" class="change">
                     <p> 
-                        Time of Last Update <input type="text" value="" id="current_time" disabled></input>
-                        Start Time <input type="text" value="" id="start_time"></input> 
-                        End Time <input type="text" value="" id="end_time"></input>
+                        Time of Last Update <input type="text" value="" id="current_time" disabled>
+                        Start Time <input type="text" value="" id="start_time"> 
+                        End Time <input type="text" value="" id="end_time">
                     </p>
                 </form>
                 </div>
-                <input type="button" value="Run" id="graph-run" onClick=$("#graph-run").runButton()></input>
-                <input type="button" value="Open New Graph" disabled></input>
-                <input type="button" value="Save Graph Image" disabled></input>
-                <input type="button" value="Dump Raw Data" disabled></input>
+                <input type="button" value="Run" id="graph-run" onClick="$('#graph-run').runButton()">
+                <input type="button" value="Open New Graph" disabled>
+                <input type="button" value="Save Graph Image" disabled>
+                <input type="button" value="Dump Raw Data" disabled>
             </div>
         
         <!-- TODO: Put this on its own page? 
           <div class="widget">
               <div class="title">Controls</div>
               <form id="controls">
-                <p>Mode: <input type="radio" name="mode" value="normal">Normal</input>
-                      <input type="radio" name="mode" value="explode">EXPLODE!</input> </p>
-                Filename: <input type="text"> </input>
-                <input type="button" value="Stop" id="stopstart"></input>
-                <input type="button" value="Pause" id="runpause"></input>
-                <input type="button" value="Load"></input>
-               --> 
-                
+                <p>Mode: <input type="radio" name="mode" value="normal">Normal
+                      <input type="radio" name="mode" value="explode">EXPLODE! </p>
+                Filename: <input type="text"> 
+                <input type="button" value="Stop" id="stopstart">
+                <input type="button" value="Pause" id="runpause">
+                <input type="button" value="Load">
               </form>
           </div>
+          -->
         </div>
     </div>
       <!-- End main content -->
