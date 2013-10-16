@@ -5169,3 +5169,34 @@
 21:31 < James__> Hey Sam
 21:39 < James__> Having Issues uploading to the GUI to git but i have successfully tested it on Firefox, Chrome and IE.  I will continue trying to upload but if i can't i will see if i can find you or Jeremy tomorrow 
 21:57 -!- James__ [~chatzilla@CPE-58-160-245-20.wa.bigpond.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Wed Oct 16 2013
+13:39 -!- MctxBot [~twang@220-253-133-241.dyn.iinet.net.au] has quit [Ping timeout]
+13:59 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
+13:59 < jtanx> ...
+13:59 < jtanx> I brought the bbb home
+14:00 < jtanx> booted it off an ubuntu image, and uvccapture can take 800x600 images fine from my webcap
+14:00 < jtanx> webcam*
+14:00 < jtanx> I don't know if it's because it's a different camera, or because it's a different os
+14:34 < jtanx> I just tested with the api/image and I can get 800x600 fine
+14:34 < jtanx> too
+14:38 < jtanx> I can even do 1600x1200 images just fine 
+14:38 < jtanx> ................
+14:38 < jtanx> ._.
+14:38 < jtanx> I'll be bringing this in tomorrow, see if it works with the cameras that we're going to be using
+14:39 < jtanx> Since my 1gb sd card was not big enough to opencv, I've actually flashed the internal memory with ubuntu
+14:39 < jtanx> (so I could install opencv)
+14:41 < jtanx> wowthat is so stupid
+14:42 < jtanx> so either it's the cameras that we bought, or the os 
+14:42 < jtanx> but it works at 1600x1200
+14:42 < jtanx> (max resolution of my webcam)
+14:43 -!- MctxBot [~twang@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:00 < jtanx> ok, I just tried it with the os we've been running before (on your 32gb sd card), and it also works at 1600x1200
+15:00 < jtanx> so it's an issue with the camera
+15:01 < jtanx> (e.g selecting a camera that actually works with the BBB
+15:14 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has quit ["brb"]
+15:16 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
+20:10 -!- MctxBot [~twang@220-253-133-241.dyn.iinet.net.au] has quit [Ping timeout]
+21:41 -!- jtanx_ [~asfa@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:56 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has quit [Ping timeout]
+23:28 -!- jtanx_ [~asfa@220-253-133-241.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+23:28 -!- MctxBot [~twang@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
