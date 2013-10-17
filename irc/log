@@ -5200,3 +5200,34 @@
 21:56 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has quit [Ping timeout]
 23:28 -!- jtanx_ [~asfa@220-253-133-241.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
 23:28 -!- MctxBot [~twang@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
+--- Day changed Thu Oct 17 2013
+09:16 -!- jtanx [~asfa@130.95.54.13] has joined #mctxuwa_softdev
+09:17 < jtanx> ....
+09:17 < jtanx> I just ran the bBB with ubuntu and used the usb microscope
+09:17 < jtanx> and it worked
+09:18 < jtanx> and so too does it work on the original os
+09:18 < jtanx> wtf
+09:33 < jtanx> hahahaa 
+09:33 < jtanx> it crashed because it ran out of memory 
+09:33 < jtanx> I tried having both cameras at once
+09:33 < jtanx> and switching between them 
+09:34 < jtanx> but other than that it works
+09:34 < jtanx> this is weird
+09:44 < jtanx> about 1/5 tries fails at 1600x1200 with 'select timeout'
+09:44 < jtanx> probably because it can't buffer that fast or something
+09:45 < jtanx> but definitely to run both cameras at once (or at least have them connected), you require an external power source, either for the beaglebone or for the usb hub
+09:47 < jtanx> yep
+09:47 < jtanx> if you do
+09:47 < jtanx> modprobe uvcvideo nodrop=1
+09:47 < jtanx> It will only display part of the image
+09:47 < jtanx> probably because it hasn't filled the buffer yet
+09:48 < jtanx> but if you load uvcvideo with normal settings
+09:48 < jtanx> it either displays the full image, or no image at all
+09:48 < jtanx> the problem is, I don't know how you detect this in opencv
+10:10 -!- jtanx [~asfa@130.95.54.13] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+13:47 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
+14:55 -!- MctxBot [~twang@220-253-133-241.dyn.iinet.net.au] has quit [Ping timeout]
+17:14 -!- MctxBot [~twang@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
+17:20 -!- MctxBot [~twang@220-253-133-241.dyn.iinet.net.au] has quit ["leaving"]
+17:22 -!- MctxBot [~twang@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
+22:38 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
