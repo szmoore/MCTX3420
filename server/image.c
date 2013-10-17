@@ -4,7 +4,8 @@
 #include <string.h>
 #include <stdio.h>
 
-CvCapture *captures[2] = {0};
+CvCapture *capture;
+int captureID = -1;
 
 void Image_Handler(FCGIContext * context, char * params)
 {
@@ -24,10 +25,12 @@ void Image_Handler(FCGIContext * context, char * params)
 		return;
 	}
 
-	CvCapture *capture = captures[num];
-	if (capture == NULL) {
+	if (captureID != num) {
+		if (captureID >= 0) {
+			cvReleaseCapture(&capture);
+		}
 		capture = cvCreateCameraCapture(num);
-		captures[num] = capture;
+		captureID = num;
 	}
 
 	cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, width);
