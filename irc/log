@@ -4974,3 +4974,229 @@
 23:29 < jtanx> too tired to check, but I refactored it and I think it still works
 23:30 < jtanx> I'll just leave it in my fork for now
 23:30 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has quit ["bye"]
+--- Day changed Mon Oct 14 2013
+10:03 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
+10:03 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+19:15 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
+19:19 < jtanx> this is stupi
+19:19 < jtanx> d
+19:19 < jtanx> flot is still the easiest to use
+19:20 < jtanx> chart.js can only plot a line chart, so all the data series must share the same x-axis points
+19:20 < jtanx> jqplot sucks
+19:21 < jtanx> oh well, I'll work on this some other time
+19:21 < jtanx> stick with flot for now
+19:40 < sam_moore> Re actuators: No, Fatal is probably not the correct response to an invalid user input :P
+19:40 < sam_moore> Re just using flot: OK
+19:43 < sam_moore> I think we need to do a grep -R "Fatal" and get rid of the ones that don't actually need to be Fatal
+19:43 < sam_moore> Which is probably most of them
+19:44 < sam_moore> Working on more useful user based control now
+19:45 < jtanx> ok
+19:46 < jtanx> I wonder if it's possible to selectively colour text in a textarea with javascript
+19:47 < sam_moore> Probably?
+19:47 < jtanx> I have a feeling that you'd have to surround those ones in <p> blocks
+19:48 < sam_moore> Hmm, but that would make them all on new paragraphs
+19:48 < jtanx> fine, <span>s
+19:48 < sam_moore> That makes sense
+19:48 < jtanx> but you'd probably need to surround highlighted text in some sort of <> block
+19:48 < jtanx> so you can style it
+19:48 < sam_moore> Makes sense
+19:48 < sam_moore> What are you going to colourise?
+19:49 < jtanx> say if there's a fatal message
+19:49 < jtanx> you colour it red?
+19:49 < jtanx> make it blink, 90s style
+19:52 < sam_moore> Hahaha
+19:52 < sam_moore> Sounds good
+19:53 < sam_moore> Colourising the labels for the graph might be useful too
+19:53 < sam_moore> (Possibly easier than adding labels to the flot plot?)
+19:53 < jtanx> hmm
+19:54 < jtanx> what I was thinking of doing was to use nvd3, which generates the graphs using the svg element instead of a canvas
+19:54 < jtanx> then you can use something like http://code.google.com/p/canvg/ to render the svg in js to a png file
+19:55 < sam_moore> Interesting
+19:55 < jtanx> no idea if it will work
+19:56 < sam_moore> Do you even have to render it to png? SVG is a good format for graphs
+19:56 < jtanx> i mean if you want to save it
+19:56 < jtanx> i dunno, most users will go
+19:56 < jtanx> what's this svg format
+19:56 < sam_moore> That's what I mean; can you save it as an svg?
+19:56 < sam_moore> Hahaha
+19:56 < jtanx> probably
+19:56 < sam_moore> If it were me, I would *want* the svg format
+19:56 < sam_moore> You can edit the graph in inkscape
+19:57 < sam_moore> Really easily
+19:57 < jtanx> yeah
+19:57 < jtanx> I'd prefer the svg format too
+19:57 < sam_moore> Get SVG working and if you really want, add a radio box to choose the file format
+19:57 < jtanx> yep
+19:58 < sam_moore> I thought FCGI_LockControl was being called on any user action, but it looks like it's only called in login.c now
+19:58 < sam_moore> Is that the change you were talking about earlier?
+19:59 < jtanx> nah
+19:59 < jtanx> fcgi_lockcontrol should only be called in login.c
+19:59 < jtanx> there was this leftover part in control.c
+19:59 < sam_moore> Oh, right, nevermind
+19:59 < jtanx> that called it too
+20:00 < sam_moore> I was thinking of FCGI_HasControl,that's ok
+20:00 < jtanx> yeah
+20:10 < MctxBot> .
+20:12 < sam_moore> ?
+20:12 < sam_moore> MctxBot: Have you become sentient yet?
+20:12 < jtanx> I was just testing notification on all messages for chatzilla
+20:14 < sam_moore> Ok
+20:53 < sam_moore> I think the correct way to do this is to store more stuff in the FCGI_Context
+20:54 < sam_moore> Like the name of the experiment currently being conducted
+20:54 < jtanx> hmm
+20:54 < sam_moore> I noticed that control.c avoids storing the actual name of the experiment anywhere
+20:54 < sam_moore> But it's late and I'm just going to hack something together
+20:55 < jtanx> yeah
+20:55 < jtanx> I don't particularly like how 'experiments' were handled in control.c
+20:55 < sam_moore> g_control stores the user name of whoever last succeeded in doing an "action=start"
+20:55 < sam_moore> I can rework it, but not tonight
+20:55 < jtanx> that's fine
+21:41 < sam_moore> ==21160==  Uninitialised value was created by a stack allocation
+21:41 < sam_moore> ==21160==    at 0x6A22DBE: __md5_crypt_r (md5-crypt.c:121)
+21:41 < sam_moore> :S
+21:41 < jtanx> .....
+21:41 < sam_moore> Not causing an error, but still
+21:41 < jtanx> what does that even mean
+21:42 < sam_moore> It's nice to know that the linux crypt functions that are used for parsing /etc/shadow have uninitialised values
+21:42 < jtanx> you sure you're calling it correctly
+21:42 < jtanx> ?
+21:42 < sam_moore> The full text (brace for impact)
+21:42 < sam_moore> ==21160== Conditional jump or move depends on uninitialised value(s)
+21:42 < sam_moore> ==21160==    at 0x6D75188: ??? (strcpy.S:98)
+21:42 < sam_moore> ==21160==    by 0x6A230E7: __md5_crypt_r (md5-crypt.c:249)
+21:42 < sam_moore> ==21160==    by 0x40A5F6: Login_Shadow (login.c:93)
+21:42 < sam_moore> ==21160==    by 0x40AA7B: Login_Handler (login.c:243)
+21:42 < sam_moore> ==21160==    by 0x404CE3: FCGI_RequestLoop (fastcgi.c:548)
+21:42 < sam_moore> ==21160==    by 0x4052AE: main (main.c:143)
+21:42 < sam_moore> ==21160==  Uninitialised value was created by a stack allocation
+21:42 < sam_moore> ==21160==    at 0x6A22DBE: __md5_crypt_r (md5-crypt.c:121)
+21:42 < sam_moore> if (strcmp(crypt(pass, salt), buffer+passwd_index) == 0)
+21:43 < sam_moore> Looks like the correct usage to me
+21:43 < sam_moore> I mean, it's *working*
+21:43 < jtanx> ~.~
+21:43 < jtanx> well then
+21:44 < sam_moore> It's probably someone being lazy with initialising things
+21:44 < jtanx> https://bugzilla.redhat.com/show_bug.cgi?id=760262
+21:44 < sam_moore> GCC under linux usually initialises things to zero
+21:44 < jtanx> https://bugzilla.redhat.com/show_bug.cgi?format=multiple&id=699917
+21:44 < sam_moore> But under other things (like Mac OSX) it doesn't; if it's not initialised you can't assume anything
+21:45 < jtanx> I thought C standard was any global variables were zeroed
+21:45 < jtanx> anything else is undefined
+21:45 < sam_moore> Well it's probably not a global variable then
+21:45 < sam_moore> But I think you're right
+21:45 < sam_moore> I just remember in CITS1210
+21:45 < jtanx> from the bug report - 'This is an annoying, but harmless false positive warning.'
+21:46 < sam_moore> We had a bunch of variables that weren't initialised
+21:46 < sam_moore> gcc under debian/ubuntu was zeroing them for us
+21:46 < sam_moore> So things still worked
+21:46 < jtanx> yeah
+21:46 < sam_moore> Go to the Mac lab...
+21:46 < sam_moore> Everything exploded
+21:46 < jtanx> hahahaha
+21:46 < jtanx> ah... CITS1210
+21:46 < jtanx> when did you take it?
+21:46 < sam_moore> Aaages ago
+21:46 < sam_moore> 2009?
+21:47 < jtanx> that was long ago
+21:47 < sam_moore> Yes
+21:47 < jtanx> 2011 for me
+21:47 < sam_moore> We got 100% though :)
+21:47 < sam_moore> For the second project
+21:47 < jtanx> sweet
+21:47 < jtanx> I think I got that too
+21:47 < jtanx> they docked marks off the first one for some stupid reason 
+21:47 < sam_moore> (He had an infinite loop in the sample solution, which we found and eliminated in our solution, I think that was the main reason)
+21:48 < jtanx> ook
+21:48 < sam_moore> (He probably didn't appreciate the #ifdef BE_REALLY_STUPID // Replicate the behaviour *exactly* as requested by the lecturer)
+21:48 < jtanx> :P
+21:48 < sam_moore> Good fun
+21:49 < jtanx> yeah, one of the comments on mine was 'did not exactly match whitespace of output'
+21:49 < sam_moore> Haha, it was pretty harsh with the replicating exactly
+21:49 < sam_moore> We had a long debate about whether we should replicate the infinite loop or not
+21:49 < sam_moore> I think we actually submitted it with "BE_REALLY_STUPID" defined :S
+21:50 < jtanx> hahahaha
+22:24 < jtanx> now to look into nvd3
+22:36 < sam_moore> I've pushed some progress, I will try and clean it up later this week (it's pretty hacky)
+22:36 < jtanx> cool
+22:37 < sam_moore> I do like the idea of having svg plots, if it works it will be much nicer than flot
+22:37 < jtanx> hopefully
+22:37 < jtanx> it doesn't work in ie8 without this compat library
+22:37 < sam_moore> Ah
+22:37 < jtanx> and with compat it'll probably be slow
+22:37 < jtanx> but oh well
+22:38 < sam_moore> Fallback to flot if browser is ie8? :P
+22:38 < jtanx> yeah
+22:38 < jtanx> maybe
+22:38 < jtanx> that could work
+22:39 < sam_moore> I'm pretty sure it's within our rights to say "You need to use one of these browsers" since it's so easy to install browsers
+22:39 < jtanx> true
+22:39 < jtanx> ie8 is more an afterthought anyway
+22:39 < sam_moore> But I suppose if they have some stupid SOE that only includes ie6...
+22:39 < jtanx> if you use ie6 you'd be screwed anyway
+22:39 < sam_moore> Haha
+22:40 < sam_moore> The first flot page I made didn't work in my phone's browser, but that's probably a JavaScript setTimeout thing
+22:40 < jtanx> do browsers even support the canvas element
+22:40 < jtanx> *mobile browsers
+22:41 < sam_moore> Well it showed the first set of data but didn't update
+22:41 < jtanx> oh 
+22:41 < jtanx> right
+22:41 < sam_moore> Don't worry, we don't need to support phone browsers
+22:41 < sam_moore> Or at least, until we tell Adrian that we don't support phone browsers, we won't have to support phone browsers :P
+22:42 < jtanx> hehehe
+23:12 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has quit [Connection reset by peer]
+23:13 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
+23:20 < jtanx> hahaha nvd3 crashed firefox
+23:20 < jtanx> let me try again
+23:20 < jtanx> if I disconnect, you know why
+23:22 < jtanx> well it didn't crash, but it didn't work
+23:22 < jtanx> oh well, I'll try again tomorrow
+23:22 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has quit ["bye"]
+--- Day changed Tue Oct 15 2013
+12:08 < sam_moore> http://jayrambhia.com/blog/capture-v4l2/
+12:08 < sam_moore> Might be useful?
+12:08 < sam_moore> I suspect the issue with the cameras is related to the colour format
+12:08 < sam_moore> MJPEG fails, but YUVU (whatever the hell that is) succeeds
+12:09 < sam_moore> Although it is still only giving 320x240
+12:13 < sam_moore> I noticed uvccapture, etc are quite buggy on my own debian laptop
+12:13 < sam_moore> I'm hoping that it might actually be a shitty userspace error that we can fix by using the v4l2 API directly
+12:13 < sam_moore> Although it's not likely
+12:14 < sam_moore> May as well try
+12:14 < sam_moore> But uvccapture just likes to hang forever
+12:14 < sam_moore> If you give it larger resolutions
+18:52 -!- james__ [~chatzilla@CPE-58-160-245-20.wa.bigpond.net.au] has joined #mctxuwa_softdev
+19:29 -!- james__ [~chatzilla@CPE-58-160-245-20.wa.bigpond.net.au] has quit [Ping timeout]
+21:27 -!- James__ [~chatzilla@CPE-58-160-245-20.wa.bigpond.net.au] has joined #mctxuwa_softdev
+21:31 < James__> Hey Sam
+21:39 < James__> Having Issues uploading to the GUI to git but i have successfully tested it on Firefox, Chrome and IE.  I will continue trying to upload but if i can't i will see if i can find you or Jeremy tomorrow 
+21:57 -!- James__ [~chatzilla@CPE-58-160-245-20.wa.bigpond.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Wed Oct 16 2013
+13:39 -!- MctxBot [~twang@220-253-133-241.dyn.iinet.net.au] has quit [Ping timeout]
+13:59 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
+13:59 < jtanx> ...
+13:59 < jtanx> I brought the bbb home
+14:00 < jtanx> booted it off an ubuntu image, and uvccapture can take 800x600 images fine from my webcap
+14:00 < jtanx> webcam*
+14:00 < jtanx> I don't know if it's because it's a different camera, or because it's a different os
+14:34 < jtanx> I just tested with the api/image and I can get 800x600 fine
+14:34 < jtanx> too
+14:38 < jtanx> I can even do 1600x1200 images just fine 
+14:38 < jtanx> ................
+14:38 < jtanx> ._.
+14:38 < jtanx> I'll be bringing this in tomorrow, see if it works with the cameras that we're going to be using
+14:39 < jtanx> Since my 1gb sd card was not big enough to opencv, I've actually flashed the internal memory with ubuntu
+14:39 < jtanx> (so I could install opencv)
+14:41 < jtanx> wowthat is so stupid
+14:42 < jtanx> so either it's the cameras that we bought, or the os 
+14:42 < jtanx> but it works at 1600x1200
+14:42 < jtanx> (max resolution of my webcam)
+14:43 -!- MctxBot [~twang@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:00 < jtanx> ok, I just tried it with the os we've been running before (on your 32gb sd card), and it also works at 1600x1200
+15:00 < jtanx> so it's an issue with the camera
+15:01 < jtanx> (e.g selecting a camera that actually works with the BBB
+15:14 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has quit ["brb"]
+15:16 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
+20:10 -!- MctxBot [~twang@220-253-133-241.dyn.iinet.net.au] has quit [Ping timeout]
+21:41 -!- jtanx_ [~asfa@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:56 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has quit [Ping timeout]
+23:28 -!- jtanx_ [~asfa@220-253-133-241.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+23:28 -!- MctxBot [~twang@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
