@@ -3,6 +3,13 @@
   font-family: "Open Sans";
   src: url("OpenSans.ttf"),
     url("OpenSans.eot");
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "Open Sans";
+  src: url("OpenSansBold.ttf");
+  font-weight: bold;
 }
 
 body {
@@ -56,6 +63,7 @@ div.centre {
   font-weight: bold;
 }
 
+/*
 table {
   border: none;
 }
@@ -69,6 +77,7 @@ table.status, table.status tr, table.status td {
     padding: 0.2em 0.75em;
 }
 
+
 td {
   padding: 0 0.5em;
 }
@@ -76,6 +85,36 @@ td {
 th {
   padding: inherit;
   border-bottom: 1px solid gray;
+}
+
+*/
+
+table {
+  border-radius: 3px;
+  border: 1px solid #ccc;
+  border-collapse: collapse;
+  word-wrap: break-word;
+  line-height: 1.3em;
+  width: 100%;
+}
+
+td {
+  padding: 0.2em 0.5em;
+}
+
+table.centre {
+  margin: auto;
+  text-align: center;
+}
+
+table.horizontal {
+  line-height: 1.6em;
+}
+
+table.horizontal th {
+  border-right: 1px solid #ccc;
+  border-bottom: 0;
+  width: 20%;
 }
 
 img.centre {
@@ -121,7 +160,7 @@ input[type="text"]:focus, input[type="password"]:focus {
 
 #header {
   padding: 1.5em 2em;
-  max-width: 1280px;
+  /*max-width: 1920px;*/
   margin: 0 auto;
 }
 
@@ -185,7 +224,7 @@ input[type="text"]:focus, input[type="password"]:focus {
 
 #content-wrap {
   padding: 1em 2em;
-  max-width: 1280px;
+  /*max-width: 1920px;*/
   margin: 1em auto;
 }
 
@@ -197,10 +236,29 @@ input[type="text"]:focus, input[type="password"]:focus {
 #sidebar{
   float: left;
   width: 240px;
+  transition: all 0.2s ease 0s;
 }
 
 #sidebar .title {
   font-size: 20px;
+}
+
+#sidebar-hide {
+  border-bottom: 1px solid #CCCCCC;
+  border-left: 1px solid #CCCCCC;
+  cursor: pointer;
+  float: right;
+  height: 20px;
+  margin-right: -1.25em;
+  margin-top: -1em;
+  text-align: center;
+  width: 20px;
+}
+
+#sidebar-show {
+  float: left;
+  cursor: pointer;
+  display: none;
 }
 
 .justify {
@@ -217,6 +275,22 @@ input[type="text"]:focus, input[type="password"]:focus {
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 0.25em;
+}
+
+/* Unused ?? */
+.sxs {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  border-spacing: 0.5em;
+}
+
+.sxs div {
+  display: table-cell;
+}
+
+.right {
+  float: right;
 }
 
 .title {
@@ -264,6 +338,8 @@ input[type="text"]:focus, input[type="password"]:focus {
   max-width: 100%;
   width: 100%;
   height: 6em;
+  background-color: white;
+  border: 1px solid #ccc;
 }
 
 /** For login.html **/

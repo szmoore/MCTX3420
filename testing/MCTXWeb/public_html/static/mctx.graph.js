@@ -97,6 +97,22 @@ $.fn.setDevices = function() {
   });
 };
 
+function setGraphStatus(on, failText) {
+  if (on) {
+    mctx.graph.running = true;
+    $("#status-text").html("&nbsp;");
+    $("#graph-run").text("Pause");
+  } else {
+    mctx.graph.running = false;
+    if (failText) {
+      $("#status-text").text(failText).addClass("fail");
+    } else {
+      $("#status-text").text("Graph stopped").removeClass("fail");
+    }
+    $("#graph-run").text("Run");
+  }
+}
+
 function graphUpdater() {
   var urls = {
     'sensors' : mctx.graph.api.sensors,
@@ -104,7 +120,6 @@ function graphUpdater() {
   }
   
   var updater = function () {
-    var time_limit = 20;
     var responses = [];
     var ctime =  $("#current_time");
     
@@ -115,17 +130,17 @@ function graphUpdater() {
     var devices = mctx.graph.devices;
     
     if (xaxis.size() < 1 || yaxis.size() < 1) {
-      mctx.graph.running = false;
+      setGraphStatus(false, "No x or y axis selected.");
       return;
     }
     
     $.each(devices, function(key, val) {
       if (val.urltype in urls) {
         var parameters = {id : val.id};
-        if (start_time != null) {
+        if (start_time !== null) {
           parameters.start_time = start_time;
         }
-        if (end_time != null) {
+        if (end_time !== null) {
           parameters.end_time = end_time;
         }
         responses.push($.ajax({url : urls[val.urltype], data : parameters})
@@ -153,14 +168,8 @@ function graphUpdater() {
           plot_data.push(devices[$(this).attr("alt")].data);
         } else {
           var result = []
-          dataMerge(devices[xaxis.attr("alt")].data, devices[$(this).attr("alt")].data, result);
-          /*
-          var astr = "[";
-          for (var i = 0; i < result.length; ++i)
-            astr += "[" + result[i][0] + "," + result[i][1] + "]" + ",";
-          astr += "]";
-          alert(astr);
-          */
+          dataMerge(devices[xaxis.attr("alt")].data, 
+                    devices[$(this).attr("alt")].data, result);
           plot_data.push(result);
         }
       });
@@ -176,10 +185,14 @@ function graphUpdater() {
       if (mctx.graph.running) {
         mctx.graph.timer = setTimeout(updater, 1000);
       }
-    }, function () {mctx.graph.running=false; alert("Graph crashed");});
+    }, function () {
+      setGraphStatus("Connection issue - graph stopped.");
+      //This will always happen when a user closes the page
+      //alert("Graph crashed"); 
+    });
   };
   
-  mctx.graph.running = true;
+  setGraphStatus(true);
   updater();
   return this;
 }
@@ -194,6 +207,7 @@ $.fn.setGraph = function () {
   var yaxis = $("#yaxis input[name=yaxis]:checked");
   if (xaxis.size() < 1 || yaxis.size() < 1) {
     //nothing to plot...
+    setGraphStatus(false, "No x or y axis selected.");
     return;
   }
   
@@ -227,6 +241,7 @@ $.fn.setGraph = function () {
   
   if (!mctx.graph.running) {
     $("#graph-run").val("Pause");
+    $("#status-text").text("")
     graphUpdater();
   }
   
@@ -234,14 +249,10 @@ $.fn.setGraph = function () {
 };
 
 $.fn.runButton = function() {
-  //alert($(this).val());
-  if ($(this).val() === "Run") {
-    $("#graph").setGraph();
-    $(this).val("Pause");
-  }
-  else {
-    mctx.graph.running = false;
+  if (mctx.graph.running) {
+    setGraphStatus(false);
     clearTimeout(mctx.graph.timer);
-    $(this).val("Run");
+  } else {
+    $("#graph").setGraph();
   }
 };

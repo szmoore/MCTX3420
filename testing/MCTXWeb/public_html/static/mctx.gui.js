@@ -284,6 +284,36 @@ $.fn.setErrorLog = function () {
     return this;
 };
 
+$(document).ready(function () {
+  //Show the content!
+  $("#content").css("display", "block");
+  
+  //Set the welcome bar
+  var name = " " + (mctx.friendlyName ? mctx.friendlyName : "");
+  $("#welcome-container").text("Welcome"+ name + "!");
+  $("#logout-container").css("display", "block");
+  //$("#menu-container").populateNavbar();
+
+  $("#logout").click(function () {
+    $("#logout").logout();
+  });
+  
+  //Enable the error log, if present
+  $("#errorlog").setErrorLog();
+  
+  //Enable the hide/show clicks
+  $("#sidebar-hide").click(function () {
+    $("#sidebar").css("display", "none");
+    $("#sidebar-show").css("display", "inherit");
+    return this;
+  });
+
+  $("#sidebar-show").click(function () {
+    $("#sidebar-show").css("display", "none");
+    $("#sidebar").css("display", "inherit");
+    return this;
+  });
+});
 $(document).ajaxError(function (event, jqXHR) {
     //console.log("AJAX query failed with: " + jqXHR.status + " (" + jqXHR.statusText + ")");
 });

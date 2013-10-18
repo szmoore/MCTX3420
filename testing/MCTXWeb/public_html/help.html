@@ -11,24 +11,7 @@
     <script type="text/javascript">
       runBeforeLoad().done(function() {
         $(document).ready(function() {
-          //Show the content!
-          $("#content").css("display", "block");
-          //Set the welcome bar
-          var name = " " + (mctx.friendlyName ? mctx.friendlyName : "");
-          $("#welcome-container").text("Welcome" + name + "!");
-          $("#logout-container").css("display", "block");
-          //$("#menu-container").populateNavbar();
-
-          $("#logout").click(function() {
-            $("#logout").logout();
-          });
-
-          $("#main_controls").submit(function() {
-            //Validate!
-            return false;
-          });
-
-          $("#errorlog").setErrorLog();
+          
         });
       })
 
@@ -66,10 +49,12 @@
 
     <div id="content-wrap">
       <div id="content">
+        <div class="widget" id="sidebar-show">&gt;</div>
         <div id="sidebar">
           <div class="widget">
+            <div id="sidebar-hide">&lt;</div>
             <div class="title">Navigation menu</div>
-            <div class="nav-menu">
+            <div id="sidebar-menu" class="nav-menu">
               <ul>
                 <li><a href="index.html"><span>Home</span></a></li>
                 <li><a href="control.html"><span>Experiment control</span></a></li>

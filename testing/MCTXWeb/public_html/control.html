@@ -15,25 +15,10 @@
     <script type="text/javascript">
       runBeforeLoad().done(function () {
         $(document).ready(function () {
-         //Show the content!
-         $("#content").css("display", "block");
-         //Set the welcome bar
-         var name = " " + (mctx.friendlyName ? mctx.friendlyName : "");
-         $("#welcome-container").text("Welcome"+ name + "!");
-         $("#logout-container").css("display", "block");
-         //$("#menu-container").populateNavbar();
-
-         $("#logout").click(function () {
-           $("#logout").logout();
-         });
-
          $("#main_controls").submit(function () {
            //Validate!
            return false;
          });
-
-         $("#errorlog").setErrorLog();
-         $("#strain-graphs").setStrainGraphs();
        });       
       })
 
@@ -79,32 +64,46 @@
       </noscript>
 
       <div id="content">
+        <div class="widget" id="sidebar-show">&gt;</div>
         <div id="sidebar">
           <div class="widget">
+            <div id="sidebar-hide">&lt;</div>
             <div class="title">Navigation menu</div>
-            <div class="nav-menu">
-            <ul>
-               <li><a href="index.html"><span>Home</span></a></li>
-               <li><a href="control.html"><span>Experiment control</span></a></li>
-               <li><a href="graph.html"><span>Experiment graphs</span></a></li>
-               <li><a href="data.html"><span>Experiment data</span></a></li>
-               <li><a href="pintest.html"><span>Pin debugging</span></a></li>
-               <li class="last"><a href="help.html"><span>Help</span></a></li>
-            </ul>
+            <div id="sidebar-menu" class="nav-menu">
+              <ul>
+                <li><a href="index.html"><span>Home</span></a></li>
+                <li><a href="control.html"><span>Experiment control</span></a></li>
+                <li><a href="graph.html"><span>Experiment graphs</span></a></li>
+                <li><a href="data.html"><span>Experiment data</span></a></li>
+                <li><a href="pintest.html"><span>Pin debugging</span></a></li>
+                <li class="last"><a href="help.html"><span>Help</span></a></li>
+              </ul>
             </div>
-          </div>
-          <div class="widget">
-            <div class="title">Help</div>
-
           </div>
         </div>
         <!-- End sidebar -->
 
         <div id="main">
           <div class="widget">
-            <div class="title">Controls</div>
-            <b>Main controls</b>
-            <form id="main_controls" action="">
+            <div class="title">Experiment Status</div>
+            <table class="horizontal">
+              <tr>
+                <th>Experiment state</th>
+                <td id="state-exp">No experiment running.</td>
+              </tr>
+              <tr>
+                <th>Software status</th>
+                <td id="state-software"></td>
+              </tr>
+            </table>
+            <div class="bold">Error and warning messages</div>
+            <textarea id="errorlog" wrap="off" rows="4" cols="30" readonly>
+            </textarea>
+          </div>
+          
+          <div class="widget">
+            <div class="bold">Main controls</div>
+            <form id="main-controls" action="">
               <table>
                 <tr>
                   <td>Experiment name</td>
@@ -128,14 +127,32 @@
                 </tr>
               </table>
             </form>
-            <b>Error and warning messages</b><br>
-            <textarea id="errorlog" wrap="off" rows="4" cols="30" readonly></textarea>
-          </div>
-          <div class="widget">
-            <div class="title">Strain gauges</div>
-            <div id="strain-graphs" class="graph">
-              <!-- Strain graph placeholder -->
-            </div>
+            
+            <div class="bold">Pressure controls</div>
+            <form id="pressure-controls" action="">
+              <table>
+                <tr>
+                  <td>Experiment name</td>
+                  <td><input name="experiment_name" type="text"></td>
+                </tr>
+                <tr>
+                  <td>Experiment mode</td>
+                  <td>
+                    <input name="experiment_type" value="strain" type="radio"> Strain it
+                    <input name="experiment_type" value="explode" type="radio"> Explode it
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                  </td>
+                  <td align="right">
+                    <input type="submit" value="Start">
+                    <input type="submit" value="Pause">
+                    <input type="submit" value="Stop">
+                  </td>
+                </tr>
+              </table>
+            </form>
           </div>
         </div>
         <!-- End main content -->
