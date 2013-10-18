@@ -5231,3 +5231,117 @@
 17:20 -!- MctxBot [~twang@220-253-133-241.dyn.iinet.net.au] has quit ["leaving"]
 17:22 -!- MctxBot [~twang@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
 22:38 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Log closed Fri Oct 18 11:45:55 2013
+--- Log opened Fri Oct 18 11:46:19 2013
+11:46 -!- sam_moor1 [matches@motsugo.ucc.gu.uwa.edu.au] has joined #mctxuwa_softdev
+11:46 -!- Irssi: #mctxuwa_softdev: Total of 3 nicks [0 ops, 0 halfops, 0 voices, 3 normal]
+11:46 -!- Irssi: Join to #mctxuwa_softdev was synced in 8 secs
+11:56 -!- sam_moore [matches@motsugo.ucc.gu.uwa.edu.au] has quit [Ping timeout]
+16:03 -!- You're now known as sam_moore
+16:03 -!- Irssi: #mctxuwa_softdev: Total of 2 nicks [0 ops, 0 halfops, 0 voices, 2 normal]
+16:03 < sam_moore> MctxBot: Tell your master that snoopy is broken
+17:41 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
+17:42 < jtanx> woops
+17:42 < jtanx> I probably screwed up fstab on the sd card when trying to enable swap space
+17:42 < jtanx> sorry about not replying earlier
+19:42 < sam_moore> Haha
+19:42 < jtanx> ~.~
+19:42 < sam_moore> We used ubuntu to test the pressure sensor and microphone
+19:42 < jtanx> what were you doing with the BBB?
+19:42 < jtanx> oh 
+19:42 < jtanx> how did that go?
+19:43 < sam_moore> Alright, flot and/or JavaScript suck at large numbers of points though
+19:43 < jtanx> yeah
+19:43 < jtanx> did you finally get your hands on a voltage divider or something
+19:44 < jtanx> or hsa the electronics team finished their stuff
+19:44 < sam_moore> We just made one, but electronics does have one
+19:45 < sam_moore> "We have 2 boards and 2 of them don't work"
+19:45 < sam_moore> GPIO can't trigger the relays it would seem
+19:45 < jtanx> well
+19:46 < jtanx> what are they going to do about that
+19:46 < sam_moore> Although we only tested 2 outputs, apparently some are 4mA some are 6mA and the thing needs 5mA
+19:47 < sam_moore> I don't know? Try every single pin, actually measure the current drawn by the relay switch
+19:47 < sam_moore> Replace the transistors on the relay
+19:47 < jtanx> haha
+19:47 < jtanx> that sounds so dodge
+19:47 < sam_moore> We tried 2 GPIO pins at once :S
+19:47 < jtanx> in parallel?
+19:47 < sam_moore> Didn't work
+19:48 < sam_moore> Yeah
+19:48 < jtanx> hahaha
+19:48 < sam_moore> But I think that might cause one to draw current from the other
+19:48 < jtanx> hmm
+19:49 < sam_moore> Need to actually look at the GPIO circuit diagram to work out what that would do
+19:49 < sam_moore> Our software can sample more than fast enough for the microphone
+19:50 < jtanx> that's cool
+19:50 < jtanx> could you see it on the graph
+19:50 < sam_moore> But plotting it in flot crashes the browser
+19:50 < sam_moore> Sort of
+19:50 < sam_moore> Had to change start_time to get all the points
+19:51 < jtanx> Flot doesn't sound too reliable
+19:51 < sam_moore> It crashes after ~1s
+19:51 < sam_moore> min
+19:51 < sam_moore> not second
+19:51 < jtanx> But can we just cut down on the number of data points
+19:51 < jtanx> how many datapoints is that after 1 min
+19:51 < sam_moore> It's obviously incredibly inefficient
+19:52 < sam_moore> I will see if averaging points helps flot
+19:52 < sam_moore> Or if it's actually JavaScript not liking really big arrays
+19:52 < jtanx> yeah
+19:52 < jtanx> I think having large arrays consumes an enormous amount of memory in js, for some reason
+19:53 < sam_moore> Dammit
+19:54 < sam_moore> We could make a python GUI using requests and pyplot :P
+19:54 < jtanx> -.-
+19:54 < jtanx> wouldn't it be worse, trying to plot it on the beaglebone
+19:55 < jtanx> given that you're using a full blown computer to plot it
+19:55 < sam_moore> No, you still plot it on the client
+19:55 < jtanx> How does that work
+19:56 < jtanx> You'd have to render it on the BBB, no?
+19:56 < sam_moore> Nope; get data the same way through HTTP and plot on the client
+19:56 < jtanx> what's the difference?
+19:57 < sam_moore> The BBB doesn't gave a problem transferring data points
+19:58 < sam_moore> The browser ie JavaScript sucks at coping with them
+19:58 < jtanx> Yeah, but if you say plot on the client, how do you plot on the client?
+19:58 < jtanx> ohhhhhhh
+19:58 < jtanx> Right I understand now
+19:59 < sam_moore> Python has modules for plotting
+19:59 < sam_moore> And modules for HTTP requests
+19:59 < jtanx> You're saying instead of a web interface a python gui instead
+19:59 < sam_moore> Maybe
+19:59 < jtanx> ??
+19:59 < sam_moore> I can at least do a proof of concept
+19:59 < jtanx> I'm lost 
+20:00 < sam_moore> But we probably shouldn't redesign the entire GUI...
+20:00 < jtanx> Hey, I'm all for it if it can be done
+20:20 < jtanx> Now, to do this control page
+20:20 < jtanx> A username can only contain alphanumeric characters
+20:21 < jtanx> right?
+20:21 < sam_moore> Yep
+20:21 < jtanx> okay
+20:21 < jtanx> was just thinking if someone had say .. in their username...
+20:25 < sam_moore> You can allow other characters
+20:25 < jtanx> well as in
+20:25 < sam_moore> Not '=' though
+20:25 < jtanx> having .. in their username would move you up a directory
+20:26 < sam_moore> Ah, cunning
+20:26 < sam_moore> Thwarted by general paranoia though
+20:26 < jtanx> :P
+20:26 < sam_moore> No stupid characters in usernames
+20:27 < sam_moore> Definitely no '/' allowed
+20:27 < jtanx> hahaha
+20:27 < jtanx> I think an alphanumeric limitation is good
+20:27 < jtanx> until the university stipulates having random characters in usernames
+20:28 < sam_moore> You forget that if the university does that they will have to cope with the same kind of bullshit
+20:29 < jtanx> Yeah, true that
+21:42 < sam_moore> I pushed a python plotting thing, but I don't really think we should be switching to it at this stage.
+21:42 < jtanx> Okay
+21:42 < sam_moore> I'll try tweak the flot GUI tomorrow to make it less shit
+21:43 < jtanx> hahaha
+21:58 < jtanx> urgh
+21:58 < jtanx> barely started on the control page
+21:59 < jtanx> I guess I'll have to complete it tomorrow
+21:59 < jtanx> even though we're probably (maybe) going with james gui
+22:00 < jtanx> I've removed the width restriction 
+22:00 < jtanx> and you can hide the navigation bar
+22:00 < jtanx> for more space
+22:11 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
