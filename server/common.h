@@ -46,6 +46,7 @@
 
 
 extern bool PathExists(const char * path);
+extern bool DirExists(const char * path);
 
 
 

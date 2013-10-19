@@ -118,10 +118,10 @@ tr.pass {
   font-weight: inherit;
 }
 
-tr.fail {
+tr.fail, tr.fail .fail {
   color: #000;
   background-color: #E30909;
-  font-weight: bold
+  font-weight: inherit;
 }
 
 table.centre {
@@ -434,4 +434,13 @@ form.controls {
 
 #experiment-stop {
   padding: 0.2em 0.4em;
+  display: none;
+}
+
+#start-widget {
+  display: none;
+}
+
+#pressure-widget {
+  display: none;
 }

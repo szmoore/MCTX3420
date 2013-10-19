@@ -25,8 +25,12 @@ mctx.menu = [
     {'text' : 'Help', href : mctx.location + 'help.html'}
 ];
 
-mctx.statusCodes = {
-    STATUS_OK : 1
+mctx.status = {
+    OK : 1,
+    ERROR : -1,
+    UNAUTHORIZED : -2,
+    NOTRUNNING : -3,
+    ALREADYEXISTS : -4
 };
 
 mctx.statusCodesDescription = {
@@ -53,6 +57,9 @@ mctx.actuators = {
     2 : {name : "Solenoid 3"},
     3 : {name : "Pressure regulator"}
 };
+
+mctx.actuator = {};
+mctx.actuator.pressure_regulator = 0;
 
 mctx.strain_gauges = {};
 mctx.strain_gauges.ids = [0, 1, 2, 3];
@@ -294,6 +301,14 @@ $.fn.setErrorLog = function () {
 
     updater();
     return this;
+};
+
+$.fn.checkStatus = function(data) {
+  if (data.status !== mctx.status.OK) {
+    $(this).text(data.description).removeClass("pass").addClass("fail");
+    return false;
+  }
+  return true;
 };
 
 $(document).ready(function () {

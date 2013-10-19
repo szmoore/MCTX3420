@@ -106,19 +106,19 @@ $.fn.setDevices = function() {
   });
 };
 
-function setGraphStatus(on, failText) {
+function setGraphStatus(on, failText, keep) {
   if (on) {
     mctx.graph.running = true;
     $("#status-text").html("&nbsp;");
-    $("#graph-run").text("Pause");
+    $("#graph-run").prop("value", "Pause");
   } else {
     mctx.graph.running = false;
     if (failText) {
       $("#status-text").text(failText).addClass("fail");
-    } else {
+    } else if (!keep) {
       $("#status-text").text("Graph stopped").removeClass("fail");
     }
-    $("#graph-run").text("Run");
+    $("#graph-run").prop("value", "Run");
   }
 }
 
@@ -155,6 +155,11 @@ function graphUpdater() {
         responses.push($.ajax({url : urls[val.urltype], data : parameters})
         .done(function(json) {
           //alert("Hi from " + json.name);
+          if (!$("#status-text").checkStatus(json)) {
+            setGraphStatus(false, null, true); //Don't reset text, checkstatus just set it.
+            return;
+          }
+          
           var dev = val.data;
           for (var i = 0; i < json.data.length; ++i) {
             if (dev.length <= 0 || json.data[i][0] > dev[dev.length-1][0]) {
@@ -169,29 +174,29 @@ function graphUpdater() {
 
     //... When the response is received, then() will happen (I think?)
     $.when.apply(this, responses).then(function () {
-      var plot_data = [];
-      yaxis.each(function() {
-        //alert("Add " + $(this).val() + " to plot");
-        if (xaxis.attr("alt") === "time") {
-          //alert("Against time");
-          plot_data.push(devices[$(this).attr("alt")].data);
-        } else {
-          var result = []
-          dataMerge(devices[xaxis.attr("alt")].data, 
-                    devices[$(this).attr("alt")].data, result);
-          plot_data.push(result);
-        }
-      });
-      
-      //$.plot("#graph", plot_data);
-      if (mctx.graph.chart !== null) {
-        mctx.graph.chart.setData(plot_data);
-        mctx.graph.chart.setupGrid(); 
-        mctx.graph.chart.draw();
-      } else {
-        mctx.graph.chart = $.plot("#graph", plot_data);
-      }
       if (mctx.graph.running) {
+        var plot_data = [];
+        
+        yaxis.each(function() {
+          //alert("Add " + $(this).val() + " to plot");
+          if (xaxis.attr("alt") === "time") {
+            //alert("Against time");
+            plot_data.push(devices[$(this).attr("alt")].data);
+          } else {
+            var result = []
+            dataMerge(devices[xaxis.attr("alt")].data, 
+                      devices[$(this).attr("alt")].data, result);
+            plot_data.push(result);
+          }
+        });
+        
+        if (mctx.graph.chart !== null) {
+          mctx.graph.chart.setData(plot_data);
+          mctx.graph.chart.setupGrid(); 
+          mctx.graph.chart.draw();
+        } else {
+          mctx.graph.chart = $.plot("#graph", plot_data);
+        }
         mctx.graph.timer = setTimeout(updater, 1000);
       }
     }, function () {
