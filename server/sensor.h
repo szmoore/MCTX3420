@@ -59,6 +59,10 @@ typedef struct
 	struct timespec sample_time;
 	/** Number of averages per sample **/
 	int averages;
+	/** Current data **/
+	DataPoint current_data;
+	/** Number of points read so far before applying average **/
+	int num_read;
 
 
 	
