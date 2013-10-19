@@ -58,6 +58,9 @@ mctx.actuators = {
     3 : {name : "Pressure regulator"}
 };
 
+mctx.actuator = {};
+mctx.actuator.pressure_regulator = 0;
+
 mctx.strain_gauges = {};
 mctx.strain_gauges.ids = [0, 1, 2, 3];
 mctx.strain_gauges.time_limit = 20;
@@ -302,7 +305,7 @@ $.fn.setErrorLog = function () {
 
 $.fn.checkStatus = function(data) {
   if (data.status !== mctx.status.OK) {
-    $(this).text(data.description).addClass("fail");
+    $(this).text(data.description).removeClass("pass").addClass("fail");
     return false;
   }
   return true;

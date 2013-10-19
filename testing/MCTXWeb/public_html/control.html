@@ -16,7 +16,38 @@
     <script type="text/javascript">
       runBeforeLoad().done(function () {
         $(document).ready(function () {
-          $("#state-exp").initialiseControls();
+          $("form").submit(function () { //Prevent form submit globally
+            return false;
+          })
+          
+          //Set the status updated
+          $("#state-exp").setStatusUpdater();
+          
+          //Set the logic for the start controls
+          $("#start-controls").submit(function () {
+            var start = $("#start-controls input[type='button']");
+            var force = $("#start-controls input[name='start_force']");
+            
+            $(this).startExperiment(start, $("#experiment_name").val(), 
+                      force.is(":checked"), $("#start-result"));
+            force.prop("checked", false);
+          });
+          
+          //Set the logic for the stop button
+          $("#experiment-stop").click(function () {
+            $(this).stopExperiment($("#stop-status"));
+          });
+          
+          //Set the logic for the pressure controls
+          $("#pressure-controls").submit(function () {
+            var pressure = {
+              set : $("#pressure-set").val(),
+              step : $("#pressure-stepsize").val(),
+              wait : $("#pressure-stepwait").val(),
+              count : $("#pressure-stepcount").val()
+            };   
+            $(this).setPressure(pressure, $("#pressure-result"));
+          });
        });       
       }).fail(function () {
         $(document).ready(function () {
@@ -96,6 +127,9 @@
                 </td>
               </tr>
             </table>
+            <div id="stop-status">
+              &nbsp;
+            </div>
             
             <div class="sub-title">Error and warning messages</div>
             <textarea id="errorlog" wrap="off" rows="4" cols="30" readonly>
@@ -108,13 +142,16 @@
               <p>
                 <label for="experiment_name">Experiment name</label>
                 <input id="experiment_name" type="text">
+                
+                <label for="start_force">Overwrite existing</label>
+                <input type="checkbox" name="start_force" id="start_force">
               </p>
               <p id="start-result">
                 &nbsp;
               </p>
               <p class="centre">
-                <input type="button" name="start_strain" value="Strain test">
-                <input type="button" name="start_strain" value="Explode test">
+                <input type="submit" name="start_strain" value="Strain test">
+                <input type="submit" name="start_explode" value="Explode test">                
               </p>
             </form>
           </div>

@@ -156,7 +156,7 @@ function graphUpdater() {
         .done(function(json) {
           //alert("Hi from " + json.name);
           if (!$("#status-text").checkStatus(json)) {
-            setGraphStatus(false, null, true);
+            setGraphStatus(false, null, true); //Don't reset text, checkstatus just set it.
             return;
           }
           
