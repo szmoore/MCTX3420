@@ -134,7 +134,7 @@ void Control_Handler(FCGIContext *context, char *params) {
 		return;
 	}
 
-	if (strcmp(g_controls.user_name, context->user_name) != 0)
+	if ((*g_controls.user_name) != '\0' && strcmp(g_controls.user_name, context->user_name) != 0)
 	{
 		if (context->user_type != USER_ADMIN) {
 			FCGI_RejectJSON(context, "Another user has an experiment in progress.");
