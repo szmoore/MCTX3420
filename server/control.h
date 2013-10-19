@@ -14,9 +14,9 @@ typedef enum ControlModes {
 } ControlModes;
 
 /** Invalid filename characters **/
-#define INVALID_CHARACTERS "\"*/:<>?\\|"
+#define INVALID_CHARACTERS "\"*/:<>?\\|. "
 /** The same as INVALID_CHARACTERS, except escaped for use in JSON strings **/
-#define INVALID_CHARACTERS_JSON "\\\"*/:<>?\\\\|"
+#define INVALID_CHARACTERS_JSON "\\\"*/:<>?\\\\|. "
 
 extern void Control_Handler(FCGIContext *context, char *params);
 extern const char* Control_SetMode(ControlModes desired_mode, void * arg);

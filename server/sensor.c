@@ -120,11 +120,15 @@ void Sensor_SetMode(Sensor * s, ControlModes mode, void * arg)
 			{
 				// Set filename
 				char filename[BUFSIZ];
-				const char *experiment_name = (const char*) arg;
+				const char *experiment_path = (const char*) arg;
+				int ret;
 
-				if (snprintf(filename, BUFSIZ, "%s_%d", experiment_name, s->id) >= BUFSIZ)
+				ret = snprintf(filename, BUFSIZ, "%s/sensor_%d", experiment_path, s->id);
+
+				if (ret >= BUFSIZ) 
 				{
-					Fatal("Experiment name \"%s\" too long (>%d)", experiment_name, BUFSIZ);
+					Fatal("Experiment path \"%s\" too long (%d, limit %d)",
+							experiment_path, ret, BUFSIZ);
 				}
 
 				Log(LOGDEBUG, "Sensor %d with DataFile \"%s\"", s->id, filename);
@@ -291,7 +295,6 @@ void Sensor_Handler(FCGIContext *context, char * params)
 	struct timeval now;
 	gettimeofday(&now, NULL);
 	double current_time = TIMEVAL_DIFF(now, *Control_GetStartTime());
-
 	int id = 0;
 	const char * name = "";
 	double start_time = 0;
