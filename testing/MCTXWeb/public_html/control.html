@@ -16,8 +16,13 @@
     <script type="text/javascript">
       runBeforeLoad().done(function () {
         $(document).ready(function () {
+          $("#state-exp").initialiseControls();
        });       
-      })
+      }).fail(function () {
+        $(document).ready(function () {
+         $("#state-exp").text("Connection failure").parent().addClass("fail");
+       });  
+      });
     </script>
   </head>
   
@@ -85,7 +90,7 @@
             <table class="horizontal medium">
               <tr id="state-exp-r">
                 <th>Experiment state</th>
-                <td id="state-exp">sdgfsdsses</td>
+                <td id="state-exp"></td>
                 <td style="text-align: right;">
                   <input id="experiment-stop" type="button" value="Stop">
                 </td>

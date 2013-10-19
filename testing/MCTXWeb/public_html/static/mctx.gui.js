@@ -25,8 +25,12 @@ mctx.menu = [
     {'text' : 'Help', href : mctx.location + 'help.html'}
 ];
 
-mctx.statusCodes = {
-    STATUS_OK : 1
+mctx.status = {
+    OK : 1,
+    ERROR : -1,
+    UNAUTHORIZED : -2,
+    NOTRUNNING : -3,
+    ALREADYEXISTS : -4
 };
 
 mctx.statusCodesDescription = {
@@ -294,6 +298,14 @@ $.fn.setErrorLog = function () {
 
     updater();
     return this;
+};
+
+$.fn.checkStatus = function(data) {
+  if (data.status !== mctx.status.OK) {
+    $(this).text(data.description).addClass("fail");
+    return false;
+  }
+  return true;
 };
 
 $(document).ready(function () {
