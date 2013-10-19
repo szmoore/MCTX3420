@@ -169,9 +169,12 @@ void * Actuator_Loop(void * arg)
 
 		Actuator_SetValue(a, a->control.start, true);
 		// Currently does discrete steps after specified time intervals
+
+		struct timespec wait;
+		DOUBLE_TO_TIMEVAL(a->control.stepsize, &wait);
 		while (!a->control_changed && a->control.steps > 0 && a->activated)
 		{
-			usleep(1e6*(a->control.stepwait));
+			clock_nanosleep(CLOCK_MONOTONIC, 0, &wait, NULL);
 			a->control.start += a->control.stepsize;
 			Actuator_SetValue(a, a->control.start, true);
 			
@@ -179,7 +182,7 @@ void * Actuator_Loop(void * arg)
 		}
 		if (a->control_changed)
 			continue;
-		usleep(1e6*(a->control.stepwait));
+		clock_nanosleep(CLOCK_MONOTONIC, 0, &wait, NULL);
 
 		//TODO:
 		// Note that although this loop has a sleep in it which would seem to make it hard to enforce urgent shutdowns,
@@ -229,8 +232,8 @@ void Actuator_SetValue(Actuator * a, double value, bool record)
 	}
 
 	// Set time stamp
-	struct timeval t;
-	gettimeofday(&t, NULL);
+	struct timespec t;
+	clock_gettime(CLOCK_MONOTONIC, &t);
 	DataPoint d = {TIMEVAL_DIFF(t, *Control_GetStartTime()), a->last_setting.value};
 	// Record value change
 	if (record)
@@ -294,8 +297,8 @@ void Actuator_EndResponse(FCGIContext * context, Actuator * a, DataFormat format
  */
 void Actuator_Handler(FCGIContext * context, char * params)
 {
-	struct timeval now;
-	gettimeofday(&now, NULL);
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
 	double current_time = TIMEVAL_DIFF(now, *Control_GetStartTime());
 	int id = 0;
 	char * name = "";

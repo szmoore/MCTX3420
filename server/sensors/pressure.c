@@ -46,7 +46,7 @@ double Pressure_Callibrate(int id, int adc)
 		case PRES_HIGH1:
 		{
 			static const double Vs = 5e3; // In mVs
-			static const double Pmin = 0.0;
+			static const double Pmin = 0.0 * PSI_TO_KPA;
 			static const double Pmax = 150.0 * PSI_TO_KPA;
 			double Vout = ADC_TO_MVOLTS(adc);
 			return ((Vout - 0.1*Vs)/(0.8*Vs))*(Pmax - Pmin) + Pmin;
@@ -93,9 +93,10 @@ bool Pressure_Read(int id, double * value)
 	//static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 	//pthread_mutex_lock(&mutex);
 	bool result = false;
-	if (ADC_Read(Pressure_GetADC(id), value))
+	int adc = 0;
+	if (ADC_Read(Pressure_GetADC(id), &adc))
 	{
-		*value = Pressure_Callibrate(id, *value);
+		*value = Pressure_Callibrate(id, adc);
 		result = true;
 	}
 	//pthread_mutex_unlock(&mutex);

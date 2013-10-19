@@ -56,7 +56,7 @@ typedef struct
 	/** Human readable name of the sensor **/
 	const char * name;
 	/** Sampling rate **/
-	int sample_us;
+	struct timespec sample_time;
 	/** Number of averages per sample **/
 	int averages;
 

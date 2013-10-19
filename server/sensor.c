@@ -47,7 +47,8 @@ int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn
 	s->init = init; // Set init function
 
 	// Start by averaging values taken over a second
-	s->sample_us = 1e6;
+	s->sample_time.tv_sec = 1;
+	s->sample_time.tv_nsec = 0;
 	s->averages = 1;
 
 	// Set sanity function
@@ -75,9 +76,9 @@ void Sensor_Init()
 {
 	Sensor_Add("cpu_stime", RESOURCE_CPU_SYS, Resource_Read, NULL, NULL, NULL);	
 	Sensor_Add("cpu_utime", RESOURCE_CPU_USER, Resource_Read, NULL, NULL, NULL);	
-	Sensor_Add("pressure_high0", PRES_HIGH0, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
-	Sensor_Add("pressure_high1", PRES_HIGH1, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
-	Sensor_Add("pressure_low0", PRES_LOW0, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
+	//Sensor_Add("pressure_high0", PRES_HIGH0, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
+	//Sensor_Add("pressure_high1", PRES_HIGH1, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
+	//Sensor_Add("pressure_low0", PRES_LOW0, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
 	//Sensor_Add("../testing/count.py", 0, Piped_Read, Piped_Init, Piped_Cleanup, 1e50,-1e50,1e50,-1e50);
 	//Sensor_Add("strain0", STRAIN0, Strain_Read, Strain_Init, 5000,0,5000,0);
 	//Sensor_Add("strain1", STRAIN1, Strain_Read, Strain_Init, 5000,0,5000,0);
@@ -199,8 +200,8 @@ void * Sensor_Loop(void * arg)
 		d.value = 0;
 		bool success = s->read(s->user_id, &(d.value));
 
-		struct timeval t;
-		gettimeofday(&t, NULL);
+		struct timespec t;
+		clock_gettime(CLOCK_MONOTONIC, &t);
 		d.time_stamp = TIMEVAL_DIFF(t, *Control_GetStartTime());	
 		
 		if (success)
@@ -217,7 +218,9 @@ void * Sensor_Loop(void * arg)
 		else
 			Log(LOGWARN, "Failed to read sensor %s (%d,%d)", s->name, s->id,s->user_id);
 
-		usleep(s->sample_us);
+
+		clock_nanosleep(CLOCK_MONOTONIC, 0, &(s->sample_time), NULL);
+		
 	}
 	
 	// Needed to keep pthreads happy
@@ -288,8 +291,8 @@ void Sensor_EndResponse(FCGIContext * context, Sensor * s, DataFormat format)
  */
 void Sensor_Handler(FCGIContext *context, char * params)
 {
-	struct timeval now;
-	gettimeofday(&now, NULL);
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
 	double current_time = TIMEVAL_DIFF(now, *Control_GetStartTime());
 
 	int id = 0;
@@ -364,7 +367,7 @@ void Sensor_Handler(FCGIContext *context, char * params)
 			FCGI_RejectJSON(context, "Negative sampling speed!");
 			return;
 		}		
-		s->sample_us = 1e6*sample_s;
+		DOUBLE_TO_TIMEVAL(sample_s, &(s->sample_time));
 	}
 	
 	

@@ -24,6 +24,6 @@ extern ControlModes Control_GetMode();
 extern const char * Control_GetModeName();
 //extern bool Control_Lock();
 //extern void Control_Unlock();
-extern const struct timeval* Control_GetStartTime();
+extern const struct timespec* Control_GetStartTime();
 
 #endif

@@ -33,7 +33,7 @@ static int Strain_To_GPIO(StrainID id)
 		default:
 			Fatal("Unknown StrainID %d", id);
 			return -1; // Should never happen
-	}
+  }
 }
 
 /**

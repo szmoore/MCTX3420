@@ -17,10 +17,10 @@ bool Resource_Read(int id, double * value)
 	switch (id)
 	{
 		case RESOURCE_CPU_USER:
-			*value = TIMEVAL_TO_DOUBLE(usage.ru_utime);
+			*value = usage.ru_utime.tv_sec + 1e-6*usage.ru_utime.tv_usec;
 			break;
 		case RESOURCE_CPU_SYS:
-			*value = TIMEVAL_TO_DOUBLE(usage.ru_stime);
+			*value = usage.ru_stime.tv_sec + 1e-6*usage.ru_stime.tv_usec;
 			break;
 		default:
 			Log(LOGWARN, "Unknown id %d", id);

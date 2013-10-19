@@ -12,7 +12,7 @@
 typedef struct ControlData {
 	ControlModes current_mode;
 	pthread_mutex_t mutex;
-	struct timeval start_time;
+	struct timespec start_time;
 	char user_name[31]; // The user who owns the currently running experiment
 } ControlData;
 
@@ -201,7 +201,7 @@ const char* Control_SetMode(ControlModes desired_mode, void * arg)
 					FILE *fp = fopen((const char*) arg, "a");
 					if (fp) {
 						fclose(fp);
-						gettimeofday(&(g_controls.start_time), NULL);
+						clock_gettime(CLOCK_MONOTONIC, &(g_controls.start_time));
 					} else
 						ret = "Cannot open experiment name marker";
 				}
@@ -258,6 +258,6 @@ const char * Control_GetModeName() {
  * Gets the start time for the current experiment
  * @return the start time
  */
-const struct timeval* Control_GetStartTime() {
+const struct timespec * Control_GetStartTime() {
 	return &g_controls.start_time;
 }

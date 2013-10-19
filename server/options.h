@@ -15,9 +15,9 @@ typedef struct
 	/** Determines at what level log messages are shown **/
 	int verbosity;
 	/** Time at which program begins to run **/
-	struct timeval start_time;
+	struct timespec start_time;
 	/** Time at which program exits **/
-	struct timeval end_time;
+	struct timespec end_time;
 
 	/** Whether or not to enable the pin_test module **/
 	bool enable_pin;

@@ -46,9 +46,14 @@ static void IdentifyHandler(FCGIContext *context, char *params) {
 	FCGI_BeginJSON(context, STATUS_OK);
 	FCGI_JSONPair("description", "MCTX3420 Server API (2013)");
 	FCGI_JSONPair("build_date", __DATE__ " " __TIME__);
+	struct timespec t;
+	t.tv_sec = 0; t.tv_nsec = 0;
+	clock_getres(CLOCK_MONOTONIC, &t);
+	FCGI_JSONDouble("clock_getres", TIMEVAL_TO_DOUBLE(t));
 	FCGI_JSONLong("api_version", API_VERSION);
 	FCGI_JSONBool("logged_in", has_control);
 	FCGI_JSONPair("user_name", has_control ? context->user_name : "");
+	
 
 	//Sensor and actuator information
 	if (ident_sensors) {
@@ -310,8 +315,8 @@ void FCGI_BeginJSON(FCGIContext *context, StatusCodes status_code)
 	printf("\t\"module\" : \"%s\"", context->current_module);
 	FCGI_JSONLong("status", status_code);
 	//Time and running statistics
-	struct timeval now;
-	gettimeofday(&now, NULL);
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
 	FCGI_JSONDouble("start_time", TIMEVAL_TO_DOUBLE(g_options.start_time));
 	FCGI_JSONDouble("current_time", TIMEVAL_TO_DOUBLE(now));
 	FCGI_JSONDouble("running_time", TIMEVAL_DIFF(now, g_options.start_time));
@@ -535,8 +540,8 @@ void * FCGI_RequestLoop (void *data)
 		
 		if (module_handler) 
 		{
-			if (module_handler != Login_Handler && module_handler != IdentifyHandler && module_handler)
-			//if (false) // Testing
+			//if (module_handler != Login_Handler && module_handler != IdentifyHandler && module_handler)
+			if (false) // Testing
 			{
 				if (!FCGI_HasControl(&context, cookie))
 				{

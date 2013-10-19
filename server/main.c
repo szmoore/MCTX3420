@@ -37,7 +37,7 @@ void ParseArguments(int argc, char ** argv)
 	if (getcwd(g_options.root_dir, sizeof(g_options.root_dir)) == NULL)
 		Fatal("Couldn't get current working directory - %s", strerror(errno));
 
-	gettimeofday(&(g_options.start_time), NULL); // Start time
+	clock_gettime(CLOCK_MONOTONIC, &(g_options.start_time)); // Start time
 
 
 	g_options.auth_method = AUTH_NONE;  // Don't use authentication
@@ -133,19 +133,19 @@ int main(int argc, char ** argv)
 	Pin_Init();
 	
 	// Try and start things
-	/*
+	
 	const char *ret;
 	if ((ret = Control_SetMode(CONTROL_START, "test")) != NULL)
 		Fatal("Control_SetMode failed with '%s'", ret);
-	*/
+	
 
 	// run request thread in the main thread
 	FCGI_RequestLoop(NULL);
 
-	/*
+	
 	if ((ret = Control_SetMode(CONTROL_STOP, "test")) != NULL)
 		Fatal("Control_SetMode failed with '%s'", ret);
-	*/
+	
 	//Sensor_StopAll();
 	//Actuator_StopAll();
 
