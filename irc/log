@@ -5345,3 +5345,188 @@
 22:00 < jtanx> and you can hide the navigation bar
 22:00 < jtanx> for more space
 22:11 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Sat Oct 19 2013
+07:59 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has joined #mctxuwa_softdev
+10:39 < jtanx> blegh, now to start on the js for the control page
+11:10 < jtanx> what would you say if instead of all this chdir business
+11:10 < jtanx> one of the initial options to start the software is to specify where you want experiments to be held
+11:11 < jtanx> e.g /usr/share/experiments or whatever
+11:11 < jtanx> then you build the path based on the username
+11:25 < sam_moore> That sounds good
+11:26 < jtanx> Okay, I'll try to do that then
+14:37 < sam_moore> There's some kind of error in mctx.gui.js now
+14:37 < jtanx> what's happening?
+14:37 < sam_moore> A syntax error
+14:37 < jtanx> let me check
+14:38 < jtanx> what page is this on?
+14:38 < sam_moore> Line 272 (mctx.gui.js): outdiv[0].scrollHeight - outdiv.height()
+14:38 < sam_moore> Caused by loading graph.html
+14:38 < jtanx> ahhhh
+14:38 < jtanx> I know why
+14:38 < jtanx> maybe
+14:39 < jtanx> I decided to just to $("#errorlog").seterrorlog in mctx.gui.js
+14:39 < jtanx> so I don't have to repeat that on every page
+14:39 < sam_moore> The debug function also causes some error in chromium
+14:39 < jtanx> but if the page deosn't have an error log
+14:39 < jtanx> hahaha
+14:39 < jtanx> chromium
+14:39 < jtanx> what does it say
+14:39 < sam_moore> Didn't I tell you that something was causing iceweasel to segfault? I have no choice! :(
+14:40 < jtanx> :P
+14:40 < sam_moore> console.log.apply(this, arguments); causes an uncaught type error: illegal invocation
+14:40 < sam_moore> I shall replace it with "alert"
+14:40 < jtanx> hmm
+14:41 < jtanx> it's because chrome has a different implementation of console.log
+14:41 < jtanx> http://stackoverflow.com/questions/9521921/why-does-console-log-apply-throw-an-illegal-invocation-error
+14:41 < jtanx> for that bug
+14:41 < sam_moore> Right
+14:42 < sam_moore> Why is the call to outdiv.scrollTop on line 272 spread over 3 lines?
+14:42 < sam_moore> ... That's probably why it syntax errors
+14:42 < jtanx> nah
+14:42 < jtanx> it's legit
+14:43 < jtanx> the problem is there's no div there if you don't define #errorlog somewhere in your html
+14:43 < sam_moore> I thought the html was supposed to load any elements specific to that page
+14:44 < sam_moore> Which should avoid this sort of thing happening
+14:44 < jtanx> Yeah, except that we were repeating the same sort of load code
+14:44 < jtanx> in most of the pages
+14:44 < jtanx> I've just added a check in seterrorlog
+14:44 < jtanx> which should ignore if there's no such div anyway
+14:44 < sam_moore> ok
+14:44 < jtanx> that whole 'experiment dir' thing is ~.~
+14:44 < jtanx> I think it's mostly done
+14:45 < sam_moore> Ok
+14:45 < jtanx> so
+14:45 < jtanx> instead of having a file 'name.exp'
+14:45 < sam_moore> Yeah that was hacky
+14:45 < jtanx> it's a folder 'name.exp'
+14:45 < jtanx> all the stuff for one experiment gets stuck in that folder
+14:45 < sam_moore> That's slightly less hacky
+14:45 < jtanx> so you have something like
+14:45 < sam_moore> Makes sense
+14:46 < jtanx>  /experiments_folder/username/experiment_name.exp
+14:46 < sam_moore> Cool
+14:46 < sam_moore> If it ever is changed to use local user accounts you can just set experiments_folder to /home
+14:47 < jtanx> yeah
+14:47 < jtanx> experiments_folder is just an argument you pass to it when you start it
+14:47 < jtanx> -e experiment_folder
+14:49 < sam_moore> Found a syntax error in graph.html now
+14:49 < jtanx> just pushing stuff now
+14:49 < jtanx> but what's the errro?
+14:50 < sam_moore> There's an unterminated bracket on the runBeforeLoad.done
+14:50 < sam_moore> I think
+14:50 < jtanx> ah
+14:50 < sam_moore> So many brackets
+14:50 < jtanx> hehehe
+14:50 < jtanx> yeah you're probably right
+14:50 < jtanx> netbeans is giving angry red on the bracket
+14:51 < jtanx> do you want me to push the fix for that?
+14:51 < sam_moore> Well there are other issues with the page
+14:52 < sam_moore> No method "always" where it's being chained on the document.ready
+14:53 < jtanx> no wait
+14:53 < sam_moore> Wait what the hell is it meant to do there
+14:53 < jtanx> [14:52:32.186] ReferenceError: mctx is not defined @ http://localhost:8383/MCTXWeb/static/mctx.graph.js:8
+14:53 < jtanx> hmm
+14:53 < jtanx> I broke something 
+14:53 < sam_moore> That's not the problem I'm getting, but generally there are lots of wierd things here
+14:53 < jtanx> yeah
+14:53 < jtanx> sorry
+14:53 < jtanx> it was probably working before I pushed changes yesterday
+14:54 < sam_moore> You have runBeforeLoad.done() calling $(document).ready which does nothing, but is chained to .always which will then call $(document).ready which then loads $("#graph-controls").setDevices()
+14:55 < sam_moore> ... I think what I originally had was runBeforeLoad.always() calling $("#graph-controls").setDevices
+14:55 < sam_moore> Possibly inside a document.ready
+14:55 < sam_moore> But now mctx.gui.js is calling document.ready itself...
+14:55 < jtanx> waiit
+14:55 < jtanx> I think it's ok now
+14:56 < jtanx> it was just brackets
+14:56 < jtanx> I'll try it on my server first
+14:58 < jtanx> yeah, I see what you mean
+15:01 < jtanx> ahh
+15:01 < sam_moore> Well I fixed it enough to test stuff
+15:01 < jtanx> yeah
+15:02 < jtanx> you planning on modifying stuff?
+15:02 < sam_moore> I think it's just a matter of having runBeforeLoad().done() call $(document).ready() and then initialise stuff
+15:02 < jtanx> I'll just keep it in my repo for now
+15:03 < sam_moore> With runBeforeLoad.fail if you want to handle bad stuff
+15:03 < jtanx> I just made it
+15:03 < jtanx> runBeforeLoad().always(function() {
+15:03 < jtanx>         $(document).ready(function() {
+15:03 < jtanx>           $("#graph-controls").setDevices();
+15:03 < jtanx>         });
+15:03 < jtanx>       });
+15:03 < sam_moore> Yep, that's what I just did
+15:03 < sam_moore> You can commit it and I'll pull it
+15:03 < jtanx> okay
+15:03 < sam_moore> If you fix the console and the errorlog things as well
+15:03 < jtanx> yep
+15:03 < jtanx> pushed that too
+15:05 < sam_moore> Hmm, start_time = -1 is not actually giving the most recent second of data
+15:05 < sam_moore> That might be a server API problem
+15:05 < jtanx> hmmm
+15:05 < sam_moore> But it might also explain why things were shitting themselves so much with the fast sampling rate
+15:06 < jtanx> what is it giving?
+15:06 < sam_moore> Because the jQuery would be getting hundreds of thousands of points...
+15:07 < sam_moore> At the moment the server API is not giving any points and giving back a stupid value for start_time
+15:07 < sam_moore> I think I might have broken it when I changed all the clocks
+15:07 < jtanx> when did you change ti?
+15:07 < sam_moore> Just now
+15:07 < jtanx> ah
+15:07 < sam_moore> I'm hoping that my first assumption about the thousands of points was the case before I broke it as well :P
+15:08 < sam_moore> (ie: It was already broken before I broke it more)
+15:08 < jtanx> ahahahah
+15:08 < jtanx> I can try
+15:08 < jtanx> I still have the old version
+15:09 < jtanx> with start_time=-1 it returns nothing
+15:09 < jtanx> start_time in the response is constant
+15:11 < sam_moore> Yeah I get wierd stuff
+15:11 < sam_moore> start_time = 17889.590701
+15:12 < sam_moore> "current_time" : 18589.539255
+15:12 < jtanx> is that with clock_gettime?
+15:12 < sam_moore> "running_time" : 699.948554,
+15:12 < sam_moore> Yes
+15:13 < sam_moore> Oh herdurp
+15:13 < sam_moore> start_time in the JSON response is *not* the same as start_time the parameter to the sensor
+15:13 < jtanx> yeah
+15:13 < sam_moore> .... should probably change that
+15:13 < jtanx> start time of experiment
+15:14 < jtanx> experiment_start_time?
+15:14 < jtanx> long variable names...
+15:14 < sam_moore> I think it's actually the program start time
+15:14 < jtanx> nup
+15:14 < jtanx> experiment starttime
+15:14 < sam_moore> Alright
+15:14 < jtanx> oh
+15:14 < jtanx> actually you may be right
+15:14 < sam_moore> Haha
+15:14 < jtanx> I thought i changed it
+15:14 < jtanx> wway back when i did the control stuff
+15:15 < jtanx> initially
+15:15 < sam_moore> ControlData has a start_time variable
+15:15 < jtanx> yeah
+15:15 < sam_moore> But g_options has a start_time variable
+15:15 < sam_moore> -_-
+15:15 < jtanx> that's confusing
+15:15 < jtanx> hahaha
+15:15 < sam_moore> Yeah, what idiot designed this...
+15:15 < jtanx> ~.~`
+15:19 < sam_moore> Right, sensor values are being saved relative to Control_GetStartTime (experiment starting time)
+15:19 < sam_moore> That's fine
+15:19 < jtanx> yep
+15:19 < sam_moore> Sensor_Handler gets "current_time" from that as well
+15:19 < jtanx> Thread safety on that is dodgey
+15:19 < jtanx> I must say
+15:20 < jtanx> but it's probably fine
+15:20 < sam_moore> It's fine, clock_gettime is posix thread safe
+15:21 < sam_moore> Oh, do you mean if the experiment changes
+15:21 < jtanx> yeah
+15:21 < jtanx> the whole *Control_GetStartTime() looks dodgy too
+15:22 < sam_moore> Perhaps just a "double Control_CurrentTime()" would be better
+15:22 < sam_moore> But it works
+15:22 < jtanx> hmm
+15:24 < sam_moore> Anyway, I think start_time=-1 is not giving any data because the default sampling rate is 1s and therefore current_time - 1 is outside the data range most of the time
+15:25 < sam_moore> start_time=-3 gives a single point with the default sampling rate
+15:25 < sam_moore> Increasing the sampling rate then you appear to get the right points
+15:31 < sam_moore> I'm going to repeat my timestamp test with the current software under regular kernel and RT linux
+15:32 < sam_moore> I know we can't ever get RT linux but I want to see if it makes much of a difference
+15:46 < jtanx> okay
+15:50 < jtanx> finally... back to actually coding the control page
+22:59 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
