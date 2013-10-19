@@ -9,19 +9,15 @@
     <script type="text/javascript" src="static/jquery-1.10.1.min.js"></script>
     <script type="text/javascript" src="static/jquery.flot.min.js"></script>
     <script type="text/javascript" src="static/mctx.gui.js"></script>
+    <script type="text/javascript" src="static/mctx.control.js"></script>
     
     <link rel="stylesheet" type="text/css" href="static/style.css">
     <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
     <script type="text/javascript">
       runBeforeLoad().done(function () {
         $(document).ready(function () {
-         $("#main_controls").submit(function () {
-           //Validate!
-           return false;
-         });
        });       
       })
-
     </script>
   </head>
   
@@ -94,11 +90,6 @@
                   <input id="experiment-stop" type="button" value="Stop">
                 </td>
               </tr>
-              <tr id="state-software-r">
-                <th>Software status</th>
-                <td id="state-software"></td>
-                <td></td>
-              </tr>
             </table>
             
             <div class="sub-title">Error and warning messages</div>
@@ -111,7 +102,7 @@
             <form id="start-controls" class="nice" action="#">
               <p>
                 <label for="experiment_name">Experiment name</label>
-                <input id="experiment_name" type="text" name="experiment_name">
+                <input id="experiment_name" type="text">
               </p>
               <p id="start-result">
                 &nbsp;

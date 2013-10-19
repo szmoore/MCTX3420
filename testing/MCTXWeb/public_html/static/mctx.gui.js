@@ -71,7 +71,14 @@ function debugLog () {
                 alert(arguments[i]);
             }
         } else {
-            console.log.apply(this, arguments);
+            try {
+              console.log.apply(this, arguments);
+            } catch (e) {
+              //Chromie
+              for (var i = 0; i < arguments.length; i++) {
+                console.log(arguments[i]);
+              }
+            }
         }
     }
 }
@@ -265,11 +272,16 @@ $.fn.setErrorLog = function () {
     var url = mctx.api + "errorlog";
     var outdiv = this;
 
+    if ($(this).length <= 0) {
+      //No error log, so do nothing.
+      return;
+    }
+
     var updater = function () {
         $.ajax({url : url}).done(function (data) {
             outdiv.text(data);
             outdiv.scrollTop(
-            outdiv[0].scrollHeight - outdiv.height()
+              outdiv[0].scrollHeight - outdiv.height()
             );
             setTimeout(updater, 3000);
         }).fail(function (jqXHR) {

@@ -23,6 +23,15 @@ mctx.graph.chart = null;
  * Appends each value pair to the result
  * @returns result
  */
+/**
+ * Helper - Calculate pairs of (dependent, independent) values
+ * Given input as (time, value) pairs for dependent and independent
+ * Appends each value pair to the result
+ * @param {array[][]} dependent Dependent data to be correlated with independent
+ * @param {array[][]} independent Independent data
+ * @param {array[][]} result Storage location
+ * @returns {dataMerge.result}
+ */
 function dataMerge(dependent, independent, result) {
 	var j = 0;
 	for (var i = 0; i < dependent.length-1; ++i) {
