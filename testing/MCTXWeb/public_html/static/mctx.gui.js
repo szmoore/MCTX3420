@@ -25,8 +25,12 @@ mctx.menu = [
     {'text' : 'Help', href : mctx.location + 'help.html'}
 ];
 
-mctx.statusCodes = {
-    STATUS_OK : 1
+mctx.status = {
+    OK : 1,
+    ERROR : -1,
+    UNAUTHORIZED : -2,
+    NOTRUNNING : -3,
+    ALREADYEXISTS : -4
 };
 
 mctx.statusCodesDescription = {
@@ -54,6 +58,9 @@ mctx.actuators = {
     3 : {name : "Pressure regulator"}
 };
 
+mctx.actuator = {};
+mctx.actuator.pressure_regulator = 0;
+
 mctx.strain_gauges = {};
 mctx.strain_gauges.ids = [0, 1, 2, 3];
 mctx.strain_gauges.time_limit = 20;
@@ -71,7 +78,14 @@ function debugLog () {
                 alert(arguments[i]);
             }
         } else {
-            console.log.apply(this, arguments);
+            try {
+              console.log.apply(this, arguments);
+            } catch (e) {
+              //Chromie
+              for (var i = 0; i < arguments.length; i++) {
+                console.log(arguments[i]);
+              }
+            }
         }
     }
 }
@@ -265,11 +279,16 @@ $.fn.setErrorLog = function () {
     var url = mctx.api + "errorlog";
     var outdiv = this;
 
+    if ($(this).length <= 0) {
+      //No error log, so do nothing.
+      return;
+    }
+
     var updater = function () {
         $.ajax({url : url}).done(function (data) {
             outdiv.text(data);
             outdiv.scrollTop(
-            outdiv[0].scrollHeight - outdiv.height()
+              outdiv[0].scrollHeight - outdiv.height()
             );
             setTimeout(updater, 3000);
         }).fail(function (jqXHR) {
@@ -282,6 +301,14 @@ $.fn.setErrorLog = function () {
 
     updater();
     return this;
+};
+
+$.fn.checkStatus = function(data) {
+  if (data.status !== mctx.status.OK) {
+    $(this).text(data.description).removeClass("pass").addClass("fail");
+    return false;
+  }
+  return true;
 };
 
 $(document).ready(function () {

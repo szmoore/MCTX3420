@@ -14,10 +14,7 @@
     <link rel="stylesheet" type="text/css" href="static/style.css">
     <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
     <script type="text/javascript">
-      runBeforeLoad().done(function() {
-        $(document).ready(function() {
-        
-        }).always(function() {
+      runBeforeLoad().always(function() {
         $(document).ready(function() {
           $("#graph-controls").setDevices();
         });
@@ -115,7 +112,7 @@
             <input type="button" value="Open New Graph" disabled>
             <input type="button" value="Save Graph Image" id="saveimage">
             <input type="button" value="Dump Raw Data" disabled>
-            <script>
+            <script type="text/javascript">
               $("#saveimage").click(function() {
                 $("canvas").each(function() {
                   var image = new Image();

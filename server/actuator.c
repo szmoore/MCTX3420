@@ -8,9 +8,6 @@
 // Files containing GPIO and PWM definitions
 #include "bbb_pin.h"
 
-
-
-
 /** Number of actuators **/
 int g_num_actuators = 0;
 
@@ -79,12 +76,17 @@ void Actuator_SetMode(Actuator * a, ControlModes mode, void *arg)
 	{
 		case CONTROL_START:
 			{
+				// Set filename
 				char filename[BUFSIZ];
-				const char *experiment_name = (const char*) arg;
+				const char *experiment_path = (const char*) arg;
+				int ret;
 
-				if (snprintf(filename, BUFSIZ, "%s_a%d", experiment_name, a->id) >= BUFSIZ)
+				ret = snprintf(filename, BUFSIZ, "%s/actuator_%d", experiment_path, a->id);
+
+				if (ret >= BUFSIZ) 
 				{
-					Fatal("Experiment name \"%s\" too long (>%d)", experiment_name, BUFSIZ);
+					Fatal("Experiment path \"%s\" too long (%d, limit %d)",
+							experiment_path, ret, BUFSIZ);
 				}
 
 				Log(LOGDEBUG, "Actuator %d with DataFile \"%s\"", a->id, filename);
@@ -141,7 +143,7 @@ void Actuator_SetMode(Actuator * a, ControlModes mode, void *arg)
  */
 void Actuator_SetModeAll(ControlModes mode, void * arg)
 {
-	for (int i = 0; i < ACTUATORS_MAX; i++)
+	for (int i = 0; i < g_num_actuators; i++)
 		Actuator_SetMode(&g_actuators[i], mode, arg);
 }
 

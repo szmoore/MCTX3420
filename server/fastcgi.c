@@ -35,9 +35,13 @@
  */ 
 static void IdentifyHandler(FCGIContext *context, char *params) {
 	bool ident_sensors = false, ident_actuators = false;
-	bool has_control = FCGI_HasControl(context, getenv("COOKIE_STRING"));
+	char control_key[CONTROL_KEY_BUFSIZ];
+	bool has_control;
 	int i;
 
+	snprintf(control_key, CONTROL_KEY_BUFSIZ, "%s", getenv("COOKIE_STRING"));
+	has_control = FCGI_HasControl(context, control_key);
+	
 	FCGIValue values[2] = {{"sensors", &ident_sensors, FCGI_BOOL_T},
 					 {"actuators", &ident_actuators, FCGI_BOOL_T}};
 	if (!FCGI_ParseRequest(context, params, values, 2))
@@ -94,6 +98,7 @@ bool FCGI_LockControl(FCGIContext *context, const char * user_name, UserType use
 	// Get current time
 	time_t now = time(NULL);
 	bool expired = now - context->control_timestamp > CONTROL_TIMEOUT;
+	int i;
 
 	// Can't lock control if: User not actually logged in (sanity), or key is still valid and the user is not an admin
 	if (user_type == USER_UNAUTH || 
@@ -109,7 +114,7 @@ bool FCGI_LockControl(FCGIContext *context, const char * user_name, UserType use
 	// Generate a SHA1 hash for the user
 	SHA_CTX sha1ctx;
 	unsigned char sha1[20];
-	int i = rand();
+	i = rand();
 	SHA1_Init(&sha1ctx);
 	SHA1_Update(&sha1ctx, &now, sizeof(now));
 	SHA1_Update(&sha1ctx, &i, sizeof(i));
@@ -117,24 +122,37 @@ bool FCGI_LockControl(FCGIContext *context, const char * user_name, UserType use
 	for (i = 0; i < sizeof(sha1); i++)
 		sprintf(context->control_key + i * 2, "%02x", sha1[i]);
 
-	// Set the IP address
+	// Set the IPv4 address
 	snprintf(context->control_ip, 16, "%s", getenv("REMOTE_ADDR"));
+
 	// Set the user name
 	int uname_len = strlen(user_name);
-	if (snprintf(context->user_name, sizeof(context->user_name), "%s", user_name) < uname_len)
-	{
-		Log(LOGERR, "Username at %d characters too long (limit %d)", uname_len, sizeof(context->user_name));
+	i = snprintf(context->user_name, sizeof(context->user_name), "%s", user_name);
+	if (i < uname_len) {
+		Log(LOGERR, "Username at %d characters too long (limit %d)", 
+			uname_len, sizeof(context->user_name));
 		return false; // :-(
 	}
 	// Set the user type
 	context->user_type = user_type;
-	// Create directory
-	if (mkdir(user_name, 0777) != 0 && errno != EEXIST)
-	{
-		Log(LOGERR, "Couldn't create user directory %s/%s - %s", g_options.root_dir, user_name, strerror(errno));
-		return false; // :-(
+
+	// Build the user directory
+	i = snprintf(context->user_dir, sizeof(context->user_dir), "%s/%s", 
+					g_options.experiment_dir, context->user_name);
+	if (i >= sizeof(context->user_dir)) {
+		Log(LOGERR, "Experiment dir too long (required %d, limit %d)",
+			i, sizeof(context->user_dir));
+		return false;
 	}
 
+	Log(LOGDEBUG, "User dir: %s", context->user_dir);
+	// Create directory
+	if (mkdir(context->user_dir, 0777) != 0 && errno != EEXIST)
+	{
+		Log(LOGERR, "Couldn't create user directory %s - %s", 
+			context->user_dir, strerror(errno));
+		return false; // :-(
+	}
 
 	return true; // :-)
 }
@@ -496,16 +514,17 @@ void * FCGI_RequestLoop (void *data)
 	while (FCGI_Accept() >= 0) {
 		
 		ModuleHandler module_handler = NULL;
-		char module[BUFSIZ], params[BUFSIZ];
-		//Don't need to copy if we're not modifying string contents
-		const char *cookie = getenv("COOKIE_STRING");
+		char module[BUFSIZ], params[BUFSIZ], control_key[CONTROL_KEY_BUFSIZ];
 		
 		//strncpy doesn't zero-truncate properly
 		snprintf(module, BUFSIZ, "%s", getenv("DOCUMENT_URI_LOCAL"));
 		snprintf(params, BUFSIZ, "%s", getenv("QUERY_STRING"));
 
+		//Hack to get the nameless cookie only
+		snprintf(control_key, CONTROL_KEY_BUFSIZ, "%s", getenv("COOKIE_STRING"));
+
 		Log(LOGDEBUG, "Got request #%d - Module %s, params %s", context.response_number, module, params);
-		Log(LOGDEBUG, "Cookie: %s", cookie);
+		Log(LOGDEBUG, "Control key: %s", control_key);
 
 		
 		//Remove trailing slashes (if present) from module query
@@ -543,7 +562,7 @@ void * FCGI_RequestLoop (void *data)
 			//if (module_handler != Login_Handler && module_handler != IdentifyHandler && module_handler)
 			if (false) // Testing
 			{
-				if (!FCGI_HasControl(&context, cookie))
+				if (!FCGI_HasControl(&context, control_key))
 				{
 					FCGI_RejectJSON(&context, "Please login. Invalid control key.");
 					continue;	

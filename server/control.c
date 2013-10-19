@@ -8,15 +8,29 @@
 #include "sensor.h"
 #include "actuator.h"
 #include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 typedef struct ControlData {
 	ControlModes current_mode;
 	pthread_mutex_t mutex;
 	struct timespec start_time;
 	char user_name[31]; // The user who owns the currently running experiment
+	char experiment_dir[BUFSIZ]; //Directory for experiment
+	char experiment_name[BUFSIZ];
 } ControlData;
 
 ControlData g_controls = {CONTROL_STOP, PTHREAD_MUTEX_INITIALIZER, {0}};
+
+bool DirExists(const char *path)
+{
+	DIR *dir = opendir(path);
+	if (dir) {
+		closedir(dir);
+		return true;
+	}
+	return false;
+}
 
 bool PathExists(const char *path) 
 {
@@ -26,6 +40,43 @@ bool PathExists(const char *path)
 		return true;
 	}
 	return false;
+}
+
+/**
+ * Lists all experiments for the current user.
+ * @param The context to work in
+ */
+void ListExperiments(FCGIContext *context) 
+{
+	DIR * dir = opendir(context->user_dir);
+	if (dir == NULL)
+	{
+		FCGI_RejectJSON(context, "Failed to open user directory");
+		return;
+	}
+	struct dirent * ent;
+	FCGI_BeginJSON(context, STATUS_OK);
+	FCGI_JSONKey("experiments");
+	FCGI_PrintRaw("[");
+
+	bool first = true;
+	while ((ent = readdir(dir)) != NULL) {
+		char *ext = strrchr(ent->d_name, '.');
+		if (ext && !strcmp(ext, ".exp")) {
+			if (!first) {
+				FCGI_PrintRaw(", ");
+			}
+
+			*ext = '\0'; // Ummm... probably not a great idea
+			FCGI_PrintRaw("\"%s\"", ent->d_name);
+			first = false;
+		}
+	}
+	FCGI_PrintRaw("]");
+	FCGI_EndJSON();
+	
+	closedir(dir);
+	return;
 }
 
 /**
@@ -40,10 +91,6 @@ void Control_Handler(FCGIContext *context, char *params) {
 	bool force = false;
 	ControlModes desired_mode;
 	
-	
-	
-
-
 	// Login/auth now handled entirely in fastcgi.c and login.c
 	//TODO: Need to not have the ability for any user to stop someone else' experiment...
 	// (achieve by storing the username of the person running the current experiment, even when they log out?)
@@ -54,43 +101,19 @@ void Control_Handler(FCGIContext *context, char *params) {
 		{"name", &name, FCGI_STRING_T}
 	};
 
-
 	if (!FCGI_ParseRequest(context, params, values, 3))
 		return;
 
-	//HACKETY HACK HACK (should really be a seperate function)
-	if (strcmp(action, "list") == 0)
-	{
-		DIR * dir = opendir(context->user_name);
-		if (dir == NULL)
-		{
-			FCGI_RejectJSON(context, "Failed to open user directory");
-			return;
-		}
-		struct dirent * ent;
+	if (!strcmp(action, "identify")) {
 		FCGI_BeginJSON(context, STATUS_OK);
-		FCGI_JSONKey("experiments");
-		FCGI_PrintRaw("[");
-
-		bool first = true;
-		while ((ent = readdir(dir)) != NULL)
-		{
-			char * c;
-			for (c = ent->d_name; *c != '\0' && *c != '.'; ++c);
-
-			if (*c != '\0' && strcmp(c, ".exp") == 0)
-			{
-				if (!first)
-					FCGI_PrintRaw(",");
-				*c = '\0'; // Ummm... probably not a great idea
-				FCGI_PrintRaw(ent->d_name);
-				first = false;
-			}
-		}
-		FCGI_PrintRaw("]");
+		FCGI_JSONLong("control_state_id", g_controls.current_mode);
+		FCGI_JSONPair("control_user_name", g_controls.user_name);
+		FCGI_JSONPair("control_experiment_name", g_controls.experiment_name);
 		FCGI_EndJSON();
-		
-		return; // Dear god this is terrible
+		return;
+	} else if (!strcmp(action, "list")) {
+		ListExperiments(context);
+		return;
 	}
 	//TODO: Need a "load" action to set data files (but not run) from a past experiment
 
@@ -111,67 +134,71 @@ void Control_Handler(FCGIContext *context, char *params) {
 		return;
 	}
 
-	if (*g_controls.user_name != '\0' && strcmp(g_controls.user_name,context->user_name) != 0)
+	if ((*g_controls.user_name) != '\0' && strcmp(g_controls.user_name, context->user_name) != 0)
 	{
-		if (context->user_type != USER_ADMIN)
-		{
+		if (context->user_type != USER_ADMIN) {
 			FCGI_RejectJSON(context, "Another user has an experiment in progress.");
 			return;
 		}
 		
-		if (!force)
-		{
+		if (!force) {
 			Log(LOGERR, "User %s is currently running an experiment!", g_controls.user_name);
 			FCGI_RejectJSON(context, "Pass \"force\" to take control over another user's experiment");
 			return;
 		}
 	}
 
-	
-	
-	//HACK
-	chdir(context->user_name);
-
 	void *arg = NULL;
+	char experiment_dir[BUFSIZ] = {0};
 	if (desired_mode == CONTROL_START) {
-		if (PathExists(name) && !force) {
-			FCGI_RejectJSON(context, "An experiment with that name already exists.");
-			chdir(g_options.root_dir); // REVERSE HACK
-			return;
-		}
-		char * c = (char*)name;
-		for (c = (char*)name; *c != '\0' && *c != '.'; ++c);
-		if (*c == '.')
-		{
-			FCGI_RejectJSON(context, "Can't include '.' characters in experiment names (at this point we don't care anymore, go find someone who does).");
-			chdir(g_options.root_dir); // REVERSE HACK
-			return;
-		}
-		arg = (void*)name;
-	}
+		int ret;
 
-	
+		if (*name == '\0') {
+			FCGI_RejectJSON(context, "An experiment name must be specified.");
+			return;
+		} if (strpbrk(name, INVALID_CHARACTERS)) {
+			FCGI_RejectJSON(context, 
+				"An experiment name must not contain: " INVALID_CHARACTERS_JSON);
+			return;
+		}
+
+		if (*(context->user_dir) == '\0') {
+			FCGI_RejectJSON(context, "Not creating experiment in root dir.");
+			return;
+		}
+
+		ret = snprintf(experiment_dir, BUFSIZ, "%s/%s.exp", 
+						context->user_dir, name);
+		if (ret >= BUFSIZ) {
+			FCGI_RejectJSON(context, "The experiment name is too long.");
+			return;
+		} else if (DirExists(experiment_dir) && !force) {
+			FCGI_RejectJSON(context, "An experiment with that name already exists.");
+			return;
+		}
+
+		arg = (void*) experiment_dir;
+	}
 
 	const char *ret;
-	if ((ret = Control_SetMode(desired_mode, arg)) != NULL) 
-	{
+	if ((ret = Control_SetMode(desired_mode, arg)) != NULL) {
 		FCGI_RejectJSON(context, ret);
-	} 
-	else 
-	{
-		if (desired_mode == CONTROL_STOP)
+	} else {
+		if (desired_mode == CONTROL_STOP) {
 			g_controls.user_name[0] = '\0';
-		else
-		{
-			snprintf(g_controls.user_name, sizeof(g_controls.user_name), context->user_name);
+			g_controls.experiment_dir[0] = '\0';
+			g_controls.experiment_name[0] = '\0';
+		} else if (desired_mode == CONTROL_START) {
+			snprintf(g_controls.user_name, sizeof(g_controls.user_name), 
+						"%s", context->user_name);
+			snprintf(g_controls.experiment_dir, sizeof(g_controls.experiment_dir),
+						"%s", experiment_dir);
+			snprintf(g_controls.experiment_name, sizeof(g_controls.experiment_name),
+						"%s", name);
 		}
-		FCGI_BeginJSON(context, STATUS_OK);
-		FCGI_JSONPair("description", "ok");
-		FCGI_EndJSON();
-	}
 
-	//REVERSE HACK
-	chdir(g_options.root_dir);
+		FCGI_AcceptJSON(context, "Ok", NULL);
+	}
 }
 
 /**
@@ -192,18 +219,13 @@ const char* Control_SetMode(ControlModes desired_mode, void * arg)
 	else switch (desired_mode) {
 		case CONTROL_START:
 			if (g_controls.current_mode == CONTROL_STOP) {
-				const char * name = arg;
-				if (!*name)
-					ret = "An experiment name must be specified";
-				else if (strpbrk(name, INVALID_CHARACTERS))
-					ret = "The experiment name must not contain: " INVALID_CHARACTERS_JSON;
-				else {
-					FILE *fp = fopen((const char*) arg, "a");
-					if (fp) {
-						fclose(fp);
-						clock_gettime(CLOCK_MONOTONIC, &(g_controls.start_time));
-					} else
-						ret = "Cannot open experiment name marker";
+				const char * path = arg;
+				if (mkdir(path, 0777) != 0 && errno != EEXIST) {
+					Log(LOGERR, "Couldn't create experiment directory %s - %s", 
+						path, strerror(errno));
+					ret = "Couldn't create experiment directory.";
+				} else {
+					clock_gettime(CLOCK_MONOTONIC, &(g_controls.start_time));
 				}
 			} else 
 				ret = "Cannot start when not in a stopped state.";

@@ -31,11 +31,8 @@ typedef struct
 	/** Authentication method **/
 	enum {AUTH_NONE, AUTH_LDAP, AUTH_SHADOW} auth_method;
 
-	/** Starting directory **/
-	char root_dir[BUFSIZ];
-
-	
-
+	/** Experiments directory **/
+	const char *experiment_dir;
 } Options;
 
 /** The only instance of the Options struct **/

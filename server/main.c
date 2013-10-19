@@ -36,13 +36,11 @@ Options g_options; // options passed to program through command line arguments
  */
 void ParseArguments(int argc, char ** argv)
 {
-
-
 	g_options.program = argv[0]; // program name
 	g_options.verbosity = LOGDEBUG; // default log level
 	// Set the main directory
-	if (getcwd(g_options.root_dir, sizeof(g_options.root_dir)) == NULL)
-		Fatal("Couldn't get current working directory - %s", strerror(errno));
+	//if (getcwd(g_options.root_dir, sizeof(g_options.root_dir)) == NULL)
+	//	Fatal("Couldn't get current working directory - %s", strerror(errno));
 
 	clock_gettime(CLOCK_MONOTONIC, &(g_options.start_time)); // Start time
 
@@ -50,9 +48,8 @@ void ParseArguments(int argc, char ** argv)
 	g_options.auth_method = AUTH_NONE;  // Don't use authentication
 	g_options.auth_uri = ""; // 
 	g_options.ldap_base_dn = "";
+	g_options.experiment_dir = ".";
 	
-
-
 	for (int i = 1; i < argc; ++i)
 	{
 		if (argv[i][0] != '-')
@@ -83,6 +80,10 @@ void ParseArguments(int argc, char ** argv)
 			case 'd':
 				g_options.ldap_base_dn = argv[++i];
 				break;
+			case 'e':
+			// Experiments directory
+				g_options.experiment_dir = argv[++i];
+				break;
 			default:
 				Fatal("Unrecognised switch %s", argv[i]);
 				break;
@@ -96,7 +97,13 @@ void ParseArguments(int argc, char ** argv)
 	Log(LOGDEBUG, "Pin Module Enabled: %d", g_options.enable_pin);
 	Log(LOGDEBUG, "Auth URI: %s", g_options.auth_uri);
 	Log(LOGDEBUG, "LDAP Base DN: %s", g_options.ldap_base_dn);
-	Log(LOGDEBUG, "Root directory: %s", g_options.root_dir);
+	//Log(LOGDEBUG, "Root directory: %s", g_options.root_dir);
+	Log(LOGDEBUG, "Experiment directory: %s", g_options.experiment_dir);
+
+	if (!DirExists(g_options.experiment_dir))
+	{
+		Fatal("Experiment directory '%s' does not exist.", g_options.experiment_dir);
+	}
 
 	if (g_options.auth_uri[0] != '\0')
 	{

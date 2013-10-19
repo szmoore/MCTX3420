@@ -33,6 +33,8 @@ typedef enum StatusCodes {
 #define FCGI_RECEIVED(x) ((x) & FCGI_PARAM_RECEIVED)
 #define FCGI_TYPE(x) ((x) & ~(FCGI_PARAM_REQUIRED | FCGI_PARAM_RECEIVED))
 
+#define CONTROL_KEY_BUFSIZ 41
+
 typedef struct FCGIValue {
 	const char *key;
 	void *value;
@@ -47,13 +49,15 @@ typedef struct
 	/**The time of last valid user access possessing the control key**/
 	time_t control_timestamp;
 	/**A SHA-1 hash that is the control key, determining who is logged in**/
-	char control_key[41]; 
+	char control_key[CONTROL_KEY_BUFSIZ]; 
 	/**The IPv4 address of the logged-in user**/
 	char control_ip[16];
 	/**Determines if the user is an admin or not**/
 	UserType user_type;
 	/**Name of the logged in user**/
 	char user_name[31];
+	/**User directory for the logged in user**/
+	char user_dir[BUFSIZ];
 	/**The name of the current module**/
 	const char *current_module;
 	/**For debugging purposes?**/
