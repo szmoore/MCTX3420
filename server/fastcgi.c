@@ -370,7 +370,7 @@ void FCGI_JSONLong(const char *key, long value)
  */
 void FCGI_JSONDouble(const char *key, double value)
 {
-	printf(",\r\n\t\"%s\" : %f", key, value);
+	printf(",\r\n\t\"%s\" : %.9f", key, value);
 }
 
 /**
