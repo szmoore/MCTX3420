@@ -10,7 +10,7 @@
 #define _POSIX_C_SOURCE 200809L
 //#define _BSD_SOURCE
 #define _XOPEN_SOURCE 600
-
+#define _GNU_SOURCE
 /** Determine if we're running on the BBB **/
 #ifdef __arm__
 	#define _BBB
@@ -21,6 +21,7 @@
 /** The current API version **/
 #define API_VERSION 0
 
+//#define REALTIME_VERSION
 
 
 
@@ -34,6 +35,7 @@
 #include <assert.h>
 #include <sys/time.h>
 #include <time.h>
+#include <string.h>
 
 #include "log.h"
 #include "fastcgi.h"

@@ -47,9 +47,9 @@ int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn
 	s->init = init; // Set init function
 
 	// Start by averaging values taken over a second
-	s->sample_time.tv_sec = 1;
-	s->sample_time.tv_nsec = 0;
+	DOUBLE_TO_TIMEVAL(1e-4, &(s->sample_time));
 	s->averages = 1;
+	s->num_read = 0;
 
 	// Set sanity function
 	s->sanity = sanity;
@@ -60,7 +60,8 @@ int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn
 			Fatal("Couldn't init sensor %s", name);
 	}
 
-
+	s->current_data.time_stamp = 0;
+	s->current_data.value = 0;
 	return g_num_sensors;
 }
 
@@ -213,7 +214,18 @@ void * Sensor_Loop(void * arg)
 					Fatal("Sensor %s (%d,%d) reads unsafe value", s->name, s->id, s->user_id);
 				}
 			}
-			Data_Save(&(s->data_file), &d, 1); // Record it
+			s->current_data.time_stamp += d.time_stamp;
+			s->current_data.value += d.value;
+			
+			if (++(s->num_read) >= s->averages)
+			{
+				s->current_data.time_stamp /= s->averages;
+				s->current_data.value /= s->averages;
+				Data_Save(&(s->data_file), &(s->current_data), 1); // Record it
+				s->num_read = 0;
+				s->current_data.time_stamp = 0;
+				s->current_data.value = 0;
+			}
 		}
 		else
 			Log(LOGWARN, "Failed to read sensor %s (%d,%d)", s->name, s->id,s->user_id);

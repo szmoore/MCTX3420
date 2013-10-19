@@ -17,6 +17,13 @@
 #include <signal.h> // for signal handling
 
 
+#ifdef REALTIME_VERSION
+#include <time.h>
+#include <sched.h>
+#include <sys/mman.h>
+#include <sys/utsname.h>
+#endif //REALTIME_VERSION
+
 // --- Variable definitions --- //
 Options g_options; // options passed to program through command line arguments
 
@@ -113,6 +120,38 @@ void Cleanup()
 	Log(LOGDEBUG, "Finish cleanup.");
 }
 
+
+#ifdef REALTIME_VERSION
+
+#define MAX_SAFE_STACK (8*1024)
+#define NSEC_PER_SEC (1000000000)
+
+void stack_prefault()
+{
+	unsigned char dummy[MAX_SAFE_STACK];
+	memset(dummy, 0, MAX_SAFE_STACK);
+	return;
+}
+
+bool is_realtime()
+{
+	struct utsname u;
+	bool crit1 = 0;
+	bool crit2 = 0;
+	FILE * f;
+	uname(&u);
+	crit1 = (strcasestr(u.version, "PREEMPT RT") != NULL);
+	if (crit1 && ((f = fopen("/sys/kernel/realtime", "r")) != NULL))
+	{
+		int flag;
+		crit2 = ((fscanf(f, "%d", &flag) == 1) && (flag == 1));
+		fclose(f);
+	}
+	return (crit1 && crit2);
+}
+
+#endif //REALTIME_VERSION
+
 /**
  * Main entry point; start worker threads, setup signal handling, wait for threads to exit, exit
  * @param argc - Num args
@@ -122,11 +161,36 @@ void Cleanup()
  */
 int main(int argc, char ** argv)
 {
+
 	// Open log before calling ParseArguments (since ParseArguments may call the Log functions)
 	openlog("mctxserv", LOG_PID | LOG_PERROR, LOG_USER);
-	Log(LOGINFO, "Server started");
 
 	ParseArguments(argc, argv); // Setup the g_options structure from program arguments
+
+	Log(LOGINFO, "Server started");
+
+
+	
+	#ifdef REALTIME_VERSION
+	
+	if (is_realtime())
+	{
+		Log(LOGDEBUG, "Running under realtime kernel");
+	}
+	else
+	{
+		Fatal("Not running under realtime kernel");
+	}
+	struct sched_param param;
+	param.sched_priority = 49;
+	if (sched_setscheduler(0, SCHED_FIFO, &param) < 0)
+		Fatal("sched_setscheduler failed - %s", strerror(errno));
+	if (mlockall(MCL_CURRENT | MCL_FUTURE) == -1)
+		Fatal("mlockall failed - %s", strerror(errno));
+	stack_prefault();
+	#endif //REALTIME_VERSION
+
+	
 
 	Sensor_Init();
 	Actuator_Init();
