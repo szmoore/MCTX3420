@@ -14,13 +14,9 @@
     <link rel="stylesheet" type="text/css" href="static/style.css">
     <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
     <script type="text/javascript">
-      runBeforeLoad().done(function() {
+      runBeforeLoad().always(function() {
         $(document).ready(function() {
-          //nothing for now
-        }).always(function() {
-          $(document).ready(function() {
-            $("#graph-controls").setDevices();
-          });
+          $("#graph-controls").setDevices();
         });
       });
 
