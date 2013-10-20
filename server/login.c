@@ -110,7 +110,12 @@ UserType Login_MySQL(const char * user, const char * pass,
 		Log(LOGERR, "No user matching %s", user);
 	}
 
-
+	//TODO: Handle administrator users somehow better than this
+	// UserCake stores the permission level in a seperate table to the username/password, which is annoying
+	if (user_type != USER_UNAUTH && strcmp(user, "admin") == 0)
+	{
+		user_type = USER_ADMIN;
+	}
 	mysql_free_result(result);
 	mysql_close(con);
 	return user_type;
@@ -368,7 +373,7 @@ void Login_Handler(FCGIContext * context, char * params)
 		{
 			//WARNING: C string manipulation code approaching!
 			// Non reentrent; uses strsep and modifies g_options.auth_options
-			// If problems happen, try strdup ...
+			// If problems happen, try strdup first ...
 			static char * db_opts[] = {"root", "", "users", "uc_users"};
 			static bool db_init_opts = false;
 			if (!db_init_opts)
@@ -387,7 +392,7 @@ void Login_Handler(FCGIContext * context, char * params)
 						break;
 					}
 				}			
-				Log(LOGDEBUG, "MySQL: user %s pass %s name %s table %s", db_opts[0], db_opts[1], db_opts[2], db_opts[3]);	
+				//Log(LOGDEBUG, "MySQL: user %s pass %s name %s table %s", db_opts[0], db_opts[1], db_opts[2], db_opts[3]);	
 			}
 
 			user_type = Login_MySQL(user, pass, g_options.auth_uri, db_opts[0],db_opts[1], db_opts[2], db_opts[3]);

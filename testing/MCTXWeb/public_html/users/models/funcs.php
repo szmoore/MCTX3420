@@ -80,6 +80,16 @@ function generateHash($plainText, $salt = null)
 	return crypt($plainText, $salt);
 }
 
+/**
+ * Generates a random password for emailing to new users.
+ * User should be asked to change the password.
+ */
+function generatePassword()
+{
+  $random = file_get_contents("/dev/urandom", false, null, 0, 25);
+  return bin2hex($random);
+}
+
 //Checks if an email is valid
 function isValidEmail($email)
 {

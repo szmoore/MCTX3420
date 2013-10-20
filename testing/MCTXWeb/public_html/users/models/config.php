@@ -20,7 +20,7 @@ $stmt->close();
 $emailActivation = $settings['activation']['value'];
 $mail_templates_dir = "models/mail-templates/";
 $websiteName = $settings['website_name']['value'];
-$websiteUrl = $settings['website_url']['value'];
+$websiteUrl = $settings['website_url']['value']."/users";
 $emailAddress = $settings['email']['value'];
 $resend_activation_threshold = $settings['resend_activation_threshold']['value'];
 $emailDate = date('dmy');
