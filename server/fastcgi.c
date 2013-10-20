@@ -520,8 +520,23 @@ void * FCGI_RequestLoop (void *data)
 		snprintf(module, BUFSIZ, "%s", getenv("DOCUMENT_URI_LOCAL"));
 		snprintf(params, BUFSIZ, "%s", getenv("QUERY_STRING"));
 
+		
+		//char cookies[BUFSIZ];
+		//snprintf(cookies, BUFSIZ, "%s", getenv("COOKIE_STRING"));
+		//Log(LOGDEBUG, "ALL cookies %s", cookies); //mmmm
+
 		//Hack to get the nameless cookie only
+		// (works as long as browsers send the nameless cookie first...)
 		snprintf(control_key, CONTROL_KEY_BUFSIZ, "%s", getenv("COOKIE_STRING"));
+		// Ignore any other cookies if the nameless cookie is empty
+		for (int i = 0; i < CONTROL_KEY_BUFSIZ; ++i)
+		{
+			if (control_key[i] == ';')
+			{
+				control_key[i] = '\0';
+				break;
+			}
+		}
 
 		Log(LOGDEBUG, "Got request #%d - Module %s, params %s", context.response_number, module, params);
 		Log(LOGDEBUG, "Control key: %s", control_key);
@@ -559,8 +574,8 @@ void * FCGI_RequestLoop (void *data)
 		
 		if (module_handler) 
 		{
-			//if (module_handler != Login_Handler && module_handler != IdentifyHandler && module_handler)
-			if (false) // Testing
+			if (g_options.auth_method != AUTH_NONE && module_handler != Login_Handler && module_handler != IdentifyHandler && module_handler)
+			//if (false) // Testing
 			{
 				if (!FCGI_HasControl(&context, control_key))
 				{

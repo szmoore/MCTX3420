@@ -25,11 +25,11 @@ typedef struct
 	/** URI for authentication **/
 	const char * auth_uri;
 
-	/** Base DN for LDAP authentication **/
-	const char * ldap_base_dn;
+	/** Additional options for authentication (to be parsed in Login_Handler) **/
+	const char * auth_options;
 
 	/** Authentication method **/
-	enum {AUTH_NONE, AUTH_LDAP, AUTH_SHADOW} auth_method;
+	enum {AUTH_NONE, AUTH_LDAP, AUTH_SHADOW, AUTH_MYSQL} auth_method;
 
 	/** Experiments directory **/
 	const char *experiment_dir;

@@ -71,14 +71,13 @@ function generateHash($plainText, $salt = null)
 {
 	if ($salt === null)
 	{
-		$salt = substr(md5(uniqid(rand(), true)), 0, 25);
+		//$salt = substr(md5(uniqid(rand(), true)), 0, 25); // Original UserCake
+		$random = file_get_contents("/dev/urandom", false, null, 0, 25); // Get random number
+		$salt = '$6$'.bin2hex($random).'$'; // Make hex salt
+		
 	}
-	else
-	{
-		$salt = substr($salt, 0, 25);
-	}
-	
-	return $salt . sha1($salt . $plainText);
+	//return $salt . sha1($salt . $plainText); // Original UserCake
+	return crypt($plainText, $salt);
 }
 
 //Checks if an email is valid
