@@ -8,7 +8,7 @@ http://usercake.com
 $db_host = "localhost"; //Host address (most likely localhost)
 $db_name = "users"; //Name of Database
 $db_user = "root"; //Name of database user
-$db_pass = "NOT_THE_PASSWORD"; //Password for database user
+$db_pass = file_get_contents("mysql_password"); // TODO: Create that file or replace this line.
 $db_table_prefix = "uc_";
 
 GLOBAL $errors;

@@ -47,7 +47,7 @@ void ParseArguments(int argc, char ** argv)
 
 	g_options.auth_method = AUTH_NONE;  // Don't use authentication
 	g_options.auth_uri = ""; // 
-	g_options.ldap_base_dn = "";
+	g_options.auth_options = "";
 	g_options.experiment_dir = ".";
 	
 	for (int i = 1; i < argc; ++i)
@@ -72,13 +72,9 @@ void ParseArguments(int argc, char ** argv)
 			case 'p':
 				g_options.enable_pin = !(strtol(argv[++i], &end, 10));
 				break;
-			// LDAP URI
+			// Authentication URI and options
 			case 'A':
 				g_options.auth_uri = argv[++i];
-				break;
-			// LDAP DN
-			case 'd':
-				g_options.ldap_base_dn = argv[++i];
 				break;
 			case 'e':
 			// Experiments directory
@@ -93,12 +89,7 @@ void ParseArguments(int argc, char ** argv)
 			Fatal("argv[%d] -%c requires an integer (got \"%s\" instead)", i-1, argv[i-1][0], argv[i]);
 	}	
 
-	Log(LOGDEBUG, "Verbosity: %d", g_options.verbosity);
-	Log(LOGDEBUG, "Pin Module Enabled: %d", g_options.enable_pin);
-	Log(LOGDEBUG, "Auth URI: %s", g_options.auth_uri);
-	Log(LOGDEBUG, "LDAP Base DN: %s", g_options.ldap_base_dn);
-	//Log(LOGDEBUG, "Root directory: %s", g_options.root_dir);
-	Log(LOGDEBUG, "Experiment directory: %s", g_options.experiment_dir);
+
 
 	if (!DirExists(g_options.experiment_dir))
 	{
@@ -107,12 +98,58 @@ void ParseArguments(int argc, char ** argv)
 
 	if (g_options.auth_uri[0] != '\0')
 	{
-		//HACK...
-		if (PathExists(g_options.auth_uri))
-			g_options.auth_method = AUTH_SHADOW;
-		else
-			g_options.auth_method = AUTH_LDAP;
+		// Get the options part of the URI if it exists
+		char * c = (char*)g_options.auth_uri;
+		while (*(++c) != '\0' && *c != '#');
+		
+		if (*(c++) == '#')
+		{
+			*(c-1) = '\0';
+			g_options.auth_options = c;
+		}
+
+		// Use the first part of the URI to identify the protocol:
+		c = (char*)g_options.auth_uri;
+		while (*(++c) != '\0' && *c != ':');
+
+		if (*c == '\0') // No ':' means no protocol; use plaintext file
+		{
+			g_options.auth_method = AUTH_SHADOW;			
+		}
+		else if (*c == ':' && *(c+1) == '/' && *(c+2) == '/')
+		{
+			
+			*c = '\0';
+			if (strcmp(g_options.auth_uri, "ldap") == 0 || strcmp(g_options.auth_uri, "ldaps") == 0)
+			{
+				*c = ':'; // LDAP URI's require the prodocol as part of the string
+				g_options.auth_method = AUTH_LDAP;
+			}
+			else if (strcmp(g_options.auth_uri, "mysql") == 0)
+			{
+				g_options.auth_uri = c+3; // MySQL doesn't (just a hostname)
+				g_options.auth_method = AUTH_MYSQL;
+			}
+			else
+			{
+				Fatal("Unsupported authentication method %s", g_options.auth_uri);
+			}
+		}
 	}
+	else
+	{
+		Log(LOGWARN, "No authentication method.");
+	}
+
+	Log(LOGDEBUG, "Verbosity: %d", g_options.verbosity);
+	Log(LOGDEBUG, "Pin Module Enabled: %d", g_options.enable_pin);
+	Log(LOGDEBUG, "Auth method: %d", g_options.auth_method);
+	Log(LOGDEBUG, "Auth URI: %s", g_options.auth_uri);
+	Log(LOGDEBUG, "Auth Options: %s", g_options.auth_options);
+	//Log(LOGDEBUG, "Root directory: %s", g_options.root_dir);
+	Log(LOGDEBUG, "Experiment directory: %s", g_options.experiment_dir);
+
+
 	
 }
 

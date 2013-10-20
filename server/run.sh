@@ -6,13 +6,16 @@ if [ ! -e "server" ]; then
         exit 1
 fi
 
+# Get the parameters
+. parameters
+echo "Parameters are: $parameters"
 
 if [[ "$(uname -m)" != *arm*  ]]; then
         echo Not running on the BBB
         # Use this to quickly test run the server in valgrind
         #spawn-fcgi -p9005 -n ./valgrind.sh
         # Use this to run the server normally
-        spawn-fcgi -p9005 -n ./server
+        spawn-fcgi -p9005 -n -- ./server $parameters
         exit 0
 fi
 
@@ -75,10 +78,7 @@ fi;
 #adc_device_path=$(dirname $(find /sys -name *AIN0))
 
 
-# Get the parameters
-. parameters
 
-echo "Parameters are: $parameters"
 
 # Run the program with parameters
 # TODO: Can tell spawn-fcgi to run the program as an unprivelaged user?

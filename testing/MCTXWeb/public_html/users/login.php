@@ -47,6 +47,8 @@ if(!empty($_POST))
 			{
 				//Hash the password and use the salt from the database to compare the password.
 				$entered_pass = generateHash($password,$userdetails["password"]);
+
+				echo "".$userdetails["password"];
 				
 				if($entered_pass != $userdetails["password"])
 				{
