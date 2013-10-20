@@ -4,8 +4,10 @@ static FILE * f = NULL;
 bool Filetest_Init(const char * name, int id)
 {
 	f = fopen(name, "w");
+	if (f == NULL)
+		return false;
 	setbuf(f, NULL); // Unbuffer
-	return (f != NULL);
+	return true;
 }
 
 bool Filetest_Set(int id, double value)

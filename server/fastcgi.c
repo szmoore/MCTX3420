@@ -9,6 +9,8 @@
 #include <fcgi_stdio.h>
 #include <openssl/sha.h>
 #include <stdarg.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "common.h"
 #include "sensor.h"
@@ -33,9 +35,13 @@
  */ 
 static void IdentifyHandler(FCGIContext *context, char *params) {
 	bool ident_sensors = false, ident_actuators = false;
-	bool has_control = FCGI_HasControl(context, getenv("COOKIE_STRING"));
+	char control_key[CONTROL_KEY_BUFSIZ];
+	bool has_control;
 	int i;
 
+	snprintf(control_key, CONTROL_KEY_BUFSIZ, "%s", getenv("COOKIE_STRING"));
+	has_control = FCGI_HasControl(context, control_key);
+	
 	FCGIValue values[2] = {{"sensors", &ident_sensors, FCGI_BOOL_T},
 					 {"actuators", &ident_actuators, FCGI_BOOL_T}};
 	if (!FCGI_ParseRequest(context, params, values, 2))
@@ -44,9 +50,14 @@ static void IdentifyHandler(FCGIContext *context, char *params) {
 	FCGI_BeginJSON(context, STATUS_OK);
 	FCGI_JSONPair("description", "MCTX3420 Server API (2013)");
 	FCGI_JSONPair("build_date", __DATE__ " " __TIME__);
+	struct timespec t;
+	t.tv_sec = 0; t.tv_nsec = 0;
+	clock_getres(CLOCK_MONOTONIC, &t);
+	FCGI_JSONDouble("clock_getres", TIMEVAL_TO_DOUBLE(t));
 	FCGI_JSONLong("api_version", API_VERSION);
 	FCGI_JSONBool("logged_in", has_control);
-	FCGI_JSONPair("friendly_name", has_control ? context->friendly_name : "");
+	FCGI_JSONPair("user_name", has_control ? context->user_name : "");
+	
 
 	//Sensor and actuator information
 	if (ident_sensors) {
@@ -75,36 +86,75 @@ static void IdentifyHandler(FCGIContext *context, char *params) {
 }
 
 /**
- * Gives the user a key that determines who has control over
- * the system at any one time. The key can be forcibly generated, revoking
- * any previous control keys. To be used in conjunction with HTTP 
- * basic authentication.
+ * Given an authorised user, attempt to set the control over the system.
+ * Modifies members in the context structure appropriately if successful.
  * @param context The context to work in
- * @param force Whether to force key generation or not.
- * @return true on success, false otherwise (eg someone else already in control)
+ * @param user_name - Name of the user
+ * @param user_type - Type of the user, passed after successful authentication
+ * @return true on success, false otherwise (eg someone else  already in control)
  */
-bool FCGI_LockControl(FCGIContext *context, bool force) {
+bool FCGI_LockControl(FCGIContext *context, const char * user_name, UserType user_type) 
+{
+	// Get current time
 	time_t now = time(NULL);
 	bool expired = now - context->control_timestamp > CONTROL_TIMEOUT;
+	int i;
 
-	if (force || !*(context->control_key) || expired) 
-	{
-		SHA_CTX sha1ctx;
-		unsigned char sha1[20];
-		int i = rand();
+	// Can't lock control if: User not actually logged in (sanity), or key is still valid and the user is not an admin
+	if (user_type == USER_UNAUTH || 
+		(user_type != USER_ADMIN && !expired && *(context->control_key) != '\0'))
+		return false;
 
-		SHA1_Init(&sha1ctx);
-		SHA1_Update(&sha1ctx, &now, sizeof(now));
-		SHA1_Update(&sha1ctx, &i, sizeof(i));
-		SHA1_Final(sha1, &sha1ctx);
+	// Release any existing control (if any)
+	FCGI_ReleaseControl(context);
 
-		context->control_timestamp = now;
-		for (i = 0; i < 20; i++)
-			sprintf(context->control_key + i * 2, "%02x", sha1[i]);
-		snprintf(context->control_ip, 16, "%s", getenv("REMOTE_ADDR"));
-		return true;
+	// Set timestamp
+	context->control_timestamp = now;
+
+	// Generate a SHA1 hash for the user
+	SHA_CTX sha1ctx;
+	unsigned char sha1[20];
+	i = rand();
+	SHA1_Init(&sha1ctx);
+	SHA1_Update(&sha1ctx, &now, sizeof(now));
+	SHA1_Update(&sha1ctx, &i, sizeof(i));
+	SHA1_Final(sha1, &sha1ctx);
+	for (i = 0; i < sizeof(sha1); i++)
+		sprintf(context->control_key + i * 2, "%02x", sha1[i]);
+
+	// Set the IPv4 address
+	snprintf(context->control_ip, 16, "%s", getenv("REMOTE_ADDR"));
+
+	// Set the user name
+	int uname_len = strlen(user_name);
+	i = snprintf(context->user_name, sizeof(context->user_name), "%s", user_name);
+	if (i < uname_len) {
+		Log(LOGERR, "Username at %d characters too long (limit %d)", 
+			uname_len, sizeof(context->user_name));
+		return false; // :-(
 	}
-	return false;
+	// Set the user type
+	context->user_type = user_type;
+
+	// Build the user directory
+	i = snprintf(context->user_dir, sizeof(context->user_dir), "%s/%s", 
+					g_options.experiment_dir, context->user_name);
+	if (i >= sizeof(context->user_dir)) {
+		Log(LOGERR, "Experiment dir too long (required %d, limit %d)",
+			i, sizeof(context->user_dir));
+		return false;
+	}
+
+	Log(LOGDEBUG, "User dir: %s", context->user_dir);
+	// Create directory
+	if (mkdir(context->user_dir, 0777) != 0 && errno != EEXIST)
+	{
+		Log(LOGERR, "Couldn't create user directory %s - %s", 
+			context->user_dir, strerror(errno));
+		return false; // :-(
+	}
+
+	return true; // :-)
 }
 
 /**
@@ -133,6 +183,7 @@ bool FCGI_HasControl(FCGIContext *context, const char *key) {
  */
 void FCGI_ReleaseControl(FCGIContext *context) {
 	*(context->control_key) = 0;
+	// Note: context->user_name should *not* be cleared
 	return;
 }
 
@@ -282,8 +333,8 @@ void FCGI_BeginJSON(FCGIContext *context, StatusCodes status_code)
 	printf("\t\"module\" : \"%s\"", context->current_module);
 	FCGI_JSONLong("status", status_code);
 	//Time and running statistics
-	struct timeval now;
-	gettimeofday(&now, NULL);
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
 	FCGI_JSONDouble("start_time", TIMEVAL_TO_DOUBLE(g_options.start_time));
 	FCGI_JSONDouble("current_time", TIMEVAL_TO_DOUBLE(now));
 	FCGI_JSONDouble("running_time", TIMEVAL_DIFF(now, g_options.start_time));
@@ -337,7 +388,7 @@ void FCGI_JSONLong(const char *key, long value)
  */
 void FCGI_JSONDouble(const char *key, double value)
 {
-	printf(",\r\n\t\"%s\" : %f", key, value);
+	printf(",\r\n\t\"%s\" : %.9f", key, value);
 }
 
 /**
@@ -463,16 +514,17 @@ void * FCGI_RequestLoop (void *data)
 	while (FCGI_Accept() >= 0) {
 		
 		ModuleHandler module_handler = NULL;
-		char module[BUFSIZ], params[BUFSIZ];
-		//Don't need to copy if we're not modifying string contents
-		const char *cookie = getenv("COOKIE_STRING");
+		char module[BUFSIZ], params[BUFSIZ], control_key[CONTROL_KEY_BUFSIZ];
 		
 		//strncpy doesn't zero-truncate properly
 		snprintf(module, BUFSIZ, "%s", getenv("DOCUMENT_URI_LOCAL"));
 		snprintf(params, BUFSIZ, "%s", getenv("QUERY_STRING"));
 
+		//Hack to get the nameless cookie only
+		snprintf(control_key, CONTROL_KEY_BUFSIZ, "%s", getenv("COOKIE_STRING"));
+
 		Log(LOGDEBUG, "Got request #%d - Module %s, params %s", context.response_number, module, params);
-		Log(LOGDEBUG, "Cookie: %s", cookie);
+		Log(LOGDEBUG, "Control key: %s", control_key);
 
 		
 		//Remove trailing slashes (if present) from module query
@@ -507,18 +559,12 @@ void * FCGI_RequestLoop (void *data)
 		
 		if (module_handler) 
 		{
-			//if (module_handler != Login_Handler && module_handler != IdentifyHandler)
+			//if (module_handler != Login_Handler && module_handler != IdentifyHandler && module_handler)
 			if (false) // Testing
 			{
-				if (cookie[0] == '\0')
+				if (!FCGI_HasControl(&context, control_key))
 				{
-					FCGI_RejectJSONEx(&context, STATUS_UNAUTHORIZED, "Please login.");
-					continue;
-				}
-
-				if (!FCGI_HasControl(&context, cookie))
-				{
-					FCGI_RejectJSON(&context, "Invalid control key.");
+					FCGI_RejectJSON(&context, "Please login. Invalid control key.");
 					continue;	
 				}
 
@@ -533,9 +579,6 @@ void * FCGI_RequestLoop (void *data)
 		{
 			FCGI_RejectJSON(&context, "Unhandled module");
 		}
-		
-
-		
 	}
 
 	Log(LOGDEBUG, "Thread exiting.");

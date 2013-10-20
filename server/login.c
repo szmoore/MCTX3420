@@ -16,24 +16,24 @@
 
 /**
  * Attempt to login using a file formatted like /etc/shadow
- * This is here for horrible hack purposes
+ * This is here... because all better options have been exhausted
  * @param user - The username
  * @param pass - The password
- * @returns True if the login was successful, false otherwise
+ * @returns Privelage level of the user or USER_UNAUTH for failure to authenticate
  */
-bool Login_Shadow(const char * user, const char * pass, const char * shadow)
+UserType Login_Shadow(const char * user, const char * pass, const char * shadow)
 {
 	if (strlen(user) + strlen(pass) >= BUFSIZ-1)
 	{
 		Log(LOGERR, "User/Password too long!\n");
-		return false;
+		return USER_UNAUTH;
 	}
 
 	FILE * f = fopen(shadow, "r");
 	if (f == NULL)
 	{
 		Log(LOGERR,"Can't open %s - %s\n", shadow, strerror(errno));
-		return false;
+		return USER_UNAUTH;
 	}
 
 	char buffer[BUFSIZ];
@@ -42,9 +42,9 @@ bool Login_Shadow(const char * user, const char * pass, const char * shadow)
 	while (fgets(buffer, BUFSIZ, f) != NULL) // NOTE: Restrict username+password strings to BUFSIZ... what could possibly go wrong?
 	{
 
-		Log(LOGDEBUG,"Scanning %d: %s", strlen(buffer), buffer);
+		//Log(LOGDEBUG,"Scanning %d: %s", strlen(buffer), buffer);
 	
-		for (int i = 0; i < BUFSIZ-1; ++i)
+		for (int i = 0; i < BUFSIZ-1 && buffer[i] != '\0'; ++i)
 		{
 			if (buffer[i] == ':')
 			{
@@ -56,7 +56,7 @@ bool Login_Shadow(const char * user, const char * pass, const char * shadow)
 
 		if (strcmp(user,buffer) == 0)
 		{
-			Log(LOGDEBUG,"User matches! %s\n", buffer);
+			//Log(LOGDEBUG,"User matches! %s\n", buffer);
 			break;
 		} 
 		passwd_index = -1;
@@ -64,16 +64,31 @@ bool Login_Shadow(const char * user, const char * pass, const char * shadow)
 
 	if (passwd_index <= 0)
 	{
-		Log(LOGDEBUG,"No user found matching %s\n", user);
-		return false;
+		//Log(LOGDEBUG,"No user found matching %s\n", user);
+		return USER_UNAUTH;
 	}
 
-	for (int i = passwd_index; i < BUFSIZ-1; ++i)
+	int gid_index = -1;
+	for (int i = passwd_index; i < BUFSIZ-1 && buffer[i] != '\0'; ++i)
 	{
-		if (buffer[i] == ':' || buffer[i] == '\n')
+		if (buffer[i] == ':')
 		{
+			gid_index = i+1;
 			buffer[i] = '\0';
-			
+		}
+		if (buffer[i] == '\n')
+			buffer[i] = '\0';
+	}
+	char * end = buffer+gid_index;
+	UserType user_type = USER_NORMAL;
+	if (gid_index > passwd_index && gid_index < BUFSIZ-1)
+	{
+		int gid = strtol(buffer+gid_index, &end,10);
+		Log(LOGDEBUG, "Usertype %d %s", gid, buffer+gid_index);
+		if (*end == '\0' && gid == 0)
+		{
+			Log(LOGDEBUG, "Admin");
+			user_type = USER_ADMIN;
 		}
 	}
 	
@@ -87,10 +102,14 @@ bool Login_Shadow(const char * user, const char * pass, const char * shadow)
 			break;
 	}
 
-	Log(LOGDEBUG,"Salted Entry: %s\n", buffer+passwd_index);
-	Log(LOGDEBUG,"Salted Attempt: %s\n", crypt(pass, salt));
+//	Log(LOGDEBUG,"Salted Entry: %s\n", buffer+passwd_index);
+//	Log(LOGDEBUG,"Salted Attempt: %s\n", crypt(pass, salt));
 	
-	return (strcmp(crypt(pass, salt), buffer+passwd_index) == 0);
+	if (strcmp(crypt(pass, salt), buffer+passwd_index) == 0)
+	{
+		return user_type;
+	}
+	return USER_UNAUTH;
 }
 
 /**
@@ -193,7 +212,7 @@ void Login_Handler(FCGIContext * context, char * params)
 	user[i] = '\0';
 
 	
-	bool authenticated = true;
+	UserType user_type = USER_UNAUTH;
 	
 	switch (g_options.auth_method)
 	{
@@ -213,10 +232,10 @@ void Login_Handler(FCGIContext * context, char * params)
 			//int len = sprintf(dn, "uid=%s,%s", user, g_options.ldap_base_dn);
 	
 			// At UWA (hooray)
-			char * user_type = "Students";
+			char * user_group = "Students";
 			if (user[0] == '0')
-				user_type = "Staff";
-			int len = sprintf(dn, "cn=%s,ou=%s,%s", user, user_type, g_options.ldap_base_dn);
+				user_group = "Staff";
+			int len = sprintf(dn, "cn=%s,ou=%s,%s", user, user_group, g_options.ldap_base_dn);
 		
 
 			if (len >= BUFSIZ)
@@ -225,41 +244,49 @@ void Login_Handler(FCGIContext * context, char * params)
 				return;
 			}
 		
-			authenticated = (Login_LDAP_Bind(g_options.auth_uri, dn, pass) == LDAP_SUCCESS);
+			if (Login_LDAP_Bind(g_options.auth_uri, dn, pass) == LDAP_SUCCESS)
+			{
+				if (user[0] == '0')
+					user_type = USER_ADMIN;
+				else
+					user_type = USER_NORMAL;
+			}
 			break;
 		}
 		case AUTH_SHADOW:
 		{
-			authenticated = Login_Shadow(user, pass, g_options.auth_uri);
+			user_type = Login_Shadow(user, pass, g_options.auth_uri);
 			break;
 		}
 		default:
 		{
 			Log(LOGWARN, "No authentication!");
+			user_type = USER_ADMIN;
 			break;
 		}
 	}
 		
 	// error check	
 	
-	if (!authenticated)
+	if (user_type == USER_UNAUTH)
 	{
+		Log(LOGDEBUG, "Authentication failure for %s", user);
 		FCGI_RejectJSONEx(context, STATUS_UNAUTHORIZED, "Authentication failure.");
 	}
 	else
 	{
-		if (FCGI_LockControl(context, false))
+		// Try and gain control over the system
+		if (FCGI_LockControl(context, user, user_type))
 		{
-			//Todo: change this to something better than the username if using LDAP.
-			snprintf(context->friendly_name, 31, "%s", user);
-			FCGI_EscapeText(context->friendly_name); //Don't break javascript pls
-
+			FCGI_EscapeText(context->user_name); //Don't break javascript pls
 			// Give the user a cookie
 			FCGI_AcceptJSON(context, "Logged in", context->control_key);
+			Log(LOGDEBUG, "Successful authentication for %s", user);
 		}
 		else
 		{
-			FCGI_RejectJSON(context, "Someone else is already logged in");
+			Log(LOGDEBUG, "%s successfully authenticated but system was in use by %s", user, context->user_name);
+			FCGI_RejectJSON(context, "Someone else is already logged in (and you are not an admin)");
 		}
 	}
 }

@@ -161,13 +161,13 @@ void Data_PrintByIndexes(DataFile * df, int start_index, int end_index, DataForm
 	switch (format)
 	{
 		case JSON:
-			fmt_string = "[%f,%f]";
+			fmt_string = "[%.9f,%f]";
 			separator = ',';
 			// For JSON we need an opening bracket
 			FCGI_PrintRaw("["); 
 			break;
 		case TSV:
-			fmt_string = "%f\t%f";
+			fmt_string = "%.9f\t%f";
 			separator = '\n';
 			break;
 	}

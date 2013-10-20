@@ -51,14 +51,19 @@ typedef struct
 	InitFn init;
 	/** Function to cleanup the sensor **/
 	CleanFn cleanup;
+	/** Function to sanity check the sensor readings **/
+	SanityFn sanity;
 	/** Human readable name of the sensor **/
 	const char * name;
-	/** Thresholds on the sensor **/
-	SensorThreshold thresholds;
 	/** Sampling rate **/
-	int sample_us;
-	/** Averages per DataPoint **/
+	struct timespec sample_time;
+	/** Number of averages per sample **/
 	int averages;
+	/** Current data **/
+	DataPoint current_data;
+	/** Number of points read so far before applying average **/
+	int num_read;
+
 
 	
 } Sensor;
@@ -73,7 +78,6 @@ extern void Sensor_SetMode(Sensor * s, ControlModes mode, void * arg);
 
 extern void * Sensor_Loop(void * args); // Main loop for a thread that handles a Sensor
 extern bool Sensor_Read(Sensor * s, DataPoint * d); // Read a single DataPoint, indicating if it has changed since the last one
-extern void Sensor_CheckData(Sensor * s, double value); // Check a DataPoint
 extern Sensor * Sensor_Identify(const char * str); // Identify a Sensor from a string
 
 extern void Sensor_Handler(FCGIContext *context, char * params); // Handle a FCGI request for Sensor data

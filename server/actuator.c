@@ -8,9 +8,6 @@
 // Files containing GPIO and PWM definitions
 #include "bbb_pin.h"
 
-
-
-
 /** Number of actuators **/
 int g_num_actuators = 0;
 
@@ -23,7 +20,7 @@ static Actuator g_actuators[ACTUATORS_MAX];
  * @param init - Function to call to initialise the actuator (may be NULL)
  * @returns Number of actuators added so far
  */
-int Actuator_Add(const char * name, int user_id, SetFn set, InitFn init, CleanFn cleanup, SanityFn sanity)
+int Actuator_Add(const char * name, int user_id, SetFn set, InitFn init, CleanFn cleanup, SanityFn sanity, double initial_value)
 {
 	if (++g_num_actuators > ACTUATORS_MAX)
 	{
@@ -36,11 +33,18 @@ int Actuator_Add(const char * name, int user_id, SetFn set, InitFn init, CleanFn
 	a->name = name;
 	a->set = set; // Set read function
 	a->init = init; // Set init function
-	if (init != NULL)
-		init(name, user_id); // Call it
+
 	a->sanity = sanity;
 
 	pthread_mutex_init(&(a->mutex), NULL);
+
+	if (init != NULL)
+	{
+		if (!init(name, user_id))
+			Fatal("Couldn't initialise actuator %s", name);
+	}
+
+	Actuator_SetValue(a, initial_value, false);
 
 	return g_num_actuators;
 }
@@ -54,7 +58,7 @@ int Actuator_Add(const char * name, int user_id, SetFn set, InitFn init, CleanFn
 void Actuator_Init()
 {
 	//Actuator_Add("ledtest",0,  Ledtest_Set, NULL,NULL,NULL);
-	Actuator_Add("filetest", 0, Filetest_Set, Filetest_Init, Filetest_Cleanup, Filetest_Sanity);
+	Actuator_Add("filetest", 0, Filetest_Set, Filetest_Init, Filetest_Cleanup, Filetest_Sanity, 0);
 }
 
 /**
@@ -72,12 +76,17 @@ void Actuator_SetMode(Actuator * a, ControlModes mode, void *arg)
 	{
 		case CONTROL_START:
 			{
+				// Set filename
 				char filename[BUFSIZ];
-				const char *experiment_name = (const char*) arg;
+				const char *experiment_path = (const char*) arg;
+				int ret;
 
-				if (snprintf(filename, BUFSIZ, "%s_a%d", experiment_name, a->id) >= BUFSIZ)
+				ret = snprintf(filename, BUFSIZ, "%s/actuator_%d", experiment_path, a->id);
+
+				if (ret >= BUFSIZ) 
 				{
-					Fatal("Experiment name \"%s\" too long (>%d)", experiment_name, BUFSIZ);
+					Fatal("Experiment path \"%s\" too long (%d, limit %d)",
+							experiment_path, ret, BUFSIZ);
 				}
 
 				Log(LOGDEBUG, "Actuator %d with DataFile \"%s\"", a->id, filename);
@@ -134,7 +143,7 @@ void Actuator_SetMode(Actuator * a, ControlModes mode, void *arg)
  */
 void Actuator_SetModeAll(ControlModes mode, void * arg)
 {
-	for (int i = 0; i < ACTUATORS_MAX; i++)
+	for (int i = 0; i < g_num_actuators; i++)
 		Actuator_SetMode(&g_actuators[i], mode, arg);
 }
 
@@ -160,17 +169,22 @@ void * Actuator_Loop(void * arg)
 		if (!a->activated)
 			break;
 
-		Actuator_SetValue(a, a->control.start);
+		Actuator_SetValue(a, a->control.start, true);
 		// Currently does discrete steps after specified time intervals
-		while (a->control.steps > 0 && a->activated)
+
+		struct timespec wait;
+		DOUBLE_TO_TIMEVAL(a->control.stepsize, &wait);
+		while (!a->control_changed && a->control.steps > 0 && a->activated)
 		{
-			usleep(1e6*(a->control.stepwait));
+			clock_nanosleep(CLOCK_MONOTONIC, 0, &wait, NULL);
 			a->control.start += a->control.stepsize;
-			Actuator_SetValue(a, a->control.start);
+			Actuator_SetValue(a, a->control.start, true);
 			
 			a->control.steps--;
 		}
-		usleep(1e6*(a->control.stepwait));
+		if (a->control_changed)
+			continue;
+		clock_nanosleep(CLOCK_MONOTONIC, 0, &wait, NULL);
 
 		//TODO:
 		// Note that although this loop has a sleep in it which would seem to make it hard to enforce urgent shutdowns,
@@ -206,12 +220,13 @@ void Actuator_SetControl(Actuator * a, ActuatorControl * c)
  * @param a - The Actuator
  * @param value - The value to set
  */
-void Actuator_SetValue(Actuator * a, double value)
+void Actuator_SetValue(Actuator * a, double value, bool record)
 {
 	if (a->sanity != NULL && !a->sanity(a->user_id, value))
 	{
 		//ARE YOU INSANE?
-		Fatal("Insane value %lf for actuator %s", value, a->name);
+		Log(LOGERR,"Insane value %lf for actuator %s", value, a->name);
+		return;
 	}
 	if (!(a->set(a->user_id, value)))
 	{
@@ -219,11 +234,19 @@ void Actuator_SetValue(Actuator * a, double value)
 	}
 
 	// Set time stamp
-	struct timeval t;
-	gettimeofday(&t, NULL);
-	// Record and save DataPoint
-	DataPoint d = {TIMEVAL_DIFF(t, *Control_GetStartTime()), value};
-	Data_Save(&(a->data_file), &d, 1);
+	struct timespec t;
+	clock_gettime(CLOCK_MONOTONIC, &t);
+	DataPoint d = {TIMEVAL_DIFF(t, *Control_GetStartTime()), a->last_setting.value};
+	// Record value change
+	if (record)
+	{	
+		d.time_stamp -= 1e-6;
+		Data_Save(&(a->data_file), &d, 1);
+		d.value = value;
+		d.time_stamp += 1e-6;
+		Data_Save(&(a->data_file), &d, 1);
+	}
+	a->last_setting = d;
 }
 
 /**
@@ -276,8 +299,8 @@ void Actuator_EndResponse(FCGIContext * context, Actuator * a, DataFormat format
  */
 void Actuator_Handler(FCGIContext * context, char * params)
 {
-	struct timeval now;
-	gettimeofday(&now, NULL);
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
 	double current_time = TIMEVAL_DIFF(now, *Control_GetStartTime());
 	int id = 0;
 	char * name = "";
@@ -336,7 +359,7 @@ void Actuator_Handler(FCGIContext * context, char * params)
 		FCGI_RejectJSON(context, "No id or name supplied");
 		return;
 	}
-	else if (id < 0 || id >= ACTUATORS_MAX)
+	else if (id < 0 || id >= g_num_actuators)
 	{
 		FCGI_RejectJSON(context, "Invalid Actuator id");
 		return;
@@ -364,7 +387,7 @@ void Actuator_Handler(FCGIContext * context, char * params)
 			//	If the user doesn't provide all 4 values, the Actuator will get set *once* using the first of the provided values
 			//	(see Actuator_Loop)
 			//  Not really a problem if n = 1, but maybe generate a warning for 2 <= n < 4 ?
-			Log(LOGDEBUG, "Only provided %d values (expect %d) for Actuator setting", n);
+			Log(LOGDEBUG, "Only provided %d values (expect %d) for Actuator setting", n, 4);
 		}
 		// SANITY CHECKS
 		if (c.stepwait < 0 || c.steps < 0 || (a->sanity != NULL && !a->sanity(a->user_id, c.start)))
@@ -373,7 +396,6 @@ void Actuator_Handler(FCGIContext * context, char * params)
 			return;
 		}
 		Actuator_SetControl(a, &c);
-
 	}
 	
 	// Begin response

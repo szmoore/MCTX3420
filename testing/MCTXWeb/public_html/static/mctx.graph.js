@@ -14,6 +14,8 @@ mctx.actuators = {};
 mctx.graph.dependent = null;
 mctx.graph.independent = null;
 mctx.graph.timer = null;
+mctx.graph.running = false;
+mctx.graph.chart = null;
 
 /**
  * Helper - Calculate pairs of (dependent, independent) values
@@ -21,13 +23,21 @@ mctx.graph.timer = null;
  * Appends each value pair to the result
  * @returns result
  */
+/**
+ * Helper - Calculate pairs of (dependent, independent) values
+ * Given input as (time, value) pairs for dependent and independent
+ * Appends each value pair to the result
+ * @param {array[][]} dependent Dependent data to be correlated with independent
+ * @param {array[][]} independent Independent data
+ * @param {array[][]} result Storage location
+ * @returns {dataMerge.result}
+ */
 function dataMerge(dependent, independent, result) {
-	
 	var j = 0;
 	for (var i = 0; i < dependent.length-1; ++i) {
 		var start = dependent[i][0];
 		var end = dependent[i+1][0];
-		var average = 0; var n = 0;
+		var average = 0, n = 0;
 		for (; j < independent.length; ++j) {
 			if (independent[j][0] < start)
 				continue;
@@ -39,31 +49,36 @@ function dataMerge(dependent, independent, result) {
 		if (n > 0) {
 			average /= n;
 			result.push([dependent[i][1], average]);
-		}	
+		}
 	}
 	return result;
 }
 
 /**
  * Helper function adds the sensors and actuators to a form
+ * @param input_type is it a radio? or is it a checkbox?
+ * @param check_first determines whether the first item is checked or not
+ * @param group which group this input belongs to (name field)
  */
-$.fn.deployDevices = function(input_type, check_first) {
-  var formhtml = $(this).html();
-  var formname = $(this).attr("id");
- // formhtml += "<i> Sensors </i>"
-  var checked = "checked";
-  if (!check_first)
-    checked = "";
-  $.each(mctx.sensors, function(key, val) {
-    formhtml += "<input type=\""+input_type+"\" value=\""+val+"\" id=\"sensors\" name=\""+formname+"\""+checked+">" + val + "</input>";
-    checked = "";
-  });
- // formhtml += "<i> Actuators </i>"
-  $.each(mctx.actuators, function(key, val) {
-    formhtml += "<input type=\""+input_type+"\" value=\""+val+"\" id=\"actuators\" name=\""+formname+"\""+checked+">" + val + "</input>";
-    checked = "";
-  });
-  $(this).html(formhtml);
+$.fn.deployDevices = function(input_type, check_first, group) {
+  var container = this;
+  var apply = function(dict, prefix) {
+    $.each(dict, function(key, val) {
+      var attributes = {
+          'type' : input_type, 'value' : key, 'alt' : val,
+          'class' : prefix, 'name' : group, 
+          'id' : prefix + '_' + val //Unique id (name mangling)
+      };
+      var entry = $("<input/>", attributes);
+      var label = $("<label/>", {'for' : prefix + '_' + val, 'text' : val}); 
+      entry.prop("checked", check_first);
+      check_first = false;
+      container.append(entry).append(label);
+    });
+  }
+  
+  apply(mctx.sensors, 'sensors');
+  apply(mctx.actuators, 'actuators');
 };
 
 /**
@@ -71,99 +86,81 @@ $.fn.deployDevices = function(input_type, check_first) {
  * @returns itself (Is this right?)
  */
 $.fn.setDevices = function() {
-	// Query for sensors and actuators
-  var sensor_curtime = 0;
-  var actuator_curtime = 0;
-  return $.when(
-  	$.ajax({url : mctx.api + "?sensors"}).done(function(data) {
-  		mctx.sensors = $.extend(mctx.sensors, data.sensors);
-      sensor_curtime = data.running_time;
-    }),
-    $.ajax({url : mctx.api + "?actuators"}).done(function(data) {
-      mctx.actuators = $.extend(mctx.actuators, data.actuators);
-      actuator_curtime = data.running_time;
-    })
-  ).then(function() {
-    $("#xaxis").deployDevices("radio", false);
-    $("#yaxis").deployDevices("checkbox", true);
-    var c = Math.max(actuator_curtime, sensor_curtime);
-    $("input[name=current_time]", "#time_range").val(c);
+  // Query for sensors and actuators
+  return $.ajax({
+    url : mctx.api + 'identify', 
+    data : {'sensors' : 1, 'actuators' : 1}
+  }).done(function (data) {
+    mctx.sensors = $.extend(mctx.sensors, data.sensors);
+    mctx.actuators = $.extend(mctx.actuators, data.actuators);
     
-    
+    //Always set the 'time' option to be checked
+    $("#xaxis input").prop('checked', true);  
+    $("#xaxis").deployDevices("radio", false, 'xaxis');
+    $("#yaxis").deployDevices("checkbox", true, 'yaxis');
+    $("#current_time").val(data.running_time);
+    //Add event listeners for when the
+    $(".change input").change(function () {
+      $("#graph").setGraph();
+    });
   });
 };
 
-
-
-
-/**
- * Sets the graphs to graph stuff.
- * @returns {$.fn}
- */
-$.fn.setGraph = function () {
-  clearTimeout(mctx.graph.timer);
-  var sensor_url = mctx.api + "sensors";
-  var actuator_url = mctx.api + "actuators";
-
-  var updateData = function(json, data) {
-    for (var i = 0; i < json.data.length; ++i)
-      data.push(json.data[i]);
-    return data;
-  };
-  var graphdiv = this;
-
-
-  // Determine which actuator/sensors to plot
- 
-  var xaxis = $("input[name=xaxis]:checked", "#xaxis");
-  var yaxis = $("input[name=yaxis]:checked", "#yaxis");
-  var start_time = $("#start_time").val();
-  var end_time = $("#end_time").val();
-  if (!$.isNumeric(start_time)) {
-    start_time = null;
+function setGraphStatus(on, failText, keep) {
+  if (on) {
+    mctx.graph.running = true;
+    $("#status-text").html("&nbsp;");
+    $("#graph-run").prop("value", "Pause");
+  } else {
+    mctx.graph.running = false;
+    if (failText) {
+      $("#status-text").text(failText).addClass("fail");
+    } else if (!keep) {
+      $("#status-text").text("Graph stopped").removeClass("fail");
+    }
+    $("#graph-run").prop("value", "Run");
   }
-  if (!$.isNumeric(end_time)) {
-    end_time = null;
+}
+
+function graphUpdater() {
+  var urls = {
+    'sensors' : mctx.graph.api.sensors,
+    'actuators' : mctx.graph.api.actuators
   }
-
-  var devices = {};
-  xaxis.each(function() {
-    devices[$(this).val()] = {};
-    devices[$(this).val()]["url"] = mctx.api + $(this).attr("id");
-    devices[$(this).val()]["data"] = [];
-    devices[$(this).val()]["start_time"] = start_time;
-    devices[$(this).val()]["end_time"] = end_time;
-  });
-  yaxis.each(function() {
-    devices[$(this).val()] = {};
-    devices[$(this).val()]["url"] = mctx.api + $(this).attr("id");
-    devices[$(this).val()]["data"] = [];
-    devices[$(this).val()]["start_time"] = start_time;
-    devices[$(this).val()]["end_time"] = end_time;
-  });
-
- 
+  
   var updater = function () {
-    var time_limit = 20;
     var responses = [];
     var ctime =  $("#current_time");
     
+    var xaxis = mctx.graph.xaxis;
+    var yaxis = mctx.graph.yaxis;
+    var start_time = mctx.graph.start_time;
+    var end_time = mctx.graph.end_time;
+    var devices = mctx.graph.devices;
+    
+    if (xaxis.size() < 1 || yaxis.size() < 1) {
+      setGraphStatus(false, "No x or y axis selected.");
+      return;
+    }
     
     $.each(devices, function(key, val) {
-      if (devices[key].url === sensor_url || devices[key].url === actuator_url) {
-       // alert("AJAX");
-        //alert(key);
-        //alert(devices[key].url);
-        parameters = {name : key};
-        if (start_time != null) {
-          //alert("start_time = " + start_time);
-          parameters = $.extend(parameters, {start_time : start_time});
+      if (val.urltype in urls) {
+        var parameters = {id : val.id};
+        if (start_time !== null) {
+          parameters.start_time = start_time;
         }
-        if (end_time != null)
-          parameters = $.extend(parameters, {end_time : end_time});
-        responses.push($.ajax({url : devices[key].url, data : parameters}).done(function(json) {
+        if (end_time !== null) {
+          parameters.end_time = end_time;
+        }
+        responses.push($.ajax({url : urls[val.urltype], data : parameters})
+        .done(function(json) {
           //alert("Hi from " + json.name);
-          var dev = devices[json.name].data;
+          if (!$("#status-text").checkStatus(json)) {
+            setGraphStatus(false, null, true); //Don't reset text, checkstatus just set it.
+            return;
+          }
+          
+          var dev = val.data;
           for (var i = 0; i < json.data.length; ++i) {
             if (dev.length <= 0 || json.data[i][0] > dev[dev.length-1][0]) {
               dev.push(json.data[i]);
@@ -177,47 +174,99 @@ $.fn.setGraph = function () {
 
     //... When the response is received, then() will happen (I think?)
     $.when.apply(this, responses).then(function () {
-      
-      var plot_data = [];
-      yaxis.each(function() {
-        //alert("Add " + $(this).val() + " to plot");
-        if (xaxis.val() === "time") {
-          //alert("Against time");
-          plot_data.push(devices[$(this).val()].data);
+      if (mctx.graph.running) {
+        var plot_data = [];
+        
+        yaxis.each(function() {
+          //alert("Add " + $(this).val() + " to plot");
+          if (xaxis.attr("alt") === "time") {
+            //alert("Against time");
+            plot_data.push(devices[$(this).attr("alt")].data);
+          } else {
+            var result = []
+            dataMerge(devices[xaxis.attr("alt")].data, 
+                      devices[$(this).attr("alt")].data, result);
+            plot_data.push(result);
+          }
+        });
+        
+        if (mctx.graph.chart !== null) {
+          mctx.graph.chart.setData(plot_data);
+          mctx.graph.chart.setupGrid(); 
+          mctx.graph.chart.draw();
+        } else {
+          mctx.graph.chart = $.plot("#graph", plot_data);
         }
-        else {
-          var result = []
-          dataMerge(devices[xaxis.val()].data, devices[$(this).val()].data, result);
-          /*
-          var astr = "[";
-          for (var i = 0; i < result.length; ++i)
-            astr += "[" + result[i][0] + "," + result[i][1] + "]" + ",";
-          astr += "]";
-          alert(astr);
-          */
-          plot_data.push(result);
-        }
-      });
-      
-      //alert(plot_data + "");
-      //alert("Plot happened");
-      $.plot("#graph", plot_data);
-      mctx.graph.timer = setTimeout(updater, 1000);
-    }, function () {alert("Graph crashed");});
+        mctx.graph.timer = setTimeout(updater, 1000);
+      }
+    }, function () {
+      setGraphStatus("Connection issue - graph stopped.");
+      //This will always happen when a user closes the page
+      //alert("Graph crashed"); 
+    });
   };
   
+  setGraphStatus(true);
   updater();
+  return this;
+}
+
+/**
+ * Sets the graphs to graph stuff.
+ * @returns {$.fn}
+ */
+$.fn.setGraph = function () {
+  // Determine which actuator/sensors to plot
+  var xaxis = $("#xaxis input[name=xaxis]:checked");
+  var yaxis = $("#yaxis input[name=yaxis]:checked");
+  if (xaxis.size() < 1 || yaxis.size() < 1) {
+    //nothing to plot...
+    setGraphStatus(false, "No x or y axis selected.");
+    return;
+  }
+  
+  var start_time = $("#start_time").val();
+  var end_time = $("#end_time").val();
+  if (!$.isNumeric(start_time)) {
+    start_time = null;
+  }
+  if (!$.isNumeric(end_time)) {
+    end_time = null;
+  }
+
+  var devices = {};
+  var populateDict = function () {
+    var dict = {};
+    dict['urltype'] = $(this).attr("class");
+    dict['id'] = $(this).attr("value");
+    dict['data'] = [];
+    dict['start_time'] = start_time;
+    dict['end_time'] = end_time;
+    devices[$(this).attr("alt")] = dict;
+  };
+  xaxis.each(populateDict);
+  yaxis.each(populateDict);
+  
+  mctx.graph.xaxis = xaxis;
+  mctx.graph.yaxis = yaxis;
+  mctx.graph.start_time = start_time;
+  mctx.graph.end_time = end_time;
+  mctx.graph.devices = devices;
+  
+  if (!mctx.graph.running) {
+    $("#graph-run").val("Pause");
+    $("#status-text").text("")
+    graphUpdater();
+  }
+  
   return this;
 };
 
 $.fn.runButton = function() {
-  //alert($(this).val());
-  if ($(this).val() === "Run") {
-    $("#graph").setGraph();
-    $(this).val("Pause");
-  }
-  else {
+  if (mctx.graph.running) {
+    setGraphStatus(false);
     clearTimeout(mctx.graph.timer);
-    $(this).val("Run");
+  } else {
+    $("#graph").setGraph();
   }
 };

@@ -4,15 +4,38 @@
 #include <string.h>
 #include <stdio.h>
 
+CvCapture *capture;
+int captureID = -1;
+
 void Image_Handler(FCGIContext * context, char * params)
 {
-	static CvCapture * capture = NULL;
-	if (capture == NULL) {
-		capture = cvCreateCameraCapture(0);
-		//limit resolution to work on bbb
-		cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, 352);
-		cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, 288);
+	int num = 0, width = 800, height = 600;
+	FCGIValue val[] = {
+		{"num", &num, FCGI_INT_T},
+		{"width", &width, FCGI_INT_T},
+		{"height", &height, FCGI_INT_T}
+	};
+	if (!FCGI_ParseRequest(context, params, val, 3))
+		return;
+	else if (num < 0 || num > 1) {
+		FCGI_RejectJSON(context, "Invalid capture number");
+		return;
+	} else if (width <= 0 || height <= 0) {
+		FCGI_RejectJSON(context, "Invalid width/height");
+		return;
 	}
+
+	if (captureID != num) {
+		if (captureID >= 0) {
+			cvReleaseCapture(&capture);
+		}
+		capture = cvCreateCameraCapture(num);
+		captureID = num;
+	}
+
+	cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, width);
+	cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, height);
+
 	static int p[] = {CV_IMWRITE_JPEG_QUALITY, 100, 0};
 
 	IplImage * frame = cvQueryFrame(capture);

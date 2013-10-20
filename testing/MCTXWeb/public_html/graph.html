@@ -4,78 +4,145 @@
     <title>MCTX3420 Web Interface</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <!--[if lte IE 8]>
-      <script language="javascript" type="text/javascript" src="static/excanvas.min.js"></script>
+    <script language="javascript" type="text/javascript" src="static/excanvas.min.js"></script>
     <![endif]-->
     <script type="text/javascript" src="static/jquery-1.10.1.min.js"></script>
     <script type="text/javascript" src="static/jquery.flot.min.js"></script>
+
     <script type="text/javascript" src="static/mctx.gui.js"></script>
-	 <script type="text/javascript" src="static/mctx.graph.js"></script>
-    
+    <script type="text/javascript" src="static/mctx.graph.js"></script>
     <link rel="stylesheet" type="text/css" href="static/style.css">
     <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
     <script type="text/javascript">
-      runBeforeLoad().always(function () {
-        $(document).ready(function () {
+      runBeforeLoad().always(function() {
+        $(document).ready(function() {
           $("#graph-controls").setDevices();
-          $("#graph-run").runButton();
-          
-       });       
-      })
+        });
+      });
 
     </script>
   </head>
-  
+
   <body>
-    <div id="header-wrap"></div>
+    <div id="header-wrap">
+      <div id="header">
+        <div id="leftnav">
+          <a href="http://www.uwa.edu.au/" target="_blank">
+            <img alt = "The University of Western Australia"
+                 src="static/uwacrest-text.png">
+          </a>
+          <span id="title">Exploding Cans</span>
+        </div>
+        <div id="rightnav">
+          <span id="welcome-container">
+          </span>
+          <span id="date">
+            <script type="text/javascript">getDate();</script>
+          </span>
+          <div id="logout-container">
+            <form action="#">
+              <div>
+                <input type="button" id="logout" value="Logout">
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="clear"></div>
+      </div>
+    </div>
+    <!-- End header -->
+
     <div id="content-wrap">
+      <noscript>
+        <div class="widget centre">
+          <div class="title">JavaScript required</div>
+          This website requires JavaScript to function correctly.
+          Please enable JavaScript to use this site.
+        </div>
+      </noscript>
+
       <div id="content">
+        <div class="widget" id="sidebar-show">&gt;</div>
+        <div id="sidebar">
+          <div class="widget">
+            <div id="sidebar-hide">&lt;</div>
+            <div class="title">Navigation menu</div>
+            <div id="sidebar-menu" class="nav-menu">
+              <ul>
+                <li><a href="index.html"><span>Home</span></a></li>
+                <li><a href="control.html"><span>Experiment control</span></a></li>
+                <li><a href="graph.html"><span>Experiment graphs</span></a></li>
+                <li><a href="data.html"><span>Experiment data</span></a></li>
+                <li><a href="pintest.html"><span>Pin debugging</span></a></li>
+                <li class="last"><a href="help.html"><span>Help</span></a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <!-- End sidebar -->
+
         <div id="main">
           <div class="widget">
             <div class="title">Graph</div>
-              <div id="graph" class="plot">
-                <!-- graph placeholder -->
-              </div>
+            <!-- graph placeholder -->
+            <div id="graph" class="plot"></div>
           </div>
           <div class="widget" id="graph-controls">
-              <!--<div class="title">Visualise</div>-->
-              <b>X-Axis</b>
-                <form id="xaxis" onChange=$("#graph").setGraph()> <input type="radio" name="xaxis" value="time" id="time" checked="yes">time</input> </form>
-                <b>Y-Axis</b>
-                <form id="yaxis" onChange=$("#graph").setGraph()>  </form>
-                <!--b>Right Y-Axis</b>
-                <form id="y2axis" onChange=$("#graph").setGraph()> <input type="radio" name="y2axis" value="none" id="none" checked="yes">none</input></form>-->
+            <!--<div class="title">Visualise</div>-->
+            <b>X-Axis</b>
+            <form id="xaxis" class="change">
+              <input type="radio" name="xaxis" alt="time" id="time" checked="checked">
+              <label for="time">time</label>
+            </form>
+            <b>Y-Axis</b>
+            <form id="yaxis" class="change">  </form>
+            <!--b>Right Y-Axis</b>
+            <form id="y2axis" onChange=$("#graph").setGraph()> <input type="radio" name="y2axis" value="none" id="none" checked="yes">none</form>-->
 
-                <div> 
-                  <form id="time_range" onChange=$("#graph").setGraph()>
-                    <p> 
-                        Time of Last Update <input type="text" value="" id="current_time" disabled></input>
-                        Start Time <input type="text" value="" id="start_time"></input> 
-                        End Time <input type="text" value="" id="end_time"></input>
-                    </p>
-                </form>
-                </div>
-                <input type="button" value="Run" id="graph-run" onClick=$("#graph-run").runButton()></input>
-                <input type="button" value="Open New Graph" disabled></input>
-                <input type="button" value="Save Graph Image" disabled></input>
-                <input type="button" value="Dump Raw Data" disabled></input>
-            </div>
-        
-        <!-- TODO: Put this on its own page? 
-          <div class="widget">
-              <div class="title">Controls</div>
-              <form id="controls">
-                <p>Mode: <input type="radio" name="mode" value="normal">Normal</input>
-                      <input type="radio" name="mode" value="explode">EXPLODE!</input> </p>
-                Filename: <input type="text"> </input>
-                <input type="button" value="Stop" id="stopstart"></input>
-                <input type="button" value="Pause" id="runpause"></input>
-                <input type="button" value="Load"></input>
-               --> 
-                
+            <div> 
+              <form id="time_range" class="change">
+                <p> 
+                  Time of Last Update <input type="text" value="" id="current_time" disabled>
+                  Start Time <input type="text" value="" id="start_time"> 
+                  End Time <input type="text" value="" id="end_time">
+                </p>
               </form>
+            </div>
+            <input type="button" value="Run" id="graph-run" onClick="$('#graph-run').runButton()">
+            <input type="button" value="Open New Graph" disabled>
+            <input type="button" value="Save Graph Image" id="saveimage">
+            <input type="button" value="Dump Raw Data" disabled>
+            <script type="text/javascript">
+              $("#saveimage").click(function() {
+                $("canvas").each(function() {
+                  var image = new Image();
+
+                  window.open(this.toDataURL("image/png"));
+                  $("#graph-controls").append(image);
+                });
+              });
+            </script>
+            
+            <div id="status-text">&nbsp;</div>
           </div>
+          
+
+          <!-- TODO: Put this on its own page? 
+            <div class="widget">
+                <div class="title">Controls</div>
+                <form id="controls">
+                  <p>Mode: <input type="radio" name="mode" value="normal">Normal
+                        <input type="radio" name="mode" value="explode">EXPLODE! </p>
+                  Filename: <input type="text"> 
+                  <input type="button" value="Stop" id="stopstart">
+                  <input type="button" value="Pause" id="runpause">
+                  <input type="button" value="Load">
+                </form>
+            </div>
+          -->
         </div>
       </div>
+      <!-- End main content -->
     </div>
   </body>
 </html>

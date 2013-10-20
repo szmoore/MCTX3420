@@ -29,7 +29,7 @@ int g_num_sensors = 0;
  * @param min_warn - Minimum warning threshold; program will log warnings if the value falls below this threshold
  * @returns Number of actuators added so far
  */
-int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn cleanup, double max_error, double min_error, double max_warn, double min_warn)
+int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn cleanup, SanityFn sanity)
 {
 	if (++g_num_sensors > SENSORS_MAX)
 	{
@@ -45,19 +45,23 @@ int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn
 	s->name = name;
 	s->read = read; // Set read function
 	s->init = init; // Set init function
-	if (init != NULL)
-		init(name, user_id); // Call it
 
 	// Start by averaging values taken over a second
-	s->sample_us = 1e6;
+	DOUBLE_TO_TIMEVAL(1e-4, &(s->sample_time));
 	s->averages = 1;
+	s->num_read = 0;
 
-	// Set warning/error thresholds
-	s->thresholds.max_error = max_error;
-	s->thresholds.min_error = min_error;
-	s->thresholds.max_warn = max_warn;
-	s->thresholds.min_warn = min_warn;
+	// Set sanity function
+	s->sanity = sanity;
 
+	if (init != NULL)
+	{
+		if (!init(name, user_id))
+			Fatal("Couldn't init sensor %s", name);
+	}
+
+	s->current_data.time_stamp = 0;
+	s->current_data.value = 0;
 	return g_num_sensors;
 }
 
@@ -68,11 +72,14 @@ int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn
  */
 #include "sensors/resource.h"
 #include "sensors/strain.h"
-#include "sensors/piped.h"
+#include "sensors/pressure.h"
 void Sensor_Init()
 {
-	Sensor_Add("cpu_stime", RESOURCE_CPU_SYS, Resource_Read, NULL, NULL, 1e50,-1e50,1e50,-1e50);	
-	Sensor_Add("cpu_utime", RESOURCE_CPU_USER, Resource_Read, NULL, NULL, 1e50,-1e50,1e50,-1e50);	
+	Sensor_Add("cpu_stime", RESOURCE_CPU_SYS, Resource_Read, NULL, NULL, NULL);	
+	Sensor_Add("cpu_utime", RESOURCE_CPU_USER, Resource_Read, NULL, NULL, NULL);	
+	//Sensor_Add("pressure_high0", PRES_HIGH0, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
+	//Sensor_Add("pressure_high1", PRES_HIGH1, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
+	//Sensor_Add("pressure_low0", PRES_LOW0, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
 	//Sensor_Add("../testing/count.py", 0, Piped_Read, Piped_Init, Piped_Cleanup, 1e50,-1e50,1e50,-1e50);
 	//Sensor_Add("strain0", STRAIN0, Strain_Read, Strain_Init, 5000,0,5000,0);
 	//Sensor_Add("strain1", STRAIN1, Strain_Read, Strain_Init, 5000,0,5000,0);
@@ -115,11 +122,15 @@ void Sensor_SetMode(Sensor * s, ControlModes mode, void * arg)
 			{
 				// Set filename
 				char filename[BUFSIZ];
-				const char *experiment_name = (const char*) arg;
+				const char *experiment_path = (const char*) arg;
+				int ret;
 
-				if (snprintf(filename, BUFSIZ, "%s_%d", experiment_name, s->id) >= BUFSIZ)
+				ret = snprintf(filename, BUFSIZ, "%s/sensor_%d", experiment_path, s->id);
+
+				if (ret >= BUFSIZ) 
 				{
-					Fatal("Experiment name \"%s\" too long (>%d)", experiment_name, BUFSIZ);
+					Fatal("Experiment path \"%s\" too long (%d, limit %d)",
+							experiment_path, ret, BUFSIZ);
 				}
 
 				Log(LOGDEBUG, "Sensor %d with DataFile \"%s\"", s->id, filename);
@@ -178,26 +189,6 @@ void Sensor_SetModeAll(ControlModes mode, void * arg)
 
 
 /**
- * Checks the sensor data for unsafe or unexpected results 
- * @param sensor_id - The ID of the sensor
- * @param value - The value from the sensor to test
- */
-void Sensor_CheckData(Sensor * s, double value)
-{
-	if( value > s->thresholds.max_error || value < s->thresholds.min_error)
-	{
-		Log(LOGERR, "Sensor %s at %f is above or below its safety value of %f or %f\n",s->name,value, s->thresholds.max_error, s->thresholds.min_error);
-		//new function that stops actuators?
-		//Control_SetMode(CONTROL_EMERGENCY, NULL)
-	}
-	else if( value > s->thresholds.max_warn || value < s->thresholds.min_warn)
-	{
-		Log(LOGWARN, "Sensor %s at %f is above or below its warning value of %f or %f\n", s->name,value,s->thresholds.max_warn, s->thresholds.min_warn);	
-	}
-}
-
-
-/**
  * Record data from a single Sensor; to be run in a seperate thread
  * @param arg - Cast to Sensor* - Sensor that the thread will handle
  * @returns NULL (void* required to use the function with pthreads)
@@ -214,21 +205,38 @@ void * Sensor_Loop(void * arg)
 		d.value = 0;
 		bool success = s->read(s->user_id, &(d.value));
 
-		struct timeval t;
-		gettimeofday(&t, NULL);
+		struct timespec t;
+		clock_gettime(CLOCK_MONOTONIC, &t);
 		d.time_stamp = TIMEVAL_DIFF(t, *Control_GetStartTime());	
 		
 		if (success)
 		{
-
-
-			Sensor_CheckData(s, d.value);
-			Data_Save(&(s->data_file), &d, 1); // Record it
+			if (s->sanity != NULL)
+			{
+				if (!s->sanity(s->user_id, d.value))
+				{
+					Fatal("Sensor %s (%d,%d) reads unsafe value", s->name, s->id, s->user_id);
+				}
+			}
+			s->current_data.time_stamp += d.time_stamp;
+			s->current_data.value += d.value;
+			
+			if (++(s->num_read) >= s->averages)
+			{
+				s->current_data.time_stamp /= s->averages;
+				s->current_data.value /= s->averages;
+				Data_Save(&(s->data_file), &(s->current_data), 1); // Record it
+				s->num_read = 0;
+				s->current_data.time_stamp = 0;
+				s->current_data.value = 0;
+			}
 		}
 		else
 			Log(LOGWARN, "Failed to read sensor %s (%d,%d)", s->name, s->id,s->user_id);
 
-		usleep(s->sample_us);
+
+		clock_nanosleep(CLOCK_MONOTONIC, 0, &(s->sample_time), NULL);
+		
 	}
 	
 	// Needed to keep pthreads happy
@@ -299,10 +307,9 @@ void Sensor_EndResponse(FCGIContext * context, Sensor * s, DataFormat format)
  */
 void Sensor_Handler(FCGIContext *context, char * params)
 {
-	struct timeval now;
-	gettimeofday(&now, NULL);
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
 	double current_time = TIMEVAL_DIFF(now, *Control_GetStartTime());
-
 	int id = 0;
 	const char * name = "";
 	double start_time = 0;
@@ -375,7 +382,7 @@ void Sensor_Handler(FCGIContext *context, char * params)
 			FCGI_RejectJSON(context, "Negative sampling speed!");
 			return;
 		}		
-		s->sample_us = 1e6*sample_s;
+		DOUBLE_TO_TIMEVAL(sample_s, &(s->sample_time));
 	}
 	
 	
