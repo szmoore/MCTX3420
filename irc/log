@@ -5530,3 +5530,39 @@
 15:46 < jtanx> okay
 15:50 < jtanx> finally... back to actually coding the control page
 22:59 -!- jtanx [~asfa@220-253-133-241.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Sun Oct 20 2013
+15:56 -!- Callum [~Callum@106-68-161-33.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:59 < Callum> hey sam, got a link to the dropbox?
+16:06 < sam_moore> https://www.dropbox.com/sh/km90dmbdrgin3mg/OimGp0qopv
+16:06 < Callum> thanks
+16:07 < sam_moore> I think I might be able to hack together a user management system based on UserCake
+16:08 < sam_moore> Someone else will have to make it look pretty though
+17:25 < Callum> opencv is fucking retarded.
+17:25 < Callum> C++ has a bunch of different functions for each individual type of blur
+17:25 < Callum> C has one function but you pass it an ID for which type of blur you want to use..
+17:30 < sam_moore> OpenCV used to be in C, but they moved it to C++
+17:30 < sam_moore> But it still supports the C API
+17:30 < sam_moore> Through some wierd magic
+17:30 < sam_moore> At least, if you run our program in valgrind, it reports a lot of stuff happening with things like "std::string" and "cv::Mat"; ie: C++ namespaces
+17:32 < Callum> yea. its a bit of a bitch to code in C...all the documentation is for c++ pretty much
+17:32 < Callum> like right now im trying to find out how to simply set all elements to 0.. where in c++ its just Mat::Scalar(0)
+17:32 < sam_moore> If you really want you can probably compile in C++, but I'm not sure if it will cause issues elsewhere
+17:33 < Callum> il just keep going like this. just a couple of things atm i need to figure out. hopefully thats it
+17:33 < sam_moore> Cool
+17:34 < sam_moore> The server now supports 3 entirely different authentication methods :S
+17:34 < Callum> haha. a little excessive.
+17:34 < Callum> hopefully they'll be happy with atleast one of them..
+17:34 < sam_moore> If we modify UserCake we can run our own user management system
+17:35 < sam_moore> I need to change it so that instead of users registering themselves it's the admin that adds users manually though
+17:35 < sam_moore> Also we'd have to get email working
+17:57 < Callum> uuh. so using one of his test images for the microscope, running it through Canny gives a bunch of squiggly lines all over the place
+17:57 < Callum> its funny, the part which is actually the edge...has the most black
+17:57 < Callum> il try some of his other images and see what it does
+20:22 -!- Callum [~Callum@106-68-161-33.dyn.iinet.net.au] has quit [EOF From client]
+20:50 -!- MctxBot_ [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:05 -!- MctxBot [~twang@220-253-133-241.dyn.iinet.net.au] has quit [Ping timeout]
+21:06 -!- Irssi: #mctxuwa_softdev: Total of 2 nicks [0 ops, 0 halfops, 0 voices, 2 normal]
+21:08 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:10 < jtanx> working on the report the day before...
+21:10 < jtanx> what is this madness
+22:23 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
