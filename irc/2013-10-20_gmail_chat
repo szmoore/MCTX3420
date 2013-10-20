@@ -1,0 +1,207 @@
+# Conversation held after creating the Week 12 progress report in google docs
+ 
+Jeremy Tan joined group chat.
+me
+9:10 PM
+Heh, I didn't expect everyone to start editing it so fast
+Jeremy Tan
+9:11 PM
+hahah
+what is this madness, working on it the day before
+me
+9:11 PM
+Crazy
+Jeremy: You weren't in IRC, but I hacked together a MySQL authentication thing to work with UserCake.
+Jeremy Tan
+9:11 PM
+oO
+me
+9:11 PM
+It seems to work well...
+Although currently any random can register for an account.
+Jeremy Tan
+9:12 PM
+Sorry, I was really busy sorting out the case study and my databases project (both due today)
+me
+9:12 PM
+That's ok
+Ironic... I spent all of today learning about a database :P
+Jeremy Tan
+9:13 PM
+I was considering using php to redirect the user if they weren't logged it
+in
+but since you got this working, great
+:P
+Never heard of usercake though
+me
+9:14 PM
+http://usercake.com/
+It does need some modification
+For some reason it stores privelage levels in a seperate table to the main users which is a pain for checking if someone is admin or not
+Jeremy Tan
+9:14 PM
+how do you interact with the db? does mysql have a C api?
+me
+9:15 PM
+And of course it has single user registration, so I'm currently trying to make a mass registration form that only the admin can use
+Yes, MySQL has a C API
+Jeremy Tan
+9:15 PM
+that must be a pain to work with
+me
+9:15 PM
+Actually not really
+Jeremy Tan
+9:15 PM
+Really?
+I was trying something similar with sqlite and the django db
+me
+9:15 PM
+At least just for the simple task of looking up a user
+Jeremy Tan
+9:16 PM
+ah
+I got the django one as far as getting the user entry
+but then the data is base64 encoded
+and uses sha256 hashing
+effort
+me
+9:16 PM
+Ahaha
+PHP has the same crypt() function as posix which made it easier
+Jeremy Tan
+9:16 PM
+yeah, except crypt is really insecure
+but I guess they dont care
+so meh
+me
+9:17 PM
+Someone would have to get access to the database to even look at the hashes first
+But MySQL doesn't have a great reputation either
+Jeremy Tan
+9:19 PM
+well that's where the problem lies anyway
+it's all about if the user gets access to the db, then you're in a really bad position if you've used crypt
+mysql has better performance than sqlite though (probably)
+About the control page - we haven't differentiated between a 'strain' and an 'explode' experiment. What controls are also necessary anyway? e.g do we even want the user to be able to control the pressure for the explode version?
+me
+9:20 PM
+The easiest way to do it is to just have "strain/explode" switch the relay and otherwise use the same controls, I'm not sure if that's OK or not though
+Jeremy Tan
+9:23 PM
+Okay
+How does that UMS affect the current api
+and user control
+/login
+me
+9:23 PM
+Not at all
+Jeremy Tan
+9:23 PM
+So is login handled by that cake or the api (or both)?
+me
+9:24 PM
+It's entirely seperate, except you can pass a mysql authentication method to the server
+UserCake handles it's own login
+Our API still has seperate login
+It just accesses the same database
+Jeremy Tan
+9:24 PM
+ahh
+very similar to the django idea then
+user cake is in php?
+me
+9:24 PM
+Yes, I think that's the best way to do it anyway
+And yes, UserCake is PHP
+Jeremy Tan
+9:26 PM
+Yeah
+Django's annoying to set up, and then you have to worry about python too
+'Yet antoher*'
+hahaha
+me
+9:26 PM
+Hmm, what's a good justification for it
+Jeremy Tan
+9:27 PM
+One thing though
+we probably have to change cookie handling in the api
+usercake probably stores its own cookies
+me
+9:27 PM
+Maybe, and yes
+Jeremy Tan
+9:27 PM
+and that will definitely screw up things
+me
+9:27 PM
+Maybe... probably...
+Jeremy Tan
+9:27 PM
+but I was planning on doing something about taht anyway
+me
+9:27 PM
+Iceweasel seems to always send the nameless cookie first...
+Jeremy Tan
+9:27 PM
+oh yeah, that's right
+me
+9:27 PM
+So I just truncated the cookie at the first ';'
+Jeremy Tan
+9:28 PM
+yesterday I limited it
+nah
+it snprintfs exactly the size of the control cookie
+so if the cookie's first, then it's all good
+me
+9:28 PM
+I think so
+But when you logout I think it sets the cookie to "0"
+Jeremy Tan
+9:29 PM
+yeah
+shouldn't be an issue since it won't match
+but I was thinking of switching to a named cookie
+PHP can't handle the nameless cookie though (something I found out today)
+me
+9:29 PM
+It shouldn't but it feels wrong...
+Switching to a named cookie is probably a good idea
+Jeremy Tan
+9:29 PM
+yeah
+I'll try that now
+Jeremy Tan
+9:33 PM
+usercake's not on git, is it?
+me
+9:34 PM
+Not yet, it's on my local machine in a new branch
+Should I push it now?
+Jeremy Tan
+9:34 PM
+ah
+that would be good if you could
+Jeremy Tan
+9:43 PM
+You know you've spent too long writing javascript when you default to writing !==
+me
+9:43 PM
+Ahahaha
+me
+9:57 PM
+I think I'll call it quits for now
+Jeremy Tan
+9:58 PM
+Okay
+me
+9:58 PM
+I'll try upload this chat log since we didn't use IRC
+Jeremy Tan
+9:58 PM
+See you tomorrow
+me
+9:58 PM
+Bye
