@@ -592,7 +592,7 @@ void * FCGI_RequestLoop (void *data)
 		
 		if (module_handler) 
 		{
-			if (module_handler != Login_Handler && module_handler != IdentifyHandler && module_handler)
+			if (g_options.auth_method != AUTH_NONE && module_handler != Login_Handler && module_handler != IdentifyHandler && module_handler)
 			//if (false) // Testing
 			{
 				if (!FCGI_HasControl(&context))
