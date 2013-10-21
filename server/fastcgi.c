@@ -33,15 +33,11 @@
  * @param context The context to work in
  * @param params User specified paramters: [actuators, sensors]
  */ 
-static void IdentifyHandler(FCGIContext *context, char *params) {
+static void IdentifyHandler(FCGIContext *context, char *params)
+{
 	bool ident_sensors = false, ident_actuators = false;
-	char control_key[CONTROL_KEY_BUFSIZ];
-	bool has_control;
 	int i;
 
-	snprintf(control_key, CONTROL_KEY_BUFSIZ, "%s", getenv("COOKIE_STRING"));
-	has_control = FCGI_HasControl(context, control_key);
-	
 	FCGIValue values[2] = {{"sensors", &ident_sensors, FCGI_BOOL_T},
 					 {"actuators", &ident_actuators, FCGI_BOOL_T}};
 	if (!FCGI_ParseRequest(context, params, values, 2))
@@ -55,6 +51,8 @@ static void IdentifyHandler(FCGIContext *context, char *params) {
 	clock_getres(CLOCK_MONOTONIC, &t);
 	FCGI_JSONDouble("clock_getres", TIMEVAL_TO_DOUBLE(t));
 	FCGI_JSONLong("api_version", API_VERSION);
+	
+	bool has_control = FCGI_HasControl(context);
 	FCGI_JSONBool("logged_in", has_control);
 	FCGI_JSONPair("user_name", has_control ? context->user_name : "");
 	
@@ -165,11 +163,12 @@ bool FCGI_LockControl(FCGIContext *context, const char * user_name, UserType use
  * @param key The control key to be validated.
  * @return TRUE if authorized, FALSE if not.
  */
-bool FCGI_HasControl(FCGIContext *context, const char *key) {
+bool FCGI_HasControl(FCGIContext *context)
+{
 	time_t now = time(NULL);
 	int result = (now - context->control_timestamp) <= CONTROL_TIMEOUT &&
-			key != NULL && context->control_key[0] != '\0' &&
-			!strcmp(context->control_key, key);
+			context->control_key[0] != '\0' &&
+			!strcmp(context->control_key, context->received_key);
 	if (result) {
 		context->control_timestamp = now; //Update the control_timestamp
 	}
@@ -181,10 +180,49 @@ bool FCGI_HasControl(FCGIContext *context, const char *key) {
  * Revokes the current control key, if present.
  * @param context The context to work in
  */
-void FCGI_ReleaseControl(FCGIContext *context) {
+void FCGI_ReleaseControl(FCGIContext *context)
+{
 	*(context->control_key) = 0;
 	// Note: context->user_name should *not* be cleared
 	return;
+}
+
+/**
+ * Gets the control cookie
+ * @param buffer A storage buffer of exactly CONTROL_KEY_BUFSIZ length to
+                 store the control key
+ */
+void FCGI_GetControlCookie(char buffer[CONTROL_KEY_BUFSIZ])
+{
+	const char *cookies = getenv("COOKIE_STRING");
+	const char *start = strstr(cookies, "mctxkey=");
+
+	if (start != NULL) {
+		const char *end;
+		size_t limit = CONTROL_KEY_BUFSIZ;
+		start += 8; //Ah, magic numbers (the length of mctxkey= - 1)
+		end = strchr(start, ';');
+		if (end != NULL && (end-start) < CONTROL_KEY_BUFSIZ) {
+			limit = (end-start) + 1;
+		}
+		snprintf(buffer, limit, "%s", start);
+		Log(LOGDEBUG, "buf: %s", buffer);
+	} else {
+		*buffer = 0;
+	}
+}
+
+/**
+ * Sends the control key to the user as a cookie.
+ * @param context the context to work in
+ * @param set Whether to set or unset the control cookie
+ */
+void FCGI_SendControlCookie(FCGIContext *context, bool set) {
+	if (set) {
+		printf("Set-Cookie: mctxkey=%s\r\n", context->control_key);
+	} else {
+		printf("Set-Cookie: mctxkey=\r\n");
+	}
 }
 
 /**
@@ -347,12 +385,9 @@ void FCGI_BeginJSON(FCGIContext *context, StatusCodes status_code)
  * @param description A short description.
  * @param cookie Optional. If given, the cookie field is set to that value.
  */
-void FCGI_AcceptJSON(FCGIContext *context, const char *description, const char *cookie)
+void FCGI_AcceptJSON(FCGIContext *context, const char *description)
 {
 	printf("Content-type: application/json; charset=utf-8\r\n");
-	if (cookie) {
-		printf("Set-Cookie: %s\r\n", cookie);
-	}
 	printf("\r\n{\r\n");
 	printf("\t\"module\" : \"%s\"", context->current_module);
 	FCGI_JSONLong("status", STATUS_OK);
@@ -514,32 +549,15 @@ void * FCGI_RequestLoop (void *data)
 	while (FCGI_Accept() >= 0) {
 		
 		ModuleHandler module_handler = NULL;
-		char module[BUFSIZ], params[BUFSIZ], control_key[CONTROL_KEY_BUFSIZ];
+		char module[BUFSIZ], params[BUFSIZ];
 		
 		//strncpy doesn't zero-truncate properly
 		snprintf(module, BUFSIZ, "%s", getenv("DOCUMENT_URI_LOCAL"));
 		snprintf(params, BUFSIZ, "%s", getenv("QUERY_STRING"));
 
-		
-		//char cookies[BUFSIZ];
-		//snprintf(cookies, BUFSIZ, "%s", getenv("COOKIE_STRING"));
-		//Log(LOGDEBUG, "ALL cookies %s", cookies); //mmmm
-
-		//Hack to get the nameless cookie only
-		// (works as long as browsers send the nameless cookie first...)
-		snprintf(control_key, CONTROL_KEY_BUFSIZ, "%s", getenv("COOKIE_STRING"));
-		// Ignore any other cookies if the nameless cookie is empty
-		for (int i = 0; i < CONTROL_KEY_BUFSIZ; ++i)
-		{
-			if (control_key[i] == ';')
-			{
-				control_key[i] = '\0';
-				break;
-			}
-		}
-
+		FCGI_GetControlCookie(context.received_key);
 		Log(LOGDEBUG, "Got request #%d - Module %s, params %s", context.response_number, module, params);
-		Log(LOGDEBUG, "Control key: %s", control_key);
+		Log(LOGDEBUG, "Control key: %s", context.received_key);
 
 		
 		//Remove trailing slashes (if present) from module query
@@ -574,10 +592,10 @@ void * FCGI_RequestLoop (void *data)
 		
 		if (module_handler) 
 		{
-			if (g_options.auth_method != AUTH_NONE && module_handler != Login_Handler && module_handler != IdentifyHandler && module_handler)
+			if (module_handler != Login_Handler && module_handler != IdentifyHandler && module_handler)
 			//if (false) // Testing
 			{
-				if (!FCGI_HasControl(&context, control_key))
+				if (!FCGI_HasControl(&context))
 				{
 					FCGI_RejectJSON(&context, "Please login. Invalid control key.");
 					continue;	
