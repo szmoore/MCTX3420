@@ -197,18 +197,17 @@ void FCGI_GetControlCookie(char buffer[CONTROL_KEY_BUFSIZ])
 	const char *cookies = getenv("COOKIE_STRING");
 	const char *start = strstr(cookies, "mctxkey=");
 
+	*buffer = 0; //Clear the buffer
 	if (start != NULL) {
-		const char *end;
-		size_t limit = CONTROL_KEY_BUFSIZ;
-		start += 8; //Ah, magic numbers (the length of mctxkey= - 1)
-		end = strchr(start, ';');
-		if (end != NULL && (end-start) < CONTROL_KEY_BUFSIZ) {
-			limit = (end-start) + 1;
+		int i;
+		start += 8; //length of mctxkey=
+		for (i = 0; i < CONTROL_KEY_BUFSIZ; i++) {
+			if (*start == 0 || *start == ';') {
+				break;
+			}
+			buffer[i] = *start++;
 		}
-		snprintf(buffer, limit, "%s", start);
-		Log(LOGDEBUG, "buf: %s", buffer);
-	} else {
-		*buffer = 0;
+		buffer[i] = 0;
 	}
 }
 
