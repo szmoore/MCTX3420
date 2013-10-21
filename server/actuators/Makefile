@@ -3,7 +3,7 @@ CXX = gcc
 FLAGS = -std=c99 -Wall -pedantic -g -I../
 #-I/usr/include/opencv -I/usr/include/opencv2/highgui For OpenCV
 LIB = -lpthread
-OBJ = ledtest.o filetest.o
+OBJ = relays.o pregulator.o
 HEADERS = $(wildcard *.h)
 RM = rm -f
 

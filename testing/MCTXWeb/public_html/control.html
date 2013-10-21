@@ -18,13 +18,13 @@
         $(document).ready(function () {
           $("form").submit(function () { //Prevent form submit globally
             return false;
-          })
+          });
           
           //Set the status updated
           $("#state-exp").setStatusUpdater();
           
           //Set the logic for the start controls
-          $("#start-controls").submit(function () {
+          $("#start-controls input[type='button']").click(function () {
             var start = $("#start-controls input[type='button']");
             var force = $("#start-controls input[name='start_force']");
             
@@ -49,8 +49,6 @@
             $(this).setPressure(pressure, $("#pressure-result"));
           });
           
-          //Set logic for sensor sample rate thing
-          $("#sensor-select").loadSensorList($("#samplerate-result"));
           $("#samplerate-controls").submit(function () {
             setSampleRate($("#sensor-select option:selected").val(), 
                           $("#sensor-set").val(), $("#samplerate-result"));
@@ -157,8 +155,8 @@
                 &nbsp;
               </p>
               <p class="centre">
-                <input type="submit" name="start_strain" value="Strain test">
-                <input type="submit" name="start_explode" value="Explode test">                
+                <input type="button" name="start_strain" value="Strain test">
+                <input type="button" name="start_explode" value="Explode test">                
               </p>
             </form>
           </div>

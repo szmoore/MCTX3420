@@ -123,7 +123,7 @@ void Cleanup()
 {
 	Log(LOGDEBUG, "Begin cleanup.");
 	Sensor_Cleanup();
-	//Actuator_Cleanup();
+	Actuator_Cleanup();
 	Log(LOGDEBUG, "Finish cleanup.");
 }
 
@@ -199,23 +199,22 @@ int main(int argc, char ** argv)
 
 	
 
-	Sensor_Init();
-	Actuator_Init();
 	Pin_Init();
 	
 	// Try and start things
 	
-	const char *ret;
-	if ((ret = Control_SetMode(CONTROL_START, "test")) != NULL)
-		Fatal("Control_SetMode failed with '%s'", ret);
+	//const char *ret;
+	//if ((ret = Control_SetMode(CONTROL_START, "test")) != NULL)
+	//	Fatal("Control_SetMode failed with '%s'", ret);
 	
 
 	// run request thread in the main thread
 	FCGI_RequestLoop(NULL);
 
 	
-	if ((ret = Control_SetMode(CONTROL_STOP, "test")) != NULL)
-		Fatal("Control_SetMode failed with '%s'", ret);
+	Control_SetMode(CONTROL_STOP, NULL);
+	//if ((ret = Control_SetMode(CONTROL_STOP, "test")) != NULL)
+	//	Fatal("Control_SetMode failed with '%s'", ret);
 	
 	//Sensor_StopAll();
 	//Actuator_StopAll();

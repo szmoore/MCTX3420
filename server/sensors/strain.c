@@ -68,6 +68,24 @@ bool Strain_Init(const char * name, int id)
 	return true;
 }
 
+bool Strain_Cleanup(int id)
+{
+	static bool kill_adc = false;
+	if (!kill_adc)
+	{
+		kill_adc = true;
+		ADC_Unexport(STRAIN_ADC);
+	}
+	int gpio_num = Strain_To_GPIO(id);
+	GPIO_Unexport(gpio_num);
+	return true;
+}
+
+bool Strain_Sanity(int id, double value)
+{
+	return true;
+}
+
 /**
  * Read from a Strain gauge
  * @param id - The strain gauge to read

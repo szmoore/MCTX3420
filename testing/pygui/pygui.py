@@ -13,7 +13,7 @@ import datetime
 import time
 
 #TODO: Replace with URL of testing server
-api_url = "https://daedalus/api"
+api_url = "https://192.168.1.10/api"
 
 def log(message):
 	sys.stderr.write("%s: %s : %s\n" % (sys.argv[0], str(datetime.datetime.now()), message))

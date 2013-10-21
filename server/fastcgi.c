@@ -46,8 +46,7 @@ static void IdentifyHandler(FCGIContext *context, char *params)
 	FCGI_BeginJSON(context, STATUS_OK);
 	FCGI_JSONPair("description", "MCTX3420 Server API (2013)");
 	FCGI_JSONPair("build_date", __DATE__ " " __TIME__);
-	struct timespec t;
-	t.tv_sec = 0; t.tv_nsec = 0;
+	struct timespec t = {0};
 	clock_getres(CLOCK_MONOTONIC, &t);
 	FCGI_JSONDouble("clock_getres", TIMEVAL_TO_DOUBLE(t));
 	FCGI_JSONLong("api_version", API_VERSION);
@@ -65,7 +64,9 @@ static void IdentifyHandler(FCGIContext *context, char *params)
 			if (i > 0) {
 				FCGI_JSONValue(",\n\t\t");
 			}
-			FCGI_JSONValue("\"%d\" : \"%s\"", i, Sensor_GetName(i)); 
+			DataPoint d = Sensor_LastData(i);
+			FCGI_JSONValue("\"%d\" : {\"name\" : \"%s\", \"value\" : [%f,%f] }", 
+				i, Sensor_GetName(i), d.time_stamp, d.value); 
 		}
 		FCGI_JSONValue("\n\t}");
 	}
@@ -76,7 +77,9 @@ static void IdentifyHandler(FCGIContext *context, char *params)
 			if (i > 0) {
 				FCGI_JSONValue(",\n\t\t");
 			}
-			FCGI_JSONValue("\"%d\" : \"%s\"", i, Actuator_GetName(i)); 
+
+			DataPoint d = Sensor_LastData(i);
+			FCGI_JSONValue("\"%d\" : {\"name\" : \"%s\", \"value\" : [%f, %f] }", i, Actuator_GetName(i), d.time_stamp, d.value); 
 		}
 		FCGI_JSONValue("\n\t}");
 	}
@@ -591,13 +594,22 @@ void * FCGI_RequestLoop (void *data)
 		
 		if (module_handler) 
 		{
-			if (g_options.auth_method != AUTH_NONE && module_handler != Login_Handler && module_handler != IdentifyHandler && module_handler)
+			if (module_handler != Login_Handler && module_handler != IdentifyHandler && module_handler)
 			//if (false) // Testing
 			{
 				if (!FCGI_HasControl(&context))
 				{
-					FCGI_RejectJSON(&context, "Please login. Invalid control key.");
-					continue;	
+					if (g_options.auth_method == AUTH_NONE)
+					{	//:(
+						Log(LOGWARN, "Locking control (no auth!)");
+						FCGI_LockControl(&context, NOAUTH_USERNAME, USER_ADMIN);
+						FCGI_SendControlCookie(&context, true);
+					}
+					else
+					{
+						FCGI_RejectJSON(&context, "Please login. Invalid control key.");
+						continue;
+					}
 				}
 
 				//Escape all special characters.
