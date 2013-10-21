@@ -5566,3 +5566,216 @@
 21:10 < jtanx> working on the report the day before...
 21:10 < jtanx> what is this madness
 22:23 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Mon Oct 21 2013
+07:40 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+08:04 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+09:15 -!- jtanx [~asfa@130.95.131.138] has joined #mctxuwa_softdev
+11:00 -!- jtanx [~asfa@130.95.131.138] has quit [Ping timeout]
+11:03 -!- jtanx_ [~asfa@130.95.54.13] has joined #mctxuwa_softdev
+11:03 -!- jtanx_ is now known as jtanx
+11:22 < jtanx> mctxserv[10834]: FATAL: Data_Save (data.c:80) - Error seeking to end of DataFile test/sensor_1 - File too large
+11:23 < jtanx> jeremy@pickle:~/git/MCTX3420/server/test$ du -sh *
+11:23 < jtanx> 0       actuator_0
+11:23 < jtanx> 2.0G    sensor_0
+11:23 < jtanx> 2.1G    sensor_1
+11:23 < jtanx> after running overnight
+11:23 < jtanx> hahaha
+11:36 < sam_moore> The 32G SD card might have been a good thing to buy...
+11:36 < sam_moore> Just in case
+11:36 < jtanx> I tried removing the line i made to fstab
+11:36 < jtanx> still didn't work
+11:36 < sam_moore> Damn
+11:36 < jtanx> was there anything important on it
+11:36 < jtanx> could just flash it with the internal memory
+11:37 < sam_moore> I'd be very hesitant to flash it to the internal memory if it doesn't boot
+11:37 < sam_moore> There may be something else wrong with it
+11:37 < jtanx> I mean
+11:37 < jtanx> there's a script
+11:37 < jtanx> to copy the internal memory to the sd card
+11:37 < sam_moore> Oh, that's cool
+11:37 < sam_moore> We can do that
+11:37 < jtanx> Okay
+11:37 < sam_moore> Since Ubuntu magically solved our image problems, we should use it
+11:38 < jtanx> yeah, that was weird
+11:38 < jtanx> just as long as there's nothing important on the sd card
+11:38 < sam_moore> Probably change the phrasing in the report from "We don't know why this fixed it" to "We fixed it through our 1337 haxor skills"
+11:38 < jtanx> >.>
+11:39 < jtanx> how did you set up usercake?
+11:39 < jtanx> like where's this db-settings.php that it mentions
+11:39 < jtanx> oh right
+11:39 < jtanx> never mind
+11:41 < sam_moore> It comes with an install directory that I removed
+11:41 < sam_moore> We should add that because we might want to modify the database structure
+11:41 < jtanx> yeah
+11:41 < sam_moore> Eg: It's a real pain that user permission levels are in a seperate table to everything else
+11:41 < sam_moore> And doesn't make sense...
+11:41 < jtanx> normalised database design
+11:41 < jtanx> :P
+11:42 < sam_moore> We can go with the "strcmp(user, "admin")" for now
+11:42 < sam_moore> Did you get the email about LEFT vs RIGHT can?
+11:42 < jtanx> yeah
+11:42 < sam_moore> I think I should ask
+11:42 < jtanx> pneumatics wants left
+11:43 < sam_moore> "Are you looking at the box from the FRONT or BACK"
+11:43 < jtanx> everyone else thought right
+11:43 < jtanx> hahahaah
+11:43 < sam_moore> "Also, which side is the FRONT"
+11:43 < jtanx> the case team got blasted this morning
+11:43 < sam_moore> Uh oh
+11:43 < jtanx> apparentl
+11:43 < jtanx> y
+11:43 < sam_moore> Then again, we all get blasted every week
+11:43 < jtanx> true
+11:43 < sam_moore> I think we manage to get the least blasting, but still
+11:43 < jtanx> oh yeah
+11:44 < jtanx> apparently the report IS individual
+11:44 < jtanx> per group
+11:44 < jtanx> I'm getting confused
+11:44 < sam_moore> Haha
+11:44 < jtanx> and it's due next monday???
+11:44 < sam_moore> -_-
+11:44 < jtanx> confusion over the due date
+11:44 < jtanx> adam apparently didn't know, and thought sparkplus would send out the date
+11:44 < jtanx> i don't know what sparkplus has got to do with this though
+11:45 < sam_moore> How long does it have to be?
+11:45 < jtanx> I have no idea
+11:45 < sam_moore> Sparkplus is for our peer evaluation
+11:45 < jtanx> yeah
+11:45 < jtanx> but the relation to report due date?
+11:45 < sam_moore> Pretty lazy if you ask me, and I don't care that they might read this (frankly I doubt it) to get the students to mark each other
+11:46 < jtanx> Yeah
+11:46 < jtanx> urgh
+11:46 < jtanx> getting 1045 (access denied) from mysql
+11:46 < jtanx> pretty sure I've got the pwd right
+11:46 < sam_moore> It might be what happens in the Real World (TM), but this is not some company, this is university, my grades should not depend on someone else
+11:47 < sam_moore> Try with `mysql` from the command line and check the password?
+11:50 < jtanx> herp derp
+11:50 < jtanx> no password
+11:53 < jtanx> now that I think about it, it's almost exactly like the django idea, except in php
+11:53 < sam_moore> Yep
+11:53 < jtanx> when you install it, is there any default login?
+11:54 < sam_moore> No; you register an account and that account becomes the admin
+11:54 < sam_moore> (of course you can also manually update the database)
+11:54 < jtanx> okay
+11:54 < sam_moore> You could change the install script to do that
+11:54 < jtanx> how are usernames and passwords stored in the db?
+11:54 < jtanx> crypt?
+11:54 < jtanx> (do you specify the algorithm?)
+11:55 < sam_moore> passwords are crypted with SHA6
+11:55 < sam_moore> The other stuff is plain text
+11:55 < sam_moore> UserCake default is SHA1 or something
+11:55 < jtanx> sha6?
+11:55 < sam_moore> I changed it to SHA6
+11:55 < jtanx> does it use something called pcks
+11:55 < jtanx> pcsk2
+11:55 < jtanx> pcks2*
+11:56 < sam_moore> Wait... by SHA6 I mean "SHA-Whatever-you-get-with-$6$-in-the-salt"
+11:56 < sam_moore> Which is actually SHA-512
+11:56 < sam_moore> Derp
+11:56 < jtanx> hmm
+11:57 < sam_moore> I couldn't find any references to security issues with doing it this way, but that doesn't mean there aren't any
+11:57 < sam_moore> However there's always going to be some security issues with anything we use
+11:57 < jtanx> yeah
+11:57 < jtanx> about the stuff in login.c
+11:57 < jtanx> you'll definitely want to change tat
+11:57 < jtanx> "SELECT password FROM %s WHERE user_name = \"%s\";", 
+11:58 < jtanx> sql injection right there
+11:58 < sam_moore> I know
+11:58 < sam_moore> That's why Login_Handler removes all non alpha-numeric characters from the user name
+11:58 < jtanx> the password?
+11:58 < sam_moore> The password isn't part of the MySQL query
+11:58 < sam_moore> Only the user name
+11:58 < jtanx> oh right
+11:58 < sam_moore> So the password can contain any characters
+11:59 < jtanx> yeah
+11:59 < jtanx> I know with sqlite you can use placeholders
+11:59 < jtanx> then you 'bind' stuff to those placeholders
+11:59 < sam_moore> I think you can with MySQL too
+11:59 < jtanx> probably
+11:59 < sam_moore> Feel free to change it if you want, I figured it was safe if username was already checked for bad characters
+12:00 < jtanx> yep
+12:03 < jtanx> Pneumatics and electronics wants to test the system this wednesday, starting from 10am
+12:03 < sam_moore> That provides a convenient reason to not work on ENSC1001
+12:03 < sam_moore> So I'll be there
+12:03 < jtanx> Hahaha
+12:08 < jtanx> nneded php5-gd
+12:08 < jtanx> these username/password restrictions are attrocious
+12:57 < sam_moore> The UserCake ones?
+12:57 < jtanx> yeah
+12:57 < sam_moore> Also, sorry I'll be late today
+12:57 < jtanx> that's ok
+12:58 < sam_moore> We're getting there...
+12:59 < sam_moore> The question is, do they want a finished project, or do they want a report on an unfinished project
+12:59 < jtanx> hahaha
+12:59 < sam_moore> Because we'll have to devote a lot of time to the report
+12:59 < jtanx> yes
+13:00 < sam_moore> We've looked into every layer of software from linux kernel drivers to databases and human computer interaction...
+13:01 < jtanx> o.o
+13:01 < sam_moore> I think we can conclude that they are all horrible hacks tied together with shoelaces
+13:01 < jtanx> about usercake
+13:02 < jtanx> is it just
+13:02 < jtanx> you have a set of pages
+13:02 < jtanx> and they're either accessible or not
+13:02 < jtanx> to the user?
+13:02 < sam_moore> Yep, and I know you're thinking we could put the API as one of those pages :P
+13:02 < jtanx> haha
+13:02 < sam_moore> But I think it's better to keep the API seperate from user management
+13:02 < jtanx> didn't think that
+13:02 < jtanx> but was just trying to understand usercake
+13:02 < sam_moore> Fair enough
+13:02 < jtanx> but since everything's in php
+13:03 < jtanx> we can do some templating
+13:03 < jtanx> instead of hacking it together with javascript
+13:03 < sam_moore> Sure
+13:03 < sam_moore> The main modification I wanted to make was a page that lets the admin upload a list of users and get rid of the registration page (or restrict it somehow)
+13:04 < jtanx> yeah
+13:04 < jtanx> but some things are better done in php
+13:04 < jtanx> like that whole 'load the sidebar in jaascript' is crap
+13:04 < jtanx> and the whole 'if not logged in, redirect the user with javascript' too
+13:04 < sam_moore> Feel free to add php to the main gui, it is probably a good choice
+13:05 < jtanx> okay
+13:05 < jtanx> once I figure out how stuff works
+13:05 < sam_moore> I'm just not experienced enough with this sort of web development stuff
+13:05 < jtanx> I can probably say it's a learing experience for everyone
+13:05 < sam_moore> Yes
+13:06 < sam_moore> I am pretty happy with how we've done this, even if it doesn't get finished
+13:06 < jtanx> Yeah, it's quite ok
+13:06 < sam_moore> I think we made good design choices
+13:06 < sam_moore> Probably the best one was when you convinced me to use FastCGI instead of writing a custom HTTP server :P
+13:07 < sam_moore> Or we'd be well and truly screwed when all the requirements for security and user management came along
+13:07 < jtanx> hahaha
+13:07 < jtanx> php
+13:07 < jtanx> custom webserver 
+13:07 < jtanx> well
+13:07 < jtanx> it might have worked
+13:08 < jtanx> call php5-cli with system
+13:08 < jtanx> hahaha
+13:08 < sam_moore> I could probably do something like that with enough time
+13:08 < sam_moore> But it wouldn't really be worth it
+13:14 < jtanx> oh right
+13:14 < jtanx> you changed usercake to use crypt 
+13:15 < jtanx> I'll change the password for the sd card image back to what we used before
+13:16 < jtanx> username will be ubuntu though
+13:18 < sam_moore> ok
+13:18 < jtanx> the internal memory still uses temppwd though
+13:20 < jtanx> if we use usercake we'd have to use php throughout the stuff anyway
+13:20 < jtanx> unless you want it to be publicly visible
+--- Log closed Mon Oct 21 14:11:57 2013
+--- Log opened Mon Oct 21 14:40:20 2013
+14:40 -!- sam_moore [matches@motsugo.ucc.gu.uwa.edu.au] has joined #mctxuwa_softdev
+14:40 -!- Irssi: #mctxuwa_softdev: Total of 2 nicks [0 ops, 0 halfops, 0 voices, 2 normal]
+14:40 -!- Irssi: Join to #mctxuwa_softdev was synced in 3 secs
+14:43 -!- jtanx [~asfa@130.95.54.13] has joined #mctxuwa_softdev
+--- Log closed Mon Oct 21 14:49:35 2013
+--- Log opened Mon Oct 21 15:08:16 2013
+15:08 -!- sam_moore [matches@motsugo.ucc.gu.uwa.edu.au] has joined #mctxuwa_softdev
+15:08 -!- Irssi: #mctxuwa_softdev: Total of 1 nicks [0 ops, 0 halfops, 0 voices, 1 normal]
+15:08 -!- Irssi: Join to #mctxuwa_softdev was synced in 2 secs
+15:17 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:22 -!- jtanx_ [~asfa@130.95.54.13] has joined #mctxuwa_softdev
+15:22 -!- jtanx_ is now known as jtanx
+15:22 -!- jtanx [~asfa@130.95.54.13] has quit [EOF From client]
+18:17 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:36 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+22:14 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+22:57 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
