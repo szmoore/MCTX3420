@@ -1,0 +1,166 @@
+/** Custom fonts **/
+@font-face {
+  font-family: "Open Sans";
+  src: url("OpenSans.ttf"),
+    url("OpenSans.eot");
+}
+
+/** Limit max width and auto-center content **/
+html  {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+body {
+  font-family: "Open Sans", "Lucida Grande","Lucida Sans",Verdana,Arial;
+  font-size: 13px;
+  background-color: #F5F5F5;
+}
+
+hr {
+  border: 0;
+  border-bottom: 1px solid gray;
+}
+
+table {
+  border: none;
+}
+
+table.centre {
+  margin: auto;
+}
+
+table.status, table.status tr, table.status td {
+    padding: 0.2em 0.75em;
+}
+
+th {
+  padding: inherit;
+  border-bottom: 1px solid gray;
+}
+
+img.centre {
+  display: block;
+  margin: auto;
+}
+
+input[type="button"], input[type="submit"] {
+  background-color: #F5F5F5;
+  border: 1px solid #A2A2A2;
+  border-radius: 3px;
+  box-shadow: 1px 1px 1px #BBBBBB;
+  transition: all 0.13s ease 0s;
+}
+
+input[type="button"]:active, input[type="submit"]:active {
+  background-color: #E8E8E8;
+}
+
+/* IE8 width bugfix */
+input[type="text"], input[type="password"] {
+  width: 100%;
+}
+
+#header {
+  background-color: #000000;
+  color: #f2f2f2;
+  padding: 1.5em 2em;
+  margin-top: -1em;
+  margin-bottom: 1em;
+  box-shadow: 0 0 0.5em #444444;
+  border-radius: 4px;
+  transition: all 0.2s ease 0s;
+}
+
+#header #title {
+  font-family: "Open Sans", Arial;
+  font-size: 30px;
+}
+
+#header #rightnav {
+  float: right;
+  padding-top: 0.5em;
+}
+
+#header #menu-container {
+  margin-right: 1.5em;
+  font-size: 15px;
+  display: inline-block;
+}
+
+#header #date {
+  padding-top: 1em;
+  font-size: 12px;
+}
+
+#content  {
+  padding: 1em 2em;
+}
+
+#sidebar{
+  float: right;
+  min-width: 22%;
+}
+
+#sidebar .title {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+#sidebar .item {
+  padding: 0.2em;
+  margin-bottom: 0.5em;
+}
+
+#main {
+  overflow: auto;
+  margin-right: 25%;
+  padding-right: 2em;
+  min-width: 400px;
+}
+
+#main .title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.graph {
+  width: 100%;
+  height: 200px;
+}
+
+.widget {
+  background-color: #EBF4FA;
+  margin: 0.25em 0.25em 1.5em;
+  padding: 1em 1.25em;
+  box-shadow: 0 0 3px #CCCCCC;
+  transition: all 0.2s ease 0s;
+  overflow: auto;
+}
+
+.widget:hover {
+  box-shadow: 0 0 0.25em #AAAAAA;
+}
+
+.widgetPanel {
+  background-color: #B4CFEC;
+  margin: 0.25em 0.25em 1.5em;
+  padding: 1em 1.25em;
+  box-shadow: 0 0 3px #CCCCCC;
+  transition: all 0.2s ease 0s;
+  overflow: auto;
+  /*color: #FFFFFF;*/
+}
+
+/** Hack **/
+.clear {
+  clear: both;
+}
+
+#errorlog {
+  overflow: auto;
+  max-width: 100%;
+  width: 100%;
+  height: 6em;
+}

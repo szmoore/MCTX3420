@@ -1,0 +1,6 @@
+<div class="widgetPanel">
+	<div class="title">ADD TITLE HERE</div>
+	<div>
+		ADD WIDGET CONTENT HERE
+	</div>
+</div>
