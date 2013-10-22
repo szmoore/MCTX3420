@@ -26,6 +26,42 @@ function toggleControls(running) {
   }
 }
 
+function setSampleRate(id, val, result) {
+  var n = Number(val);
+  if (isNaN(n) || n < 0) {
+    result.text("You must give positive numeric values.").addClass("fail");
+    return;
+  }
+  
+  $.ajax({
+    url : mctx.api + 'sensors',
+    data : {id : id, sample_s : n}
+  }).done(function(data) {
+    if (!result.checkStatus(data)) {
+      return;
+    }
+    
+    result.text("Set ok!").removeClass("fail").addClass("pass");
+  });
+};
+
+$.fn.loadSensorList = function (result, input) {
+  var select = this;
+  
+  $.ajax({
+    url : mctx.api + 'identify',
+    data : {'sensors' : 1}
+  }).done(function(data) {
+    if (!result.checkStatus(data)) {
+      return;
+    }
+    for (var id in data.sensors) {
+      var option = $("<option/>", {value : id, text : data.sensors[id]});
+      select.append(option);
+    }
+  });
+}
+
 $.fn.setStatusUpdater = function () {
   var result = this;
   

@@ -48,6 +48,13 @@
             };   
             $(this).setPressure(pressure, $("#pressure-result"));
           });
+          
+          //Set logic for sensor sample rate thing
+          $("#sensor-select").loadSensorList($("#samplerate-result"));
+          $("#samplerate-controls").submit(function () {
+            setSampleRate($("#sensor-select option:selected").val(), 
+                          $("#sensor-set").val(), $("#samplerate-result"));
+          });
        });       
       }).fail(function () {
         $(document).ready(function () {
@@ -177,10 +184,29 @@
                 </tr>
               </table>
               <p class="left" id="pressure-result">
-                
+                &nbsp;
               </p>
               <p class="right">
                 <input type="submit" value="Set pressure">
+              </p>
+            </form>
+            
+            <form id="samplerate-controls" action="#" class="nice clear">
+              <table>
+                <tr>
+                  <td><label for="sensor-select">Select a sensor</label></td>
+                  <td><label for="sensor-set">Set sampling rate (s)</label></td>
+                </tr>
+                <tr>
+                  <td><select id="sensor-select" style="width:100%;"></select></td>
+                  <td><input id="sensor-set" type="text"></td>
+                </tr>
+              </table>
+              <p class="left" id="samplerate-result">
+                &nbsp;
+              </p>
+              <p class="right">
+                <input type="submit" value="Set sampling rate">
               </p>
             </form>
           </div>
