@@ -2,6 +2,8 @@
 *.o
 *.exe
 *.dll
+*.a
+*.lib
 
 .DS_Store
 .DS_Store?
