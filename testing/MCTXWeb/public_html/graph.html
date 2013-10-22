@@ -84,7 +84,7 @@
         <!-- End sidebar -->
 
         <div id="main">
-          <div class="widget">
+          <div class="widget" id="graph-widget">
             <div class="title">Graph</div>
             <!-- graph placeholder -->
             <div id="graph-container">
@@ -104,24 +104,45 @@
             <!--b>Right Y-Axis</b>
             <form id="y2axis" onChange=$("#graph").setGraph()> <input type="radio" name="y2axis" value="none" id="none" checked="yes">none</form>-->
 
-            <div> 
-              <form id="time_range" class="change">
-                <p> 
-                  Time of Last Update <input type="text" value="" id="current_time" disabled>
-                  Start Time <input type="text" value="" id="start_time"> 
-                  End Time <input type="text" value="" id="end_time">
-                </p>
-              </form>
-            </div>
+
+            <form id="time_range" class="change">
+              <p> 
+                Time of Last Update <input type="text" value="" id="current_time" disabled>
+                Start Time <input type="text" value="" id="start_time"> 
+                End Time <input type="text" value="" id="end_time">
+              </p>
+            </form>
+
             <input type="button" value="Run" id="graph-run" onClick="$('#graph-run').runButton()">
             <input type="button" value="Open New Graph" disabled>
             <input type="button" value="Save Graph Image" id="saveimage">
             <input type="button" value="Dump Raw Data" disabled>
             <script type="text/javascript">
               $("#saveimage").click(function() {
-                  html2canvas($("#graph-container")[0], {
+                  html2canvas($("#graph-widget")[0], {
                     onrendered: function(canvas) {
-                      window.open(canvas.toDataURL("image/png"))
+                      var context = canvas.getContext('2d');
+                      context.webkitImageSmoothingEnabled = false;//webkit
+                      context.mozImageSmoothingEnabled = false;//firefox
+                      context.imageSmoothingEnabled = false;
+                      
+                      window.open(canvas.toDataURL("image/png"));
+                      
+                      /*
+                      var canvasOut = document.createElement("canvas");
+                      var ratio = canvas.height / canvas.width;
+                      var width = 1600;
+                      var height = width * ratio;
+                      canvasOut.setAttribute('width', width);
+                      canvasOut.setAttribute('height', height);
+                      
+                      context = canvasOut.getContext('2d');
+                      context.webkitImageSmoothingEnabled = false;//webkit
+                      context.mozImageSmoothingEnabled = false;//firefox
+                      context.imageSmoothingEnabled = false;
+                      context.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, width, height);
+                      
+                      window.open(canvasOut.toDataURL("image/png"))*/
                     }
                   });
               });
