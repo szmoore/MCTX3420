@@ -8,9 +8,11 @@
     <![endif]-->
     <script type="text/javascript" src="static/jquery-1.10.1.min.js"></script>
     <script type="text/javascript" src="static/jquery.flot.min.js"></script>
-
+    <script type="text/javascript" src="static/html2canvas.js"></script>
+    
     <script type="text/javascript" src="static/mctx.gui.js"></script>
     <script type="text/javascript" src="static/mctx.graph.js"></script>
+    
     <link rel="stylesheet" type="text/css" href="static/style.css">
     <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
     <script type="text/javascript">
@@ -85,7 +87,10 @@
           <div class="widget">
             <div class="title">Graph</div>
             <!-- graph placeholder -->
-            <div id="graph" class="plot"></div>
+            <div id="graph-container">
+              <div id="graph" class="plot"></div>
+              <div id="graph-legend"></div>
+            </div>
           </div>
           <div class="widget" id="graph-controls">
             <!--<div class="title">Visualise</div>-->
@@ -114,12 +119,11 @@
             <input type="button" value="Dump Raw Data" disabled>
             <script type="text/javascript">
               $("#saveimage").click(function() {
-                $("canvas").each(function() {
-                  var image = new Image();
-
-                  window.open(this.toDataURL("image/png"));
-                  $("#graph-controls").append(image);
-                });
+                  html2canvas($("#graph-container")[0], {
+                    onrendered: function(canvas) {
+                      window.open(canvas.toDataURL("image/png"))
+                    }
+                  });
               });
             </script>
             

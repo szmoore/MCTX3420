@@ -11,6 +11,8 @@ mctx.graph.api.sensors = mctx.api + "sensors";
 mctx.graph.api.actuators = mctx.api + "actuators";
 mctx.sensors = {};
 mctx.actuators = {};
+
+mctx.graph.devices = {};
 mctx.graph.dependent = null;
 mctx.graph.independent = null;
 mctx.graph.timer = null;
@@ -69,6 +71,7 @@ $.fn.deployDevices = function(input_type, check_first, group) {
           'class' : prefix, 'name' : group, 
           'id' : prefix + '_' + val //Unique id (name mangling)
       };
+      
       var entry = $("<input/>", attributes);
       var label = $("<label/>", {'for' : prefix + '_' + val, 'text' : val}); 
       entry.prop("checked", check_first);
@@ -178,16 +181,20 @@ function graphUpdater() {
         var plot_data = [];
         
         yaxis.each(function() {
+          var series = {};
+          series.label = $(this).attr("alt");
+          
           //alert("Add " + $(this).val() + " to plot");
           if (xaxis.attr("alt") === "time") {
             //alert("Against time");
-            plot_data.push(devices[$(this).attr("alt")].data);
+            series.data = devices[$(this).attr("alt")].data;
           } else {
             var result = []
             dataMerge(devices[xaxis.attr("alt")].data, 
                       devices[$(this).attr("alt")].data, result);
-            plot_data.push(result);
+            series.data = result;
           }
+          plot_data.push(series);
         });
         
         if (mctx.graph.chart !== null) {
@@ -195,7 +202,12 @@ function graphUpdater() {
           mctx.graph.chart.setupGrid(); 
           mctx.graph.chart.draw();
         } else {
-          mctx.graph.chart = $.plot("#graph", plot_data);
+          var options = {
+            legend : {
+              container : "#graph-legend"
+            }
+          };
+          mctx.graph.chart = $.plot("#graph", plot_data, options);
         }
         mctx.graph.timer = setTimeout(updater, 1000);
       }
