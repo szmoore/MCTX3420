@@ -1,0 +1,144 @@
+
+  .bst files
+
+Bibliography style files define the style of a bibliography source list.
+
+One specifies a /bibliography style/ in one's /LaTeX/ document with a line
+
+    \bibliographystyle{/style/} 
+
+where /style/ is the name of a .bst file (like one of those listed in
+the tables below) ... /but *without* the/ .bst /extension,/ e.g. the way
+to specify the author's favourite bibliography style is by
+
+    \bibliographystyle{uwa} 
+
+The standard bibliography styles are plain, unsrt, abbrv and alpha.
+A locally produced bibliography style is: uwa. It is most like abbrv.
+
+
+    .bst files on our system
+
+The most important .bst files on our system are tabulated below
+
+.bst file 	Style description
+abbrv.bst <../bibtex/bst/base/abbrv.bst> 	Like plain.bst, except that
+entries are more compact because first names, month names and journal
+names are abbreviated
+alpha.bst <../bibtex/bst/base/alpha.bst> 	Like plain.bst, except that
+entry labels like `Knu66', formed from the author's name and the year of
+publication, are used.
+plain.bst <../bibtex/bst/base/plain.bst> 	This style is formatted more
+or less as suggested by Mary-Claire van Leunen in /A Handbook for
+Scholars / (Alfred A. Knopf, New York, 1979). Entries are sorted
+alphabetically and are labelled with numbers.
+unsrt.bst <../bibtex/bst/base/unsrt.bst> 	Like plain.bst, except that
+entries appear in the order of their first citation.
+uwa.bst <../bibtexuwa/bst/uwa.bst> 	Like abbrv.bst, but sets off
+adjacent fields more, by using different fonts or punctuation.
+editiontype field added. Also uses \bysame (a horizontal line) in place
+of the author when subsequent references are by the same author(s). Now
+also has a url field. See the header of uwa.bst
+<../bibtexuwa/bst/uwa.bst> for a fuller description.
+uwab.bst <../bibtexuwa/bst/uwab.bst> 	Same as uwa.bst, but does not use
+\bysame.
+
+
+    Other .bst files on our system
+
+.bst file 	Style description
+abbrvnat.bst <../bibtex/bst/natbib/abbrvnat.bst> 	Like plainnat.bst,
+except that entries are more compact because first names, month names
+and journal names are abbreviated. Used with the *natbib* /LaTeX/ package.
+abstract.bst <../bibtex/bst/misc/abstract.bst> 	Like alpha.bst, except
+with abstract field.
+acm.bst <../bibtex/bst/base/acm.bst> 	Like abbrv.bst, except names come
+out /Last, initials/, and in small caps. Some dates are parenthesised.
+For Assoc. for Computing Machinery.
+agsm.bst <../bibtex/bst/misc/agsm.bst> 	Like alpha.bst. Used with the
+*harvard* package. For Australian Government publications.
+apalike.bst <../bibtex/bst/base/apalike.bst> 	Like alpha.bst. Used with
+the *apalike* package. Variant of apa (American Psychology Assoc.) style.
+amsalpha.bst <../bibtex/bst/ams/amsalpha.bst> 	Like alpha.bst, except
+more an /AmS-TeX/ style.
+authordate1.bst <../bibtex/bst/authordate/authordate1.bst> 	Citations
+are of form: (Author, Year). In bibliography there is neither a number
+label (as for the plain style) nor an alpha label (as for the alpha
+style). Author's names are typeset in roman. Uppercase letters in
+article, journal and book titles are left as given in the .bib file.
+Used in conjunction with the *authordate1-4* /LaTeX/ package.
+authordate2.bst <../bibtex/bst/authordate/authordate2.bst> 	Like
+authordate1.bst, but with /downstyle/ titles, i.e. titles are lowercase
+except for the first letter, any letter following a colon, and letters
+protected by { and }. Used in conjunction with the *authordate1-4*
+/LaTeX/ package.
+authordate3.bst <../bibtex/bst/authordate/authordate3.bst> 	Like
+authordate1.bst, but with author's names in small capitals. Used in
+conjunction with the *authordate1-4* /LaTeX/ package.
+authordate4.bst <../bibtex/bst/authordate/authordate4.bst> 	Like
+authordate3.bst, but with /downstyle/ titles, i.e. titles are lowercase
+except for the first letter, any letter following a colon, and letters
+protected by { and }. Used in conjunction with the *authordate1-4*
+/LaTeX/ package.
+amsplain.bst <../bibtex/bst/ams/amsplain.bst> 	Like plain.bst, except
+more an /AmS-TeX/ style.
+chicago.bst <../bibtex/bst/chicago/chicago.bst> 	Like alpha.bst. Used
+with the *chicago* package. Variant of newapa (American Psychology
+Assoc.) style.
+chicagoa.bst <../bibtex/bst/chicago/chicagoa.bst> 	Like alpha.bst. Used
+with the *chicago* package. Variant of newapa (American Psychology
+Assoc.) style, that has annotation field.
+dcu.bst <../bibtex/bst/misc/dcu.bst> 	Like alpha.bst. Used with the
+*harvard* package. By Design Computing Unit (Sydney University).
+ieeetr.bst <../bibtex/bst/base/ieeetr.bst> 	Like plain.bst, with IEEE
+abbreviations. Article titles are in quotes, commas separate all fields
+except after booktitles and before notes.
+gerabbrv.bst <../bibtex/bst/germbib/gerabbrv.bst> 	Like gerplain.bst,
+except that entries are more compact because first names, month names
+and journal names are abbreviated. Used with the *bibgerm* package.
+geralpha.bst <../bibtex/bst/germbib/geralpha.bst> 	Like gerplain.bst,
+except that entry labels like `Knu66', formed from the author's name and
+the year of publication, are used. Used with the *bibgerm* package.
+gerapali.bst <../bibtex/bst/germbib/gerapali.bst> 	Like geralpha.bst.
+Variant of apa (American Psychology Assoc.) style. Used with the
+*bibgerm* package.
+gerplain.bst <../bibtex/bst/germbib/gerplain.bst> 	A German version of
+plain.bst. Used with the *bibgerm* package.
+gerunsrt.bst <../bibtex/bst/germbib/gerunsrt.bst> 	Like gerplain.bst,
+except that entries appear in the order of their first citation. Used
+with the *bibgerm* package.
+is-abbrv.bst <../bibtex/bst/is-base/is-abbrv.bst> 	Like abbrv.bst,
+except ISSN and ISBN fields added.
+is-alpha.bst <../bibtex/bst/is-base/is-alpha.bst> 	Like alpha.bst,
+except ISSN and ISBN fields added.
+is-plain.bst <../bibtex/bst/is-base/is-plain.bst> 	Like plain.bst,
+except ISSN and ISBN fields added.
+is-unsrt.bst <../bibtex/bst/is-base/is-unsrt.bst> 	Like unsrt.bst,
+except ISSN and ISBN fields added.
+jaumsb.bst <../bibtex/bst/aums/jaumsb.bst> 	A style most like abbrev.bst
+used for typesetting bibliographies for the *jaumsb* class (Journal of
+the Australian Mathematics Society - Series B).
+kluwer.bst <../bibtex/bst/misc/kluwer.bst> 	Like alpha.bst. Used with
+the *harvard* package. Kluwer Academic Publishers style.
+line.bst <../bibtex/bst/aums/line.bst> 	A style most like abbrev.bst
+used for typesetting bibliographies for the *jaumsa* class (Journal of
+the Australian Mathematics Society - Series A).
+ltugbib.bst <../bibtex/bst/misc/ltugbib.bst> 	Unkeyed and with initials
+following author names, but otherwise like abbrev.bst. Used with the
+*ltugboat* class.
+named.bst <../bibtex/bst/misc/named.bst> 	Similar to alpha.bst, except
+labels are of form [Author, Year]. Author's names are typeset in roman.
+Uppercase letters in article, journal and book titles are left as given
+in the .bib file. Used in conjunction with the *named* /LaTeX/ package.
+plainnat.bst <../bibtex/bst/natbib/plainnat.bst> 	Like plain.bst, except
+that citations appear in [Author, Year] form. Used with the *natbib*
+/LaTeX/ package.
+siam.bst <../bibtex/bst/misc/siam.bst> 	Like abbrv.bst, except names are
+in small caps, titles are in italics and commas separate all fields
+except notes. Style of Society of Industrial and Applied Maths.
+unsrtnat.bst <../bibtex/bst/natbib/unsrtnat.bst> 	Like plainnat.bst,
+except that entries appear in the order of their first citation. Used
+with the *natbib* /LaTeX/ package.
+
+HTML 3.2 Checked!
+
