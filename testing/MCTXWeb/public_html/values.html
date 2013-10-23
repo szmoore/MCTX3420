@@ -1,0 +1,173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>MCTX3420 Web Interface</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!--[if lte IE 8]>
+      <script language="javascript" type="text/javascript" src="static/excanvas.min.js"></script>
+    <![endif]-->
+    <script type="text/javascript" src="static/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript" src="static/jquery.flot.min.js"></script>
+    <script type="text/javascript" src="static/mctx.gui.js"></script>
+    <script type="text/javascript" src="static/mctx.control.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="static/style.css">
+    <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
+    <script type="text/javascript">
+      function initialiseTable(container, prefix, data) {
+        var hrow = $("<tr/>");
+        var vrow = $("<tr/>");
+        var c = 0;
+        
+        for (var key in data) {
+          var value = data[key];
+          var id = prefix + value.name;
+          var h = $("<td/>").append($("<label/>", {for : id, text : value.name}));
+          var e = $("<td/>").append($("<input/>", {id : id, type : "text", readonly : true, value : value.value[1]}));
+          hrow.append(h);
+          vrow.append(e);
+          
+          if (++c >= 2) {
+            container.append(hrow).append(vrow);
+            c = 0;
+            hrow = $("<tr/>");
+            vrow = $("<tr/>");
+          }
+        }
+        if (c > 0) {
+          container.append(hrow).append(vrow);
+        }
+      }
+      
+      function updateTable(prefix, data) {
+        for (var key in data) {
+          var value = data[key];
+          var id = prefix + value.name;
+          $("#" + id).val(value.value[1]);
+        }
+      }
+    
+      $.fn.setValueUpdater = function (data) {
+        initialiseTable($("#sensor-values table"), "sensors_", data.sensors);
+        initialiseTable($("#actuator-values table"), "actuators_", data.actuators);
+        
+        var updater = function () {
+          $.ajax({
+            url : mctx.api + 'identify',
+            data : {'sensors' : 1, 'actuators' : 1}
+          }).done(function (data) {
+            updateTable("sensors_", data.sensors);
+            updateTable("actuators_", data.actuators);
+            setTimeout(updater, 5000);
+          }).fail(function () {
+            $("#error-message").text("Connection failure").addClass("fail");
+          });
+        };
+        
+        setTimeout(updater, 5000);
+      };
+      
+      runBeforeLoad().done(function () {
+        $(document).ready(function () {
+          $.ajax({
+            url : mctx.api + 'identify',
+            data : {'sensors' : 1, 'actuators' : 1}
+          }).done(function (data) {
+            if (data.control_state !== "Running") {
+              $("#error-message").text("Experiment not running").addClass("fail");
+            } else {
+              $("#values-widget").setValueUpdater(data);
+            }
+          }).fail(function () {
+            $("#error-message").text("Connection failure").addClass("fail");
+          });
+       });       
+      }).fail(function () {
+        $(document).ready(function () {
+         $("#error-message").text("Connection failure").addClass("fail");
+       });  
+      });
+    </script>
+  </head>
+  
+  <body>
+    <div id="header-wrap">
+      <div id="header">
+        <div id="leftnav">
+          <a href="http://www.uwa.edu.au/" target="_blank">
+            <img alt = "The University of Western Australia"
+            src="static/uwacrest-text.png">
+          </a>
+          <span id="title">Exploding Cans</span>
+        </div>
+        <div id="rightnav">
+          <span id="welcome-container">
+          </span>
+          <span id="date">
+            <script type="text/javascript">getDate();</script>
+          </span>
+          <div id="logout-container">
+            <form action="#">
+              <div>
+                <input type="button" id="logout" value="Logout">
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="clear"></div>
+      </div>
+    </div>
+    <!-- End header -->
+    
+    <div id="content-wrap">
+      <noscript>
+        <div class="widget centre">
+          <div class="title">JavaScript required</div>
+          This website requires JavaScript to function correctly.
+          Please enable JavaScript to use this site.
+        </div>
+      </noscript>
+
+      <div id="content">
+        <div class="widget" id="sidebar-show">&gt;</div>
+        <div id="sidebar">
+          <div class="widget">
+            <div id="sidebar-hide">&lt;</div>
+            <div class="title">Navigation menu</div>
+            <div id="sidebar-menu" class="nav-menu">
+              <ul>
+                <li><a href="index.html"><span>Home</span></a></li>
+                <li><a href="control.html"><span>Experiment control</span></a></li>
+                <li><a href="graph.html"><span>Experiment graphs</span></a></li>
+                <li><a href="values.html"><span>Experiment data (live)</span></a></li>
+                <li><a href="data.html"><span>Experiment data</span></a></li>
+                <li><a href="pintest.html"><span>Pin debugging</span></a></li>
+                <li class="last"><a href="help.html"><span>Help</span></a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <!-- End sidebar -->
+
+        <div id="main">
+          <div id="values-widget" class="widget">
+            <p class="right" id="error-message">
+              &nbsp;
+            </p>
+            <div class="sub-title">Sensors</div>
+            <form id="sensor-values" action="#" class="nice clear">
+              <table>
+              </table>
+            </form>
+            <div class="sub-title">Actuators</div>
+            <form id="actuator-values" action="#" class="nice clear">
+              <table>
+              </table>
+            </form>
+          </div>
+        </div>
+        <!-- End main content -->
+      </div>
+    </div>
+  </body>
+</html>

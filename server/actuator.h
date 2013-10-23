@@ -86,6 +86,7 @@ extern Actuator * Actuator_Identify(const char * str); // Identify a Sensor from
 
 extern void Actuator_Handler(FCGIContext *context, char * params); // Handle a FCGI request for Actuator control
 extern const char * Actuator_GetName(int id);
+extern DataPoint Actuator_LastData(int id);
 
 #endif //_ACTUATOR_H
 

@@ -18,6 +18,8 @@
         $(document).ready(function () {
           $("form").submit(function () { //Prevent form submit globally
             return false;
+          }).each(function () {
+            this.reset();
           });
           
           //Set the status updated
@@ -50,7 +52,8 @@
           });
           
           $("#pressure-controls input[name='clear']").click(function () {
-            $("#pressure-set")[0].reset();
+            $("#pressure-controls")[0].reset();
+            $("#pressure-result").text("");
           });
           
           $("#pressure-controls input[name='zero']").click(function () {
@@ -133,6 +136,7 @@
                 <li><a href="index.html"><span>Home</span></a></li>
                 <li><a href="control.html"><span>Experiment control</span></a></li>
                 <li><a href="graph.html"><span>Experiment graphs</span></a></li>
+                <li><a href="values.html"><span>Experiment data (live)</span></a></li>
                 <li><a href="data.html"><span>Experiment data</span></a></li>
                 <li><a href="pintest.html"><span>Pin debugging</span></a></li>
                 <li class="last"><a href="help.html"><span>Help</span></a></li>
@@ -234,46 +238,6 @@
               </p>
             </form>
           </div>
-          
-          <div id="stats-widget" class="widget">
-            <form id="stats" action="#" class="nice clear">
-              <table>
-                <tr>
-                  <td><label for="stats-mainspressure">Mains pressure (kPa)</label></td>
-                  <td><label for="stats-canpressure">Can pressure (kPa)</label></td>
-                </tr>
-                <tr>
-                  <td><input id="stats-mainspressure" type="text" readonly></td>
-                  <td><input id="stats-canpressure" type="text" readonly></td>
-                </tr>
-                <tr class="stats-strain">
-                  <td><label for="stats-strain1">Central hoop strain</label></td>
-                  <td><label for="stats-strain2">Central longitudinal strain</label></td>
-                </tr>
-                <tr class="stats-strain">
-                  <td><input id="stats-strain1" type="text" readonly></td>
-                  <td><input id="stats-strain2" type="text" readonly></td>
-                </tr>
-                <tr class="stats-strain">
-                  <td><label for="stats-strain3">End hoop strain</label></td>
-                  <td><label for="stats-strain4">End longitudinal strain</label></td>
-                </tr>
-                <tr class="stats-strain">
-                  <td><input id="stats-strain3" type="text" readonly></td>
-                  <td><input id="stats-strain4" type="text" readonly></td>
-                </tr>
-                <tr class="stats-strain">
-                  <td><label for="stats-dilatometer">Dilatometer reading</label></td>
-                  <td><label for="stats-dilatometer">Camera feed</label></td>
-                </tr>
-                <tr class="stats-strain">
-                  <td><input id="stats-dilatometer" type="text" readonly></td>
-                  <td><a href="#">Link</a></td>
-                </tr>
-              </table>
-            </form>
-          </div>
-          
         </div>
         <!-- End main content -->
       </div>

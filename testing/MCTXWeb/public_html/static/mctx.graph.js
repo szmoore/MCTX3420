@@ -66,14 +66,17 @@ $.fn.deployDevices = function(input_type, check_first, group) {
   var container = this;
   var apply = function(dict, prefix) {
     $.each(dict, function(key, val) {
+      //Unique id (name mangling)
+      var id = container.attr('id') + "_" + prefix + "_" + val.name;
+      
       var attributes = {
           'type' : input_type, 'value' : key, 'alt' : val.name,
           'class' : prefix, 'name' : group, 
-          'id' : prefix + '_' + val.name //Unique id (name mangling)
+          'id' : id
       };
       
       var entry = $("<input/>", attributes);
-      var label = $("<label/>", {'for' : prefix + '_' + val.name, 'text' : val.name}); 
+      var label = $("<label/>", {'for' : id, 'text' : val.name}); 
       entry.prop("checked", check_first);
       check_first = false;
       container.append(entry).append(label);

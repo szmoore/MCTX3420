@@ -78,7 +78,7 @@ static void IdentifyHandler(FCGIContext *context, char *params)
 				FCGI_JSONValue(",\n\t\t");
 			}
 
-			DataPoint d = Sensor_LastData(i);
+			DataPoint d = Actuator_LastData(i);
 			FCGI_JSONValue("\"%d\" : {\"name\" : \"%s\", \"value\" : [%f, %f] }", i, Actuator_GetName(i), d.time_stamp, d.value); 
 		}
 		FCGI_JSONValue("\n\t}");

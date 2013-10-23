@@ -457,3 +457,9 @@ Actuator * Actuator_Identify(const char * name)
 	}
 	return NULL;
 }
+
+DataPoint Actuator_LastData(int id)
+{
+	Actuator * a = &(g_actuators[id]);
+	return a->last_setting;
+}
