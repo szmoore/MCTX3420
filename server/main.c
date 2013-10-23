@@ -214,7 +214,7 @@ int main(int argc, char ** argv)
 	FCGI_RequestLoop(NULL);
 
 	
-	Conrol_SetMode(CONTROL_STOP, NULL);
+	Control_SetMode(CONTROL_STOP, NULL);
 	//if ((ret = Control_SetMode(CONTROL_STOP, "test")) != NULL)
 	//	Fatal("Control_SetMode failed with '%s'", ret);
 	
