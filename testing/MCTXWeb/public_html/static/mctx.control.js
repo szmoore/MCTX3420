@@ -153,7 +153,8 @@ $.fn.startExperiment = function (group, experiment, force, result) {
    data : data
  }).done(function (data) {
    if (!result.checkStatus(data)) {
-     return;
+    $(group).removeAttr('disabled');
+    return;
    }
    
    //Select the can
@@ -162,6 +163,7 @@ $.fn.startExperiment = function (group, experiment, force, result) {
     data : {name : "can_select", set : can_number}
    }).done(function (data) {
     if (!result.checkStatus(data)) {
+     $(group).removeAttr('disabled');
      return;
     }
     
@@ -171,11 +173,12 @@ $.fn.startExperiment = function (group, experiment, force, result) {
       data : {name : "can_enable", set : 1}
     }).done(function (data) {
       if (!result.checkStatus(data)) {
+        $(group).removeAttr('disabled');
         return;
       }
       result.html("&nbsp;");
       toggleControls(true);
-    }).always(function () {
+    }).fail(function () {
       $(group).removeAttr('disabled');
     });
    }).fail(function () {

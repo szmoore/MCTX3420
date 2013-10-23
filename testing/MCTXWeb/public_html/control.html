@@ -18,9 +18,10 @@
         $(document).ready(function () {
           $("form").submit(function () { //Prevent form submit globally
             return false;
-          }).each(function () {
-            this.reset();
-          });
+          }).trigger("reset"); //Reset forms
+          
+          //Force enable start buttons if previously disabled
+          $("#start-controls input[type='button']").removeAttr("disabled");
           
           //Set the status updated
           $("#state-exp").setStatusUpdater();
@@ -181,7 +182,6 @@
                 &nbsp;
               </p>
               <p class="centre">
-                
                 <input type="button" name="start_explode" value="Explode test">
                 <input type="button" name="start_strain" value="Strain test">                
               </p>
