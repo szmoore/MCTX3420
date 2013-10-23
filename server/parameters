@@ -23,7 +23,7 @@ pin_test="0"
 #auth_uri="ldap://192.168.1.1"
 #auth_uri="ldaps://ldap.pheme.uwa.edu.au" #UWA
 #auth_uri="/etc/shadow"
-auth_uri="shadow"
+#auth_uri="shadow"
 
 # Set to the dn of the LDAP server
 ldap_base_dn="ou=People,dc=daedalus" # Testing
@@ -31,4 +31,5 @@ ldap_base_dn="ou=People,dc=daedalus" # Testing
 
 
 ## OPTIONS TO BE PASSED TO SERVER; DO NOT EDIT
-parameters="-v $verbosity -p $pin_test -A $auth_uri -d $ldap_base_dn"
+parameters="-v $verbosity -p $pin_test"
+# -A $auth_uri -d $ldap_base_dn"

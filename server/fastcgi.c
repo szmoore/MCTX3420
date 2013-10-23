@@ -64,7 +64,9 @@ static void IdentifyHandler(FCGIContext *context, char *params)
 			if (i > 0) {
 				FCGI_JSONValue(",\n\t\t");
 			}
-			FCGI_JSONValue("\"%d\" : \"%s\"", i, Sensor_GetName(i)); 
+			DataPoint d = Sensor_LastData(i);
+			FCGI_JSONValue("\"%d\" : {\"name\" : \"%s\", \"value\" : [%f,%f] }", 
+				i, Sensor_GetName(i), d.time_stamp, d.value); 
 		}
 		FCGI_JSONValue("\n\t}");
 	}
@@ -75,7 +77,9 @@ static void IdentifyHandler(FCGIContext *context, char *params)
 			if (i > 0) {
 				FCGI_JSONValue(",\n\t\t");
 			}
-			FCGI_JSONValue("\"%d\" : \"%s\"", i, Actuator_GetName(i)); 
+
+			DataPoint d = Sensor_LastData(i);
+			FCGI_JSONValue("\"%d\" : {\"name\" : \"%s\", \"value\" : [%f, %f] }", i, Actuator_GetName(i), d.time_stamp, d.value); 
 		}
 		FCGI_JSONValue("\n\t}");
 	}
@@ -599,6 +603,7 @@ void * FCGI_RequestLoop (void *data)
 					{	//:(
 						Log(LOGWARN, "Locking control (no auth!)");
 						FCGI_LockControl(&context, NOAUTH_USERNAME, USER_ADMIN);
+						FCGI_SendControlCookie(&context, true);
 					}
 					else
 					{

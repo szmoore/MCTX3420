@@ -123,7 +123,7 @@ void Cleanup()
 {
 	Log(LOGDEBUG, "Begin cleanup.");
 	Sensor_Cleanup();
-	//Actuator_Cleanup();
+	Actuator_Cleanup();
 	Log(LOGDEBUG, "Finish cleanup.");
 }
 
@@ -199,8 +199,6 @@ int main(int argc, char ** argv)
 
 	
 
-	Sensor_Init();
-	Actuator_Init();
 	Pin_Init();
 	
 	// Try and start things

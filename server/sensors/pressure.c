@@ -40,6 +40,9 @@ double Pressure_Callibrate(int id, int adc)
 {
 	//double voltage = ADC_TO_VOLTS(adc); // convert reading to voltage
 
+	return (double)adc;
+
+	//TODO: Fix this
 	switch (id)
 	{
 		case PRES_HIGH0:

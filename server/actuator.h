@@ -67,13 +67,14 @@ typedef struct
 	/** Sanity check function **/
 	SanityFn sanity;
 	/** Cleanup function **/
-	CleanFn clean;
+	CleanFn cleanup;
 	/** Last setting **/
 	DataPoint last_setting;
 	
 } Actuator;
 
 extern void Actuator_Init(); // One off initialisation of *all* Actuators
+extern void Actuator_Cleanup();
 
 extern void Actuator_SetModeAll(ControlModes mode, void *arg);
 extern void Actuator_SetMode(Actuator * a, ControlModes mode, void *arg);
