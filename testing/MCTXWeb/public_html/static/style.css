@@ -388,6 +388,17 @@ form.controls {
 	font-size:20px;
 }
 
+/** For links on the data page **/
+.datalink {
+	color: black;
+	text-decoration:none;
+}
+
+.datalink:hover {
+	color: blue;
+	text-decoration:underline;
+}
+
 /** Hack **/
 .clear {
   clear: both;

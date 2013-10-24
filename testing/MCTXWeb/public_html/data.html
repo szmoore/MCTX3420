@@ -22,33 +22,9 @@
         $(document).ready(function() {
         });
       })
-
-      //function to load appropriate graph image depending on drop-down menu
-      function graphLoad(graphid, folder, newgraph) {
-        document.getElementById(graphid).src = folder + "/" + newgraph + ".png";
-      }
-      //function to load appropriate graph image depending on drop-down menu
-      function graphLoad2(graphid, newgraph) {
-        var exp = document.getElementById("expselect").value;
-        document.getElementById(graphid).src = exp + "/" + newgraph + ".png";
-      }
-      //function to create appropriate experiment links depending on drop-down menu
-      function expLoad(expclass, folder, newlink) {
-        var elems = document.getElementsByClassName(expclass);
-        for (i = 0; i < elems.length; i++) {
-          var elem = elems[i];
-          elem.href = folder + "/" + newlink;
-        }
-      }
-      //function to update experiment links links depending on drop-down menu
-      function expLoadTotal(folder) {
-        expLoad('s1', folder, 'strain1');
-        expLoad('s2', folder, 'strain2');
-        expLoad('s3', folder, 'strain3');
-        expLoad('s4', folder, 'strain4');
-        expLoad('p1', folder, 'pressure1');
-        expLoad('p2', folder, 'pressure2');
-        expLoad('d', folder, 'all.zip');
+      //function to load new experiment depending on drop-down menu
+      function expLoad(expName) {
+		window.open("api/control?action=load&name=" + expName);
       }
     </script>
   </head>
@@ -109,142 +85,64 @@
               </ul>
             </div>
           </div>
+		  		<div class="widget justify">
+            <div class="title">Help</div>
+			<p>To view the desired data as a text file, click on the appropriate link. Dilatometer data and camera data can be viewed on their separate pages. To graph the
+			data, use the <a href="graph.html">graphs</a> page.</p>
+			<p>To view data from previous experiments, select the experiment (sorted by date) by using the drop-down menu.</p>
+          </div>
         </div>
         <!-- End sidebar -->
 
         <div id="main">
           <div class="widget">
             <div class="title">Experiment Data</div>
-            <b>Current Experiment</b>
+            <b>Select An Experiment</b>
+              <p><select id="expselect" onChange="expLoad(this.value)">
+                <option value="current">Current (12-12-13)</option>
+                <option value="exp2">Experiment 1 (12-10-13)</option>
+                <option value="exp3">Experiment 2 (15-10-13)</option>
+                <option value="exp4">Experiment 3 (01-11-13)</option>
+                <option value="exp5">Experiment 4 (27-11-13)</option>
+				<option value="exp6">Experiment 5 (28-11-13)</option>
+              </select></p>
             <table>
-              <tr>
-                <!--I have no idea how we'll end up storing all the experiment data on the Beaglebone so these currently just link to a bunch of dummy files-->
-                <td>View Sensor Data</td>
-                <td></td>
-                <td><a href="current/strain1">Strain 1</a></td>
-                <td><a href="current/strain2">Strain 2</a></td>
-                <td><a href="current/strain3">Strain 3</a></td>
-                <td><a href="current/strain4">Strain 4</a></td>
-                <td><a href="current/pressure1">Pressure 1</a></td>
-                <td><a href="current/pressure2">Pressure 2</a></td>
-              </tr>
+			  <tr>
+			    <td>Experiment Date</td>
+			    <td><em>Date Lookup</em></td>
+			  </tr>
               <tr>
                 <!--uses the download attribute to force downloads, only compatible with some browsers. Other users will just have to right-click and Save File As-->
-                <td>Save Sensor Data</td>
-                <td><a href="current/all.zip" download><input type="button" value="Download All"></a></td>
-                <td><a href="current/strain1" download><input type="button" value="Strain 1"></a></td>
-                <td><a href="current/strain2" download><input type="button" value="Strain 2"></a></td>
-                <td><a href="current/strain3" download><input type="button" value="Strain 3"></a></td>
-                <td><a href="current/strain4" download><input type="button" value="Strain 4"></a></td>
-                <td><a href="current/pressure1" download><input type="button" value="Pressure 1"></a></td>
-                <td><a href="current/pressure1" download><input type="button" value="Pressure 1"></a></td>
+                <td><a class="datalink" href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-Sensors#strain-gauges" target="_blank">Strain Data</a></td>
+                <td><a href="current/strain.zip" download><input type="button" value="Download All"></a></td>
+                <td><input type="button" value="Strain Gauge 1" onclick="window.open('api/sensors?start_time=0&format=tsv&id=0')"></td>
+                <td><input type="button" value="Strain Gauge 2" onclick="window.open('api/sensors?start_time=0&format=tsv&id=1')"></td>
+                <td><input type="button" value="Strain Gauge 3" onclick="window.open('api/sensors?start_time=0&format=tsv&id=2')"></td>
+                <td><input type="button" value="Strain Gauge 4" onclick="window.open('api/sensors?start_time=0&format=tsv&id=3')"></td>
+			  </tr>
+			  <tr>
+			    <td><a class="datalink" href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-Sensors#pressure-sensors" target="_blank">Pressure Data</a></td>
+                <td><a href="current/pressure.zip" download><input type="button" value="Download All"></a></td>
+                <td><input type="button" value="Pressure Sensor 1" onclick="window.open('api/sensors?start_time=0&format=tsv&id=4')"></td>
+                <td><input type="button" value="Pressure Sensor 2" onclick="window.open('api/sensors?start_time=0&format=tsv&id=5')"></td>
+				<td><input type="button" value="Pressure Sensor 3" onclick="window.open('api/sensors?start_time=0&format=tsv&id=6')"></td>
               </tr>
               <tr>
-                <!--not sure about how exactly we'll be linking to dilatometer or camera data yet-->
-                <td>Dilatometer</td>
-                <td><a href="nowhere" download="nowhere"><input type="button" value="Download Data"></a></td>
-                <td><a href="nowhere">View Data</a></td>
+                <!--this assumes dilatometer and camera data will be kept on separate pages in the GUI-->
+                <td><a class="datalink" href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-Sensors#dilatometer" target="_blank">Dilatometer</a></td>
+                <td><a href="dilatometer.zip" download=><input type="button" value="Download Data"></a></td>
+                <td><a href="dilatometer.html">View Data</a></td>
               </tr>
               <tr>
-                <td>Camera Data</td>
-                <td><a href="nowhere" download="nowhere"><input type="button" value="Download Data"></a></td>
-                <td><a href="nowhere">View Data</a></td>
-              </tr>
-              <tr>
-
-                <td>Graphs</td>
-                <td>
-                  <form>
-                    <select onChange="graphLoad('g1', 'current', this.value)">
-                      <!--link this to graphs functionality, currently just loads a placeholder image-->
-                      <!--graphs could just plot the data over entire time range of the experiment-->
-                      <option value="nograph">Choose to view</option>
-                      <option value="graph1">Strain 1</option>
-                      <option value="graph2">Strain 2</option>
-                      <option value="graph3">Strain 3</option>
-                      <option value="graph4">Strain 4</option>
-                      <option value="graph5">Pressure 1</option>
-                      <option value="graph6">Pressure 2</option>
-                    </select>
-                  </form>
-
-                </td>
-              </tr>
-            </table>
-            <img src="current/nograph.png" id="g1">
-            <p><b>Previous Experiments</b></p>
-            <table>
-              <tr>
-                <td>Select Experiment</td>
-                <td>
-                  <!--Upon selecting experiment, modify all the download links-->
-                  <!--TODO: prevent downloads of data if no experiment is selected-->
-                  <select id="expselect" onChange="expLoadTotal(this.value)">
-                    <option value="current">Current</option>
-                    <option value="exp1">Experiment 1</option>
-                    <option value="exp2">Experiment 2</option>
-                    <option value="exp3">Experiment 3</option>
-                    <option value="exp4">Experiment 4</option>
-                    <option value="exp5">Experiment 5</option>
-                  </select>
-                </td>
-              </tr>
-              <tr>
-                <td>Experiment Date</td>
-                <!--Lookup the experiment date here for identification purposes-->
-                <td><b>DATE LOOKUP</b></td>
-              </tr>
-              <tr>
-                <td>View Sensor Data</td>
-                <td></td>
-                <td><a href="current/strain1" class="s1">Strain 1</a></td>
-                <td><a href="current/strain2" class="s2">Strain 2</a></td>
-                <td><a href="current/strain3" class="s3">Strain 3</a></td>
-                <td><a href="current/strain4" class="s4">Strain 4</a></td>
-                <td><a href="current/pressure1" class="p1">Pressure 1</a></td>
-                <td><a href="current/pressure2" class="p2">Pressure 2</a></td>
-              </tr>
-              <tr>
-                <td>Save Sensor Data</td>
-                <td><a href="current/all.zip" download class="d"><input type="button" value="Download All"></a></td>
-                <td><a href="current/strain1" download class="s1"><input type="button" value="Strain 1"></a></td>
-                <td><a href="current/strain2" download class="s2"><input type="button" value="Strain 2"></a></td>
-                <td><a href="current/strain3" download class="s3"><input type="button" value="Strain 3"></a></td>
-                <td><a href="current/strain4" download class="s4"><input type="button" value="Strain 4"></a></td>
-                <td><a href="current/pressure1" download class="p1"><input type="button" value="Pressure 1"></a></td>
-                <td><a href="current/pressure2" download class="p2"><input type="button" value="Pressure 1"></a></td>
-              </tr>
-              <tr>
-                <!--not sure about how exactly we'll be linking to dilatometer or camera data yet-->
-                <td>Dilatometer</td>
-                <td><a href="nowhere" download="nowhere"><input type="button" value="Download Data"></a></td>
-                <td><a href="nowhere">View Data</a></td>
-              </tr>
-              <tr>
-                <td>Camera Data</td>
-                <td><a href="nowhere" download="nowhere"><input type="button" value="Download Data"></a></td>
-                <td><a href="nowhere">View Data</a></td>
+                <td><a class="datalink" href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-Sensors#camera" target="_blank">Camera Data</a></td>
+                <td><a href="image.jpeg" download><input type="button" value="Download Data"></a></td>
+                <td><a href="image.html">View Data</a></td>
               </tr>
               <tr>
                 <td>Graphs</td>
-                <td>
-                  <form>
-                    <select onChange="graphLoad2('g2', this.value)">
-                      <!--link this to graphs functionality, currently just loads a placeholder image-->
-                      <!--graphs could just plot the data over entire time range of the experiment-->
-                      <option value="nograph">Choose to view</option>
-                      <option value="graph1">Strain 1</option>
-                      <option value="graph2">Strain 2</option>
-                      <option value="graph3">Strain 3</option>
-                      <option value="graph4">Strain 4</option>
-                      <option value="graph5">Pressure 1</option>
-                      <option value="graph6">Pressure 2</option>
-                    </select>
-                  </form>
-                </td>
+                <td><a href="graph.html">Graphs Page</a></td>
               </tr>
             </table>
-            <img src="current/nograph.png" id="g2">
           </div>
         </div>
         <!-- End main content -->
