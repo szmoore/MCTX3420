@@ -6198,3 +6198,50 @@
 --- Day changed Wed Oct 23 2013
 19:30 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
 23:01 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Thu Oct 24 2013
+07:42 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+10:21 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+14:16 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+14:36 -!- Rowan [~Rowan@106-68-210-88.dyn.iinet.net.au] has joined #mctxuwa_softdev
+14:47 < jtanx> Hey
+15:45 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Connection reset by peer]
+15:47 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+17:27 -!- Rowan [~Rowan@106-68-210-88.dyn.iinet.net.au] has quit [EOF From client]
+17:51 < jtanx> huh
+17:51 < jtanx> it was surprisingly easy to add post support
+17:56 < sam_moore> That's cool
+17:56 < jtanx> you just fgets from stdin instead
+17:56 < jtanx> it's in the same format too
+17:56 < sam_moore> Excellent
+17:57 < jtanx> we probably do have to unescape html strings though
+17:57 < jtanx> like if someone had a comma in their password
+17:57 < sam_moore> If we had a progress report we could put "potential gaping security leak plugged"
+17:57 < jtanx> Hahaha
+17:57 < jtanx> but it still allows the get request version
+17:57 < sam_moore> Oh well
+17:57 < jtanx> but then that's your own fault
+17:57 < sam_moore> Yep
+17:59 < sam_moore> Doesn't look like the IRC channel will get a mention in the "communication" section of the report :(
+17:59 < sam_moore> Oh no wait, it does
+17:59 < sam_moore> Good
+17:59 < sam_moore> ... That "overall schedule"...
+17:59 < jtanx> Haha
+17:59 < sam_moore> I started it, and quickly realised it was a waste of time
+18:01 < sam_moore> Also, need to hate on the beaglebone less
+18:01 < sam_moore> Otherwise they might try and do something stupid like replace it next year
+18:01 < jtanx> That would be stupid
+18:01 < sam_moore> Yeah, it was a pain, but probably still one of the best things to use
+18:02 < sam_moore> RPi with dedicated ADC/DAC modules would probably have been best
+18:02 < sam_moore> Distributed system of arduinos.... noooo
+18:02 < jtanx> Yeah
+18:02 < jtanx> RPi with ADC/DAC would have been cool
+18:02 < jtanx> but only because there's more support for the RPi
+18:02 < sam_moore> Yes
+19:19 < jtanx> hmm
+19:20 < jtanx> maybe I should enable POST only for the login module?
+19:20 < jtanx> Right now, if POST and GET data is received, the GET data is discarded in place of the POST data
+19:28 < jtanx> Yeah, okay I only enabled it for login
+22:38 < jtanx> Hahahahaha
+22:39 < jtanx> I passed our code through ohloh - https://www.ohloh.net/p/MCTX3420
+22:39 < jtanx> Apparently it's work 3 years of effort, and is valued at $150k
+22:49 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
