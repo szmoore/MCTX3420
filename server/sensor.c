@@ -47,7 +47,7 @@ int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn
 	s->init = init; // Set init function
 
 	// Start by averaging values taken over a second
-	DOUBLE_TO_TIMEVAL(1e-3, &(s->sample_time));
+	DOUBLE_TO_TIMEVAL(1, &(s->sample_time));
 	s->averages = 1;
 	s->num_read = 0;
 
