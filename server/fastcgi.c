@@ -591,10 +591,8 @@ void * FCGI_RequestLoop (void *data)
 		//strncpy doesn't zero-truncate properly
 		snprintf(module, BUFSIZ, "%s", getenv("DOCUMENT_URI_LOCAL"));
 		
-		//Read from post body. If not empty, try GET instead.
-		if (fgets(params, BUFSIZ, stdin) == NULL || *params == '\0') {
-			snprintf(params, BUFSIZ, "%s", getenv("QUERY_STRING"));
-		}
+		//Get the GET query string
+		snprintf(params, BUFSIZ, "%s", getenv("QUERY_STRING"));
 		//URL decode the parameters
 		FCGI_URLDecode(params);
 
@@ -653,6 +651,13 @@ void * FCGI_RequestLoop (void *data)
 				//Escape all special characters.
 				//Don't escape for login (password may have special chars?)
 				FCGI_EscapeText(params);
+			} else { //Only for Login handler.
+				//If GET data is empty, use POST instead.
+				if (*params == '\0') {
+					Log(LOGDEBUG, "Using POST!");
+					fgets(params, BUFSIZ, stdin); 
+					FCGI_URLDecode(params);
+				}
 			}
 
 			module_handler(&context, params);

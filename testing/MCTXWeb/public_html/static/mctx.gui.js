@@ -123,7 +123,7 @@ function runBeforeLoad(isLoginPage) {
                 window.location = mctx.location + "login.html";
             }
         } else {
-            mctx.friendlyName = data.friendly_name;
+            mctx.friendlyName = data.user_name;
         }
     }).fail(function (jqHXR) {
         if (mctx.debug) {
