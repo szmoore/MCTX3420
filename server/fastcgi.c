@@ -11,6 +11,7 @@
 #include <stdarg.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <ctype.h>
 
 #include "common.h"
 #include "sensor.h"
@@ -538,6 +539,40 @@ char *FCGI_EscapeText(char *buf)
 }
 
 /**
+ * Unescapes a URL encoded string in-place. The string
+ * must be NULL terminated.
+ * (e.g this%2d+string --> this- string)
+ * @param buf The buffer to decode. Will be modified in-place.
+ * @return The same buffer.
+ */
+char *FCGI_URLDecode(char *buf)
+{
+	char *head = buf, *tail = buf;
+	char hex[3] = {0};
+
+	while (*tail) {
+		if (*tail == '%') { //%hh hex to char
+			tail++;
+			if (isxdigit(*tail) && isxdigit(*(tail+1))) {
+				hex[0] = *tail++;
+				hex[1] = *tail++;
+				*head++ = (char)strtol(hex, NULL, 16);
+			} else { //Not valid format; keep original
+				head++;
+			}
+		} else if (*tail == '+') { //Plus to space
+			tail++;
+			*head++ = ' ';
+		} else { //Anything else
+			*head++ = *tail++;
+		}
+	}
+	*head = 0; //NULL-terminate at new end point
+
+	return buf;
+}
+
+/**
  * Main FCGI request loop that receives/responds to client requests.
  * @param data Reserved.
  * @returns NULL (void* required for consistency with pthreads, although at the moment this runs in the main thread anyway)
@@ -555,7 +590,11 @@ void * FCGI_RequestLoop (void *data)
 		
 		//strncpy doesn't zero-truncate properly
 		snprintf(module, BUFSIZ, "%s", getenv("DOCUMENT_URI_LOCAL"));
+		
+		//Get the GET query string
 		snprintf(params, BUFSIZ, "%s", getenv("QUERY_STRING"));
+		//URL decode the parameters
+		FCGI_URLDecode(params);
 
 		FCGI_GetControlCookie(context.received_key);
 		Log(LOGDEBUG, "Got request #%d - Module %s, params %s", context.response_number, module, params);
@@ -592,35 +631,38 @@ void * FCGI_RequestLoop (void *data)
 		context.current_module = module;
 		context.response_number++;
 		
-		if (module_handler) 
-		{
-			if (module_handler != Login_Handler && module_handler != IdentifyHandler && module_handler)
-			//if (false) // Testing
-			{
+		if (module_handler) {
+			if (module_handler == IdentifyHandler) {
+				FCGI_EscapeText(params);
+			} else if (module_handler != Login_Handler) {
 				if (!FCGI_HasControl(&context))
 				{
-					if (g_options.auth_method == AUTH_NONE)
-					{	//:(
+					if (g_options.auth_method == AUTH_NONE) {	//:(
 						Log(LOGWARN, "Locking control (no auth!)");
 						FCGI_LockControl(&context, NOAUTH_USERNAME, USER_ADMIN);
 						FCGI_SendControlCookie(&context, true);
 					}
-					else
-					{
+					else {
 						FCGI_RejectJSON(&context, "Please login. Invalid control key.");
 						continue;
 					}
 				}
-
+				
 				//Escape all special characters.
 				//Don't escape for login (password may have special chars?)
 				FCGI_EscapeText(params);
+			} else { //Only for Login handler.
+				//If GET data is empty, use POST instead.
+				if (*params == '\0') {
+					Log(LOGDEBUG, "Using POST!");
+					fgets(params, BUFSIZ, stdin); 
+					FCGI_URLDecode(params);
+				}
 			}
 
 			module_handler(&context, params);
 		} 
-		else 
-		{
+		else {
 			FCGI_RejectJSON(&context, "Unhandled module");
 		}
 	}

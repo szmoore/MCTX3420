@@ -123,8 +123,26 @@ function runBeforeLoad(isLoginPage) {
                 window.location = mctx.location + "login.html";
             }
         } else {
-            mctx.friendlyName = data.friendly_name;
+            mctx.friendlyName = data.user_name;
         }
+        
+        $(document).ready(function () {
+          //Show the content!
+          $("#content").css("display", "block");
+          
+          //Set the welcome bar
+          var name = " " + (mctx.friendlyName ? mctx.friendlyName : "");
+          $("#welcome-container").text("Welcome"+ name + "!");
+          $("#logout-container").css("display", "block");
+          //$("#menu-container").populateNavbar();
+
+          $("#logout").click(function () {
+            $("#logout").logout();
+          });
+          
+          //Enable the error log, if present
+          $("#errorlog").setErrorLog();
+        });
     }).fail(function (jqHXR) {
         if (mctx.debug) {
             debugLog("Failed to ident server. Is API running?")
@@ -151,74 +169,6 @@ $.fn.populateNavMenu = function() {
     $(this).append(root);
     return this;
 }
-
-/**
-* Sets the camera autoupdater
-* Obsolete?
-* @returns {$.fn}
-*/
-$.fn.setCamera = function () {
-    var url = mctx.api + "image";  //http://beaglebone/api/image
-    var update = true;
-
-    //Stop updating if we can't retrieve an image!
-    this.error(function() {
-        update = false;
-    });
-
-    var parent = this;
-
-    var updater = function() {
-        if (!update) {
-            alert("Cam fail");
-            parent.attr("src", "");
-            return;
-        }
-        
-        parent.attr("src", url + "#" + (new Date()).getTime());
-        
-        setTimeout(updater, 10000);
-    };
-
-    updater();
-    return this;
-};
-
-/**
-* Sets the strain graphs to graph stuff. Obsolete?
-* @returns {$.fn}
-*/
-$.fn.setStrainGraphs = function () {
-    var sensor_url = mctx.api + "sensors";
-    var graphdiv = this;
-
-    var updater = function () {
-        var time_limit = mctx.strain_gauges.time_limit;
-        var responses = new Array(mctx.strain_gauges.ids.length);
-        
-        for (var i = 0; i < mctx.strain_gauges.ids.length; i++) {
-            var parameters = {id : i, start_time: -time_limit};
-            responses[i] = $.ajax({url : sensor_url, data : parameters});
-        }
-        
-        $.when.apply(this, responses).then(function () {
-            var data = new Array(arguments.length);
-            for (var i = 0; i < arguments.length; i++) {
-                var raw_data = arguments[i][0].data;
-                var pruned_data = [];
-                var step = ~~(raw_data.length/100);
-                for (var j = 0; j < raw_data.length; j += step)
-                pruned_data.push(raw_data[j]); 
-                data[i] = pruned_data;
-            }
-            $.plot(graphdiv, data);
-            setTimeout(updater, 1000);
-        }, function () {debugLog("It crashed");});
-    };
-
-    updater();
-    return this;
-};
 
 /**
 * Performs a login attempt.
@@ -308,39 +258,25 @@ $.fn.checkStatus = function(data) {
     $(this).text(data.description).removeClass("pass").addClass("fail");
     return false;
   }
+  $(this).removeClass("fail");
   return true;
 };
 
 $(document).ready(function () {
-  //Show the content!
-  $("#content").css("display", "block");
-  
-  //Set the welcome bar
-  var name = " " + (mctx.friendlyName ? mctx.friendlyName : "");
-  $("#welcome-container").text("Welcome"+ name + "!");
-  $("#logout-container").css("display", "block");
-  //$("#menu-container").populateNavbar();
-
-  $("#logout").click(function () {
-    $("#logout").logout();
-  });
-  
-  //Enable the error log, if present
-  $("#errorlog").setErrorLog();
-  
   //Enable the hide/show clicks
   $("#sidebar-hide").click(function () {
-    $("#sidebar").css("display", "none");
-    $("#sidebar-show").css("display", "inherit");
+    $("#sidebar").hide();
+    $("#sidebar-show").show();
     return this;
   });
 
   $("#sidebar-show").click(function () {
-    $("#sidebar-show").css("display", "none");
-    $("#sidebar").css("display", "inherit");
+    $("#sidebar-show").hide();
+    $("#sidebar").show();
     return this;
   });
 });
+
 $(document).ajaxError(function (event, jqXHR) {
     //console.log("AJAX query failed with: " + jqXHR.status + " (" + jqXHR.statusText + ")");
 });

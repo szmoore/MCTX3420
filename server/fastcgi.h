@@ -85,6 +85,7 @@ extern void FCGI_JSONKey(const char *key);
 extern void FCGI_PrintRaw(const char *format, ...);
 extern void FCGI_EndJSON();
 extern void FCGI_RejectJSONEx(FCGIContext *context, StatusCodes status, const char *description);
+extern char *FCGI_URLDecode(char *buf);
 extern char *FCGI_EscapeText(char *buf);
 extern void *FCGI_RequestLoop (void *data);
 
