@@ -6245,3 +6245,47 @@
 22:39 < jtanx> I passed our code through ohloh - https://www.ohloh.net/p/MCTX3420
 22:39 < jtanx> Apparently it's work 3 years of effort, and is valued at $150k
 22:49 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Fri Oct 25 2013
+08:48 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:50 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+09:56 < sam_moore> Um... we didn't make our first commit in 200
+09:56 < sam_moore> * 2000
+09:56 < sam_moore> 10 developers???
+09:57 < sam_moore> There are 6 of us
+09:57 < sam_moore> And some people contributed about 2 lines of source code...
+09:57 < sam_moore> Mostly written in JavaScript
+09:57 < sam_moore> Really?
+09:57 < sam_moore> Is that counting the jQuery UI guff?
+09:58 < sam_moore> That's annoying, because the C part of the project is like 50% comment lines
+09:58 < sam_moore> And it says "low number of comments" based on the JavaScript :S
+09:59 < sam_moore> Still... this is really cool
+10:00 < jtanx> hahaha
+10:00 < jtanx> the 2000 commit was because we made commits on the bbb
+10:00 < sam_moore> ok...
+10:00 < jtanx> but it lacks an rtc 
+10:00 < sam_moore> Where do we get the extra 4 developers from?
+10:00 < sam_moore> "Debian" is one
+10:00 < jtanx> and for some reason the time didn't get updated
+10:01 < jtanx> umm
+10:01 < jtanx> hmm
+10:01 < jtanx> Ubuntu user?
+10:01 < sam_moore> Oh, "Callum" and "Callum-" are treated seperately -_-
+10:01 < jtanx> oh
+10:01 < sam_moore> That's still only 8
+10:02 < jtanx> the results are a bit skewed
+10:02 < jtanx> because a lot of the javascript is just from other libraries
+10:02 < jtanx> well at least i think so
+10:04 < sam_moore> Yeah
+10:05 < sam_moore> Is it easy to just pass a subset of the code through?
+10:08 < jtanx> Yep - you have to set what's ignored
+10:08 < jtanx> I've just set it to ignore all *.min.js files (essentially all external js files)
+10:08 < jtanx> But it won't get updated for a while
+10:09 < jtanx> I've got to go for ~ 2 hrs 
+10:10 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+10:12 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+12:46 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+13:42 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+20:44 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:20 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+21:36 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+23:39 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
