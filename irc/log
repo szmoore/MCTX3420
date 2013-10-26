@@ -6289,3 +6289,72 @@
 21:20 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
 21:36 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
 23:39 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+--- Day changed Sat Oct 26 2013
+08:43 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:22 -!- justin_kruger [~justinkru@CPE-60-230-240-161.lnse1.wel.bigpond.net.au] has joined #mctxuwa_softdev
+09:23 -!- justin_kruger [~justinkru@CPE-60-230-240-161.lnse1.wel.bigpond.net.au] has quit [EOF From client]
+09:27 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+09:38 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+13:42 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+15:00 -!- Callum [~Callum@106-68-161-33.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:10 < Callum> just finished the code to get the edge. atm it just returns the position on their object. was thinking we'd just use the timestamp and go this was the additional width at this time, additional width at time +1, so rate of change is 2*difference etc
+15:11 < Callum> also pushing 3 images to testing (actually i should go abck and push original too) but to show it blurred, after canny and with the found edge imposed over it (without w.e values i had set at the time..)
+15:15 < jtanx> Nice
+15:16 < Callum> ok merged
+15:17 < Callum> i might need some help merging this into the server code too
+15:18 < Callum> just to make sure its all good
+15:34 < jtanx> Sure
+15:34 < jtanx> I'm really busy right now though with this other crappy project that I have to do
+15:35 < jtanx> If not today, then maybe during tomorrow's meeting (if we're having a meeting then?)
+15:37 -!- Callum [~Callum@106-68-161-33.dyn.iinet.net.au] has left #mctxuwa_softdev []
+15:38 -!- Callum [~chatzilla@106-68-161-33.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:55 -!- Callum [~chatzilla@106-68-161-33.dyn.iinet.net.au] has quit [Ping timeout]
+16:06 -!- Callum [~chatzilla@106-68-161-33.dyn.iinet.net.au] has joined #mctxuwa_softdev
+16:07 < Callum> we were meeting tomorrow? also i have an assignment due monday i havent started. was going to try and work through that and work on another project i have due..as well as this
+16:07 < Callum> still need to start my writeup for this.
+16:40 < Callum> also, if the image is completely black, the read function should return false (havent yet tested this but it should be the case)
+16:53 < Callum> also looking at justins diagram, why isnt the microscope not included?
+16:54 < Callum> or is it just both under "camera"
+17:01 < jtanx> Yeah
+17:01 < jtanx> I think it's just under "camera"
+17:02 < Callum> ok.
+17:02 < jtanx> I dunno, I thought we should try to meet some time next week
+17:02 < jtanx> monday's our usual meeting time
+17:02 < Callum> you said tomorrow though didnt you?
+17:03 < jtanx> Ohh
+17:03 < jtanx> sorry
+17:03 < jtanx> my bad
+17:03 < jtanx> I meant monday
+17:03 < Callum> was going to say, my body clock so out of wack its sunday already?
+17:03 < Callum> yea. if i can get the assignment done tomorrow il be happy to spend most oif the day trying to finish some of this off
+17:03 < jtanx> Haha mine is
+17:03 < Callum> to be fair, i normally work saturdays
+17:03 < Callum> i took it off to do work.
+17:04 < jtanx> :/
+17:04 < Callum> so it should feel like a sunday
+17:04 < jtanx> I had this assignment where I thought I had completed it, but when I reread the specs I found out that I missed a large portion of it
+17:05 < Callum> ouch
+17:05 < Callum> what assignment was this for?
+17:05 < jtanx> cits3242
+17:05 < jtanx> some programming unit
+17:05 < Callum> figured by the cits. :p
+17:05 < jtanx> hehe
+17:06 < jtanx> yeah, if it wasn't for that i'd be solely working on this project right now
+17:07 < Callum> yea iv kind of been working on 3 or 4 things all at once. and not gotten far in anything.
+17:07 < jtanx> yeah, it's always crap when things are due at the same time
+17:08 < jtanx> but 3-4 things at once? that's harsh
+17:12 < Callum> umm. assignment due tomorrow i havent started. i have anoither group project but we only really have 2 members and wev barely done anything (due friday, meant to have 4/5 members)
+17:12 < Callum> physics assignment also due on friday
+17:12 < Callum> just trying to figure out how to get it all done
+17:13 < Callum> not going to be a fun week. then after this weeks over its major catchup in the 3 units i have exams for
+17:13 < Callum> oh and this tute adrian decided to give us...should probably look at that some time too
+17:16 < Callum> whats the model for the microscope? cant find anything in dropbox
+17:22 < Callum> they are  using the microscope only on the non-exploding one im assuming?
+17:23 < jtanx> Yeah
+17:23 < jtanx> the microscope
+17:23 < jtanx> it's a kaiser baas something
+17:23 < jtanx> KBA03030
+17:24 < Callum> thanks
+17:57 -!- Callum [~chatzilla@106-68-161-33.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+22:04 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+23:31 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has left #mctxuwa_softdev []
