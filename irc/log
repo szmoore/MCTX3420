@@ -5566,3 +5566,726 @@
 21:10 < jtanx> working on the report the day before...
 21:10 < jtanx> what is this madness
 22:23 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Mon Oct 21 2013
+07:40 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+08:04 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+09:15 -!- jtanx [~asfa@130.95.131.138] has joined #mctxuwa_softdev
+11:00 -!- jtanx [~asfa@130.95.131.138] has quit [Ping timeout]
+11:03 -!- jtanx_ [~asfa@130.95.54.13] has joined #mctxuwa_softdev
+11:03 -!- jtanx_ is now known as jtanx
+11:22 < jtanx> mctxserv[10834]: FATAL: Data_Save (data.c:80) - Error seeking to end of DataFile test/sensor_1 - File too large
+11:23 < jtanx> jeremy@pickle:~/git/MCTX3420/server/test$ du -sh *
+11:23 < jtanx> 0       actuator_0
+11:23 < jtanx> 2.0G    sensor_0
+11:23 < jtanx> 2.1G    sensor_1
+11:23 < jtanx> after running overnight
+11:23 < jtanx> hahaha
+11:36 < sam_moore> The 32G SD card might have been a good thing to buy...
+11:36 < sam_moore> Just in case
+11:36 < jtanx> I tried removing the line i made to fstab
+11:36 < jtanx> still didn't work
+11:36 < sam_moore> Damn
+11:36 < jtanx> was there anything important on it
+11:36 < jtanx> could just flash it with the internal memory
+11:37 < sam_moore> I'd be very hesitant to flash it to the internal memory if it doesn't boot
+11:37 < sam_moore> There may be something else wrong with it
+11:37 < jtanx> I mean
+11:37 < jtanx> there's a script
+11:37 < jtanx> to copy the internal memory to the sd card
+11:37 < sam_moore> Oh, that's cool
+11:37 < sam_moore> We can do that
+11:37 < jtanx> Okay
+11:37 < sam_moore> Since Ubuntu magically solved our image problems, we should use it
+11:38 < jtanx> yeah, that was weird
+11:38 < jtanx> just as long as there's nothing important on the sd card
+11:38 < sam_moore> Probably change the phrasing in the report from "We don't know why this fixed it" to "We fixed it through our 1337 haxor skills"
+11:38 < jtanx> >.>
+11:39 < jtanx> how did you set up usercake?
+11:39 < jtanx> like where's this db-settings.php that it mentions
+11:39 < jtanx> oh right
+11:39 < jtanx> never mind
+11:41 < sam_moore> It comes with an install directory that I removed
+11:41 < sam_moore> We should add that because we might want to modify the database structure
+11:41 < jtanx> yeah
+11:41 < sam_moore> Eg: It's a real pain that user permission levels are in a seperate table to everything else
+11:41 < sam_moore> And doesn't make sense...
+11:41 < jtanx> normalised database design
+11:41 < jtanx> :P
+11:42 < sam_moore> We can go with the "strcmp(user, "admin")" for now
+11:42 < sam_moore> Did you get the email about LEFT vs RIGHT can?
+11:42 < jtanx> yeah
+11:42 < sam_moore> I think I should ask
+11:42 < jtanx> pneumatics wants left
+11:43 < sam_moore> "Are you looking at the box from the FRONT or BACK"
+11:43 < jtanx> everyone else thought right
+11:43 < jtanx> hahahaah
+11:43 < sam_moore> "Also, which side is the FRONT"
+11:43 < jtanx> the case team got blasted this morning
+11:43 < sam_moore> Uh oh
+11:43 < jtanx> apparentl
+11:43 < jtanx> y
+11:43 < sam_moore> Then again, we all get blasted every week
+11:43 < jtanx> true
+11:43 < sam_moore> I think we manage to get the least blasting, but still
+11:43 < jtanx> oh yeah
+11:44 < jtanx> apparently the report IS individual
+11:44 < jtanx> per group
+11:44 < jtanx> I'm getting confused
+11:44 < sam_moore> Haha
+11:44 < jtanx> and it's due next monday???
+11:44 < sam_moore> -_-
+11:44 < jtanx> confusion over the due date
+11:44 < jtanx> adam apparently didn't know, and thought sparkplus would send out the date
+11:44 < jtanx> i don't know what sparkplus has got to do with this though
+11:45 < sam_moore> How long does it have to be?
+11:45 < jtanx> I have no idea
+11:45 < sam_moore> Sparkplus is for our peer evaluation
+11:45 < jtanx> yeah
+11:45 < jtanx> but the relation to report due date?
+11:45 < sam_moore> Pretty lazy if you ask me, and I don't care that they might read this (frankly I doubt it) to get the students to mark each other
+11:46 < jtanx> Yeah
+11:46 < jtanx> urgh
+11:46 < jtanx> getting 1045 (access denied) from mysql
+11:46 < jtanx> pretty sure I've got the pwd right
+11:46 < sam_moore> It might be what happens in the Real World (TM), but this is not some company, this is university, my grades should not depend on someone else
+11:47 < sam_moore> Try with `mysql` from the command line and check the password?
+11:50 < jtanx> herp derp
+11:50 < jtanx> no password
+11:53 < jtanx> now that I think about it, it's almost exactly like the django idea, except in php
+11:53 < sam_moore> Yep
+11:53 < jtanx> when you install it, is there any default login?
+11:54 < sam_moore> No; you register an account and that account becomes the admin
+11:54 < sam_moore> (of course you can also manually update the database)
+11:54 < jtanx> okay
+11:54 < sam_moore> You could change the install script to do that
+11:54 < jtanx> how are usernames and passwords stored in the db?
+11:54 < jtanx> crypt?
+11:54 < jtanx> (do you specify the algorithm?)
+11:55 < sam_moore> passwords are crypted with SHA6
+11:55 < sam_moore> The other stuff is plain text
+11:55 < sam_moore> UserCake default is SHA1 or something
+11:55 < jtanx> sha6?
+11:55 < sam_moore> I changed it to SHA6
+11:55 < jtanx> does it use something called pcks
+11:55 < jtanx> pcsk2
+11:55 < jtanx> pcks2*
+11:56 < sam_moore> Wait... by SHA6 I mean "SHA-Whatever-you-get-with-$6$-in-the-salt"
+11:56 < sam_moore> Which is actually SHA-512
+11:56 < sam_moore> Derp
+11:56 < jtanx> hmm
+11:57 < sam_moore> I couldn't find any references to security issues with doing it this way, but that doesn't mean there aren't any
+11:57 < sam_moore> However there's always going to be some security issues with anything we use
+11:57 < jtanx> yeah
+11:57 < jtanx> about the stuff in login.c
+11:57 < jtanx> you'll definitely want to change tat
+11:57 < jtanx> "SELECT password FROM %s WHERE user_name = \"%s\";", 
+11:58 < jtanx> sql injection right there
+11:58 < sam_moore> I know
+11:58 < sam_moore> That's why Login_Handler removes all non alpha-numeric characters from the user name
+11:58 < jtanx> the password?
+11:58 < sam_moore> The password isn't part of the MySQL query
+11:58 < sam_moore> Only the user name
+11:58 < jtanx> oh right
+11:58 < sam_moore> So the password can contain any characters
+11:59 < jtanx> yeah
+11:59 < jtanx> I know with sqlite you can use placeholders
+11:59 < jtanx> then you 'bind' stuff to those placeholders
+11:59 < sam_moore> I think you can with MySQL too
+11:59 < jtanx> probably
+11:59 < sam_moore> Feel free to change it if you want, I figured it was safe if username was already checked for bad characters
+12:00 < jtanx> yep
+12:03 < jtanx> Pneumatics and electronics wants to test the system this wednesday, starting from 10am
+12:03 < sam_moore> That provides a convenient reason to not work on ENSC1001
+12:03 < sam_moore> So I'll be there
+12:03 < jtanx> Hahaha
+12:08 < jtanx> nneded php5-gd
+12:08 < jtanx> these username/password restrictions are attrocious
+12:57 < sam_moore> The UserCake ones?
+12:57 < jtanx> yeah
+12:57 < sam_moore> Also, sorry I'll be late today
+12:57 < jtanx> that's ok
+12:58 < sam_moore> We're getting there...
+12:59 < sam_moore> The question is, do they want a finished project, or do they want a report on an unfinished project
+12:59 < jtanx> hahaha
+12:59 < sam_moore> Because we'll have to devote a lot of time to the report
+12:59 < jtanx> yes
+13:00 < sam_moore> We've looked into every layer of software from linux kernel drivers to databases and human computer interaction...
+13:01 < jtanx> o.o
+13:01 < sam_moore> I think we can conclude that they are all horrible hacks tied together with shoelaces
+13:01 < jtanx> about usercake
+13:02 < jtanx> is it just
+13:02 < jtanx> you have a set of pages
+13:02 < jtanx> and they're either accessible or not
+13:02 < jtanx> to the user?
+13:02 < sam_moore> Yep, and I know you're thinking we could put the API as one of those pages :P
+13:02 < jtanx> haha
+13:02 < sam_moore> But I think it's better to keep the API seperate from user management
+13:02 < jtanx> didn't think that
+13:02 < jtanx> but was just trying to understand usercake
+13:02 < sam_moore> Fair enough
+13:02 < jtanx> but since everything's in php
+13:03 < jtanx> we can do some templating
+13:03 < jtanx> instead of hacking it together with javascript
+13:03 < sam_moore> Sure
+13:03 < sam_moore> The main modification I wanted to make was a page that lets the admin upload a list of users and get rid of the registration page (or restrict it somehow)
+13:04 < jtanx> yeah
+13:04 < jtanx> but some things are better done in php
+13:04 < jtanx> like that whole 'load the sidebar in jaascript' is crap
+13:04 < jtanx> and the whole 'if not logged in, redirect the user with javascript' too
+13:04 < sam_moore> Feel free to add php to the main gui, it is probably a good choice
+13:05 < jtanx> okay
+13:05 < jtanx> once I figure out how stuff works
+13:05 < sam_moore> I'm just not experienced enough with this sort of web development stuff
+13:05 < jtanx> I can probably say it's a learing experience for everyone
+13:05 < sam_moore> Yes
+13:06 < sam_moore> I am pretty happy with how we've done this, even if it doesn't get finished
+13:06 < jtanx> Yeah, it's quite ok
+13:06 < sam_moore> I think we made good design choices
+13:06 < sam_moore> Probably the best one was when you convinced me to use FastCGI instead of writing a custom HTTP server :P
+13:07 < sam_moore> Or we'd be well and truly screwed when all the requirements for security and user management came along
+13:07 < jtanx> hahaha
+13:07 < jtanx> php
+13:07 < jtanx> custom webserver 
+13:07 < jtanx> well
+13:07 < jtanx> it might have worked
+13:08 < jtanx> call php5-cli with system
+13:08 < jtanx> hahaha
+13:08 < sam_moore> I could probably do something like that with enough time
+13:08 < sam_moore> But it wouldn't really be worth it
+13:14 < jtanx> oh right
+13:14 < jtanx> you changed usercake to use crypt 
+13:15 < jtanx> I'll change the password for the sd card image back to what we used before
+13:16 < jtanx> username will be ubuntu though
+13:18 < sam_moore> ok
+13:18 < jtanx> the internal memory still uses temppwd though
+13:20 < jtanx> if we use usercake we'd have to use php throughout the stuff anyway
+13:20 < jtanx> unless you want it to be publicly visible
+--- Log closed Mon Oct 21 14:11:57 2013
+--- Log opened Mon Oct 21 14:40:20 2013
+14:40 -!- sam_moore [matches@motsugo.ucc.gu.uwa.edu.au] has joined #mctxuwa_softdev
+14:40 -!- Irssi: #mctxuwa_softdev: Total of 2 nicks [0 ops, 0 halfops, 0 voices, 2 normal]
+14:40 -!- Irssi: Join to #mctxuwa_softdev was synced in 3 secs
+14:43 -!- jtanx [~asfa@130.95.54.13] has joined #mctxuwa_softdev
+--- Log closed Mon Oct 21 14:49:35 2013
+--- Log opened Mon Oct 21 15:08:16 2013
+15:08 -!- sam_moore [matches@motsugo.ucc.gu.uwa.edu.au] has joined #mctxuwa_softdev
+15:08 -!- Irssi: #mctxuwa_softdev: Total of 1 nicks [0 ops, 0 halfops, 0 voices, 1 normal]
+15:08 -!- Irssi: Join to #mctxuwa_softdev was synced in 2 secs
+15:17 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:22 -!- jtanx_ [~asfa@130.95.54.13] has joined #mctxuwa_softdev
+15:22 -!- jtanx_ is now known as jtanx
+15:22 -!- jtanx [~asfa@130.95.54.13] has quit [EOF From client]
+18:17 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:36 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+22:14 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+22:57 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+--- Day changed Tue Oct 22 2013
+09:35 < sam_moore> So... looking at our system diagram, we have "mains electricity" going directly into the BeagleBone
+09:35 < sam_moore> That should probably be fixed
+09:38 < sam_moore> Dammit isn't there an svg version somewhere
+10:06 < sam_moore> Oliver said Adrian's goal was to "teach us a lesson"
+10:07 < sam_moore> If the goal is to turn us into cynical bastards, I was already a cynical bastard before this unit, so I fail to see the point
+10:07 < sam_moore> ... Talking to myself, excellent sign
+10:38 -!- jtanx [825ffcb6@ircip4.mibbit.com] has joined #mctxuwa_softdev
+10:39 < sam_moore> Hi Jeremy
+10:40 < sam_moore> Are you OK with the section I listed for you?
+10:40 < jtanx> Sure, it seems okay
+10:41 < jtanx> This is going to be a busy week
+10:42 < sam_moore> I basically told my ENSC1001 team that if I have to choose between failing two units, I will choose to fail ENSC1001
+10:42 < sam_moore> I am now "that guy"
+10:43 < jtanx> Urgh :(
+10:44 < sam_moore> The requirements for the diary in terms of software are a bit ridiculous
+10:44 < sam_moore> In the 21st century
+10:44 < sam_moore> You'd think we could use git
+10:44 < sam_moore> As opposed to writing down source code in our diary
+10:44 < sam_moore> ... writing down code...
+10:44 < sam_moore> By hand
+10:44 < jtanx> Yeah, the requirements for this whole unit have been quite a stretch\
+10:44 < sam_moore> In a diary
+10:44 < sam_moore> What the hell???
+10:44 < jtanx> I asked during the meeting if he wanted a printed copy of the code :P
+10:45 < sam_moore> One idea I have had that would have been good
+10:45 < sam_moore> Is to always make 2 git commits whenever you work on something
+10:45 < sam_moore> One when you start
+10:45 < sam_moore> And one when you finish
+10:45 < jtanx> good idea
+10:46 < sam_moore> So, does he want a printed copy of the code?
+10:52 < jtanx> nah
+10:58 < sam_moore> Damn, that might have been fun to hand in
+10:58 < jtanx> We could do it just for shits
+10:58 < jtanx> print out the doxygen manual too
+10:58 < sam_moore> Hahaha
+10:58 < sam_moore> The doxygen manual is probably bigger than the printed source code
+10:59 < jtanx> Get a quote from uniprint 
+10:59 < jtanx> print and bind it
+10:59 < sam_moore> Sure
+10:59 < sam_moore> It won't help though
+10:59 < jtanx> yeah
+10:59 < sam_moore> The response to anything that looks like it was a large amount of work
+10:59 < sam_moore> is "you overcomplicated it!"
+10:59 < jtanx> ~.~
+11:02 < jtanx> okay, i'm leaving uni
+11:02 -!- jtanx [825ffcb6@ircip4.mibbit.com] has quit ["http://www.mibbit.com ajax IRC Client"]
+11:31 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+11:37 < jtanx> well, I guess now's a good time than any to learn LaTeX
+11:39 < sam_moore> Haha
+11:39 < sam_moore> You don't have to learn LaTeX
+11:39 < sam_moore> It's just, for a 30 page report
+11:39 < sam_moore> If I am the one collating it
+11:39 < sam_moore> I want to use LaTeX
+11:39 < sam_moore> Hang on, I'll submit something in a minute, I got sidetracked looking at flow chart applications
+11:41 < jtanx> that's ok
+11:41 < jtanx> I've always wanted to learn latex anyway
+11:43 < sam_moore> If you're good at programming you can pick up latex pretty easily
+11:43 < jtanx> yeah, it doesn't look to bad
+11:43 < sam_moore> The scary bit is all the preamble stuff
+11:43 < sam_moore> Which you just copy/paste from examples unless you actually want to change something majorly
+11:43 < jtanx> haha
+11:43 < sam_moore> The rest is just like any markup language, except a bit more verbose
+11:44 < sam_moore> I have a nice template structure from my thesis we can use
+11:44 < jtanx> Cool
+11:57 < sam_moore> https://github.com/szmoore/MCTX3420/tree/report/reports/final
+11:58 < sam_moore> Essentially every chapter gets a single .tex file in the chapters directory
+11:58 < sam_moore> report.tex determines the formatting and stuff, so the chapter.tex files don't have to have anything other than content
+11:58 < jtanx> Okay
+11:59 < sam_moore> I'm not sure if it builds under windows easily
+11:59 < jtanx> well
+11:59 < jtanx> one of the reasons why i hesitated to use latex was because it's something like a few gb to isntall
+12:00 < jtanx> it should build under windows fine
+12:00 < sam_moore> Ah
+12:00 < sam_moore> I think it's worth it
+12:00 < jtanx> I have no disk space to install it on my laptop
+12:00 < sam_moore> For something of this scale... using a standard word processor...
+12:00 < sam_moore> Haha
+12:00 < jtanx> but it's installed on my server
+12:00 < sam_moore> Just worry about the content, I can make it compile either way
+12:00 < jtanx> yeah
+12:01 < sam_moore> Also, do you know any good flow chart stuff? Other than omnigraffle which is OSX only
+12:01 < jtanx> ms visio
+12:01 < jtanx> defacto standard
+12:02 < jtanx> never particularly liked it though
+12:03 < jtanx> it's free of msdnaa, but of course you need a windows computer...
+12:03 < sam_moore> Yeah, that will ruin my productivity
+12:04 < sam_moore> I do have windows, but rebooting is not fun, installing windows equivelants of all the software I use under linux is not fun, wine is probably broken, and running my windows operating system off the hard disk as a VM can be done, but gives temperamental results
+12:07 < jtanx> hahaha
+12:15 < sam_moore> Hmm, I have LibreOffice draw
+12:15 < sam_moore> Maybe that doesn't suck
+12:16 < jtanx> I hate using Libre/Open*
+12:16 < jtanx> never formats properly
+12:17 < sam_moore> Yeah... just trying to join two shapes together nicely is taking more than 3 seconds, screw that
+12:17 < jtanx> hahaha
+12:17 < sam_moore> I'll try this "Dia" thing
+12:18 < sam_moore> Oh dear
+12:18 < sam_moore> There's "Dia"
+12:18 < sam_moore> And "Diagramly"
+12:20 < jtanx> what about graphviz
+12:28 < sam_moore> giffly looks good
+12:28 < jtanx> Any particular name for our server software?
+12:28 < sam_moore> Oh god, it needs a name
+12:28 < jtanx> I've just been referring to it as 'Server API'
+12:28 < sam_moore> Yeah :S
+12:29 < sam_moore> I have a friend who didn't name their software and had to give a report on it and the only thing anyone commented on was its lack of name
+12:29 < sam_moore> So the next time...
+12:30 < jtanx> >.>
+12:30 < sam_moore> He said "This part of the software is 'sabertooth' and this part is 'timberwolf'"
+12:30 < sam_moore> And they liked it
+12:30 < jtanx> Hahaha
+12:30 < jtanx> what
+12:31 < sam_moore> ...
+12:31 < sam_moore> What's the greek god of disaster?
+12:31 < sam_moore> Or exploding pressurised vessels
+12:32 < sam_moore> Demeter, goddess of failure...
+12:33 < sam_moore> Just stick with Server API for now
+12:35 < sam_moore> I think I'll use gliffy even though it requires me to sell my soul to whatever company owns it
+12:35 < sam_moore> Can't be worse than facebook
+12:35 < jtanx> ._.
+12:35 < jtanx> fair enough
+12:36 < sam_moore> For a "vector graphics" editor, "dia" just looks horrible
+12:36 < sam_moore> The lines don't alias properly at all
+12:36 < jtanx> does it generate svg output
+12:37 < sam_moore> gliffy does and I'm not looking back :P
+12:37 < jtanx> hahaha
+12:42 < sam_moore> gliffy is really nice
+12:42 < jtanx> which flow chart are you doing
+12:42 < sam_moore> At the moment, the sensors thread
+12:43 < jtanx> Okay
+12:43 < jtanx> ahh
+12:43 < jtanx> gliffy would have been handy for uml crap I had to do
+12:46 < sam_moore> If you want to start with flow charts, try and do one for how ajax goes from the client and then data comes back through the labyrinth of FastCGI calls :P
+12:47 < sam_moore> I have a feeling they will consider flow charts to be "documentation" and not "report" though :S
+12:47 < jtanx> We can put it in the report
+12:47 < jtanx> then write about it
+12:47 < sam_moore> Haha
+12:47 < sam_moore> I actually have some results from experiments which they keep going on about in the marking key
+12:48 < sam_moore> I'm not sure what we can do for the results of tests from the GUI
+12:48 < jtanx> yeah
+12:48 < sam_moore> At one point I had a graph in flot that was plotting the time it took to update the graph in flot
+12:48 < sam_moore> But I never saved it
+12:48 < jtanx> o.O
+12:49 < sam_moore> Something that might be nice is a cachegrind profile
+12:49 < sam_moore> Whenever I do a report on software I try and profile it somehow
+12:49 < sam_moore> Anyway... the focus has shifted from "make the system work" to "write a report"
+12:49 < jtanx> Yeah
+12:50 < sam_moore> So we're pretty much just going to leave the system in an almost finished state, but since it would take someone a few weeks to learn it, they'll just start again...
+12:50 < sam_moore> and fail in all the same ways next year :(
+12:50 < jtanx> Hahahaha, of course
+13:48 < sam_moore> This flow chart stuff is really annoying
+13:48 < sam_moore> How much detail needs to be included
+13:48 < sam_moore> Argh
+13:48 < jtanx> I just made one in visio
+13:48 < jtanx> high level crap
+13:49 < jtanx> but still annoying to make
+13:49 < jtanx> I was hoping to make the flow chart
+13:49 < jtanx> then comment on that
+13:49 < jtanx> in the text
+13:49 < sam_moore> Ok
+13:50 < jtanx> Do you think something like this is ok?http://i.imgur.com/acNVXME.png
+13:52 < sam_moore> That looks good
+13:52 < sam_moore> It's completely inconsistent with what my sensor flow chart looks like visually though
+13:52 < jtanx> :S
+13:53 < sam_moore> Should we try make them all look the same, or not bother?
+13:53 < jtanx> Hmm
+13:53 < sam_moore> I'm not sure if this works; can you access it like this: https://www.gliffy.com/go/html5/5007621?app=1b5094b0-6042-11e2-bcfd-0800200c9a66
+13:53 < jtanx> I have to login
+13:54 < jtanx> presumably your login
+13:54 < sam_moore> Yeah, ok, I'll just put it under figures
+13:55 < sam_moore> https://github.com/szmoore/MCTX3420/blob/report/reports/final/figures/sensor_thread.png
+13:57 < jtanx> Nice
+14:00 < sam_moore> Whatever, don't worry about consistency, just make the charts
+14:00 < jtanx> If we get time, maybe then
+14:24 < sam_moore> We don't have time, I just spent 6 hours making one diagram :S
+14:24 < sam_moore> Ok, only 4.5 hours so far, but still
+14:24 < jtanx> :S
+14:24 < jtanx> I've spent what, 30 mins deciding how to write this one paragraph
+14:25 < jtanx> This is ridiculous
+14:25 < sam_moore> Were you there when Oliver said that Adrian's goal with this unit was to punish us?
+14:25 < jtanx> Hahaha
+14:25 < jtanx> Nah I wasn't there
+14:26 < sam_moore> The whole point is apparently to make us realise that we need a project manager
+14:26 < sam_moore> Something that I'm pretty sure I could work out for myself thankyou very much
+14:26 < jtanx> >.o
+14:29 < sam_moore> I've pushed some sort of report layout thing
+14:32 < sam_moore> It looks like most of the marks are on the "Approach" section
+14:32 < sam_moore> Which reminds me, I need to finish adding up my hours...
+14:33 < sam_moore> For cost calculation we could go "We have an average of X lines per day. According to James Trevelyn, the metric is 15 lines per day. Assuming this means 8 hours full time work at $150 an hour... we need this much money."
+14:34 < jtanx> Yeah
+16:09 < sam_moore> Ok, I'm starting to get the hang of this
+16:09 < sam_moore> If I just don't sleep for the next week
+16:09 < sam_moore> We'll be fine
+16:09 < jtanx> :S
+16:10 < sam_moore> Dammit are we still testing this system on Wednesday?
+16:10 < jtanx> I think so
+16:10 < jtanx> I'm trying to push out as much of this as possible today, but I'm not getting that far...
+16:10 < sam_moore> Ok, it should be fine, we just need some minor changes
+16:10 < sam_moore> Like... actually putting all the sensors/actuators in the software...
+16:10 < sam_moore> All the logic to control them is there though
+16:10 < jtanx> Yeah, maybe...
+16:11 < sam_moore> Don't worry about shit like the microphone in the graph page; the data can be recorded and downloaded, that's good enough for it
+16:11 < jtanx> Yep
+16:12 < jtanx> I don't particularly see the use of the microphone anyway
+16:12 < sam_moore> I don't know either
+16:13 < sam_moore> I realised that doing something like PID control with the current sensor/actuator logic would be a pain...
+16:13 < jtanx> Will we need pid control?
+16:14 < sam_moore> I don't think so
+16:14 < jtanx> I hope not
+16:14 < sam_moore> Well... not if the pressure regulator is good
+16:14 < jtanx> Here's to hoping
+16:14 < jtanx> (and if electronics gets their PWM-to-analogue thing going)
+16:15 < sam_moore> At least it's sort of possible to make PID control work, if you can identify the sensor somehow in Actuator_Loop and then just look at (sensor->current_data.value)/(sensor->points_read)
+16:15 < sam_moore> (Because I was lazy and reused current_data to store the sum of the points read before averaging, rather than the actual most recent point)
+16:16 < sam_moore> ergh, we'll fix that if it needs fixing anyway
+16:23 < sam_moore> Actually, if the goal is just to plot pressure vs strain, we don't care exactly what the pressure regulator is *supposed* to be... we just blindly increase it and then plot the strain vs an actual pressure sensor instead
+16:24 < jtanx> That's true
+16:26 < sam_moore> I wonder how harsh they will be on the "you must have designed the system completely before you implement it"
+16:26 < sam_moore> Do we have to determine what every line of code is going to be before we write them?
+16:27 < jtanx> Well there's no way that can be the case
+16:28 < jtanx> If that were the case i think we'd still be stuck trying to write the basics
+16:28 < sam_moore> At a high level our design is still exactly what is on that block diagram from ages ago
+16:28 < sam_moore> At a lower level... it's been through a few changes
+16:53 < sam_moore> ... I'm at 13 pages, but a lot of them are blank
+16:55 < jtanx> Ideally it should be ~5 pages/person since there's 6 people...
+16:55 < jtanx> How it actually turns out, well...
+16:57 < sam_moore> Well
+16:57 < sam_moore> One flow chart == 1 page...
+16:57 < sam_moore> I'm pretty sure I need to make at least 3 flow charts...
+16:57 < jtanx> Hahaha
+16:58 < sam_moore> Hmmm, could we hand in 29 pages of flow chart and 1 page of text...
+16:58 < sam_moore> The "teamwork" process could be a fun flowchart to make
+16:58 < sam_moore> Put lots of skull and crossbones on it
+16:58 < jtanx> :P
+16:59 < sam_moore> I'm pretty sure if you just count the figures I wanted to include that would make more than 5 pages
+16:59 < sam_moore> Perhaps this is achievable then
+17:00 < sam_moore> At least, getting 30 pages is achievable, not sure about meeting the marking criteria
+17:00 < jtanx> Yeah
+17:09 < jtanx> I'm at about 2 pages, and I've barely even started on explaining anything
+17:09 < jtanx> just reasoning why we chose what we chose
+17:28 < jtanx> "So Adrian just made an LMS announcement and the report is now due on Friday Week 13 (5pm), which is slightly more reasonable."
+17:28 < jtanx> (Justin just emailed)
+17:56 < sam_moore> I wonder if James' refreshing new GUI will be ready to show off by Tuesday
+17:56 < jtanx> Hehe
+17:57 < jtanx> Hopefully
+17:58 < sam_moore> LMS has two reports...
+17:58 < sam_moore> "Individual Report" and "Final Report"
+17:58 < jtanx> really
+17:58 < jtanx> why
+17:59 < sam_moore> Maybe the individual report is for the peer assessment mark?
+17:59 < jtanx> ah
+17:59 < jtanx> the marks on lms are depressing me
+18:00 < sam_moore> The progress report marks?
+18:00 < sam_moore> They are pretty depressing
+18:00 < jtanx> the quiz marks and soldering lab
+18:00 < sam_moore> Oh those
+18:00 < sam_moore> They are even more depressing
+18:01 < sam_moore> Wait, this maths doesn't make sense
+18:01 < sam_moore> The meetings are worth 52/1010
+18:01 < sam_moore> The tutorials are worth 808
+18:01 < sam_moore> The soldering video is 100
+18:01 < jtanx> it's lms being screwy
+18:01 < sam_moore> And our final report is worth 23?
+18:02 < jtanx> the quiz marks and tutorial is marked outof 100%
+18:02 < jtanx> I don't know what the others are marked out of
+18:02 < jtanx> (well tutes out of 4)
+18:11 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+19:16 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+20:20 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+20:22 -!- jtanx_ [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+20:22 -!- jtanx_ is now known as jtanx
+21:14 < sam_moore> I just did a test that I probably should have done ages ago, but it confirms my assertion that C is much better (at least in terms of performance) for multithreaded stuff than python
+21:14 < jtanx> well yeah
+21:14 < jtanx> but then how much performance do you require
+21:14 < sam_moore> All the performance
+21:15 < jtanx> :P
+21:15 < sam_moore> At the fastest possible sampling rate, python is up around 0.01s in terms of the standard deviation of the distribution you get
+21:15 < sam_moore> So that's pretty bad
+21:18 < sam_moore> That's on a multicore processor actually
+21:18 < sam_moore> I guess I could repeat the test on the actual beaglebone, but I think the graph proves the point
+21:20 < sam_moore> ... Anyway, they said they wanted results of tests and things... so that's a test we can put in if we need to.
+21:21 < jtanx> Yeah
+21:24 < jtanx> https://github.com/niklasvh/html2canvas
+21:25 < jtanx> oh that's cool
+21:41 < sam_moore> Your section of the report is really good
+21:41 < jtanx> Really?
+21:41 < jtanx> I thought it was really wishy washy
+21:41 < sam_moore> Well it justifies the design choice pretty well
+21:42 < jtanx> Thanks
+21:42 < sam_moore> At one point people were seriously discussing using things other than HTTP
+21:43 < jtanx> What could we have used
+21:43 < jtanx> designed our own protocol?
+21:43 < sam_moore> Yeah, which would have sucked, that's what I had to explain
+21:44 < jtanx> Yeah
+21:44 < sam_moore> It was something along the lines of "why do we need to do all this complicated web stuff, can't we just have one device talking to another device over some kind of serial cable"
+21:44 < jtanx> I could imagine the heartache involved in trying to use some custom protocol
+21:44 < jtanx> hahaha
+21:44 < sam_moore> In the first place... you then have to build two custom devices as well as write a custom protocol...
+21:46 < jtanx> Yeah
+21:46 < sam_moore> We did need a raspberry pi or beaglebone, whether or not using an arduino as well for low level stuff would be better I'm not sure
+21:47 < jtanx> Hmm
+21:47 < sam_moore> I don't think it would have been worth the effort needed to get the RPi/BBB to talk to the arduino
+21:47 < jtanx> An arduino may have been better for all the gpio/adc stuff I guess
+21:47 < jtanx> but yeah
+21:47 < jtanx> the communication between the device and the arduino
+21:48 < sam_moore> Well you'd have a request coming in via HTTP, and then that would have to be sent over USB to the arduino to do the appropriate hardware control
+21:48 < sam_moore> Which would probably make it difficult to make the sensors/actuators independent of the client
+21:49 < jtanx> Well, there's also the option of i2c
+21:49 < jtanx> but yes
+21:49 < jtanx> an extra layer of communication
+21:49 < jtanx> :/
+21:49 < sam_moore> Either way, you have to store the data somehow... and you don't want it to be dependent on the client request... 
+21:50 < sam_moore> The more I think about it, the less I like it...
+21:51 < sam_moore> So I'm glad we went with the BeagleBone even though it's gpio/adc/pwm control is terrible
+21:51 < jtanx> Hahaha
+21:51 < jtanx> love/hate relationship with the bbb
+21:52 < sam_moore> You'd need to have interrupt handlers and some kind of synchronisation going on
+21:52 < sam_moore> You still need mutexes and conditionals with threads, but it's a lot easier
+21:53 < sam_moore> ... and we'd still need the multithreaded stuff anyway, because we'd still have sensors on the actual RPi/BBB to deal with
+21:53 < sam_moore> Yep, it would have been worse
+21:53 < jtanx> Yeah
+21:54 < sam_moore> We should definitely note this in the report somewhere
+21:55 < jtanx> Yeah
+21:55 < jtanx> Help justify why we agreed to the bbb
+21:55 < sam_moore> Well we did sort of agree to it because of that
+21:55 < sam_moore> It was partly "Hmm, we only have to write code for one device"
+21:56 < sam_moore> And partly because electronics wanted it to avoid having to build the extra hardware
+21:56 < sam_moore> And partly because if electronics wanted it then we wouldn't have to write our own BOM and order things :P
+21:56 < jtanx> :P
+22:18 < jtanx> MySQL Database BLARGH
+22:18 < jtanx> hehe
+22:21 < sam_moore> Do my thread flow charts make sense?
+22:22 < sam_moore> It's hard to know objectively
+22:22 < sam_moore> But I suspect looking at them for too long may cause the brain to shut down
+22:24 < sam_moore> Dammit, I can't remember if tomorrow is supposed to be some important assessment thing for ENSC1001 or not
+22:24 < jtanx> o.o
+22:24 < jtanx> I'm still trying to familiarise myself with the meaning of all the flow chart symbols
+22:24 < jtanx> but it seems okay
+22:24 < jtanx> don't you have to give a presentation or something for ensc1001
+22:25 < sam_moore> Yeah, but it's alright, that's next week
+22:25 < sam_moore> All the things are due next week
+22:26 < sam_moore> That's all that matters to me right now, because I want to sleep
+22:26 < jtanx> :S
+22:26 < sam_moore> Next Tuesday I will hate myself for sleeping this Tuesday
+22:26 < sam_moore> But Sam from next Tuesday is a jerk anyway
+22:26 < sam_moore> I never liked that guy
+22:26 < jtanx> Hey, sleep is important
+22:27 < jtanx> One thing about the flow charts, doesn't fatal just call exit(), so no deinitialisation happens
+22:27 < sam_moore> Um, sort of
+22:27 < sam_moore> But when the program exits, Cleanup gets called
+22:27 < sam_moore> Which calls the deinitialisation functions
+22:27 < jtanx> When did that get enabled
+22:28 < sam_moore> Cleanup has been there for ages
+22:28 < sam_moore> It's just been empty most of the time
+22:28 < jtanx> Ah
+22:28 < sam_moore> Although, I'm not sure if calling exit() is the best way to do it when you have multiple threads
+22:28 < jtanx> Meh
+22:28 < jtanx> when you have a fatal situation
+22:29 < sam_moore> Software isn't going to help?
+22:29 < jtanx> no
+22:29 < sam_moore> I was planning on having exit called with different error codes
+22:29 < jtanx> but what can you do with that
+22:30 < sam_moore> You can restart the server using run.sh
+22:30 < jtanx> but with the different error codes?
+22:30 < sam_moore> Or you can start a quick and dirty program that will make sure everything's deinitialised
+22:30 < jtanx> Ah
+22:30 < jtanx> I guess that could work
+22:30 < sam_moore> One error code for "really bad thing happened, we're going to die"
+22:30 < sam_moore> And one for "Something dumb happened, restart the server"
+22:31 < jtanx> About the graphs changing colours
+22:31 < jtanx> is it okay to just add a legend
+22:31 < sam_moore> It is OK to do whatever is the minimal work for the maximum reward
+22:31 < jtanx> hahaha
+22:31 < jtanx> well
+22:32 < jtanx> it was really easy to add the legend
+22:32 < sam_moore> Good, problem solved
+22:32 < jtanx> :P
+22:33 < jtanx> For the actuators
+22:33 < jtanx> did you remove that fatal call
+22:33 < jtanx> when the value was not safe?
+22:33 < sam_moore> I think I did
+22:33 < jtanx> Okay
+22:33 < sam_moore> It reports an error and doesn't set the actuator
+22:33 < sam_moore> And in theory it cancels the remaining steps
+22:33 < jtanx> That's good
+22:33 < sam_moore> Meaning the actuator just stays at the last safe value
+22:35 < sam_moore> Ah, it doesn't cancel the steps, but that can be easily changed
+22:35 < sam_moore> But currently it would just continually report the error until all the steps were finished
+22:36 < jtanx> either way's fine
+22:37 < jtanx> what's the default sample rate
+22:38 < sam_moore> It used to be 1s
+22:38 < jtanx> it's just that overnight it's generating about 2G of data
+22:38 < jtanx> which doesn't sound like 1s
+22:39 < sam_moore> Then it most likely isn't anymore
+22:39 < sam_moore> Nope, it's now 1e-4 seconds
+22:39 < sam_moore> Changed for the microphone test
+22:39 < jtanx> ahh
+22:40 < sam_moore> Should probably make the starting sample rate an argument to Sensor_Add
+22:40 < jtanx> I was wondering why it was consuming 30% cpu on idle
+22:40 < jtanx> ls
+22:40 < sam_moore> Ergh, if the microphone is running with everything else, it will generate a lot of data
+22:41 < jtanx> Yeah
+22:41 < sam_moore> Fortunately I added averaging
+22:41 < sam_moore> And apparently they just want an average from the microphone
+22:41 < sam_moore> Or a "level"
+22:41 < sam_moore> Or something
+22:41 < jtanx> oO
+22:42 < sam_moore> We'll just have the microphone sample at 1e-6 and have 1e6 averages per point
+22:42 < sam_moore> (ie: 1 point gets recorded every second)
+22:46 < sam_moore> Hmm, or you could make the microphone's ReadFn only succeed if the last pressure reading is higher than a certain value
+22:46 < sam_moore> But that's getting complicated
+22:49 < sam_moore> Good night anyway
+22:52 < jtanx> Okay
+22:53 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+23:01 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+23:55 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+--- Day changed Wed Oct 23 2013
+19:30 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+23:01 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Thu Oct 24 2013
+07:42 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+10:21 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+14:16 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+14:36 -!- Rowan [~Rowan@106-68-210-88.dyn.iinet.net.au] has joined #mctxuwa_softdev
+14:47 < jtanx> Hey
+15:45 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Connection reset by peer]
+15:47 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+17:27 -!- Rowan [~Rowan@106-68-210-88.dyn.iinet.net.au] has quit [EOF From client]
+17:51 < jtanx> huh
+17:51 < jtanx> it was surprisingly easy to add post support
+17:56 < sam_moore> That's cool
+17:56 < jtanx> you just fgets from stdin instead
+17:56 < jtanx> it's in the same format too
+17:56 < sam_moore> Excellent
+17:57 < jtanx> we probably do have to unescape html strings though
+17:57 < jtanx> like if someone had a comma in their password
+17:57 < sam_moore> If we had a progress report we could put "potential gaping security leak plugged"
+17:57 < jtanx> Hahaha
+17:57 < jtanx> but it still allows the get request version
+17:57 < sam_moore> Oh well
+17:57 < jtanx> but then that's your own fault
+17:57 < sam_moore> Yep
+17:59 < sam_moore> Doesn't look like the IRC channel will get a mention in the "communication" section of the report :(
+17:59 < sam_moore> Oh no wait, it does
+17:59 < sam_moore> Good
+17:59 < sam_moore> ... That "overall schedule"...
+17:59 < jtanx> Haha
+17:59 < sam_moore> I started it, and quickly realised it was a waste of time
+18:01 < sam_moore> Also, need to hate on the beaglebone less
+18:01 < sam_moore> Otherwise they might try and do something stupid like replace it next year
+18:01 < jtanx> That would be stupid
+18:01 < sam_moore> Yeah, it was a pain, but probably still one of the best things to use
+18:02 < sam_moore> RPi with dedicated ADC/DAC modules would probably have been best
+18:02 < sam_moore> Distributed system of arduinos.... noooo
+18:02 < jtanx> Yeah
+18:02 < jtanx> RPi with ADC/DAC would have been cool
+18:02 < jtanx> but only because there's more support for the RPi
+18:02 < sam_moore> Yes
+19:19 < jtanx> hmm
+19:20 < jtanx> maybe I should enable POST only for the login module?
+19:20 < jtanx> Right now, if POST and GET data is received, the GET data is discarded in place of the POST data
+19:28 < jtanx> Yeah, okay I only enabled it for login
+22:38 < jtanx> Hahahahaha
+22:39 < jtanx> I passed our code through ohloh - https://www.ohloh.net/p/MCTX3420
+22:39 < jtanx> Apparently it's work 3 years of effort, and is valued at $150k
+22:49 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Fri Oct 25 2013
+08:48 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:50 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+09:56 < sam_moore> Um... we didn't make our first commit in 200
+09:56 < sam_moore> * 2000
+09:56 < sam_moore> 10 developers???
+09:57 < sam_moore> There are 6 of us
+09:57 < sam_moore> And some people contributed about 2 lines of source code...
+09:57 < sam_moore> Mostly written in JavaScript
+09:57 < sam_moore> Really?
+09:57 < sam_moore> Is that counting the jQuery UI guff?
+09:58 < sam_moore> That's annoying, because the C part of the project is like 50% comment lines
+09:58 < sam_moore> And it says "low number of comments" based on the JavaScript :S
+09:59 < sam_moore> Still... this is really cool
+10:00 < jtanx> hahaha
+10:00 < jtanx> the 2000 commit was because we made commits on the bbb
+10:00 < sam_moore> ok...
+10:00 < jtanx> but it lacks an rtc 
+10:00 < sam_moore> Where do we get the extra 4 developers from?
+10:00 < sam_moore> "Debian" is one
+10:00 < jtanx> and for some reason the time didn't get updated
+10:01 < jtanx> umm
+10:01 < jtanx> hmm
+10:01 < jtanx> Ubuntu user?
+10:01 < sam_moore> Oh, "Callum" and "Callum-" are treated seperately -_-
+10:01 < jtanx> oh
+10:01 < sam_moore> That's still only 8
+10:02 < jtanx> the results are a bit skewed
+10:02 < jtanx> because a lot of the javascript is just from other libraries
+10:02 < jtanx> well at least i think so
+10:04 < sam_moore> Yeah
+10:05 < sam_moore> Is it easy to just pass a subset of the code through?
+10:08 < jtanx> Yep - you have to set what's ignored
+10:08 < jtanx> I've just set it to ignore all *.min.js files (essentially all external js files)
+10:08 < jtanx> But it won't get updated for a while
+10:09 < jtanx> I've got to go for ~ 2 hrs 
+10:10 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+10:12 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+12:46 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+13:42 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+20:44 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:20 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+21:36 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+23:39 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev

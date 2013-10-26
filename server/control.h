@@ -18,6 +18,8 @@ typedef enum ControlModes {
 /** The same as INVALID_CHARACTERS, except escaped for use in JSON strings **/
 #define INVALID_CHARACTERS_JSON "\\\"*/:<>?\\\\|. "
 
+#define NOAUTH_USERNAME "_anonymous_noauth"
+
 extern void Control_Handler(FCGIContext *context, char *params);
 extern const char* Control_SetMode(ControlModes desired_mode, void * arg);
 extern ControlModes Control_GetMode();

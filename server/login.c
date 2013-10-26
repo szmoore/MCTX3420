@@ -286,7 +286,10 @@ void Logout_Handler(FCGIContext * context, char * params)
 /**
  * Handle a Login Request
  * @param context - The context
- * @param params - Parameter string, should contain username and password
+ * @param params - Parameter string, should contain username and password.
+ *				   NOTE: Care should be taken when using params, as it is
+ *				   completely unescaped. Do not log or use it without
+ *                 suitable escaping.
  */
 void Login_Handler(FCGIContext * context, char * params)
 {
@@ -328,7 +331,7 @@ void Login_Handler(FCGIContext * context, char * params)
 
 		case AUTH_LDAP:
 		{
-			if (strlen(pass) <= 0)
+			if (*pass == '\0')
 			{
 				FCGI_RejectJSON(context, "No password supplied.");
 				return;

@@ -18,13 +18,16 @@
         $(document).ready(function () {
           $("form").submit(function () { //Prevent form submit globally
             return false;
-          })
+          }).trigger("reset"); //Reset forms
+          
+          //Force enable start buttons if previously disabled
+          $("#start-controls input[type='button']").removeAttr("disabled");
           
           //Set the status updated
           $("#state-exp").setStatusUpdater();
           
           //Set the logic for the start controls
-          $("#start-controls").submit(function () {
+          $("#start-controls input[type='button']").click(function () {
             var start = $("#start-controls input[type='button']");
             var force = $("#start-controls input[name='start_force']");
             
@@ -47,6 +50,34 @@
               count : $("#pressure-stepcount").val()
             };   
             $(this).setPressure(pressure, $("#pressure-result"));
+          });
+          
+          $("#pressure-controls input[name='clear']").click(function () {
+            $("#pressure-controls")[0].reset();
+            $("#pressure-result").text("");
+          });
+          
+          $("#pressure-controls input[name='zero']").click(function () {
+            $("#pressure-controls input[name='clear']").click();
+            $("#pressure-set").val("0");
+            
+            $("#pressure-controls").submit();
+          });
+          
+          $("#pressure-controls input[name='step-it']").click(function () {
+            var pressure = {
+              set : $("#pressure-set").val(), step : "", wait : "", count : ""
+            };
+            
+            $(this).setPressure(pressure, $("#pressure-result")).done(function () {
+              var next = Number($("#pressure-set").val()) + Number($("#pressure-stepsize").val());
+              $("#pressure-set").val(next.toString());
+            });
+            
+          });
+          $("#samplerate-controls").submit(function () {
+            setSampleRate($("#sensor-select option:selected").val(), 
+                          $("#sensor-set").val(), $("#samplerate-result"));
           });
        });       
       }).fail(function () {
@@ -106,6 +137,7 @@
                 <li><a href="index.html"><span>Home</span></a></li>
                 <li><a href="control.html"><span>Experiment control</span></a></li>
                 <li><a href="graph.html"><span>Experiment graphs</span></a></li>
+                <li><a href="values.html"><span>Experiment data (live)</span></a></li>
                 <li><a href="data.html"><span>Experiment data</span></a></li>
                 <li><a href="pintest.html"><span>Pin debugging</span></a></li>
                 <li class="last"><a href="help.html"><span>Help</span></a></li>
@@ -150,8 +182,8 @@
                 &nbsp;
               </p>
               <p class="centre">
-                <input type="submit" name="start_strain" value="Strain test">
-                <input type="submit" name="start_explode" value="Explode test">                
+                <input type="button" name="start_explode" value="Explode test">
+                <input type="button" name="start_strain" value="Strain test">                
               </p>
             </form>
           </div>
@@ -177,53 +209,35 @@
                 </tr>
               </table>
               <p class="left" id="pressure-result">
-                
+                &nbsp;
               </p>
               <p class="right">
+                <input type="button" name="clear" value="Clear input">
+                <input type="button" name="zero" value="Zero the pressure">
+                <input type="button" name="step-it" value="Step the pressure">
                 <input type="submit" value="Set pressure">
               </p>
             </form>
-          </div>
-          
-          <div id="stats-widget" class="widget">
-            <form id="stats" action="#" class="nice clear">
+            
+            <form id="samplerate-controls" action="#" class="nice clear">
               <table>
                 <tr>
-                  <td><label for="stats-mainspressure">Mains pressure (kPa)</label></td>
-                  <td><label for="stats-canpressure">Can pressure (kPa)</label></td>
+                  <td><label for="sensor-select">Select a sensor</label></td>
+                  <td><label for="sensor-set">Set sampling rate (s)</label></td>
                 </tr>
                 <tr>
-                  <td><input id="stats-mainspressure" type="text" readonly></td>
-                  <td><input id="stats-canpressure" type="text" readonly></td>
-                </tr>
-                <tr class="stats-strain">
-                  <td><label for="stats-strain1">Central hoop strain</label></td>
-                  <td><label for="stats-strain2">Central longitudinal strain</label></td>
-                </tr>
-                <tr class="stats-strain">
-                  <td><input id="stats-strain1" type="text" readonly></td>
-                  <td><input id="stats-strain2" type="text" readonly></td>
-                </tr>
-                <tr class="stats-strain">
-                  <td><label for="stats-strain3">End hoop strain</label></td>
-                  <td><label for="stats-strain4">End longitudinal strain</label></td>
-                </tr>
-                <tr class="stats-strain">
-                  <td><input id="stats-strain3" type="text" readonly></td>
-                  <td><input id="stats-strain4" type="text" readonly></td>
-                </tr>
-                <tr class="stats-strain">
-                  <td><label for="stats-dilatometer">Dilatometer reading</label></td>
-                  <td><label for="stats-dilatometer">Camera feed</label></td>
-                </tr>
-                <tr class="stats-strain">
-                  <td><input id="stats-dilatometer" type="text" readonly></td>
-                  <td><a href="#">Link</a></td>
+                  <td><select id="sensor-select" style="width:100%;"></select></td>
+                  <td><input id="sensor-set" type="text"></td>
                 </tr>
               </table>
+              <p class="left" id="samplerate-result">
+                &nbsp;
+              </p>
+              <p class="right">
+                <input type="submit" value="Set sampling rate">
+              </p>
             </form>
           </div>
-          
         </div>
         <!-- End main content -->
       </div>

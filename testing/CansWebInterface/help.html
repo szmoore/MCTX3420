@@ -1,0 +1,199 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>MCTX3420 Web Interface</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!--[if lte IE 8]>
+      <script language="javascript" type="text/javascript" src="static/excanvas.min.js"></script>
+    <![endif]-->
+    <script type="text/javascript" src="static/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript" src="static/jquery.flot.min.js"></script>
+    <script type="text/javascript" src="static/base64.js"></script>
+    <script type="text/javascript" src="static/mctx.gui.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="static/style.css">
+    <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $("#menu-container").populateNavbar();
+        $("#login").submit(function () {
+          $("#login").login();
+          return false;
+        });
+        
+        $("#main_controls").submit(function () {
+          //Validate!
+          return false;
+        });
+        //$("#cam1").setCamera();
+        //$("#strain-graphs").setStrainGraphs();
+        $("#errorlog").setErrorLog();
+      });
+    </script>
+  </head>
+  
+  <body>
+<div id="header-wrap">
+      <div id="header">
+        <div id="leftnav">
+          <a href="http://www.uwa.edu.au/" target="_blank">
+            <img alt = "The University of Western Australia"
+            src="static/uwacrest-text.png">
+          </a>
+          <span id="title">Exploding Can Web Interface: Help</span>
+        </div>
+		<div class="nav-menu">
+			<ul class="menu">
+			  <li><a href="dashboard.html">Home</a></li>
+			  <li><a href="setup.html">Setup</a></li>
+			  <li><a href="admin.html">Admin</a></li>
+			  <li><a href="help.html">Help</a></li>
+			</ul>
+		</div>
+        <div id="rightnav">
+          <span id="welcome-container">
+          </span>
+          <span id="date">
+            <script type="text/javascript">getDate();</script>
+          </span>
+          <div id="logout-container">
+            <form action="#">
+              <div>
+                <input type="button" id="logout" value="Logout">
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="clear"></div>
+      </div>
+    </div>    
+	<!-- End header -->
+    
+    <div id="content">
+      <div id="sidebar">
+        <div class="widgetPanel">
+          <div class="title">Status</div>
+          <div class="item">
+            <table class="status centre">
+              <tr><th>Module</th> <th>State</th></tr>
+              <tr><td>Server API</td> <td>PASS</td></tr>
+              <tr><td>Enclosure interlock</td> <td>FAIL</td></tr>
+              <tr><td>Pressure level</td> <td>PASS</td></tr>
+            </table>
+            <hr>
+            Software mode: <span id="server_mode">off</span>
+          </div>         
+        </div>
+        
+		<div class="widgetPanel">
+            <div class="title">Tutorials</div>
+            <p class="justify">For general information on using the MCTX project web interface (i.e. this webpage!) see the <b>'Tutorials'</b> section.
+              This will guide you through setting up, running and analysing an experiment with basic tutorials and explanation of the possible options.</p>
+          </div>
+          <div class="widgetPanel">
+            <div class="title">Experiment Hardware</div>
+            <p class="justify">For detailed technical information about the experiment hardware, including system diagrams, datasheets and run-downs of the components,
+              see the <b>'Hardware'</b> section.</p>
+          </div>
+          <div class="widgetPanel">
+            <div class="title">Experiment Software</div>
+            <p class="justify">For detailed technical information about the experiment software, including explanations of its structure, functions and so on, see the
+              <b>'Software'</b> section. Actual code can be accessed on the project's GitHub: <a href="https://github.com/szmoore/MCTX3420">MCTX3420</a>.</p>
+          </div>
+          <div class="widgetPanel">
+            <div class="title">Contact</div>
+            <p class="justify">If you would like more information about the project or require additional assistance, please contact:</p>
+            <p><b>Adrian Keating</b></p>
+            <p><b>Adam Wittek</b></p>
+          </div>
+
+        
+	</div>
+
+	<!-- End sidebar -->
+
+        <div id="main">
+          <div class="widget">
+            <div class="title">Getting Started</div>
+            <p class="justify">Welcome to the MCTX3420 project documentation! On this page, you will find help on how to use the project software,
+              as well as information about the various hardware components.</p>
+            <p class="justify">For a basic introduction to using the experiment, see <b>'Tutorials'</b>.
+              <a href="https://github.com/szmoore/MCTX3420/wiki/System-Overview" target="_blank">System overview</a> provides a general overview of the experiment's hardware, while
+              <a href="https://github.com/szmoore/MCTX3420/wiki/Getting-Started:-Web-Interface" target="_blank">Using the web interface</a> provides a tutorial on using the the project software.
+              For detailed information about the experiment hardware, see the <b>'Hardware'</b> section. For detailed information about the project software,
+              see the <b>'Software'</b> section.</p>
+            <div class="sub-title">Tutorials</div>
+            <ul>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/System-Overview" target="_blank">System overview</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Getting-Started:-Web-Interface" target="_blank">Using the web interface</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Getting-Started:-Run-an-Experiment" target="_blank">Running an experiment</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Getting-Started:-View-Old-Experiments" target="_blank">Viewing previous experiments</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Getting-Started:-Data-Processing" target="_blank">Data processing</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/System-Safety" target="_blank">System safety</a></li>
+            </ul>
+            <div class="sub-title">Hardware</div>
+            <ul>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/System-Overview" target="_blank">System overview</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-Electronics" target="_blank">Electronics</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-BeagleBone" target="_blank">BeagleBone</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-Pneumatics" target="_blank">Pneumatics</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-Sensors" target="_blank">Sensors</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-Mounting" target="_blank">Mounting</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-Case" target="_blank">Case</a></li>
+            </ul>
+            <div class="sub-title">Software</div>
+            <ul>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Software:-Overview" target="_blank">Software overview</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Software:-Browser-Interface" target="_blank">Browser interface</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Software:-Server-API" target="_blank">Server API</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Software:-Server-Code" target="_blank">Server code</a>
+                <ul>
+                  <li><a href="https://github.com/szmoore/MCTX3420/wiki/Software:-Data-Handling" target="_blank">Data handling</a></li>
+                  <li><a href="https://github.com/szmoore/MCTX3420/wiki/Software:-Sensors-&amp;-Actuators" target="_blank">Sensors and actuators</a></li>
+                  <li><a href="https://github.com/szmoore/MCTX3420/wiki/Software:-Pin-Access" target="_blank">Pin access</a></li>
+                  <li><a href="https://github.com/szmoore/MCTX3420/wiki/Software:-Image-Processing" target="_blank">Image processing</a></li>
+                </ul>
+              </li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Software:-Terminology" target="_blank">Terminology</a></li>
+            </ul>
+          </div>
+
+          <div class="widget">
+            <div class="title">Project Wiki</div>
+            <p>All of the project's help documentation is stored in its <a href="https://github.com/szmoore/MCTX3420/wiki" target="_blank">GitHub wiki.</a> This git repository also
+              stores all of the software code for the project; to access the project code files, visit <a href="https://github.com/szmoore/MCTX3420" target="_blank">this link</a>.</p>
+            <p>The following is a list of pages on the GitHub wiki (all of which can be accessed via the categories above):<p>
+            <ul>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Getting-Started:-Data-Processing" target="_blank">Getting Started: Data Processing</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Getting-Started:-Run-an-Experiment" target="_blank">Getting Started: Run an Experiment</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Getting-Started:-View-Old-Experiments" target="_blank">Getting Started: View Old Experiments</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Getting-Started:-Web-Interface" target="_blank">Getting Started: Web Interface</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-BeagleBone" target="_blank">Hardware: BeagleBone</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-Case" target="_blank">Hardware: Case</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-Electronics" target="_blank">Hardware: Electronics</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-Mounting" target="_blank">Hardware: Mounting</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-Pneumatics" target="_blank">Hardware: Pneumatics</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-Sensors" target="_blank">Hardware: Sensors</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki" target="_blank">Home</a>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Software:-Browser-Interface" target="_blank">Software: Browser Interface</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Software:-Data-Handling" target="_blank">Software: Data Handling</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Software:-Image-Processing" target="_blank">Software: Image Processing</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Software:-Overview" target="_blank">Software: Overview</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Software:-Pin-Access" target="_blank">Software: Pin Access</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Software:-Sensors-&amp;-Actuators" target="_blank">Software: Sensors &amp; Actuators</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Software:-Server-API" target="_blank">Software: Server API</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Software:-Server-Code" target="_blank">Software: Server Code</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/Software:-Terminology" target="_blank">Software: Terminology</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/System-Overview" target="_blank">System Overview</a></li>
+              <li><a href="https://github.com/szmoore/MCTX3420/wiki/System-Safety" target="_blank">System Safety</a></li>
+            </ul>
+          </div>
+        </div>
+		</div>
+
+
+	<!-- End main content -->
+      
+    </div>
+  </body>
+</html>

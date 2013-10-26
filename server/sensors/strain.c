@@ -6,6 +6,8 @@
 #include <pthread.h>
 
 #define STRAIN_ADC ADC0
+// TODO: Choose this
+#define STRAIN_GPIO 15
 
 /**
  * Convert Strain gauge id number to a GPIO pin on the Mux
@@ -59,12 +61,33 @@ bool Strain_Init(const char * name, int id)
 	if (!GPIO_Set(gpio_num, false))
 		Fatal("Couldn't set GPIO%d for strain sensor %d to LOW", gpio_num, id);
 
-	static bool init_adc = false;
-	if (!init_adc)
+	static int init = 0;
+	if (++init == 1)
 	{
-		init_adc = true;
+		GPIO_Export(STRAIN_GPIO);
+		GPIO_Set(STRAIN_GPIO, true);
 		ADC_Export(STRAIN_ADC);
 	}
+	return true;
+}
+
+bool Strain_Cleanup(int id)
+{
+	static int killed = 0;
+	if (++killed == 4)
+	{
+
+		GPIO_Set(STRAIN_GPIO, false);
+		ADC_Unexport(STRAIN_ADC);
+	}
+
+	int gpio_num = Strain_To_GPIO(id);
+	GPIO_Unexport(gpio_num);
+	return true;
+}
+
+bool Strain_Sanity(int id, double value)
+{
 	return true;
 }
 

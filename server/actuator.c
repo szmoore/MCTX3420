@@ -35,7 +35,7 @@ int Actuator_Add(const char * name, int user_id, SetFn set, InitFn init, CleanFn
 	a->init = init; // Set init function
 
 	a->sanity = sanity;
-
+	a->cleanup = cleanup;
 	pthread_mutex_init(&(a->mutex), NULL);
 
 	if (init != NULL)
@@ -51,15 +51,34 @@ int Actuator_Add(const char * name, int user_id, SetFn set, InitFn init, CleanFn
 
 
 /**
- * One off initialisation of *all* Actuators
+ * Initialisation of *all* Actuators
  */
-#include "actuators/ledtest.h"
-#include "actuators/filetest.h"
+#include "actuators/pregulator.h"
+#include "actuators/relays.h"
 void Actuator_Init()
 {
 	//Actuator_Add("ledtest",0,  Ledtest_Set, NULL,NULL,NULL);
-	Actuator_Add("filetest", 0, Filetest_Set, Filetest_Init, Filetest_Cleanup, Filetest_Sanity, 0);
+	//Actuator_Add("filetest", 0, Filetest_Set, Filetest_Init, Filetest_Cleanup, Filetest_Sanity, 0);
+	Actuator_Add("pregulator", 0, Pregulator_Set, Pregulator_Init, Pregulator_Cleanup, Pregulator_Sanity, 0);
+	Actuator_Add("can_select", RELAY_CANSELECT, Relay_Set, Relay_Init, Relay_Cleanup, Relay_Sanity, 0);
+	Actuator_Add("can_enable", RELAY_CANENABLE, Relay_Set, Relay_Init, Relay_Cleanup, Relay_Sanity, 0);
+	Actuator_Add("main_pressure", RELAY_MAIN, Relay_Set, Relay_Init, Relay_Cleanup, Relay_Sanity, 1);
 }
+
+/**
+ * Deinitialise actuators
+ */
+void Actuator_Cleanup()
+{
+	for (int i = 0; i < g_num_actuators; ++i)
+	{
+		Actuator * a = g_actuators+i;
+		if (a->cleanup != NULL)
+			a->cleanup(a->user_id);
+	}
+	g_num_actuators = 0;
+}
+
 
 /**
  * Sets the actuator to the desired mode. No checks are
@@ -143,8 +162,12 @@ void Actuator_SetMode(Actuator * a, ControlModes mode, void *arg)
  */
 void Actuator_SetModeAll(ControlModes mode, void * arg)
 {
+	if (mode == CONTROL_START)
+		Actuator_Init();
 	for (int i = 0; i < g_num_actuators; i++)
 		Actuator_SetMode(&g_actuators[i], mode, arg);
+	if (mode == CONTROL_STOP)
+		Actuator_Cleanup();
 }
 
 /**
@@ -173,7 +196,7 @@ void * Actuator_Loop(void * arg)
 		// Currently does discrete steps after specified time intervals
 
 		struct timespec wait;
-		DOUBLE_TO_TIMEVAL(a->control.stepsize, &wait);
+		DOUBLE_TO_TIMEVAL(a->control.stepwait, &wait);
 		while (!a->control_changed && a->control.steps > 0 && a->activated)
 		{
 			clock_nanosleep(CLOCK_MONOTONIC, 0, &wait, NULL);
@@ -381,7 +404,7 @@ void Actuator_Handler(FCGIContext * context, char * params)
 	
 		ActuatorControl c = {0.0, 0.0, 0.0, 0}; // Need to set default values (since we don't require them all)
 		// sscanf returns the number of fields successfully read...
-		int n = sscanf(set, "%lf,%lf,%lf,%d", &(c.start), &(c.stepwait), &(c.stepsize), &(c.steps)); // Set provided values in order
+		int n = sscanf(set, "%lf_%lf_%lf_%d", &(c.start), &(c.stepwait), &(c.stepsize), &(c.steps)); // Set provided values in order
 		if (n != 4)
 		{
 			//	If the user doesn't provide all 4 values, the Actuator will get set *once* using the first of the provided values
@@ -433,4 +456,10 @@ Actuator * Actuator_Identify(const char * name)
 			return &(g_actuators[i]);
 	}
 	return NULL;
+}
+
+DataPoint Actuator_LastData(int id)
+{
+	Actuator * a = &(g_actuators[id]);
+	return a->last_setting;
 }

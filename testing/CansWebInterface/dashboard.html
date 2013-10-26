@@ -1,0 +1,190 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>MCTX3420 Web Interface</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!--[if lte IE 8]>
+      <script language="javascript" type="text/javascript" src="static/excanvas.min.js"></script>
+    <![endif]-->
+    <script type="text/javascript" src="static/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript" src="static/jquery.flot.min.js"></script>
+    <script type="text/javascript" src="static/base64.js"></script>
+    <script type="text/javascript" src="static/mctx.gui.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="static/style.css">
+    <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
+	<link rel="stylesheet" type="text/css" href="static/exp-menu.css">
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $("#menu-container").populateNavbar();
+        $("#login").submit(function () {
+          $("#login").login();
+          return false;
+        });
+        
+        $("#main_controls").submit(function () {
+          //Validate!
+          return false;
+        });
+        //$("#cam1").setCamera();
+        //$("#strain-graphs").setStrainGraphs();
+        $("#errorlog").setErrorLog();
+      });
+    </script>
+  </head>
+  
+  <body>
+<div id="header-wrap">
+      <div id="header">
+        <div id="leftnav">
+          <a href="http://www.uwa.edu.au/" target="_blank">
+            <img alt = "The University of Western Australia"
+            src="static/uwacrest-text.png">
+          </a>
+          <span id="title">Exploding Can Web Interface: Home</span>
+        </div>
+		<div class="nav-menu">
+			<ul class="menu">
+			  <li><a href="dashboard.html">Home</a></li>
+			  <li><a href="setup.html">Setup</a></li>
+			  <li><a href="admin.html">Admin</a></li>
+			  <li><a href="help.html">Help</a></li>
+			</ul>
+		</div>
+        <div id="rightnav">
+          <span id="welcome-container">
+          </span>
+          <span id="date">
+            <script type="text/javascript">getDate();</script>
+          </span>
+          <div id="logout-container">
+            <form action="#">
+              <div>
+                <input type="button" id="logout" value="Logout">
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="clear"></div>
+      </div>
+    </div>    <!-- End header -->
+    
+    <div id="content">
+      <div id="sidebar">
+		<div class="widgetPanel">
+			<div class="title">Controls</div>
+			<form id="main_controls" action="">
+				<table>
+				<tr>
+					<td>Experiment name</td>
+					<td>
+					<input name="experiment_name" type="text">
+					</td>
+				</tr>
+				<tr>
+				<td>Experiment mode</td>
+				<td>
+					<input name="experiment_type" value="strain" type="radio"> Strain it
+					<input name="experiment_type" value="explode" type="radio"> Explode it
+				</td>
+				</tr>
+				</table>
+				<div align="right">
+					<input type="submit" value="Start">
+					<input type="submit" value="Pause">
+					<input type="submit" value="Stop">
+				</div>
+			</form>
+		</div>
+        <div class="widgetPanel">
+          <div class="title">Status</div>
+          <div class="item">
+            <table class="status centre">
+              <tr><th>Module</th> <th>State</th></tr>
+              <tr><td>Server API</td> <td>PASS</td></tr>
+              <tr><td>Enclosure interlock</td> <td>FAIL</td></tr>
+              <tr><td>Pressure level</td> <td>PASS</td></tr>
+            </table>
+            <hr>
+            Software mode: <span id="server_mode">off</span>
+          </div>         
+        </div>
+        
+        <div class="widgetPanel">
+          <div class="title">Pressure controls</div>
+        </div>
+	</div>
+	<!-- End sidebar -->
+
+      <div id="main">
+	  <div class="widget">
+		<div class="exp-menu">
+			<ul class="menu">
+			  <li><a href="#"><b>Dashboard</b></a></li>
+			  <li><a href="graph.html">Graph</a></li>
+			  <li><a href="#">Image</a></li>
+			  <li><a href="#">In/Out</a></li>
+			</ul>
+		  </div>
+		</div>
+		<div class="widget">
+            <div class="title">System Diagram</div>
+            <img id="sbd" src="static/sbd4.png" class="centre" style="border:5px solid" alt="System diagram" usemap="#sbd-map">
+            <map name="sbd-map">
+              <area shape="rect" coords="8,72,105,118" href="#" alt="Client PC" title="You">
+              <area shape="rect" coords="176,72,275,118" href="#" alt="BBB">
+              <area shape="rect" coords="298,53,395,145" href="#" alt="Electronics">
+              <area shape="rect" coords="446,53,543,145" href="#" alt="Pneumatics">
+              <area shape="rect" coords="218,191,315,237" href="#" alt="Sensors">
+              <area shape="rect" coords="418,191,515,237" href="#" alt="Camera">
+              <area shape="rect" coords="218,237,315,285" href="#" alt="Strain Can">
+              <area shape="rect" coords="418,237,515,285" href="#" alt="Explode Can" title="Won't happen">
+              <area shape="rect" coords="87,191,183,237" href="#" alt="Case" id="case-btn">
+              <area shape="rect" coords="87,257,183,303" href="#" alt="Mounting" id="mounting-btn">
+              <area shape="rect" coords="210,182,540,317" alt="Mounting Area" id="mounting-area">
+              <area shape="poly" coords="172,27,548,27,548,317,212,317,212,156,172,156" alt="case Area" id="case-area">
+            </map>
+            <script type="text/javascript" src="static/jquery.maphilight.min.js">
+
+            </script>
+            <script type="text/javascript">
+              $("#sbd").maphilight({
+                fillOpacity: 0.4,
+                strokeColor: '000000',
+                strokeOpacity: 0.7
+              });
+
+              $.fn.hilightToggle = function (on) {
+                var data = $(this).data("maphilight") || {};
+                data.neverOn = !on;
+                $(this).data("maphilight", data);
+                return this;
+              };
+
+              $("#mounting-area").hilightToggle(false);
+              $("#case-area").hilightToggle(false);
+
+              $("#mounting-btn").mouseover(function () {
+                $("#mounting-area").hilightToggle(true).mouseover();
+              }).mouseout(function () {
+                $("#mounting-area").hilightToggle(false);
+              });
+
+              $("#case-btn").mouseover(function () {
+                $("#case-area").hilightToggle(true).mouseover();
+              }).mouseout(function () {
+                $("#case-area").hilightToggle(false);
+              });
+
+            </script>
+            
+            <div class="clear"></div>
+          </div>
+		  </div>
+
+
+	<!-- End main content -->
+      
+    </div>
+  </body>
+</html>
