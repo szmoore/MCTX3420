@@ -548,7 +548,7 @@ char *FCGI_EscapeText(char *buf)
 char *FCGI_URLDecode(char *buf)
 {
 	char *head = buf, *tail = buf;
-	char hex[3] = {0};
+	char val, hex[3] = {0};
 
 	while (*tail) {
 		if (*tail == '%') { //%hh hex to char
@@ -556,7 +556,9 @@ char *FCGI_URLDecode(char *buf)
 			if (isxdigit(*tail) && isxdigit(*(tail+1))) {
 				hex[0] = *tail++;
 				hex[1] = *tail++;
-				*head++ = (char)strtol(hex, NULL, 16);
+				char val = (char)strtol(hex, NULL, 16);
+				//Control codes --> Space character
+				*head++ = (val < 0x20) ? 0x20 : val;
 			} else { //Not valid format; keep original
 				head++;
 			}
