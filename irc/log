@@ -6358,3 +6358,147 @@
 17:57 -!- Callum [~chatzilla@106-68-161-33.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
 22:04 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
 23:31 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has left #mctxuwa_softdev []
+--- Day changed Sun Oct 27 2013
+07:59 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+08:46 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+15:08 < sam_moore> Blergh, what are we going to put in the "Results" part of this report?
+15:09 < sam_moore> "We plugged it all in and it didn't explode" ?
+15:13 < sam_moore> Also it looks like gliffy only lets you export one svg on the trial account
+15:14 < sam_moore> And if the image isn't exactly A4 size, pdf is terrible
+15:14 < sam_moore> So the remainder of my figures will be png
+15:20 < sam_moore> Do we need to find references for all these things that we worked out and/or already knew ourselves...
+15:20 < jtanx> haha
+15:21 < sam_moore> I feel like referencing git commits
+15:21 < jtanx> Yeah I was going to do that
+15:21 < sam_moore> We should do that
+15:21 < jtanx> results
+15:21 < jtanx> it seems to work
+15:21 < sam_moore> ...
+15:21 < sam_moore> I put in a "Customer Satisfaction" section under results
+15:22 < jtanx> :P
+15:22 < sam_moore> It says "No matter what we did, the customer was not satisfied"
+15:22 < sam_moore> Next year they'll probably be told the beaglebone is stupid and start doing it all on an arduino
+15:22 < jtanx> mm probably
+15:22 < sam_moore> And then get told that it needs a user management system...
+15:23 < jtanx> hahahaha
+15:23 < sam_moore> I'm having trouble with what level of assumptions I should make about the reader's knowledge
+15:23 < sam_moore> Do they know what a thread is?
+15:24 < sam_moore> Do they know what "high level" and "low level" mean
+15:24 < jtanx> Thats... what I was having difficulty with too
+15:24 < sam_moore> Do they know what a kernel is?
+15:24 < jtanx> how far back do you have to explain terminology
+15:24 < sam_moore> Or context switching...
+15:24 < sam_moore> Argh
+15:24 < jtanx> write a treatise on multithreaded computing
+15:24 < sam_moore> :S
+15:24 < sam_moore> This is rather simple multithreaded stuff really
+15:26 < sam_moore> I think we need a "terminology" section
+15:27 < jtanx> THat would be good
+15:30 < jtanx> oh yeah
+15:30 < jtanx> we should be able to use commas again
+15:30 < jtanx> for that actuator step thing
+15:30 < jtanx> because it decodes the string first
+15:31 < jtanx> not sure if that will introduce any security issues though
+15:32 < sam_moore> Who cares, ship it
+15:33 < sam_moore> But I don't think so?
+15:33 < jtanx> :P
+15:33 < jtanx> maybe
+15:33 < jtanx> I dunno
+15:33 < sam_moore> sscanf can at most read to the end of the string
+15:34 < jtanx> since it decodes %hh to the hex value
+15:34 < jtanx> I mean if you give it a url encoded string
+15:34 < jtanx> with %01
+15:34 < jtanx> it would change that to the character 0x01
+15:34 < jtanx> which is like some control code
+15:34 < sam_moore> Hmm
+15:34 < jtanx> we could limit it so anything less than 0x20 is a space
+15:34 < sam_moore> Just do that then
+15:35 < jtanx> but it's probably important to url decode strings
+15:35 < jtanx> what if someone had a , in their password
+15:35 < jtanx> or weird characters
+15:35 < sam_moore> God dammit
+15:35 < sam_moore> call isprint() ?
+15:35 < jtanx> nah I mean
+15:36 < jtanx> it should be fine if we convert anything < 0x20 to a space
+15:36 < jtanx> but it's better that we're url decoding stuff
+15:36 < sam_moore> Ok
+15:36 < jtanx> because if we didn't, the password string would be like %2d instead of -
+15:36 < jtanx> for example
+15:36 < sam_moore> Yeah, that would suck
+15:37 < sam_moore> Do you think Rowan and/or James will write their parts of the report?
+15:37 < jtanx> Maybe, I dunno
+15:38 < jtanx> Rowan was trying to copy the wiki, which was written mostly by Justin?
+15:38 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:38 < sam_moore> Yeah, that's not really cool
+15:38 < jtanx> :/
+15:38 < sam_moore> I don't think there's much that can be just put into the report from the wiki anyway
+15:38 < sam_moore> It's too informal
+15:38 < sam_moore> And has a lot of "TODO: Fill this in" pages
+15:38 < jtanx> Yeah, they're counted separately anyway
+15:39 < jtanx> as in, there's a specific mark for wiki pages
+15:39 < sam_moore> Oh dear
+15:39 < jtanx> (or equivalent documentation afaik)
+15:39 < sam_moore> Every area there's a mark for is just another area they can deduct marks for not liking
+15:39 < jtanx> Yeah, I'm not liking it very much
+15:40 < sam_moore> Are we supposed to talk about the other subsystems or focus on our own?
+15:40 < jtanx> I'm hoping to focus on our own really
+15:40 < jtanx> but I guess there would be overlap
+15:48 < jtanx> did you see the microscope stuff that callum did
+16:00 < sam_moore> I glanced at it
+16:00 < sam_moore> It's in the main directory not sensors/
+16:01 < sam_moore> Does it work?
+16:01 < jtanx> well from the test pictures it looks quite good
+16:01 < jtanx> not sure how well it will work with the real thing
+16:02 < sam_moore> Hahaha
+16:02 < sam_moore> If it works with what we were given, good enough
+16:02 < jtanx> Yep
+16:03 < sam_moore> We seem to end up having to actually implement all of sensors things
+16:03 < sam_moore> I guess I will add the calibration in at some point before Tuesday
+16:04 < jtanx> :/
+16:04 < sam_moore> It shouldn't be that hard, I've done it before
+16:04 < sam_moore> Convert raw value to nearest two indexes in an array
+16:04 < sam_moore> Interpolate between those two indexes
+16:05 < sam_moore> I think for the Microphone there's 1024 points because he tested it with a 10 bit ADC somehow
+16:05 < sam_moore> For other things...
+16:05 < sam_moore> There are 10 points
+16:05 < jtanx> 1024 points
+16:05 < jtanx> wait what
+16:06 < sam_moore> 1 point per ADC value
+16:06 < sam_moore> As in, I was sent a lookup table of ADC value -> dB level
+16:06 < jtanx> oh right
+16:06 < jtanx> yeah
+16:06 < jtanx> he was testing it on an arduino
+16:06 < jtanx> was the arduino calibrated properly
+16:07 < sam_moore> Lalala not listening...
+16:07 < jtanx> :P
+16:07 < sam_moore> Oh, it loks like I only have 20 points anyway
+16:09 < sam_moore> This calibration does assume that electronics uses exactly the same voltage divider that sensors guy used
+16:09 < jtanx> it's probably close enough
+16:09 < sam_moore> Well maybe
+16:09 < sam_moore> Just trusting the data sheet is probably close enough
+16:10 < sam_moore> I'm not sure I see the point in calibrating a device if you don't actually use the final setup to calibrate it...
+16:10 < jtanx> Yeah, true
+16:22 < sam_moore> Is the use of '*' in pointer names a "standard"... I always thought it was... how you made a variable a pointer
+16:22 < jtanx> Oh yeah that
+16:31 < sam_moore> God dammit I have no motivation left to do anything
+16:32 < jtanx> urgh
+16:32 -!- jtanx changed the topic of #mctxuwa_softdev to: :(
+16:34 < sam_moore> Should I put your part of the report into tex?
+16:34 < jtanx> Yeah, I guess
+16:34 < sam_moore> I think if I put your part and Justin's part combined with my hopelessly incomplete part...
+16:34 < sam_moore> we will actually have too many pages
+16:34 < jtanx> :/
+16:34 < jtanx> was there a hard limit?
+16:35 < jtanx> I probably need to cut down my section, too much rambling
+16:36 < sam_moore> I think it's fine
+16:37 < jtanx> I dunno
+16:37 < jtanx> I have the feeling I'm not following the guidelines correctly on what I'm supposed to talk about
+16:37 < sam_moore> We can't win either way
+16:37 < jtanx> Yeah, like where am I meant to find the references for half the stuff I did
+16:38 < sam_moore> Surely James Trevelyn would have got a few papers out of his Telelabs thing?
+16:39 < sam_moore> I'll leave it for now
+16:39 < jtanx> Okay
+16:41 < sam_moore> My section will be great when I actually include all those figures I refer to...
+19:33 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+21:26 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+23:24 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["it has been segmented"]
