@@ -13,7 +13,6 @@ if(isUserLoggedIn())
 	$loggedInUser->userLogOut();
 }
 
-/*
 if(!empty($websiteUrl)) 
 {
 	$add_http = "";
@@ -27,10 +26,10 @@ if(!empty($websiteUrl))
 	die();
 }
 else
-{*/
-	header("Location: login.php");//http://".$_SERVER['HTTP_HOST']);
+{
+	header("Location: http://".$_SERVER['HTTP_HOST']);
 	die();
-/*}*/	
+}	
 
 ?>
 

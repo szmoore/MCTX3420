@@ -5,7 +5,7 @@ http://usercake.com
 */
 
 require_once("models/config.php");
-if (!securePage($_SERVER['PHP_SELF'])){header("Location: login.php"); die();}
+if (!securePage($_SERVER['PHP_SELF'])){die();}
 
 $pages = getPageFiles(); //Retrieve list of pages in root usercake folder
 $dbpages = fetchAllPages(); //Retrieve list of pages in pages table
@@ -42,13 +42,23 @@ if (count($deletions) > 0) {
 $dbpages = fetchAllPages();
 
 require_once("models/header.php");
-startPage();
 
-echo '
-<div class="widget">
-<div class="title">Page visibilities</div>
-<table class="admin left lines">
-<tr><th>Id</th><th>Page</th><th>Visibility</th></tr>';
+echo "
+<body>
+<div id='wrapper'>
+<div id='top'><div id='logo'></div></div>
+<div id='content'>
+<h1>UserCake</h1>
+<h2>Admin Pages</h2>
+<div id='left-nav'>";
+
+include("left-nav.php");
+
+echo "
+</div>
+<div id='main'>
+<table class='admin'>
+<tr><th>Id</th><th>Page</th><th>Access</th></tr>";
 
 //Display list of pages
 foreach ($dbpages as $page){
@@ -77,8 +87,10 @@ foreach ($dbpages as $page){
 
 echo "
 </table>
-</div>";
-
-finishPage();
+</div>
+<div id='bottom'></div>
+</div>
+</body>
+</html>";
 
 ?>

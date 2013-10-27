@@ -4,41 +4,35 @@ UserCake Version: 2.0.2
 http://usercake.com
 */
 
-if (!securePage($_SERVER['PHP_SELF'])){die();}
+if (isUserLoggedIn()) {
 
-//Links for logged in user
-if(isUserLoggedIn()) {
-	echo "
-	<ul>
-	<li><a href='account.php'>Account Home</a></li>
-	<li><a href='user_settings.php'>User Settings</a></li>
-	<li><a href='logout.php'>Logout</a></li>
-	</ul>";
-	
-	//Links for permission level 2 (default admin)
-	if ($loggedInUser->checkPermission(array(2))){
-	echo "
-	<ul>
-	<li><a href='admin_configuration.php'>Admin Configuration</a></li>
-	<li><a href='admin_users.php'>Admin Users</a></li>
-	<li><a href='admin_permissions.php'>Admin Permissions</a></li>
-	<li><a href='admin_pages.php'>Admin Pages</a></li>
-	</ul>";
-	}
-} 
-//Links for users not logged in
-else {
-	echo "
-	<ul>
-	<li><a href='index.php'>Home</a></li>
-	<li><a href='login.php'>Login</a></li>
-	<li><a href='register.php'>Register</a></li>
-	<li><a href='forgot-password.php'>Forgot Password</a></li>";
-	if ($emailActivation)
-	{
-	echo "<li><a href='resend-activation.php'>Resend Activation Email</a></li>";
-	}
-	echo "</ul>";
+echo '
+        <div id="sidebar">
+ ';
+
+ //Is admin
+if ($loggedInUser->checkPermission(array(2))){
+    echo '
+          <div class="widget">
+            <div class="title">Site Administration</div>
+            <div id="sidebar-menu" class="nav-menu">
+              <ul>
+                <li><a href="index.php"><span>Home</span></a></li>
+                <li><a href="admin_users.php"><span>Manage user list</span></a></li>
+                <li><a href="admin_upload_users.php"><span>Upload new users</span></a></li>
+                <li><a href="admin_pages.php"><span>Manage visible pages</span></a></li>
+                <li><a href="admin_configuration.php"><span>Manage site details</span></a></li>
+              </ul>
+            </div>
+          </div>
+    ';
 }
 
+
+echo $custom_sidebar.'
+       </div>
+        <!-- End sidebar -->
+';
+
+}
 ?>

@@ -8,7 +8,7 @@ require_once("models/config.php");
 if (!securePage($_SERVER['PHP_SELF'])){die();}
 
 //Prevent the user visiting the logged in page if he/she is already logged in
-if(isUserLoggedIn()) { header("Location: index.php"); die(); }
+if(isUserLoggedIn()) { header("Location: account.php"); die(); }
 
 //Forms posted
 if(!empty($_POST))
@@ -48,7 +48,7 @@ if(!empty($_POST))
 				//Hash the password and use the salt from the database to compare the password.
 				$entered_pass = generateHash($password,$userdetails["password"]);
 
-				//echo "".$userdetails["password"]; //Wut is dis
+				echo "".$userdetails["password"];
 				
 				if($entered_pass != $userdetails["password"])
 				{
@@ -69,22 +69,13 @@ if(!empty($_POST))
 					$loggedInUser->displayname = $userdetails["display_name"];
 					$loggedInUser->username = $userdetails["user_name"];
 					
-          //Only allow login to admins
-          if ($loggedInUser->checkPermission(array(2)))
-          {
-            //Update last sign in
-            $loggedInUser->updateLastSignIn();
-            
-            $_SESSION["userCakeUser"] = $loggedInUser;
-            
-            //Redirect to user account page
-            header("Location: index.php");
-            die();
-          }
-          else
-          {
-            $errors[] = ("You are no admin :(");
-          }
+					//Update last sign in
+					$loggedInUser->updateLastSignIn();
+					$_SESSION["userCakeUser"] = $loggedInUser;
+					
+					//Redirect to user account page
+					header("Location: account.php");
+					die();
 				}
 			}
 		}
@@ -92,43 +83,45 @@ if(!empty($_POST))
 }
 
 require_once("models/header.php");
-startPage();
 
-echo '
-      <div id="login-container">
-      <div class="widget">
-        <div class="title">Notice</div>
-        This is the login page for site administration.<br>If you wish to log in
-        to the main web-site, see <a href="#">here instead</a>.
-      </div>
-       <div class="widget">
-           <form id="login" name="login" action="'.$_SERVER["PHP_SELF"].'" method="post">
-             <p>
-               <label>
-                 Username<br>
-                 <input name="username" type="text">
-               </label>
-             </p>
-             <p>
-               <label>
-                 Password<br>
-                 <input name="password" type="password">
-               </label>             
-             </p>
-             <p style="float:left; margin:0;">
-               <a href="forgot-password.php">Forgotten password?</a>
-             </p>
-             <p style="float:right; margin:0;">
-               <input type="submit" value="Log In">
-             </p>
-';
+echo "
+<body>
+<div id='wrapper'>
+<div id='top'><div id='logo'></div></div>
+<div id='content'>
+<h1>UserCake</h1>
+<h2>Login</h2>
+<div id='left-nav'>";
+
+include("left-nav.php");
+
+echo "
+</div>
+<div id='main'>";
+
 echo resultBlock($errors,$successes);
-echo '
-            </form>
-       </div>
-      </div>
- ';
 
-finishPage();
+echo "
+<div id='regbox'>
+<form name='login' action='".$_SERVER['PHP_SELF']."' method='post'>
+<p>
+<label>Username:</label>
+<input type='text' name='username' />
+</p>
+<p>
+<label>Password:</label>
+<input type='password' name='password' />
+</p>
+<p>
+<label>&nbsp;</label>
+<input type='submit' value='Login' class='submit' />
+</p>
+</form>
+</div>
+</div>
+<div id='bottom'></div>
+</div>
+</body>
+</html>";
 
 ?>

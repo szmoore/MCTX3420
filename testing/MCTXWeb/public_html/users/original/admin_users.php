@@ -22,15 +22,26 @@ if(!empty($_POST))
 $userData = fetchAllUsers(); //Fetch information for all users
 
 require_once("models/header.php");
-startPage();
-
-echo notificationBlock($errors,$successes);
 echo "
-<div class='widget'><div class='title'>User list</div>";
+<body>
+<div id='wrapper'>
+<div id='top'><div id='logo'></div></div>
+<div id='content'>
+<h1>UserCake</h1>
+<h2>Admin Users</h2>
+<div id='left-nav'>";
+
+include("left-nav.php");
+
+echo "
+</div>
+<div id='main'>";
+
+echo resultBlock($errors,$successes);
 
 echo "
 <form name='adminUsers' action='".$_SERVER['PHP_SELF']."' method='post'>
-<table class='admin left'>
+<table class='admin'>
 <tr>
 <th>Delete</th><th>Username</th><th>Display Name</th><th>Title</th><th>Last Sign In</th>
 </tr>";
@@ -62,8 +73,10 @@ echo "
 </table>
 <input type='submit' name='Submit' value='Delete' />
 </form>
-</div>";
-
-finishPage();
+</div>
+<div id='bottom'></div>
+</div>
+</body>
+</html>";
 
 ?>
