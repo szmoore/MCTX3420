@@ -267,7 +267,7 @@ static void Dilatometer_GetImageTest( )
 /**
  * For testing purposes
  */
-int main(int argc, char ** argv)
+/*int main(int argc, char ** argv)
 {
 	//cvNamedWindow( "display", CV_WINDOW_AUTOSIZE );// Create a window for display.
 	//gettimeofday(&start, NULL);
@@ -286,5 +286,5 @@ int main(int argc, char ** argv)
 	cvDestroyWindow("display");
 
 	Dilatometer_Cleanup();
-}
+}*/
 
