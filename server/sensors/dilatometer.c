@@ -21,7 +21,6 @@ int kernel_size = 3;
 static CvMat * g_srcRGB  = NULL; 	// Source Image
 static CvMat * g_srcGray = NULL; 	// Gray scale of source image
 static CvMat * g_edges 	 = NULL; 	// Detected Edges
-static CvMat * g_data    = NULL; 
 
 /** Pointers for capturing image **/
 static CvCapture * g_capture = NULL;
@@ -59,11 +58,11 @@ void Dilatometer_TestImage()
 		}
 		
 	}
-	if (g_data == NULL)
+	if (g_srcGray == NULL)
 	{
-		g_data = cvCreateMat(g_srcRGB->rows,g_srcRGB->cols,CV_8UC1);
+		g_srcGray = cvCreateMat(g_srcRGB->rows,g_srcRGB->cols,CV_8UC1);
 	}
-	cvCvtColor(g_srcRGB,g_data,CV_RGB2GRAY);
+	cvCvtColor(g_srcRGB,g_srcGray,CV_RGB2GRAY);
 }	
 
 /**
@@ -71,18 +70,16 @@ void Dilatometer_TestImage()
  */
 void Dilatometer_Cleanup()
 {
-	if (g_data != NULL)
-		cvReleaseMat(&g_data);
 	if (g_capture != NULL)
 		cvReleaseCapture(&g_capture);
-	if (g_srcRGB != NULL)
-		cvReleaseMat(&g_srcRGB);
+	if (frame != NULL)
+		cvReleaseImageHeader(&frame);
+	//if (g_srcRGB != NULL)
+	//	cvReleaseMat(&g_srcRGB);	// Causing run time error in cvReleaseMat
 	if (g_srcGray != NULL)
 		cvReleaseMat(&g_srcGray);
 	if (g_edges != NULL)
 		cvReleaseMat(&g_edges);
-	if (frame != NULL)
-		cvReleaseImageHeader(&frame);
 }
 
 /**
@@ -92,12 +89,17 @@ static bool Dilatometer_GetImage()
 {	
 	bool result = true;
 	// If more than one camera is connected, then input needs to be determined, however the camera ID may change after being unplugged
-	g_capture = cvCreateCameraCapture(0);
-
-	//If cvCreateCameraCapture returns NULL there is an error with the camera
 	if( g_capture == NULL)
-		result = false;
-	
+	{
+		g_capture = cvCreateCameraCapture(0);
+		//If cvCreateCameraCapture returns NULL there is an error with the camera
+		if( g_capture == NULL)
+		{
+			result = false;
+			return;
+		}
+	}
+
 	// Get the frame and convert it to CvMat
 	frame =  cvQueryFrame(g_capture);
 	CvMat stub;
@@ -105,18 +107,20 @@ static bool Dilatometer_GetImage()
 
 	if( g_srcRGB == NULL)
 		result = false;
-		
+	
+	// Convert the image to grayscale
+	if (g_srcGray == NULL)
+	{
+		g_srcGray = cvCreateMat(g_srcRGB->rows,g_srcRGB->cols,CV_8UC1);
+	}
+
+	cvCvtColor(g_srcRGB,g_srcGray,CV_RGB2GRAY);
+	
 	return result;
 }
 
 void CannyThreshold()
 {
-	
-	if (g_data == NULL)
-	{
-		g_data = cvCreateMat(g_srcGray->rows,g_srcGray->cols,CV_8UC1);
-	}
-
 	if ( g_edges == NULL)
 	{
 		g_edges = cvCreateMat(g_srcGray->rows,g_srcGray->cols,CV_8UC1);
@@ -133,8 +137,8 @@ void CannyThreshold()
 	//cvSaveImage("test_blurred.jpg",g_edges,0);
 
 	//cvShowImage("display", g_edges);
-	//cvWaitKey(0); 	
-	
+	//cvWaitKey(0); 
+
 	// Find the edges in the image
 	cvCanny( g_edges, g_edges, lowThreshold, lowThreshold*ratio, kernel_size );
 	
@@ -143,7 +147,7 @@ void CannyThreshold()
 
 	//cvShowImage("display", g_edges);
 	//cvWaitKey(0); 	
-	
+
 }
 
  /**
@@ -247,10 +251,10 @@ void Draw_Edge(double edge)
 	}
 	cvShowImage("display", g_edges);
 	cvWaitKey(0); 	
-	cvSaveImage("test_edge_avg.jpg",g_edges,0);
+	//cvSaveImage("test_edge_avg.jpg",g_edges,0);
 }
 
-/*// Test algorithm
+/* // Test algorithm
 static void Dilatometer_GetImageTest( )
 {	
 	//Generates Test image
@@ -272,16 +276,15 @@ static void Dilatometer_GetImageTest( )
 	Dilatometer_Init();
 	
 	cvNamedWindow( "display", CV_WINDOW_AUTOSIZE);
-//	cvShowImage("display", g_data);
-//	cvWaitKey(0); 	
-	double width;
+	//double width;
 	
 	double edge;
-	Dilatometer_Read(&edge,20000);
+	Dilatometer_GetEdge(&edge,20000);
 	//For testing purposes, overlay the given average line over the image
-	Draw_Edge(edge);
-
+	//Draw_Edge(edge);
+	
 	cvDestroyWindow("display");
 
+	Dilatometer_Cleanup();
 }*/
 

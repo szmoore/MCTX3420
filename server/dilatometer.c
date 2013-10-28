@@ -72,14 +72,14 @@ void Dilatometer_Cleanup()
 {
 	if (g_capture != NULL)
 		cvReleaseCapture(&g_capture);
-	if (g_srcRGB != NULL)
-		cvReleaseMat(&g_srcRGB);
+	if (frame != NULL)
+		cvReleaseImageHeader(&frame);
+	//if (g_srcRGB != NULL)
+	//	cvReleaseMat(&g_srcRGB);	// Causing run time error in cvReleaseMat
 	if (g_srcGray != NULL)
 		cvReleaseMat(&g_srcGray);
 	if (g_edges != NULL)
 		cvReleaseMat(&g_edges);
-	if (frame != NULL)
-		cvReleaseImageHeader(&frame);
 }
 
 /**
@@ -89,11 +89,17 @@ static bool Dilatometer_GetImage()
 {	
 	bool result = true;
 	// If more than one camera is connected, then input needs to be determined, however the camera ID may change after being unplugged
-	g_capture = cvCreateCameraCapture(0);
-	//If cvCreateCameraCapture returns NULL there is an error with the camera
 	if( g_capture == NULL)
-		result = false;
-	
+	{
+		g_capture = cvCreateCameraCapture(0);
+		//If cvCreateCameraCapture returns NULL there is an error with the camera
+		if( g_capture == NULL)
+		{
+			result = false;
+			return;
+		}
+	}
+
 	// Get the frame and convert it to CvMat
 	frame =  cvQueryFrame(g_capture);
 	CvMat stub;
@@ -129,19 +135,18 @@ void CannyThreshold()
 	
 	//Save the image
 	//cvSaveImage("test_blurred.jpg",g_edges,0);
-		printf("what about here?\n");
 
-	cvShowImage("display", g_edges);
-	cvWaitKey(0); 	
+	//cvShowImage("display", g_edges);
+	//cvWaitKey(0); 
+
 	// Find the edges in the image
 	cvCanny( g_edges, g_edges, lowThreshold, lowThreshold*ratio, kernel_size );
 	
 	//Save the image
 	//cvSaveImage("test_edge.jpg",g_edges,0);
 
-	cvShowImage("display", g_edges);
-	cvWaitKey(0); 	
-			printf("hopeful\n");
+	//cvShowImage("display", g_edges);
+	//cvWaitKey(0); 	
 
 }
 
@@ -276,11 +281,10 @@ int main(int argc, char ** argv)
 	double edge;
 	Dilatometer_GetEdge(&edge,20000);
 	//For testing purposes, overlay the given average line over the image
-	Draw_Edge(edge);
+	//Draw_Edge(edge);
 	
 	cvDestroyWindow("display");
 
 	Dilatometer_Cleanup();
-
 }
 
