@@ -6502,3 +6502,375 @@
 19:33 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
 21:26 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
 23:24 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["it has been segmented"]
+--- Day changed Mon Oct 28 2013
+08:20 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:10 -!- jtanx_ [6a445d5d@ircip1.mibbit.com] has joined #mctxuwa_softdev
+09:13 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+09:13 -!- jtanx_ is now known as jtanx
+09:17 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+10:04 -!- jtanx [6a445d5d@ircip1.mibbit.com] has quit ["http://www.mibbit.com ajax IRC Client"]
+13:02 -!- jtanx [~asfa@130.95.51.228] has joined #mctxuwa_softdev
+13:02 < jtanx> damn, forgot to connect back my server
+13:21 -!- jtanx [~asfa@130.95.51.228] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+14:17 -!- jtanx [~asfa@130.95.117.148] has joined #mctxuwa_softdev
+15:38 -!- jtanx [~asfa@130.95.117.148] has quit [Ping timeout]
+17:07 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+17:36 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+18:35 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+19:33 < sam_moore> Are we demonstrating James' GUI tomorrow?
+19:45 < jtanx> I have no idea
+19:45 < jtanx> given that it doesn't work with our api, probably not?
+19:46 < jtanx> I can change the colour scheme to make it look similar...
+19:58 < sam_moore> No, don't worry
+19:58 < sam_moore> This is why we have git
+19:59 < jtanx> :/
+19:59 < sam_moore> Hang on, does it work with any of the API?
+19:59 < sam_moore> The API hasn't changed *that* much
+20:00 < jtanx> I don't know
+20:00 < sam_moore> The sensors API has not changed for months
+20:00 < jtanx> it has some of the javascript that got copied over
+20:00 < sam_moore> Except that "name" was added as an optional thing
+20:00 < jtanx> but the javascript's probably out of date
+20:00 < jtanx> his version is missing links to some pages also, last time I checked
+20:03 < sam_moore> Stick with the working GUI
+20:03 < sam_moore> Everyone knew about the testing on Wednesday morning and that GUI was the one that the people who actually showed up got working
+20:03 < sam_moore> I guess we could try the totally untested up until now GUI tomorrow morning at 8am
+20:04 < jtanx> This is... going to be awkward for the report
+20:04 < sam_moore> At some point between when the case team builds their box and the cans are connected to their amazing mounts
+20:06 < sam_moore> We'll put in a paragraph about how we have a "testing" GUI
+20:06 < jtanx> ._.
+20:07 < sam_moore> Which was designed purely from a point of view of allowing us to test the server and the experiment hardware
+20:07 < sam_moore> And thus is sorely lacking in Human Computer Interaction Industry Standards (is that a thing)
+20:07 < jtanx> Yep
+20:07 < jtanx> haha
+20:08 < sam_moore> I feel like tomorrow will be a waste of time
+20:09 < jtanx> unfortunately yeah
+20:09 < sam_moore> But I suppose if anyone needs to demonstrate that their thing actually does something it will be us, since our work is effectively invisible
+20:09 < sam_moore> ... Not unlike the case
+20:09 < jtanx> if that case doesn't turn up...
+20:09 < sam_moore> You don't really expect the case to turn up do you?
+20:09 < sam_moore> Although, maybe it will
+20:10 < jtanx> Well, one can only hope...
+20:10 < sam_moore> I think it could be fun to take bets on what the case would actually be if it turned up
+20:10 < jtanx> oh boy, your email is hilarious
+20:11 < sam_moore> I bet they just take the case that's currently in G19, put it on top of the system, and call it a day
+20:11 < jtanx> :P
+20:11 < sam_moore> Yeah, I know Alex
+20:12 -!- Callum [~chatzilla@106-69-68-94.dyn.iinet.net.au] has joined #mctxuwa_softdev
+20:13 < jtanx> oh, you merged usercake into the main repo too
+20:13 < sam_moore> Hi Callum
+20:13 < Callum> hey
+20:13 < jtanx> hey
+20:13 < sam_moore> jtanx: Didn't we want to do that?
+20:13 < sam_moore> Eventually at least
+20:13 < jtanx> yeah
+20:13 < sam_moore> It needs setting up on the beaglebone, I'm not going to worry about it
+20:14 < jtanx> I skinned it yesterday
+20:14 < sam_moore> I think we can just enable /etc/shadow authentication to demonstrate
+20:14 < jtanx> yeah
+20:14 < jtanx> the changes I made are still on the 'users' branch
+20:14 < jtanx> but it's not finished yet
+20:15 < sam_moore> We'll note stuff like this in "Recommendations" or "Work for the future" or something
+20:15 < jtanx> Yeah
+20:15 < jtanx> Working with usercake...
+20:15 < jtanx> it was absolute spaghetti code
+20:16 < sam_moore> Haha
+20:16 < sam_moore> It made sense to me
+20:16 < sam_moore> Sort of
+20:16 < jtanx> It makes sense
+20:16 < jtanx> but it's just... ugh
+20:16 < sam_moore> Pretty much everything is in funcs.php
+20:16 < jtanx> Yeah
+20:16 < sam_moore> They have an entire class that represents a new user
+20:16 < sam_moore> But when you search for users it returns a map/dictionary
+20:16 < jtanx> What I found so stupid
+20:17 < jtanx> is that when you create a user
+20:17 < jtanx> it doesn't return the id 
+20:17 < jtanx> so you have to search the db to find the id of the user you just made
+20:17 < sam_moore> Hahaha
+20:18 < sam_moore> Callum: If you want to test the dilatometer, just hard code it as camera 0 and we won't bother plugging the other camera in tomorrow
+20:18 < jtanx> The quality from the other camera was really shit anyway
+20:18 < sam_moore> Or I guess if we really want to we can recompile the program with it hard coded
+20:18 < jtanx> sounds like a plan
+20:18 < Callum> ok
+20:19 < sam_moore> It only has to work for as long as Adrian wants to see it
+20:19 < jtanx> I wouldn't be surprised if adrian didn't bother to turn up, and sent adam instead though
+20:19 < Callum> probably be the case
+20:19 < Callum> :p
+20:19 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+20:19 < jtanx> it's baack
+20:24 < jtanx> wow
+20:24 < jtanx> usercake ships with html that's broken
+20:27 < sam_moore> I did not notice that
+20:28 < sam_moore> Well, you get what you pay for
+20:29 < jtanx> :P
+20:37 < jtanx> wat
+20:37 < jtanx>  //Don't update, this fool is trying to update with the same password Â¬Â¬
+20:37 < jtanx> from usercake
+21:13 < Callum> jaime did we end up finding a way to convert stuff from IplImage to Mat in open cv?
+21:13 < Callum> cant find a way...or a way to just capture straight to mat in C
+21:13 < Callum> which is fucked...Mat is meant to replace IplImage.
+21:13 < jtanx> Try check interferometer.c
+21:13 < jtanx> I think it does the conversion
+21:14 < sam_moore> Callum: I think I solved it at some point making interferometer.c
+21:14 < sam_moore> You can't capture straight to cvMat
+21:14 < sam_moore> It is retarted, yes
+21:15 < Callum> ah found it. thanks
+21:16 < Callum> also, i dont think you ever released IplImage sam :p
+21:17 < sam_moore> Meh
+21:17 < sam_moore> IplImage * img = cvQueryFrame(g_capture);
+21:17 < sam_moore> Whoops
+21:17 < Callum> what?
+21:17 < sam_moore> Accidental copy/paste
+21:18 < sam_moore> Well I was going to copy/paste the image conversion code but you found it
+21:18 < sam_moore> For completeness anyway
+21:18 < sam_moore> CvMat stub;
+21:18 < sam_moore>  CvMat * background = cvGetMat(img, &stub, 0, 0);
+21:18 < sam_moore> And I still don't know what the stub is for...
+21:20 < Callum> ahaha
+21:22 < jtanx> stubs
+21:22 < jtanx> ahh
+21:24 < jtanx> okay
+21:24 < jtanx> updated usercake 
+21:24 < jtanx> hopefully it still works
+21:25 < sam_moore> ...
+21:26 < sam_moore> I bet we get a segmentation fault or something
+21:26 < jtanx> :3
+21:26 < sam_moore> What did you update it to do anyway?
+21:27 < jtanx> make it look like the rest of our gui
+21:27 < sam_moore> Oh, nice
+21:27 < jtanx> only allow admins to login
+21:27 < jtanx> to that part
+21:27 < jtanx> but users can still change their password
+21:27 < sam_moore> Excellent
+21:27 -!- callum__ [~chatzilla@106-69-68-94.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:27 < jtanx> oO
+21:27 < sam_moore> Woah, doppleganger
+21:27 < callum__> getting this weird compiler error: /usr/bin/ld: /usr/lib/debug/usr/lib/x86_64-linux-gnu/crt1.o(.debug_info): relocation 20 has invalid symbol index 19
+21:27 < sam_moore> Uuuuuhh
+21:28 < jtanx> try make clean?
+21:28 < jtanx> make
+21:28 < callum__> yea logged onto laptop to copy/pasta
+21:28 < callum__> :p
+21:28 < callum__> still doing it. not sure if its something i did..coz i changed a bunch of stuff
+21:29 < sam_moore> make absolutely sure everything's cleaned
+21:29 < sam_moore> Including the sensors and actuators sub directories
+21:29 < sam_moore> I can't remember if I made make clean recursively do those
+21:30 < Callum> didnt help
+21:31 < jtanx> hmm
+21:31 < jtanx> apparently
+21:31 < jtanx> http://stackoverflow.com/questions/5528958/make-file-problem
+21:31 < jtanx> it's because more than one file is linking against the crt
+21:31 < jtanx> why is that
+21:31 < jtanx> when you added your module
+21:32 < jtanx> did you modify the makefile and add microscope.o or something
+21:32 < jtanx> or did you do something different
+21:32 < Callum> i havent added it to the makefile yet tbh
+21:32 < Callum> just been compiling it myself
+21:32 < jtanx> oh right
+21:32 < jtanx> well that is weird
+21:33 < Callum> yup. 
+21:33 < jtanx> so what files are you compiling (and how)>
+21:33 < sam_moore> Can you push it to git?
+21:33 < Callum> alright
+21:34 < sam_moore> Use a new branch if you don't want to overwrite a working version (although it's git... you can always go back a few commits)
+21:34 < jtanx> you might have to update your git repo first
+21:34 < sam_moore> Good point
+21:34 < jtanx> i've just made some changes
+21:34 < sam_moore> Callum: Make a new branch
+21:34 < sam_moore> Easier that way, in case there are changes that need merging
+21:34 < sam_moore> It's `git checkout -b branch_name`
+21:34 < sam_moore> Make changes, commit
+21:35 < sam_moore> Then go `git push <github> branch_name`
+21:38 < Callum> done
+21:39 < callum__> https://github.com/Callum-/MCTX3420/tree/dilatometer/server/sensors
+21:40 < jtanx> Off topic, but:https://github.com/szmoore/MCTX3420/watchers 
+21:40 < jtanx> who's skinnybabulu
+21:40 < callum__> ahahaha
+21:40 < callum__> wtf kind of name is that
+21:40 < sam_moore> callm__: Careful
+21:41 < sam_moore> They are watching us
+21:41 < sam_moore> (seriously, these logs all go into github :P)
+21:41 < Callum> assuming whoeever it is reads the logs.
+21:41 < sam_moore> With a name like skinnybabulu, you never know what they're capable of
+21:42 < jtanx> ~.~
+21:42 < Callum> ok. i'll watch my back then.
+21:42 < sam_moore> Actually, doesn't IRC support a mode for listening in on a channel without being listed in the names?
+21:42 < sam_moore> Not that you need that when you can look at all the logs
+21:42 < jtanx> I don't know
+21:42 < jtanx> I don't think so
+21:43 < sam_moore> It might be Kieran?
+21:43 < Callum> possibly
+21:43 < jtanx> it's probably one of the others
+21:43 < jtanx> yeah
+21:43 < sam_moore> Or maybe it's... dun dun dun... Adrian!
+21:43 < jtanx> oO
+21:44 < jtanx> what were you using to compile your code
+21:44 < Callum> does it compile for you?
+21:44 < jtanx> as in, by calling make?
+21:44 < Callum> nah i was compiling it using gcc
+21:45 < jtanx> oh
+21:45 < jtanx> what was your compile command
+21:46 < Callum> gcc dilatometer.c -o dila + all the libs/flags from Makefile
+21:46 < jtanx> Okay
+21:46 < jtanx> gcc microscope.c -std=gnu99 -Wall -pedantic -g -I/usr/include/opencv -I/usr/include/opencv2/highgui -L/usr/lib -lfcgi -lssl -lcrypto -lpthread -lm -lopencv_highgui -lopencv_core -lopencv_ml -lopencv_imgproc -lldap -lcrypt -o microscope
+21:46 < jtanx> that worked
+21:46 < sam_moore> jtanx: I think he's moved it to sensors/dilatometer.*
+21:47 < jtanx> oh right
+21:47 < sam_moore> Which is compiling for me
+21:47 < Callum> odd.
+21:47 < sam_moore> Hint: Edit the Makefile to have dilatometer.o as an object
+21:47 < sam_moore> Then you can just type `make dilatometer.o` without all the flags
+21:47 < sam_moore> Oh wait, but I commented out some of the flags
+21:47 < sam_moore> Whatever, you can uncomment them
+21:48 < jtanx> I can reproduce the issue
+21:48 < sam_moore> How?
+21:48 < jtanx> gcc dilatometer.c -std=gnu99 -Wall -pedantic -g -I/usr/include/opencv -I/usr/include/opencv2/highgui -L/usr/lib -lfcgi -lssl -lcrypto -lpthread -lm -lopencv_highgui -lopencv_core -lopencv_ml -lopencv_imgproc -lldap -lcrypt -o dilatometer -I..
+21:48 < sam_moore> Oh
+21:48 < sam_moore> Make sure the library flags are last in the gcc line
+21:49 < sam_moore> I'm not sure if it's still a problem, but with Ubuntu 10 or something it was an issue
+21:50 < sam_moore> I suggest adding dilatometer.o to the sensors/Makefile
+21:50 < sam_moore> Then try running make in the main server directory
+21:50 < sam_moore> That seems to work fine for me
+21:51 < sam_moore> I'm going to bed, see you tomorrow, hopefully I can wake up early enough
+21:51 < Callum> how do i just execute whats in dilatometer then?
+21:51 < jtanx> hmm
+21:53 < jtanx> ohh right
+21:53 < jtanx> I see
+21:53 < jtanx> in dilatometer.c you commented out the main function
+21:54 < jtanx> so of course you'll get linker errors
+21:54 < sam_moore> Yeah, I get that when I try and compile it as a stand alone binary
+21:54 < sam_moore> As an object file it works fine
+21:54 < jtanx> yeah
+21:54 < Callum> ah right. forgot i commented out main..
+21:57 < Callum> ok
+21:57 < Callum> well im getting a seg fault now
+21:57 < jtanx> use valgrind
+22:05 < Callum> just realised i had a CvMat i never used... 
+22:05 < jtanx> :P
+22:05 < Callum> well i did. but i changed it something else but i kept it in global/cleanup
+22:06 < Callum> and only then it was used in testing :p
+22:06 < jtanx> haha
+22:06 < Callum> and i think i know the problem
+22:06 < Callum> forgot to convert it to gray with getting image from camera
+22:08 < Callum> woo another core dumpo
+22:08 < Callum> :D
+22:10 < jtanx> ._.
+22:17 < Callum> it appears to be in canny..
+22:17 < jtanx> you sure?
+22:18 < Callum> well printf before it shows up, but not after
+22:18 < Callum> tyring to make any sense out of valgrind
+22:19 < jtanx> update your code on github
+22:19 < jtanx> and I'll have a look
+22:19 < callum__> libv4l2: error setting pixformat: Device or resource busy
+22:19 < callum__> HIGHGUI ERROR: libv4l unable to ioctl S_FMT
+22:19 < callum__> libv4l2: error setting pixformat: Device or resource busy
+22:19 < callum__> libv4l1: error setting pixformat: Device or resource busy
+22:19 < callum__> HIGHGUI ERROR: libv4l unable to ioctl VIDIOCSPICT
+22:19 < callum__> OpenCV Error: Null pointer (NULL array pointer is passed) in cvGetMat, file /build/buildd/opencv-2.3.1/modules/core/src/array.cpp, line 2382
+22:19 < callum__> terminate called after throwing an instance of 'cv::Exception'
+22:19 < callum__>   what():  /build/buildd/opencv-2.3.1/modules/core/src/array.cpp:2382: error: (-27) NULL array pointer is passed in function cvGetMat
+22:19 < callum__> that came out horribly
+22:21 < Callum> ok its pushed, use dilatometer.c from server
+22:21 < Callum> not sensors
+22:21 < jtanx> okay
+22:26 < jtanx> I can't compile the one in server
+22:26 < Callum> really?
+22:26 < jtanx> dilatometer.c:222:6: error: conflicting types for ‘Dilatometer_Read’
+22:26 < jtanx> In file included from dilatometer.c:8:0:
+22:26 < jtanx> dilatometer.h:13:15: note: previous declaration of ‘Dilatometer_Read’ was here
+22:26 < jtanx> dilatometer.c: In function ‘Dilatometer_Read’:
+22:26 < jtanx> dilatometer.c:224:43: error: ‘SAMPLES’ undeclared (first use in this function)
+22:26 < jtanx> dilatometer.c:224:43: note: each undeclared identifier is reported only once for each function it appears in
+22:26 < jtanx> In file included from dilatometer.c:7:0:
+22:26 < Callum> you on the branch?
+22:27 < jtanx> jeremy@pickle:~/git/callum/server$ git status
+22:27 < jtanx> # On branch dilatometer
+22:27 < Callum> ctually
+22:27 < Callum> i dont think that .h file is up to date
+22:27 < Callum> copy the one from sensors
+22:27 < jtanx> okay
+22:29 < jtanx> urgh linking errors
+22:30 < Callum> really?
+22:31 < jtanx> can you copy your compile command
+22:31 < callum__> gcc dilatometer.c -o dila -lfcgi -lssl -lcrypto -lpthread -lm -lopencv_highgui -lopencv_core -lopencv_ml -lopencv_imgproc -lldap -lcrypt -std=gnu99 -Wall -pedantic -g -I/usr/include/opencv -I/usr/include/opencv2/highgui -L/usr/lib
+22:31 < jtanx> okay that worked
+22:33 < Callum> does it seg fault for you?
+22:33 < jtanx> yeah
+22:33 < jtanx> after I press space
+22:33 < Callum> "line 2392"
+22:33 < jtanx> twice
+22:33 < Callum> somethings going wrong in canny IMO
+22:33 < Callum> but it could be because of what im passing it?
+22:33 < Callum> well must be. was working before
+22:33 < jtanx> wait 
+22:33 < jtanx> so what's happening
+22:34 < jtanx> for me
+22:34 < jtanx> is that it's getting to 'hopeful'
+22:34 < jtanx> and probably looping to the next request?
+22:34 < Callum> wait. so not canny
+22:34 < jtanx> yeah
+22:34 < jtanx> because if you press space twice
+22:35 < jtanx> that means that it's getting past canny
+22:35 < jtanx> isn't it?
+22:35 < Callum> yea
+22:35 < Callum> its showing edges
+22:35 < Callum> hmm
+22:36 < jtanx> is it meant to run in a loop?
+22:37 < Callum> no. its meant to call it twice though. comment out Init and it will call read once
+22:38 < Callum> hmm i commented it out and got another error message
+22:38 < jtanx> you sure you're not freeing something that's about to be used
+22:38 < Callum> i only free stuff in cleanup though
+22:38 < Callum> and i only run that at the end
+22:39 < Callum> but something in cleanup is chucking its shit with me
+22:40 < Callum> "The first thing you need to know about Mat is that you no longer need to manually allocate its memory and release it as soon as you do not need it. While doing this is still a possibility, most of the OpenCV functions will allocate its output data manually."
+22:40 < jtanx> hmm
+22:41 < jtanx> if( g_capture == NULL)
+22:41 < jtanx> this check has to be before the createcameracapture
+22:41 < jtanx> otherwise you're creating twice
+22:41 < jtanx> 	if( g_capture == NULL)
+22:41 < jtanx> 	{
+22:41 < jtanx> 		g_capture = cvCreateCameraCapture(0);
+22:42 < jtanx> 		//If cvCreateCameraCapture returns NULL there is an error with the camera
+22:42 < jtanx> 		if (g_capture == NULL)
+22:42 < jtanx> 		{
+22:42 < jtanx> 			result = false;
+22:42 < jtanx> 		}
+22:42 < jtanx> 	}
+22:42 < Callum> no, thats testing to see if capture has worked
+22:42 < jtanx> that worked for me though
+22:42 < jtanx> fixed the issue
+22:42 < jtanx>  or not
+22:42 < jtanx> it lasted longer though
+22:42 < Callum> ahaha
+22:43 < jtanx> but it's definitely part of the issue
+22:44 < Callum> ok i see what yoru saying now
+22:45 < jtanx> now the problem's witht he cvreleasemat
+22:45 < Callum> yea
+22:45 < Callum> dont know why though
+22:49 < jtanx> because it's opencv
+22:49 < jtanx> oh well
+22:49 < jtanx> I'm going to bed
+22:49 < Callum> hah good reasoning
+22:49 < Callum> alright
+22:49 < Callum> what time is the thing tomorrow? 9?
+22:49 < jtanx> see you tomorrow, I guess
+22:49 < jtanx> yeah but probably going to get there at 8 to set stuff up
+22:50 < Callum> that means getting up at 6 though :/
+22:50 < jtanx> :/
+22:50 < jtanx> adrian better be there
+22:50 < Callum> also
+22:50 < jtanx> okay i'm out, bye
+22:51 < Callum> its only RGB release
+22:51 < Callum> which is fucking it up
+22:51 < Callum> other 2 are fine
+22:51 < jtanx> hmm
+22:51 < jtanx> comment it out?
+22:51 < jtanx> pfft who cares about memory leaks
+22:51 < jtanx> :P
+22:51 < Callum> haha
+22:51 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["bye"]
+22:53 < Callum> i know noones there but (with g_srcRGB mat not released) i have definitely 72bytes lost, indirectly 240 bytes and possibly 16Mb
+22:54 < Callum> and with all mats not released, same except possible loss of 17Mb
+23:16 -!- callum__ [~chatzilla@106-69-68-94.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0/20130803215302]"]
+23:24 -!- Callum [~chatzilla@106-69-68-94.dyn.iinet.net.au] has quit [EOF From client]
