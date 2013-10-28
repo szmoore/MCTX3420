@@ -165,14 +165,11 @@ function resultBlock($errors,$successes){
 	//Success block
 	if(count($successes) > 0)
 	{
-		echo "<div id='success'>
-		<a href='#' onclick=\"showHide('success');\">[X]</a>
-		<ul>";
+		echo "<div id='success'>";
 		foreach($successes as $success)
 		{
-			echo "<li>".$success."</li>";
+      echo "<p>".$success."</li>";
 		}
-		echo "</ul>";
 		echo "</div>";
 	}
 }
