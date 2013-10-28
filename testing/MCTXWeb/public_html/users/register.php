@@ -40,9 +40,9 @@ if(!empty($_POST))
 	if(!ctype_alnum($displayname)){
 		$errors[] = lang("ACCOUNT_DISPLAY_INVALID_CHARACTERS");
 	}
-	if(minMaxRange(8,50,$password) && minMaxRange(8,50,$confirm_pass))
+	if(minMaxRange(6,50,$password) && minMaxRange(6,50,$confirm_pass))
 	{
-		$errors[] = lang("ACCOUNT_PASS_CHAR_LIMIT",array(8,50));
+		$errors[] = lang("ACCOUNT_PASS_CHAR_LIMIT",array(6,50));
 	}
 	else if($password != $confirm_pass)
 	{
@@ -81,25 +81,13 @@ if(!empty($_POST))
 }
 
 require_once("models/header.php");
-echo "
-<body>
-<div id='wrapper'>
-<div id='top'><div id='logo'></div></div>
-<div id='content'>
-<h1>UserCake</h1>
-<h2>Register</h2>
-
-<div id='left-nav'>";
-include("left-nav.php");
-echo "
-</div>
-
-<div id='main'>";
-
-echo resultBlock($errors,$successes);
+startPage();
 
 echo "
-<div id='regbox'>
+<div class='widget' id='login-container'><div class='title centre'>User registration</div>";
+
+echo "
+<div id=''>
 <form name='newUser' action='".$_SERVER['PHP_SELF']."' method='post'>
 
 <p>
@@ -122,23 +110,26 @@ echo "
 <label>Email:</label>
 <input type='text' name='email' />
 </p>
+
 <p>
 <label>Security Code:</label>
 <img src='models/captcha.php'>
 </p>
+<p>
 <label>Enter Security Code:</label>
 <input name='captcha' type='text'>
 </p>
-<label>&nbsp;<br>
+<p class='right'>
+<label>&nbsp;</label>
 <input type='submit' value='Register'/>
-</p>
+</p>";
 
+echo resultBlock($errors,$successes);
+echo "
 </form>
 </div>
 
-</div>
-<div id='bottom'></div>
-</div>
-</body>
-</html>";
+</div>";
+
+finishPage();
 ?>

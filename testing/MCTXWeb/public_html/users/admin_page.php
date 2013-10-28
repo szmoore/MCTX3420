@@ -4,6 +4,8 @@ UserCake Version: 2.0.2
 http://usercake.com
 */
 
+//what a bunch of spaghetti code
+
 require_once("models/config.php");
 if (!securePage($_SERVER['PHP_SELF'])){die();}
 $pageId = $_GET['id'];
@@ -71,41 +73,49 @@ $pagePermissions = fetchPagePermissions($pageId);
 $permissionData = fetchAllPermissions();
 
 require_once("models/header.php");
+startPage();
 
-echo "
-<body>
-<div id='wrapper'>
-<div id='top'><div id='logo'></div></div>
-<div id='content'>
-<h1>UserCake</h1>
-<h2>Admin Page</h2>
-<div id='left-nav'>";
+echo notificationBlock($errors, $successes);
 
-include("left-nav.php");
-
-echo "
+echo '
+<div class="widget">
+<div class="right">
+  Page ID '.$pageDetails['id'].'
 </div>
-<div id='main'>";
 
-echo resultBlock($errors,$successes);
+<div class="title">Manage page "'.$pageDetails['page'].'"</div>
+
+<div class="sub-title">Access control list</div>';
+echo "
+<form name='adminPage' class='nice clear' action='".$_SERVER['PHP_SELF']."?id=".$pageId."' method='post'>
+<input type='hidden' name='process' value='1'>
+
+<table class='admin left lines'>
+<tr>
+  <th class=''>Swap</th>
+  <th class=''>Has access</th>
+  <th class=''>Does not have access</th>
+</tr>
+";
+
+foreach ($permissionData as $v) {
+  echo "<tr>";
+  if(isset($pagePermissions[$v['id']])) {
+    echo "<td><input type='checkbox' name='removePermission[".$v['id']."]' id='removePermission[".$v['id']."]' value='".$v['id']."'></td>";
+    echo "<td>".$v['name']."</td><td></td>";
+  } else {
+    echo "<td><input type='checkbox' name='addPermission[".$v['id']."]' id='addPermission[".$v['id']."]' value='".$v['id']."</td>'>";
+    echo "<td></td><td>".$v['name']."</td>";
+  }
+  
+  echo "</tr>";
+}
 
 echo "
-<form name='adminPage' action='".$_SERVER['PHP_SELF']."?id=".$pageId."' method='post'>
-<input type='hidden' name='process' value='1'>
-<table class='admin'>
-<tr><td>
-<h3>Page Information</h3>
-<div id='regbox'>
-<p>
-<label>ID:</label>
-".$pageDetails['id']."
-</p>
-<p>
-<label>Name:</label>
-".$pageDetails['page']."
-</p>
-<p>
-<label>Private:</label>";
+</table>
+
+<p class='left'>
+<label for='private'>Private page:</label>";
 
 //Display private checkbox
 if ($pageDetails['private'] == 1){
@@ -117,44 +127,17 @@ else {
 
 echo "
 </p>
-</div></td><td>
-<h3>Page Access</h3>
-<div id='regbox'>
-<p>
-Remove Access:";
 
-//Display list of permission levels with access
-foreach ($permissionData as $v1) {
-	if(isset($pagePermissions[$v1['id']])){
-		echo "<br><input type='checkbox' name='removePermission[".$v1['id']."]' id='removePermission[".$v1['id']."]' value='".$v1['id']."'> ".$v1['name'];
-	}
-}
-
-echo"
-</p><p>Add Access:";
-
-//Display list of permission levels without access
-foreach ($permissionData as $v1) {
-	if(!isset($pagePermissions[$v1['id']])){
-		echo "<br><input type='checkbox' name='addPermission[".$v1['id']."]' id='addPermission[".$v1['id']."]' value='".$v1['id']."'> ".$v1['name'];
-	}
-}
-
-echo"
-</p>
-</div>
-</td>
-</tr>
-</table>
-<p>
+<p class='right'>
 <label>&nbsp;</label>
 <input type='submit' value='Update' class='submit' />
 </p>
 </form>
-</div>
-<div id='bottom'></div>
-</div>
-</body>
-</html>";
+";
+
+echo "
+</div>";
+
+finishPage();
 
 ?>

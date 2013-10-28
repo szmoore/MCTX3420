@@ -7,15 +7,14 @@ http://usercake.com
 require_once("models/config.php");
 if (!securePage($_SERVER['PHP_SELF'])){die();}
 
-//Prevent the user visiting the logged in page if he/she is already logged in
-if(isUserLoggedIn()) { header("Location: index.php"); die(); }
-
 //Forms posted
 if(!empty($_POST))
 {
 	$errors = array();
 	$username = sanitize(trim($_POST["username"]));
 	$password = trim($_POST["password"]);
+  $password_new = trim($_POST["password_new"]);
+  $password_confirm = trim($_POST["password_confirm"]);
 	
 	//Perform some validation
 	//Feel free to edit / change as required
@@ -69,21 +68,40 @@ if(!empty($_POST))
 					$loggedInUser->displayname = $userdetails["display_name"];
 					$loggedInUser->username = $userdetails["user_name"];
 					
-          //Only allow login to admins
-          if ($loggedInUser->checkPermission(array(2)))
+          if(trim($password_new) == "")
           {
-            //Update last sign in
-            $loggedInUser->updateLastSignIn();
-            
-            $_SESSION["userCakeUser"] = $loggedInUser;
-            
-            //Redirect to user account page
-            header("Location: index.php");
-            die();
+            $errors[] = lang("ACCOUNT_SPECIFY_NEW_PASSWORD");
           }
-          else
+          else if(trim($password_confirm) == "")
           {
-            $errors[] = ("You are no admin :(");
+            $errors[] = lang("ACCOUNT_SPECIFY_CONFIRM_PASSWORD");
+          }
+          else if(minMaxRange(6,50,$password_new))
+          {	
+            $errors[] = lang("ACCOUNT_NEW_PASSWORD_LENGTH",array(6,50));
+          }
+          else if($password_new != $password_confirm)
+          {
+            $errors[] = lang("ACCOUNT_PASS_MISMATCH");
+          }
+          
+          //End data validation
+          if(count($errors) == 0)
+          {
+            //Also prevent updating if someone attempts to update with the same password
+            $entered_pass_new = generateHash($password_new,$loggedInUser->hash_pw);
+            
+            if($entered_pass_new == $loggedInUser->hash_pw)
+            {
+              //Don't update, this fool is trying to update with the same password Â¬Â¬
+              $errors[] = lang("ACCOUNT_PASSWORD_NOTHING_TO_UPDATE");
+            }
+            else
+            {
+              //This function will create the new hash and update the hash_pw property.
+              $loggedInUser->updatePassword($password_new);
+              $successes[] = lang("ACCOUNT_PASSWORD_UPDATED");
+            }
           }
 				}
 			}
@@ -91,18 +109,23 @@ if(!empty($_POST))
 	}
 }
 
+if (isUserLoggedIn())
+{
+  //If not admin, log them out after pw change
+  if (!$loggedInUser->checkPermission(array(2)))
+  {
+    $loggedInUser->userLogOut();
+  }
+}
+
 require_once("models/header.php");
 startPage();
 
 echo '
       <div id="login-container">
-      <div class="widget">
-        <div class="title">Notice</div>
-        This is the login page for site administration.<br>If you wish to log in
-        to the main web-site, see <a href="..">here instead</a>.
-      </div>
        <div class="widget">
-           <form id="login" name="login" action="'.$_SERVER["PHP_SELF"].'" method="post">
+          <div class="title centre">Change of password</div>
+           <form id="login-update" class="clear" name="login-update" action="'.$_SERVER["PHP_SELF"].'" method="post">
              <p>
                <label>
                  Username<br>
@@ -115,17 +138,28 @@ echo '
                  <input name="password" type="password">
                </label>             
              </p>
+             <p>
+               <label>
+                 New password<br>
+                 <input name="password_new" type="password">
+               </label>             
+             </p>
+             <p>
+               <label>
+                 Confirm password<br>
+                 <input name="password_confirm" type="password">
+               </label>             
+             </p>
              <p style="float:left; margin:0;">
-               <a href="forgot-password.php">Forgotten password?</a><br>
-               <a href="register.php">Register</a>
+               <a href="forgot-password.php">Forgotten password?</a>
              </p>
              <p style="float:right; margin:0;">
-               <input type="submit" value="Log In">
+               <input type="submit" value="Update">
              </p>
-';
-echo resultBlock($errors,$successes);
+            </form>';
+            
+echo resultBlock($errors,$successes);            
 echo '
-            </form>
        </div>
       </div>
  ';

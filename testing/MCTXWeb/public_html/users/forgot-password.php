@@ -6,6 +6,7 @@ http://usercake.com
 
 require_once("models/config.php");
 if (!securePage($_SERVER['PHP_SELF'])){die();}
+if (isUserLoggedIn()){header("Location: index.php"); die();}
 
 //User has confirmed they want their password changed 
 if(!empty($_GET["confirm"]))
@@ -174,22 +175,13 @@ if(!empty($_POST))
 }
 
 require_once("models/header.php");
-echo "
-<body>
-<div id='wrapper'>
-<div id='top'><div id='logo'></div></div>
-<div id='content'>
-<h1>UserCake</h1>
-<h2>Forgot Password</h2>
-<div id='left-nav'>";
+startPage();
 
-include("left-nav.php");
+//echo notificationBlock($errors,$successes);
 
 echo "
-</div>
-<div id='main'>";
-
-echo resultBlock($errors,$successes);
+<div id='login-container'>
+<div class='widget'><div class='title centre'>Forgot password</div>";
 
 echo "
 <div id='regbox'>
@@ -205,13 +197,15 @@ echo "
 <p>
 <label>&nbsp;</label>
 <input type='submit' value='Submit' class='submit' />
-</p>
+</p>";
+echo resultBlock($errors,$successes);
+
+echo "
 </form>
 </div>
 </div>
-<div id='bottom'></div>
-</div>
-</body>
-</html>";
+</div>";
+
+finishPage();
 
 ?>

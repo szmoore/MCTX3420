@@ -141,28 +141,16 @@ $userPermission = fetchUserPermissions($userId);
 $permissionData = fetchAllPermissions();
 
 require_once("models/header.php");
+startPage();
+
+echo notificationBlock($errors,$successes);
 
 echo "
-<body>
-<div id='wrapper'>
-<div id='top'><div id='logo'></div></div>
-<div id='content'>
-<h1>UserCake</h1>
-<h2>Admin User</h2>
-<div id='left-nav'>";
-
-include("left-nav.php");
-
-echo "
-</div>
-<div id='main'>";
-
-echo resultBlock($errors,$successes);
+<div class='widget'><div class='title centre'>User administration</div>";
 
 echo "
 <form name='adminUser' action='".$_SERVER['PHP_SELF']."?id=".$userId."' method='post'>
 <table class='admin'><tr><td>
-<h3>User Information</h3>
 <div id='regbox'>
 <p>
 <label>ID:</label>
@@ -181,7 +169,7 @@ echo "
 <input type='text' name='email' value='".$userdetails['email']."' />
 </p>
 <p>
-<label>Active:</label>";
+<label>Active: </label>";
 
 //Display activation link, if account inactive
 if ($userdetails['active'] == '1'){
@@ -207,7 +195,7 @@ echo "
 ".date("j M, Y", $userdetails['sign_up_stamp'])."
 </p>
 <p>
-<label>Last Sign In:</label>";
+<label>Last Sign In: </label>";
 
 //Last sign in, interpretation
 if ($userdetails['last_sign_in_stamp'] == '0'){
@@ -257,9 +245,8 @@ echo"
 </table>
 </form>
 </div>
-<div id='bottom'></div>
-</div>
-</body>
-</html>";
+";
+
+finishPage();
 
 ?>

@@ -135,23 +135,12 @@ $languages = getLanguageFiles(); //Retrieve list of language files
 $templates = getTemplateFiles(); //Retrieve list of template files
 $permissionData = fetchAllPermissions(); //Retrieve list of all permission levels
 require_once("models/header.php");
+startPage();
+
+echo notificationBlock($errors,$successes);
 
 echo "
-<body>
-<div id='wrapper'>
-<div id='top'><div id='logo'></div></div>
-<div id='content'>
-<h1>UserCake</h1>
-<h2>Admin Configuration</h2>
-<div id='left-nav'>";
-
-include("left-nav.php");
-
-echo "
-</div>
-<div id='main'>";
-
-echo resultBlock($errors,$successes);
+<div class='widget'><div class='title'>Site details</div>";
 
 echo "
 <div id='regbox'>
@@ -228,10 +217,8 @@ echo "
 <input type='submit' name='Submit' value='Submit' />
 </form>
 </div>
-</div>
-<div id='bottom'></div>
-</div>
-</body>
-</html>";
+</div>";
+
+finishPage();
 
 ?>
