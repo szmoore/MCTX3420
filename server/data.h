@@ -49,6 +49,7 @@ extern int Data_Read(DataFile * df, DataPoint * buffer, int index, int amount); 
 extern void Data_PrintByIndexes(DataFile * df, int start_index, int end_index, DataFormat format);  // Print data buffer
 extern void Data_PrintByTimes(DataFile * df, double start_time, double end_time, DataFormat format); // Print data between time values
 extern int Data_FindByTime(DataFile * df, double time_stamp, DataPoint * closest); // Find index of DataPoint with the closest timestamp to that given
+extern double Data_Calibrate(double value, double x[], double y[], int size);
 
 extern void Data_Handler(DataFile * df, FCGIValue * start, FCGIValue * end, DataFormat format, double current_time); // Helper; given FCGI params print data
 extern DataFormat Data_GetFormat(FCGIValue * fmt); // Helper; convert human readable format string to DataFormat
