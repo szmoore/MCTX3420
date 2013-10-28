@@ -11,6 +11,8 @@ mctx.graph.api.sensors = mctx.api + "sensors";
 mctx.graph.api.actuators = mctx.api + "actuators";
 mctx.sensors = {};
 mctx.actuators = {};
+
+mctx.graph.devices = {};
 mctx.graph.dependent = null;
 mctx.graph.independent = null;
 mctx.graph.timer = null;
@@ -64,13 +66,17 @@ $.fn.deployDevices = function(input_type, check_first, group) {
   var container = this;
   var apply = function(dict, prefix) {
     $.each(dict, function(key, val) {
+      //Unique id (name mangling)
+      var id = container.attr('id') + "_" + prefix + "_" + val.name;
+      
       var attributes = {
-          'type' : input_type, 'value' : key, 'alt' : val,
+          'type' : input_type, 'value' : key, 'alt' : val.name,
           'class' : prefix, 'name' : group, 
-          'id' : prefix + '_' + val //Unique id (name mangling)
+          'id' : id
       };
+      
       var entry = $("<input/>", attributes);
-      var label = $("<label/>", {'for' : prefix + '_' + val, 'text' : val}); 
+      var label = $("<label/>", {'for' : id, 'text' : val.name}); 
       entry.prop("checked", check_first);
       check_first = false;
       container.append(entry).append(label);
@@ -178,16 +184,20 @@ function graphUpdater() {
         var plot_data = [];
         
         yaxis.each(function() {
+          var series = {};
+          series.label = $(this).attr("alt");
+          
           //alert("Add " + $(this).val() + " to plot");
           if (xaxis.attr("alt") === "time") {
             //alert("Against time");
-            plot_data.push(devices[$(this).attr("alt")].data);
+            series.data = devices[$(this).attr("alt")].data;
           } else {
             var result = []
             dataMerge(devices[xaxis.attr("alt")].data, 
                       devices[$(this).attr("alt")].data, result);
-            plot_data.push(result);
+            series.data = result;
           }
+          plot_data.push(series);
         });
         
         if (mctx.graph.chart !== null) {
@@ -195,7 +205,12 @@ function graphUpdater() {
           mctx.graph.chart.setupGrid(); 
           mctx.graph.chart.draw();
         } else {
-          mctx.graph.chart = $.plot("#graph", plot_data);
+          var options = {
+            legend : {
+              container : "#graph-legend"
+            }
+          };
+          mctx.graph.chart = $.plot("#graph", plot_data, options);
         }
         mctx.graph.timer = setTimeout(updater, 1000);
       }

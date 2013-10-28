@@ -1,0 +1,195 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>MCTX3420 Web Interface</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!--[if lte IE 8]>
+      <script language="javascript" type="text/javascript" src="static/excanvas.min.js"></script>
+    <![endif]-->
+    <script type="text/javascript" src="static/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript" src="static/jquery.flot.min.js"></script>
+    <script type="text/javascript" src="static/base64.js"></script>
+    <script type="text/javascript" src="static/mctx.gui.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="static/style.css">
+    <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
+	<link rel="stylesheet" type="text/css" href="static/exp-menu.css">
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $("#menu-container").populateNavbar();
+        $("#login").submit(function () {
+          $("#login").login();
+          return false;
+        });
+        
+        $("#main_controls").submit(function () {
+          //Validate!
+          return false;
+        });
+        //$("#cam1").setCamera();
+        //$("#strain-graphs").setStrainGraphs();
+        $("#errorlog").setErrorLog();
+	
+      });
+    </script>
+	<script type="text/javascript">
+      runBeforeLoad().always(function () {
+        $(document).ready(function () {
+          $("#graph-controls").setDevices();
+          $("#graph-run").runButton();
+          
+       });       
+      })
+
+    </script>
+  </head>
+  
+  <body>
+<div id="header-wrap">
+      <div id="header">
+        <div id="leftnav">
+          <a href="http://www.uwa.edu.au/" target="_blank">
+            <img alt = "The University of Western Australia"
+            src="static/uwacrest-text.png">
+          </a>
+          <span id="title">Exploding Can Web Interface: Home</span>
+        </div>
+		<div class="nav-menu">
+			<ul class="menu">
+			  <li><a href="dashboard.html">Home</a></li>
+			  <li><a href="setup.html">Setup</a></li>
+			  <li><a href="admin.html">Admin</a></li>
+			  <li><a href="help.html">Help</a></li>
+			</ul>
+		</div>
+        <div id="rightnav">
+          <span id="welcome-container">
+          </span>
+          <span id="date">
+            <script type="text/javascript">getDate();</script>
+          </span>
+          <div id="logout-container">
+            <form action="#">
+              <div>
+                <input type="button" id="logout" value="Logout">
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="clear"></div>
+      </div>
+    </div>    <!-- End header -->
+    
+    <div id="content">
+      <div id="sidebar">
+	  <div class="widgetPanel">
+			<div class="title">Controls</div>
+			<form id="main_controls" action="">
+				<table>
+				<tr>
+					<td>Experiment name</td>
+					<td>
+					<input name="experiment_name" type="text">
+					</td>
+				</tr>
+				<tr>
+				<td>Experiment mode</td>
+				<td>
+					<input name="experiment_type" value="strain" type="radio"> Strain it
+					<input name="experiment_type" value="explode" type="radio"> Explode it
+				</td>
+				</tr>
+				</table>
+				<div align="right">
+					<input type="submit" value="Start">
+					<input type="submit" value="Pause">
+					<input type="submit" value="Stop">
+				</div>
+			</form>
+		</div>
+        <div class="widgetPanel">
+          <div class="title">Status</div>
+          <div class="item">
+            <table class="status centre">
+              <tr><th>Module</th> <th>State</th></tr>
+              <tr><td>Server API</td> <td>PASS</td></tr>
+              <tr><td>Enclosure interlock</td> <td>FAIL</td></tr>
+              <tr><td>Pressure level</td> <td>PASS</td></tr>
+            </table>
+            <hr>
+            Software mode: <span id="server_mode">off</span>
+          </div>         
+        </div>
+        
+        <div class="widgetPanel">
+          <div class="title">Pressure controls</div>
+        </div>
+        
+	</div>
+	<!-- End sidebar -->
+
+      <div id="main">
+	  <!--Experiment Menu Bar-->
+		<div class="widget">
+		<div class="exp-menu">
+			<ul class="menu">
+			  <li><a href="dashboard.html">Dashboard</a></li>
+			  <li><a href="#"><b>Graph</b></a></li>
+			  <li><a href="#">Image</a></li>
+			  <li><a href="#">In/Out</a></li>
+			</ul>
+		  </div>
+		</div>
+		
+		<div class="widget">
+            <div class="title">Graph</div>
+              <div id="graph" class="plot">
+                <!-- graph placeholder -->
+              </div>
+          </div>
+          <div class="widget" id="graph-controls">
+              <!--<div class="title">Visualise</div>-->
+              <b>X-Axis</b>
+                <form id="xaxis" onChange=$("#graph").setGraph()> <input type="radio" name="xaxis" value="time" id="time" checked="yes">time</input> </form>
+                <b>Y-Axis</b>
+                <form id="yaxis" onChange=$("#graph").setGraph()>  </form>
+                <!--b>Right Y-Axis</b>
+                <form id="y2axis" onChange=$("#graph").setGraph()> <input type="radio" name="y2axis" value="none" id="none" checked="yes">none</input></form>-->
+
+                <div> 
+                  <form id="time_range" onChange=$("#graph").setGraph()>
+                    <p> 
+                        Time of Last Update <input type="text" value="" id="current_time" disabled></input>
+                        Start Time <input type="text" value="" id="start_time"></input> 
+                        End Time <input type="text" value="" id="end_time"></input>
+                    </p>
+                </form>
+                </div>
+                <input type="button" value="Run" id="graph-run" onClick=$("#graph-run").runButton()></input>
+                <input type="button" value="Open New Graph" disabled></input>
+                <input type="button" value="Save Graph Image" disabled></input>
+                <input type="button" value="Dump Raw Data" disabled></input>
+            </div>
+        
+        <!--TODO put this on new page??
+          <div class="widget">
+              <div class="title">Controls</div>
+              <form id="controls">
+                <p>Mode: <input type="radio" name="mode" value="normal">Normal</input>
+                      <input type="radio" name="mode" value="explode">EXPLODE!</input> </p>
+                Filename: <input type="text"> </input>
+                <input type="button" value="Stop" id="stopstart"></input>
+                <input type="button" value="Pause" id="runpause"></input>
+                <input type="button" value="Load"></input>
+                
+              </form>
+          </div>
+		  -->
+		  </div>
+
+
+	<!-- End main content -->
+      
+    </div>
+  </body>
+</html>

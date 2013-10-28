@@ -278,14 +278,18 @@ int Login_LDAP_Bind(const char * uri, const char * dn, const char * pass)
 void Logout_Handler(FCGIContext * context, char * params)
 {
 	FCGI_ReleaseControl(context);
-	FCGI_AcceptJSON(context, "Logged out", "0");
+	FCGI_SendControlCookie(context, false); //Unset the cookie
+	FCGI_AcceptJSON(context, "Logged out");
 }
 
 
 /**
  * Handle a Login Request
  * @param context - The context
- * @param params - Parameter string, should contain username and password
+ * @param params - Parameter string, should contain username and password.
+ *				   NOTE: Care should be taken when using params, as it is
+ *				   completely unescaped. Do not log or use it without
+ *                 suitable escaping.
  */
 void Login_Handler(FCGIContext * context, char * params)
 {
@@ -327,7 +331,7 @@ void Login_Handler(FCGIContext * context, char * params)
 
 		case AUTH_LDAP:
 		{
-			if (strlen(pass) <= 0)
+			if (*pass == '\0')
 			{
 				FCGI_RejectJSON(context, "No password supplied.");
 				return;
@@ -419,7 +423,8 @@ void Login_Handler(FCGIContext * context, char * params)
 		{
 			FCGI_EscapeText(context->user_name); //Don't break javascript pls
 			// Give the user a cookie
-			FCGI_AcceptJSON(context, "Logged in", context->control_key);
+			FCGI_SendControlCookie(context, true); //Send the control key
+			FCGI_AcceptJSON(context, "Logged in");
 			Log(LOGDEBUG, "Successful authentication for %s", user);
 		}
 		else

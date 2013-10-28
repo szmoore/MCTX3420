@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>MCTX3420 Web Interface</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!--[if lte IE 8]>
+      <script language="javascript" type="text/javascript" src="static/excanvas.min.js"></script>
+    <![endif]-->
+    <script type="text/javascript" src="static/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript" src="static/jquery.flot.min.js"></script>
+    <script type="text/javascript" src="static/base64.js"></script>
+    <script type="text/javascript" src="static/mctx.gui.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="static/style.css">
+    <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $("#menu-container").populateNavbar();
+        $("#login").submit(function () {
+          $("#login").login();
+          return false;
+        });
+        
+        $("#main_controls").submit(function () {
+          //Validate!
+          return false;
+        });
+        //$("#cam1").setCamera();
+        //$("#strain-graphs").setStrainGraphs();
+        $("#errorlog").setErrorLog();
+      });
+    </script>
+  </head>
+  
+<body>
+	<div id="header-wrap">
+      <div id="header">
+        <div id="leftnav">
+          <a href="http://www.uwa.edu.au/" target="_blank">
+            <img alt = "The University of Western Australia"
+            src="static/uwacrest-text.png">
+          </a>
+          <span id="title">Exploding Can Web Interface: TEMPLATE</span>
+        </div>
+		<div class="nav-menu">
+			<ul class="menu">
+			  <li><a href="dashboard.html">Home</a></li>
+			  <li><a href="setup.html">Setup</a></li>
+			  <li><a href="admin.html">Admin</a></li>
+			  <li><a href="help.html">Help</a></li>
+			</ul>
+		</div>
+        <div id="rightnav">
+          <span id="welcome-container">
+          </span>
+          <span id="date">
+            <script type="text/javascript">getDate();</script>
+          </span>
+          <div id="logout-container">
+            <form action="#">
+              <div>
+                <input type="button" id="logout" value="Logout">
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="clear"></div>
+      </div>
+    </div>    
+	<!-- End header -->
+    
+    <div id="content">
+      <div id="sidebar">
+        <div class="widgetPanel">
+          <div class="title">DEMO SIDEPANEL</div>
+          <div class="item">
+            This is a Demonstration Panel Only.
+            <hr>
+            This is a Demonstration Panel Only
+          </div>         
+        </div>
+	</div>
+
+	<!-- End sidebar -->
+
+        <div id="main">
+          <div class="widget">
+            <div class="title">TEMPLATE PAGE</div>
+            <p class="justify">This page is a template only</p>
+			</div>
+			</div>
+		</div>
+
+
+	<!-- End main content -->
+      
+    </div>
+</body>
+</html>

@@ -17,6 +17,7 @@ typedef enum
 extern bool Pressure_Init(const char * name, int id);
 extern bool Pressure_Cleanup(int id);
 extern bool Pressure_Read(int id, double * value);
+extern bool Pressure_Sanity(int id, double value);
 
 #endif //_PRESSURE_H
 

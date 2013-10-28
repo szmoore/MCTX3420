@@ -47,7 +47,7 @@ int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn
 	s->init = init; // Set init function
 
 	// Start by averaging values taken over a second
-	DOUBLE_TO_TIMEVAL(1e-4, &(s->sample_time));
+	DOUBLE_TO_TIMEVAL(1, &(s->sample_time));
 	s->averages = 1;
 	s->num_read = 0;
 
@@ -62,6 +62,8 @@ int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn
 
 	s->current_data.time_stamp = 0;
 	s->current_data.value = 0;
+	s->averaged_data.time_stamp = 0;
+	s->averaged_data.value = 0;
 	return g_num_sensors;
 }
 
@@ -75,16 +77,16 @@ int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn
 #include "sensors/pressure.h"
 void Sensor_Init()
 {
-	Sensor_Add("cpu_stime", RESOURCE_CPU_SYS, Resource_Read, NULL, NULL, NULL);	
-	Sensor_Add("cpu_utime", RESOURCE_CPU_USER, Resource_Read, NULL, NULL, NULL);	
-	//Sensor_Add("pressure_high0", PRES_HIGH0, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
-	//Sensor_Add("pressure_high1", PRES_HIGH1, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
-	//Sensor_Add("pressure_low0", PRES_LOW0, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
+	//Sensor_Add("cpu_stime", RESOURCE_CPU_SYS, Resource_Read, NULL, NULL, NULL);	
+	//Sensor_Add("cpu_utime", RESOURCE_CPU_USER, Resource_Read, NULL, NULL, NULL);	
+	Sensor_Add("pressure_high0", PRES_HIGH0, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
+	Sensor_Add("pressure_high1", PRES_HIGH1, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
+	Sensor_Add("pressure_low0", PRES_LOW0, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
 	//Sensor_Add("../testing/count.py", 0, Piped_Read, Piped_Init, Piped_Cleanup, 1e50,-1e50,1e50,-1e50);
-	//Sensor_Add("strain0", STRAIN0, Strain_Read, Strain_Init, 5000,0,5000,0);
-	//Sensor_Add("strain1", STRAIN1, Strain_Read, Strain_Init, 5000,0,5000,0);
-	//Sensor_Add("strain2", STRAIN2, Strain_Read, Strain_Init, 5000,0,5000,0);
-	//Sensor_Add("strain3", STRAIN3, Strain_Read, Strain_Init, 5000,0,5000,0);
+	Sensor_Add("strain0", STRAIN0, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
+	Sensor_Add("strain1", STRAIN1, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
+	Sensor_Add("strain2", STRAIN2, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
+	Sensor_Add("strain3", STRAIN3, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
 	//Sensor_Add("pressure0", PRESSURE0, Pressure_Read, Pressure_Init, 5000,0,5000,0);
 	//Sensor_Add("pressure1", PRESSURE1, Pressure_Read, Pressure_Init, 5000,0,5000,0);
 	//Sensor_Add("pressure_feedback", PRESSURE_FEEDBACK, Pressure_Read, Pressure_Init, 5000,0,5000,0);
@@ -103,6 +105,7 @@ void Sensor_Cleanup()
 		if (s->cleanup != NULL)
 			s->cleanup(s->user_id);
 	}
+	g_num_sensors = 0;
 }
 
 /**
@@ -183,8 +186,12 @@ void Sensor_SetMode(Sensor * s, ControlModes mode, void * arg)
  */
 void Sensor_SetModeAll(ControlModes mode, void * arg)
 {
+	if (mode == CONTROL_START)
+		Sensor_Init();
 	for (int i = 0; i < g_num_sensors; i++)
 		Sensor_SetMode(&g_sensors[i], mode, arg);
+	if (mode == CONTROL_STOP)
+		Sensor_Cleanup();
 }
 
 
@@ -201,38 +208,40 @@ void * Sensor_Loop(void * arg)
 	// Until the sensor is stopped, record data points
 	while (s->activated)
 	{
-		DataPoint d;
-		d.value = 0;
-		bool success = s->read(s->user_id, &(d.value));
+		
+		bool success = s->read(s->user_id, &(s->current_data.value));
 
 		struct timespec t;
 		clock_gettime(CLOCK_MONOTONIC, &t);
-		d.time_stamp = TIMEVAL_DIFF(t, *Control_GetStartTime());	
+		s->current_data.time_stamp = TIMEVAL_DIFF(t, *Control_GetStartTime());	
 		
 		if (success)
 		{
 			if (s->sanity != NULL)
 			{
-				if (!s->sanity(s->user_id, d.value))
+				if (!s->sanity(s->user_id, s->current_data.value))
 				{
 					Fatal("Sensor %s (%d,%d) reads unsafe value", s->name, s->id, s->user_id);
 				}
 			}
-			s->current_data.time_stamp += d.time_stamp;
-			s->current_data.value += d.value;
+			s->averaged_data.time_stamp += s->current_data.time_stamp;
+			s->averaged_data.value = s->current_data.value;
 			
 			if (++(s->num_read) >= s->averages)
 			{
-				s->current_data.time_stamp /= s->averages;
-				s->current_data.value /= s->averages;
-				Data_Save(&(s->data_file), &(s->current_data), 1); // Record it
+				s->averaged_data.time_stamp /= s->averages;
+				s->averaged_data.value /= s->averages;
+				Data_Save(&(s->data_file), &(s->averaged_data), 1); // Record it
 				s->num_read = 0;
-				s->current_data.time_stamp = 0;
-				s->current_data.value = 0;
+				s->averaged_data.time_stamp = 0;
+				s->averaged_data.value = 0;
 			}
 		}
 		else
-			Log(LOGWARN, "Failed to read sensor %s (%d,%d)", s->name, s->id,s->user_id);
+		{
+			// Silence because strain sensors fail ~50% of the time :S
+			//Log(LOGWARN, "Failed to read sensor %s (%d,%d)", s->name, s->id,s->user_id);
+		}
 
 
 		clock_nanosleep(CLOCK_MONOTONIC, 0, &(s->sample_time), NULL);
@@ -408,5 +417,10 @@ const char * Sensor_GetName(int id)
 	return g_sensors[id].name;
 }
 
+DataPoint Sensor_LastData(int id)
+{
+	Sensor * s = &(g_sensors[id]);
+	return s->current_data;
+}
 
 

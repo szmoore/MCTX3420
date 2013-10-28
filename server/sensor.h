@@ -61,6 +61,9 @@ typedef struct
 	int averages;
 	/** Current data **/
 	DataPoint current_data;
+
+	/** Summed data **/
+	DataPoint averaged_data;
 	/** Number of points read so far before applying average **/
 	int num_read;
 
@@ -81,6 +84,8 @@ extern bool Sensor_Read(Sensor * s, DataPoint * d); // Read a single DataPoint, 
 extern Sensor * Sensor_Identify(const char * str); // Identify a Sensor from a string
 
 extern void Sensor_Handler(FCGIContext *context, char * params); // Handle a FCGI request for Sensor data
+
+extern DataPoint Sensor_LastData(int id);
 
 extern const char * Sensor_GetName(int id);
 

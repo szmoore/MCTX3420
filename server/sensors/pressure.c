@@ -6,8 +6,14 @@
 #include "pressure.h"
 #include "../bbb_pin.h"
 #include "../log.h" // For Fatal()
+#include "../data.h"
 
 #define PSI_TO_KPA 6.89475729
+
+/** Uncalibrated values in ADC readings **/
+static double high_raw[] = {642,910,1179,1445,1712,1980}; 
+/** Calibrated values in kPa **/
+static double high_cal[] = {95, 190, 285, 380, 474, 560};
 
 /**
  * Get the ADC number of a Pressure sensor
@@ -40,18 +46,26 @@ double Pressure_Callibrate(int id, int adc)
 {
 	//double voltage = ADC_TO_VOLTS(adc); // convert reading to voltage
 
+
+
+	//TODO: Fix this
 	switch (id)
 	{
 		case PRES_HIGH0:
 		case PRES_HIGH1:
 		{
+			/*
 			static const double Vs = 5e3; // In mVs
 			static const double Pmin = 0.0 * PSI_TO_KPA;
 			static const double Pmax = 150.0 * PSI_TO_KPA;
 			double Vout = ADC_TO_MVOLTS(adc);
 			return ((Vout - 0.1*Vs)/(0.8*Vs))*(Pmax - Pmin) + Pmin;
+			*/
+
+			return Data_Calibrate((double)adc, high_raw, high_cal, sizeof(high_raw)/sizeof(double));
 		}	
 		case PRES_LOW0:
+			// Not calibrated!
 			return (200.0 * (adc / ADC_RAW_MAX));
 		default:
 			Fatal("Unknown Pressure id %d", id);
@@ -101,4 +115,14 @@ bool Pressure_Read(int id, double * value)
 	}
 	//pthread_mutex_unlock(&mutex);
 	return result;
+}
+
+/**
+ * Sanity check the pressure reading
+ * @param value - The pressure reading (calibrated)
+ * @returns true iff the value is safe, false if it is dangerous
+ */
+bool Pressure_Sanity(int id, double value)
+{
+	return (value < 590);
 }

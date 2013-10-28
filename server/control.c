@@ -197,7 +197,7 @@ void Control_Handler(FCGIContext *context, char *params) {
 						"%s", name);
 		}
 
-		FCGI_AcceptJSON(context, "Ok", NULL);
+		FCGI_AcceptJSON(context, "Ok");
 	}
 }
 

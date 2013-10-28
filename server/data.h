@@ -54,4 +54,6 @@ extern void Data_Handler(DataFile * df, FCGIValue * start, FCGIValue * end, Data
 extern DataFormat Data_GetFormat(FCGIValue * fmt); // Helper; convert human readable format string to DataFormat
 
 
+extern double Data_Callibrate(double value, double map[], int map_size);
+
 #endif //_DATAPOINT_H

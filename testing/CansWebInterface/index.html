@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>MCTX3420 Web Interface</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!--[if lte IE 8]>
+      <script language="javascript" type="text/javascript" src="static/excanvas.min.js"></script>
+    <![endif]-->
+    <script type="text/javascript" src="static/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript" src="static/jquery.flot.min.js"></script>
+    <script type="text/javascript" src="static/base64.js"></script>
+    <script type="text/javascript" src="static/mctx.gui.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="static/style.css">
+    <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $("#menu-container").populateNavbar();
+        $("#login").submit(function () {
+          $("#login").login();
+          return false;
+        });
+        
+        $("#main_controls").submit(function () {
+          //Validate!
+          return false;
+        });
+        //$("#cam1").setCamera();
+        //$("#strain-graphs").setStrainGraphs();
+        $("#errorlog").setErrorLog();
+      });
+    </script>
+  </head>
+  
+  <body>
+    <div id="header">
+      <span id="title">Exploding Cans</span>
+      <div id="rightnav">
+        <div id="menu-container" class="nav-menu">
+        </div>
+        <span id="date">
+          <script type="text/javascript">getDate();</script>
+        </span>
+      </div>
+      <div class="clear"></div>
+    </div>
+    <!-- End header -->
+    
+    <div id="content">
+      <div id="sidebar">
+        <div class="widget">
+          <div class="title">Status</div>
+          <div class="item">
+            <table class="status centre">
+              <tr><th>Module</th> <th>State</th></tr>
+              <tr><td>Server API</td> <td>PASS</td></tr>
+              <tr><td>Enclosure interlock</td> <td>FAIL</td></tr>
+              <tr><td>Pressure level</td> <td>PASS</td></tr>
+            </table>
+            <hr>
+            Software mode: <span id="server_mode">off</span>
+          </div>         
+        </div>
+        
+        <div class="widget">
+          <div class="title">Pressure controls</div>
+        </div>
+        
+        <div class="widget">
+          <div class="title">Login</div>
+          <div class="item">
+            <form id="login" action="#">
+              <table class="centre">
+                <tr><td>Username</td><td><input name="username" type="text"></td></tr>
+                <tr><td>Password</td><td><input name="pass" type="password"></td></tr>
+                <tr>
+                  <td></td>
+                  <td>
+                    <input type="submit" value="Submit">
+                    <input type="checkbox" name="force"> Force
+                  </td>
+                </tr>
+              </table>
+            </form>
+          </div>
+        </div>
+      </div>
+      <!-- End sidebar -->
+
+      <div id="main">
+        <div class="widget">
+          <div class="title">Dashboard</div>
+          <!--<img class="centre" src="overview.png" alt="Overview">-->
+          <b>Main controls</b>
+          <form id="main_controls" action="">
+            <table>
+              <tr>
+                <td>Experiment name</td>
+                <td><input name="experiment_name" type="text"></td>
+              </tr>
+              <tr>
+                <td>Experiment mode</td>
+                <td>
+                  <input name="experiment_type" value="strain" type="radio"> Strain it
+                  <input name="experiment_type" value="explode" type="radio"> Explode it
+                </td>
+              </tr>
+              <tr>
+                <td>
+                </td>
+                <td align="right">
+                  <input type="submit" value="Start">
+                </td>
+              </tr>
+            </table>
+          </form>
+          <b>Error and warning messages</b><br>
+          <textarea id="errorlog" wrap="off" rows="4" cols="30" readonly></textarea>
+        </div>
+        
+        <div class="widget">
+          <div class="title">Strain gauges</div>
+          <div id="strain-graphs" class="graph">
+            <!-- Strain graph placeholder -->
+          </div>
+        </div>
+        
+        <div class="widget">
+          <div class="title">Camera Feed</div>
+          <img src="" alt="Camera 1" id="cam1" class="centre">
+        </div>
+      </div>
+      <!-- End main content -->
+      
+    </div>
+  </body>
+</html>

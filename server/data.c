@@ -356,3 +356,51 @@ DataFormat Data_GetFormat(FCGIValue * fmt)
 	}
 	return JSON;
 }
+
+/**
+ * Binary search for index of a double in an array
+ * @param value - The value
+ * @param x - The array
+ * @param size - Sizeof the array
+ */
+int FindClosest(double value, double x[], int size)
+{
+	int upper = size-1;
+	int lower = 0;
+	int index = 0;
+	while (upper - lower > 1)
+	{
+		index = lower + ((upper - lower)/2);
+		double look = x[index];
+		if (look > value)
+			upper = index;
+		else if (look < value)
+			lower = index;
+		else
+			return index;
+	}
+
+	if (x[index] > value && index > 0)
+		--index;
+	return index;
+
+}
+
+/**
+ * Get calibrated value by interpolation in array y
+ * @param value - Raw measured value
+ * @param x - x values (raw values) of the data
+ * @param y - calibrated values
+ * @param size - Number of values in the arrays
+ * @returns interpolated calibrated value
+ */
+double Data_Calibrate(double value, double x[], double y[], int size)
+{
+	int i = FindClosest(value, x, size);
+	if (i >= size-1)
+	{
+		i = size-2;	
+	}
+	double dist = (value - x[i])/(x[i+1] - x[i]);
+	return y[i] + dist*(y[i+1]-y[i]);
+}

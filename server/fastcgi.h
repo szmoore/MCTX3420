@@ -50,6 +50,8 @@ typedef struct
 	time_t control_timestamp;
 	/**A SHA-1 hash that is the control key, determining who is logged in**/
 	char control_key[CONTROL_KEY_BUFSIZ]; 
+	/**The received control key for the current request**/
+	char received_key[CONTROL_KEY_BUFSIZ];
 	/**The IPv4 address of the logged-in user**/
 	char control_ip[16];
 	/**Determines if the user is an admin or not**/
@@ -68,11 +70,13 @@ typedef void (*ModuleHandler) (FCGIContext *context, char *params);
 
 extern bool FCGI_LockControl(FCGIContext *context, const char * user_name, UserType user_type);
 extern void FCGI_ReleaseControl(FCGIContext *context);
-extern bool FCGI_HasControl(FCGIContext *context, const char *key);
+extern bool FCGI_HasControl(FCGIContext *context);
+extern void FCGI_GetControlCookie(char buffer[CONTROL_KEY_BUFSIZ]);
+extern void FCGI_SendControlCookie(FCGIContext *context, bool set);
 extern char *FCGI_KeyPair(char *in, const char **key, const char **value);
 extern bool FCGI_ParseRequest(FCGIContext *context, char *params, FCGIValue values[], size_t count);
 extern void FCGI_BeginJSON(FCGIContext *context, StatusCodes status_code);
-extern void FCGI_AcceptJSON(FCGIContext *context, const char *description, const char *cookie);
+extern void FCGI_AcceptJSON(FCGIContext *context, const char *description);
 extern void FCGI_JSONPair(const char *key, const char *value);
 extern void FCGI_JSONLong(const char *key, long value);
 extern void FCGI_JSONDouble(const char *key, double value);
@@ -81,6 +85,7 @@ extern void FCGI_JSONKey(const char *key);
 extern void FCGI_PrintRaw(const char *format, ...);
 extern void FCGI_EndJSON();
 extern void FCGI_RejectJSONEx(FCGIContext *context, StatusCodes status, const char *description);
+extern char *FCGI_URLDecode(char *buf);
 extern char *FCGI_EscapeText(char *buf);
 extern void *FCGI_RequestLoop (void *data);
 

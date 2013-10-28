@@ -501,7 +501,8 @@ bool ADC_Read(int id, int *value)
 
 	if (pread(g_adc[id].fd_value, adc_str, ADC_DIGITS-1, 0) == -1)
 	{
-		AbortBool("ADC %d read failed: %s", id, strerror(errno));
+		//AbortBool("ADC %d read failed: %s", id, strerror(errno));
+		return false;
 	}
 
 	*value = strtol(adc_str, NULL, 10);
