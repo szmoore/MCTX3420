@@ -365,7 +365,7 @@ form.controls {
 }
 
 .widget {
-  background-color: #ffffff;
+  background-color: #fff; /*#EBF4FA;*/ /*#ffffff; segmented */
   margin: 0.25em 0.25em 1.5em;
   padding: 1em 1.25em;
   box-shadow: 0 0 3px #CCCCCC;

@@ -140,6 +140,10 @@ function runBeforeLoad(isLoginPage) {
             $("#logout").logout();
           });
           
+          $("#change-password").click(function () {
+            window.open("users/user_change_details.php");
+          });
+          
           //Enable the error log, if present
           $("#errorlog").setErrorLog();
         });
