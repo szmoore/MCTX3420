@@ -140,6 +140,10 @@ function runBeforeLoad(isLoginPage) {
             $("#logout").logout();
           });
           
+          $("#change-password").click(function () {
+            window.open("users/user_change_details.php");
+          });
+          
           //Enable the error log, if present
           $("#errorlog").setErrorLog();
         });
@@ -186,6 +190,7 @@ $.fn.login = function () {
 
     return $.ajax({
         url : mctx.api + "bind",
+        type : "POST",
         data : {user: username, pass : password}
     }).done(function (data) {
         if (data.status < 0) {

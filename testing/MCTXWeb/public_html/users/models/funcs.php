@@ -154,29 +154,57 @@ function resultBlock($errors,$successes){
 	//Error block
 	if(count($errors) > 0)
 	{
-		echo "<div id='error'>
-		<a href='#' onclick=\"showHide('error');\">[X]</a>
-		<ul>";
+		echo "<div id='result' class='fail'>";
+    
 		foreach($errors as $error)
 		{
-			echo "<li>".$error."</li>";
+			echo "<p>".$error."</p>";
 		}
-		echo "</ul>";
 		echo "</div>";
 	}
 	//Success block
 	if(count($successes) > 0)
 	{
-		echo "<div id='success'>
-		<a href='#' onclick=\"showHide('success');\">[X]</a>
-		<ul>";
+		echo "<div id='success'>";
 		foreach($successes as $success)
 		{
-			echo "<li>".$success."</li>";
+      echo "<p>".$success."</li>";
 		}
-		echo "</ul>";
 		echo "</div>";
 	}
+}
+
+function notificationBlock($errors, $successes) {
+  if (count($errors) > 0 || count($successes) > 0)
+  {
+    echo '
+          <div class="widget dismiss-container">
+            <div class="dismiss right">
+              <a href="#">Dismiss</a>
+            </div>
+            
+            <div class="title large">Notifications</div>
+    ';
+    
+    foreach ($errors as $error)
+    {
+      echo '<p class="fail">'.$error.'</p>';
+    }
+    
+    foreach ($successes as $success)
+    {
+      echo '<p>'.$success.'</p>';
+    }
+    
+    echo '
+          </div>
+          <script type="text/javascript">
+            $(".dismiss").click(function() {
+              $(".dismiss-container").css("display", "none");
+            })
+          </script>
+    ';
+  }
 }
 
 //Completely sanitizes text
@@ -285,6 +313,70 @@ function emailUsernameLinked($email,$username)
 	}
 }
 
+function permissionNameToId($permission)
+{
+	global $mysqli,$db_table_prefix;
+	$stmt = $mysqli->prepare("SELECT id
+		FROM ".$db_table_prefix."permissions
+		WHERE
+		name = ?
+		LIMIT 1");
+	$stmt->bind_param("s", $permission);	
+	$stmt->execute();
+	$stmt->bind_result($id);
+  
+  while ($stmt->fetch()){
+		$perm_id = $id;
+  }
+	$stmt->close();
+	
+  return $perm_id;
+}
+
+function fetchAllUsersWithPerm($perm_name)
+{
+	global $mysqli,$db_table_prefix; 
+  
+  $perm_id = permissionNameToId($perm_name);
+	$stmt = $mysqli->prepare("SELECT 
+		p1.id
+		FROM ".$db_table_prefix."users p1
+    WHERE EXISTS (SELECT * FROM ".$db_table_prefix."user_permission_matches
+                 WHERE user_id=p1.id AND permission_id=?)"
+  );
+  $stmt->bind_param("i", $perm_id); 
+	$stmt->execute();
+	$stmt->bind_result($id);
+	
+	while ($stmt->fetch()){
+		$row[] = $id;
+	}
+	$stmt->close();
+	return ($row);
+}
+
+function fetchAllUsersWithoutPerm($perm_name)
+{
+	global $mysqli,$db_table_prefix; 
+  
+  $perm_id = permissionNameToId($perm_name);
+	$stmt = $mysqli->prepare("SELECT 
+		p1.id
+		FROM ".$db_table_prefix."users p1
+    WHERE NOT EXISTS (SELECT * FROM ".$db_table_prefix."user_permission_matches
+                 WHERE user_id=p1.id AND permission_id=?)"
+  );
+  $stmt->bind_param("i", $perm_id); 
+	$stmt->execute();
+	$stmt->bind_result($id);
+	
+	while ($stmt->fetch()){
+		$row[] = $id;
+	}
+	$stmt->close();
+	return ($row);
+}
+
 //Retrieve information for all users
 function fetchAllUsers()
 {
@@ -311,6 +403,27 @@ function fetchAllUsers()
 	}
 	$stmt->close();
 	return ($row);
+}
+
+//Yeah usercake... Fetches the user id from username
+function fetchUserId($username)
+{
+  global $mysqli,$db_table_prefix; 
+  $stmt = $mysqli->prepare("SELECT 
+		id
+		FROM ".$db_table_prefix."users
+		WHERE
+		user_name = ?
+		LIMIT 1");
+		$stmt->bind_param("s", $username);
+	
+	$stmt->execute();
+	$stmt->bind_result($id);
+	while ($stmt->fetch()){
+		$user_id = $id;
+	}
+	$stmt->close();
+	return $user_id;
 }
 
 //Retrieve complete user information by username, token or ID
@@ -1185,7 +1298,7 @@ function securePage($uri){
 			return true;
 		}
 		else {
-			header("Location: account.php");
+			header("Location: index.php");
 			return false;	
 		}
 	}

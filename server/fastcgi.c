@@ -556,7 +556,7 @@ char *FCGI_URLDecode(char *buf)
 			if (isxdigit(*tail) && isxdigit(*(tail+1))) {
 				hex[0] = *tail++;
 				hex[1] = *tail++;
-				char val = (char)strtol(hex, NULL, 16);
+				val = (char)strtol(hex, NULL, 16);
 				//Control codes --> Space character
 				*head++ = (val < 0x20) ? 0x20 : val;
 			} else { //Not valid format; keep original
