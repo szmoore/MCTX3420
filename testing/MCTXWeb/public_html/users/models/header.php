@@ -17,10 +17,10 @@ echo '
   <head>
     <title>MCTX3420 Web Interface</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="stylesheet" type="text/css" href="static/style.css">
-    <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
+    <link rel="stylesheet" type="text/css" href="../static/style.css">
+    <link rel="stylesheet" type="text/css" href="../static/nav-menu.css">
     
-    <script type="text/javascript" src="static/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript" src="../static/jquery-1.10.1.min.js"></script>
     
 	'.$custom_header_scripts.'
   </head>
@@ -31,7 +31,7 @@ echo '
         <div id="leftnav">
           <a href="http://www.uwa.edu.au/" target="_blank">
             <img alt = "The University of Western Australia"
-            src="static/uwacrest-text.png">
+            src="../static/uwacrest-text.png">
           </a>
           <span id="title">Site Administration</span>
         </div>
