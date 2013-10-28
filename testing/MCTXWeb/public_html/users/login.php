@@ -99,7 +99,7 @@ echo '
       <div class="widget">
         <div class="title">Notice</div>
         This is the login page for site administration.<br>If you wish to log in
-        to the main web-site, see <a href="#">here instead</a>.
+        to the main web-site, see <a href="..">here instead</a>.
       </div>
        <div class="widget">
            <form id="login" name="login" action="'.$_SERVER["PHP_SELF"].'" method="post">
