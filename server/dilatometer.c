@@ -12,21 +12,20 @@
 static double test_left, test_right;
 
 // Canny Edge algorithm variables
-int edgeThresh = 1;
-int lowThreshold;
-int const max_lowThreshold = 100;
+int blur = 5;
+int lowThreshold = 30;
 int ratio = 3;
 int kernel_size = 3;
 
-/** Buffer for storing image data. Stored as a  **/
-static CvMat * g_srcRGB  = NULL; // Source Image
-static CvMat * g_srcGray = NULL; // Gray scale of source image
-static CvMat * g_edges 	 = NULL; // Detected Edges
-static CvMat * g_data    = NULL; // Image to mask edges onto
+/** Buffers for storing image data.  **/
+static CvMat * g_srcRGB  = NULL; 	// Source Image
+static CvMat * g_srcGray = NULL; 	// Gray scale of source image
+static CvMat * g_edges 	 = NULL; 	// Detected Edges
 
-
-/** Camera capture pointer **/
+/** Pointers for capturing image **/
 static CvCapture * g_capture = NULL;
+static IplImage * frame  = NULL;	// This is required as you can not use capture with CvMat in C
+
 
 /**
  * Create a test image using left as left edge and right as right edge positions
@@ -56,163 +55,209 @@ void Dilatometer_TestImage()
  					s.val[i] *= exp( (test_right - x) / 25); 				
 			}	
 			cvSet2D(g_srcRGB,y,x,s);
-		//	if( s.val[0] > 200)
-		//		printf("row: %d, col: %d, %f\n", y, x, s.val[0]); 
 		}
 		
 	}
-	if (g_data == NULL)
+	if (g_srcGray == NULL)
 	{
-		g_data = cvCreateMat(g_srcRGB->rows,g_srcRGB->cols,CV_8UC1); //IPL_DEPTH_8U?
+		g_srcGray = cvCreateMat(g_srcRGB->rows,g_srcRGB->cols,CV_8UC1);
 	}
-	cvCvtColor(g_srcRGB,g_data,CV_RGB2GRAY);
+	cvCvtColor(g_srcRGB,g_srcGray,CV_RGB2GRAY);
 }	
+
+/**
+ * Cleanup Dilatometer pointers
+ */
+void Dilatometer_Cleanup()
+{
+	if (g_capture != NULL)
+		cvReleaseCapture(&g_capture);
+	if (g_srcRGB != NULL)
+		cvReleaseMat(&g_srcRGB);
+	if (g_srcGray != NULL)
+		cvReleaseMat(&g_srcGray);
+	if (g_edges != NULL)
+		cvReleaseMat(&g_edges);
+	if (frame != NULL)
+		cvReleaseImageHeader(&frame);
+}
+
+/**
+ * Get an image from the Dilatometer
+ */
+static bool Dilatometer_GetImage()
+{	
+	bool result = true;
+	// If more than one camera is connected, then input needs to be determined, however the camera ID may change after being unplugged
+	g_capture = cvCreateCameraCapture(0);
+	//If cvCreateCameraCapture returns NULL there is an error with the camera
+	if( g_capture == NULL)
+		result = false;
+	
+	// Get the frame and convert it to CvMat
+	frame =  cvQueryFrame(g_capture);
+	CvMat stub;
+	g_srcRGB = cvGetMat(frame,&stub,0,0);
+
+	if( g_srcRGB == NULL)
+		result = false;
+	
+	// Convert the image to grayscale
+	if (g_srcGray == NULL)
+	{
+		g_srcGray = cvCreateMat(g_srcRGB->rows,g_srcRGB->cols,CV_8UC1);
+	}
+
+	cvCvtColor(g_srcRGB,g_srcGray,CV_RGB2GRAY);
+	
+	return result;
+}
+
+void CannyThreshold()
+{
+	if ( g_edges == NULL)
+	{
+		g_edges = cvCreateMat(g_srcGray->rows,g_srcGray->cols,CV_8UC1);
+	}
+ 	
+	// Commented out lines are used during testing to show the image to screen, can also save the test images
+	//cvShowImage("display", g_srcGray);
+	//cvWaitKey(0); 	
+	
+	// Reduce noise with a kernel blurxblur. Input the grayscale source image, output to edges. (0's mean it's determined from kernel sizes)
+	cvSmooth( g_srcGray, g_edges, CV_GAUSSIAN, blur, blur ,0 ,0 );
+	
+	//Save the image
+	//cvSaveImage("test_blurred.jpg",g_edges,0);
+		printf("what about here?\n");
+
+	cvShowImage("display", g_edges);
+	cvWaitKey(0); 	
+	// Find the edges in the image
+	cvCanny( g_edges, g_edges, lowThreshold, lowThreshold*ratio, kernel_size );
+	
+	//Save the image
+	//cvSaveImage("test_edge.jpg",g_edges,0);
+
+	cvShowImage("display", g_edges);
+	cvWaitKey(0); 	
+			printf("hopeful\n");
+
+}
+
+ /**
+ * Read the dilatometer image. The value changed will correspond to the new location of the edge.
+ * @param val - Will store the read value if successful
+ * @param samples - Number of rows to scan (increasing will slow down performance!)
+ * @returns true on successful read
+ */
+bool Dilatometer_GetEdge( double * value, int samples)
+{
+	bool result = false; 
+	double average = 0;
+	// Get the image from the camera
+	result = Dilatometer_GetImage();
+	// If an error occured when capturing image then return
+	if (!result)
+		return result;
+	
+	// Apply the Canny Edge theorem to the image
+	CannyThreshold();
+
+	int width = g_edges->cols;
+	int height = g_edges->rows;
+	
+	// If the number of samples is greater than the image height, sample every row
+	if( samples > height)
+	{
+		samples = height;
+	}
+	
+	int sample_height;
+	int num_edges = 0;	// Number of edges. if each sample location has an edge, then num_edges = samples
+
+	for (int i=0; i<samples; i++)
+	{
+		// Determine the position in the rows to find the edges. 
+		// This will give you a number of evenly spaced samples
+		sample_height = ceil(height * (i + 1) / samples) -1;
+		
+		// Need to go through each pixel of a row and find all the locations of a line. If there is more than one pixel, average it. note this only works if the canny edge algorithm returns lines about the actual line (no outliers).
+		
+		int edge_location=0;
+		int num=0;
+		for ( int col = 0; col < width; col++)
+		{
+			// Count the number of points
+			// Get the threshold of the pixel at the current location
+			CvScalar value = cvGet2D(g_edges, sample_height, col);
+			if( value.val[0]> THRES)
+			{
+				edge_location += col;
+				num++;
+			}
+		}
+		if( num > 0)
+		{
+			average += ( edge_location / num );
+			num_edges++;
+		}
+	}
+	if (num_edges > 0)
+		average /= num_edges;
+	
+	if( average > 0)
+	{	
+		result = true; //Successfully found an edge
+		*value = average;
+	}
+	return result;
+}
+
+ /**
+ * Read the dilatometer image. The value changed will correspond to the new location of the edge.
+ * @param val - Will store the read value if successful
+ * @returns true on successful read
+ */
+bool Dilatometer_Read( double * value)
+{
+	bool result = Dilatometer_GetEdge(value, SAMPLES);
+	return result;
+}
 
 /**
  * Initialise the dilatometer
  */
 void Dilatometer_Init()
 {
-	
 	// Make an initial reading (will allocate memory the first time only).
-	Dilatometer_Read(1); 
+	double val;
+	Dilatometer_GetEdge(&val, 1); 
 }
 
-/**
- * Cleanup Interferometer stuff
- */
-void Dilatometer_Cleanup()
+// Overlays a line over the given edge position
+void Draw_Edge(double edge)
 {
-	if (g_data != NULL)
-		cvReleaseMat(&g_data);
-
-	if (g_capture != NULL)
-		cvReleaseCapture(&g_capture);
-
-}
-
-/**
- * Get an image from the Dilatometer
- */
-static void Dilatometer_GetImage()
-{	
-	//Need to implement camera
-}
-
-void CannyThreshold()
-{
-	
-	if (g_data == NULL)
+	CvScalar value;
+	value.val[0]=244;
+	for( int i = 0; i < g_srcGray->rows; i++)
 	{
-		g_data = cvCreateMat(g_srcGray->rows,g_srcGray->cols,CV_8UC1);
+		cvSet2D(g_edges,i,edge,value);
 	}
-
-	if ( g_edges == NULL)
-	{
-		g_edges = cvCreateMat(g_srcGray->rows,g_srcGray->cols,CV_8UC1);
-	}
- 	
-	//g_data = 0;
-	cvShowImage("display", g_srcGray);
-	cvWaitKey(0); 	
-	// Reduce noise with a kernel 3x3. Input the grayscale source image, output to edges. (0's mean it's determined from kernel sizes)
-	cvSmooth( g_srcGray, g_edges, CV_GAUSSIAN, 9, 9 ,0 ,0 );
-	
 	cvShowImage("display", g_edges);
 	cvWaitKey(0); 	
-
-	// Find the edges in the image
-	cvCanny( g_edges, g_edges, lowThreshold, lowThreshold*ratio, kernel_size );
-
-	cvShowImage("display", g_edges);
-	cvWaitKey(0); 	
-	
-	// Mask the edges over G_data
-	//.copyTo( g_data, g_edges);
+	//cvSaveImage("test_edge_avg.jpg",g_edges,0);
 }
 
-// Test algorithm
+/* // Test algorithm
 static void Dilatometer_GetImageTest( )
 {	
 	//Generates Test image
 	//Dilatometer_TestImage();
 	
 	//Load Test image
-	g_srcGray = cvLoadImageM ("testimage.jpg",CV_LOAD_IMAGE_GRAYSCALE );
-	CannyThreshold();
-}
-
-
-/**
- * Read the dilatometer; gets the latest image, processes it, THEN DOES WHAT
- * @param samples - Number of rows to scan (increasing will slow down performance!)
- * @returns the average width of the can
- */
-double Dilatometer_Read(int samples)
-{ 	
-	//Get the latest image
-	//Dilatometer_GetImage();
-
-	Dilatometer_GetImageTest();
-	
-	int width = g_srcGray->cols;
-	int height = g_srcGray->rows;
-	// If the number of samples is greater than the image height, sample every row
-	if( samples > height)
-	{
-		//Log(LOGNOTE, "Number of samples is greater than the dilatometer image height, sampling every row instead.\n");
-		samples = height;
-	}
-
-	// Stores the width of the can at different sample locations. Not necessary unless we want to store this information
-	//double widths[samples];
-	// The average width of the can
-	double average_width;
-	int sample_height;
-	for (int i=0; i<samples; i++)
-	{
-		// Contains the locations of the 2 edges
-		double edges[2] = {0.0,0.0};
-		int pos = 0;	// Position in the edges array (start at left edge)
-		int num = 0;	// Keep track of the number of columns above threshold
-
-		// Determine the position in the rows to find the edges. 
-		sample_height = ceil(height * (i + 1) / samples) -1;
-		//printf("sample height is %d\n", sample_height);
-
-		//CvScalar test = cvGet2D(g_srcGray, 150,300);
-		//printf("test is %f,%f,%f,%f\n", test.val[0], test.val[1], test.val[2], test.val[3]);
-
-
-		for ( int col = 0; col < width; col++)
-		{
-			CvScalar value = cvGet2D(g_srcGray, sample_height, col);
-			if( value.val[0]> THRES)
-			{
-				edges[pos] += (double) col;
-				num++;
-			}
-			// If num > 0 and we're not above threshold, we have left the threshold of the edge
-			else if( num > 0)
-			{
-				// Find the mid point of the edge
-				edges[pos] /= num;
-				if( edges[1] == 0) 
-				{
-					pos = 1;	// Move to the right edge
-					num = 0;
-				}
-				else
-					break;		// Exit the for loop
-			}
-		}
-		// Determine the width of the can at this row
-		//widths[i] = edges[1] - edges[0];
-		average_width += (edges[1] - edges[0]);
-	}
-	average_width /= (double) samples;
-	return average_width;
-}
+	g_srcGray = cvLoadImageM ("testimage4.jpg",CV_LOAD_IMAGE_GRAYSCALE );
+}*/
 
 /**
  * For testing purposes
@@ -224,35 +269,18 @@ int main(int argc, char ** argv)
 	test_left = 100;
 	test_right = 500;
 	Dilatometer_Init();
+	
+	cvNamedWindow( "display", CV_WINDOW_AUTOSIZE);
+	//double width;
+	
+	double edge;
+	Dilatometer_GetEdge(&edge,20000);
+	//For testing purposes, overlay the given average line over the image
+	Draw_Edge(edge);
+	
+	cvDestroyWindow("display");
 
-//	cvNamedWindow( "display", CV_WINDOW_AUTOSIZE);
-//	cvShowImage("display", g_data);
-//	cvWaitKey(0); 	
-	double width;
-	/*for( int i = 0; i < 20; ++i)
-	{
-		test_left  -= i * (rand() % 1000) * 1e-3;
-		test_right += i * (rand() % 1000) * 1e-3;
+	Dilatometer_Cleanup();
 
-		//Make sure left and right positions are sane
-		if( test_left < 0)
-			test_left = 0;
-		if( test_right > 639)
-			test_right = 639;
-		if( test_left > test_right)
-		{
-			int tmp = test_right;
-			test_right = test_left;
-			test_left = tmp;
-		}
-
-		width = Dilatometer_Read(5);
-		cvNamedWindow( "display", CV_WINDOW_AUTOSIZE);
-		cvShowImage("display", g_srcGray);
-		cvWaitKey(0); 
-		double expected = test_right - test_left;
-		double perc = 100 * (expected - width) / expected;
-		printf("%d: Left: %.4f.    Width: %.4f.\n  Right: %.4f. Expected: %.4f. Percentage: %.4f\n", i, test_left, width, test_right, expected, perc);
-	}*/
 }
 
