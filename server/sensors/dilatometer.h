@@ -17,7 +17,7 @@
 #define RATIO 3
 #define KERNELSIZE 3
 
-//Scaling factor required to change from pixels to mm
+//Scaling factor required to change from pixels to nm
 #define SCALE 1 // Note camera has not been calibrated yet so result will be in pixels
 
 extern bool Dilatometer_Init(const char * name, int id); // Initialise the dilatometer
