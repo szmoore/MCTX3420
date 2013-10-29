@@ -159,7 +159,7 @@ void CannyThreshold()
  * @param samples - Number of rows to scan (increasing will slow down performance!)
  * @returns true on successful read
  */
-bool Dilatometer_GetExpansion( double * value, int samples)
+bool Dilatometer_GetExpansion( int id, double * value, int samples)
 {
 	bool result = false; 
 	double average = 0;
@@ -221,12 +221,21 @@ bool Dilatometer_GetExpansion( double * value, int samples)
 	{	
 		result = true; // Successfully found an edge
 		// If the experiment has already been initialised
-		if( lastPosition > 0)
-		{	
-			// Find the rate of expansion and convert to mm. Will give a negative result for compression.
-			*value = (average - lastPosition) * SCALE;
-			lastPosition = average;	// Current position now becomes the last position
-		}
+		switch (id)
+		{
+			case DIL_POS:
+				*value = average*SCALE;
+				return result;
+			case DIL_DIFF:
+				if( lastPosition > 0)
+				{	
+					// Find the rate of expansion and convert to mm. Will give a negative result for compression.
+					*value = (average - lastPosition) * SCALE;
+					lastPosition = average;	// Current position now becomes the last position
+				}
+				return result;
+			default:
+				return false;  		}
 	}
 	return result;
 }
@@ -238,7 +247,7 @@ bool Dilatometer_GetExpansion( double * value, int samples)
  */
 bool Dilatometer_Read(int id, double * value)
 {
-	bool result = Dilatometer_GetExpansion(value, SAMPLES);
+	bool result = Dilatometer_GetExpansion(id, value, SAMPLES);
 	return result;
 }
 
@@ -250,7 +259,7 @@ bool Dilatometer_Init(const char * name, int id)
 	// Make an initial reading (will allocate memory the first time only).
 	double val;
 	lastPosition = 0;  // Reset the last position
-	bool result = Dilatometer_GetExpansion(&val, 1); 
+	bool result = Dilatometer_GetExpansion(DIL_POS, &val, 1); 
 	return result;
 }
 
