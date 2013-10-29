@@ -3,64 +3,73 @@
 #include "image.h"
 #include <string.h>
 #include <stdio.h>
+#include <pthread.h>
 
 CvCapture *capture;
 int captureID = -1;
 
 void Image_Handler(FCGIContext * context, char * params)
 {
-	int num = 0, width = 800, height = 600;
+	int num = 0, width = 1600, height = 1200;	// Set Default values
 	FCGIValue val[] = {
 		{"num", &num, FCGI_INT_T},
 		{"width", &width, FCGI_INT_T},
 		{"height", &height, FCGI_INT_T}
 	};
-	if (!FCGI_ParseRequest(context, params, val, 3))
+	if (!FCGI_ParseRequest(context, params, val, 3))	// Populate val
 		return;
-	else if (num < 0 || num > 1) {
+	// Ensure the camera id is 0 or 1. Even though we plan to only have 1 camera attached at a time, this will allow 2. increase
+	else if (num < 0 || num > 1) {				
 		FCGI_RejectJSON(context, "Invalid capture number");
 		return;
+	// Ensure valid widths
 	} else if (width <= 0 || height <= 0) {
 		FCGI_RejectJSON(context, "Invalid width/height");
 		return;
 	}
+	
+	CvMat * g_src = NULL;   // Source Image
+	CvMat * g_encoded;   	// Encoded Image
 
-	if (captureID != num) {
-		if (captureID >= 0) {
-			cvReleaseCapture(&capture);
-		}
-		capture = cvCreateCameraCapture(num);
-		captureID = num;
-	}
+	Camera_GetImage( num, width, height ,g_src); 
+	g_encoded = cvEncodeImage("test_encode.jpg",g_src,0);
+
+	Log(LOGNOTE, "Sending image!");
+	FCGI_PrintRaw("Content-type: image/jpg\r\n");
+	FCGI_PrintRaw("Cache-Control: no-cache, no-store, must-revalidate\r\n\r\n");
+	//FCGI_PrintRaw("Content-Length: %d", g_encoded->rows*g_encoded->cols);
+	FCGI_WriteBinary(g_encoded->data.ptr,1,g_encoded->rows*g_encoded->cols);
+	
+	cvReleaseMat(&g_encoded);
+	cvReleaseMat(&g_src);
+}
+
+ bool Camera_GetImage(int num, int width, int height,  CvMat * image)
+ {
+	static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; // Need to use a mutex to ensure 2 captures are not open at once
+	pthread_mutex_lock(&mutex);
+	bool result = false;
+
+	capture = cvCreateCameraCapture(num);
 
 	cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, width);
 	cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, height);
 
-	static int p[] = {CV_IMWRITE_JPEG_QUALITY, 100, 0};
-
 	IplImage * frame = cvQueryFrame(capture);
-	assert(frame != NULL);
+	if( frame == NULL)
+		return result;
 
-//        CvMat stub;
- //       CvMat * background = cvGetMat(frame, &stub, 0, 0);
+	// Convert the IplImage pointer to CvMat
+        CvMat stub;
+        image = cvGetMat(frame, &stub, 0, 0);
+	if( image == NULL)
+		return result;
 
-//	CvMat *cv8u = cvCreateMat(frame->width, frame->height, CV_8U);
-//	double min, max;
-//	CvPoint a,b;	
-//	cvMinMaxLoc(background, &min, &max, &a, &b, 0);
-	
-//	double ccscale = 255.0/(max-min);
-//	double ccshift = -min;
-	//cvCvtScale(frame, cv8u, ccscale, ccshift);
-	CvMat * jpg = cvEncodeImage(".jpg", frame, p);
-
-	// Will this work?
-	Log(LOGNOTE, "Sending image!");
-	FCGI_PrintRaw("Content-type: image/jpg\r\n");
-	FCGI_PrintRaw("Cache-Control: no-cache, no-store, must-revalidate\r\n\r\n");
-	//FCGI_PrintRaw("Content-Length: %d", jpg->rows*jpg->cols);
-	FCGI_WriteBinary(jpg->data.ptr,1,jpg->rows*jpg->cols);
-	
-	cvReleaseMat(&jpg);
+	// Release the capture and IplImage pointers
 	cvReleaseImageHeader(&frame);
+	cvReleaseCapture(&capture);
+
+	pthread_mutex_unlock(&mutex);	//Close the mutex
+	return true;
 }
+
