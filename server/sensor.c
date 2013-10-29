@@ -92,7 +92,8 @@ void Sensor_Init()
 	//Sensor_Add("pressure1", PRESSURE1, Pressure_Read, Pressure_Init, 5000,0,5000,0);
 	//Sensor_Add("pressure_feedback", PRESSURE_FEEDBACK, Pressure_Read, Pressure_Init, 5000,0,5000,0);
 	//Sensor_Add("enclosure", ENCLOSURE, Enclosure_Read, Enclosure_Init, 1,1,1,1);
-	Sensor_Add("dilatometer", 0, Dilatometer_Read, Dilatometer_Init, Dilatometer_Cleanup, NULL);
+	Sensor_Add("dilatometer_pos", DIL_POS, Dilatometer_Read, Dilatometer_Init, Dilatometer_Cleanup, NULL);
+	Sensor_Add("dilatometer_diff",DIL_DIFF, Dilatometer_Read, Dilatometer_Init, Dilatometer_Cleanup, NULL);
 }
 
 /**
