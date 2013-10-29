@@ -32,7 +32,7 @@ void Image_Handler(FCGIContext * context, char * params)
 	CvMat * g_src = NULL;   // Source Image
 	CvMat * g_encoded;   	// Encoded Image
 
-	result = Camera_GetImage( num, width, height ,g_src); 
+	Camera_GetImage( num, width, height ,g_src); 
 	g_encoded = cvEncodeImage("test_encode.jpg",g_src,0);
 
 	Log(LOGNOTE, "Sending image!");
