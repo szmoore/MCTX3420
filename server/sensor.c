@@ -75,6 +75,7 @@ int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn
 #include "sensors/resource.h"
 #include "sensors/strain.h"
 #include "sensors/pressure.h"
+#include "sensors/dilatometer.h"
 void Sensor_Init()
 {
 	//Sensor_Add("cpu_stime", RESOURCE_CPU_SYS, Resource_Read, NULL, NULL, NULL);	
@@ -91,7 +92,7 @@ void Sensor_Init()
 	//Sensor_Add("pressure1", PRESSURE1, Pressure_Read, Pressure_Init, 5000,0,5000,0);
 	//Sensor_Add("pressure_feedback", PRESSURE_FEEDBACK, Pressure_Read, Pressure_Init, 5000,0,5000,0);
 	//Sensor_Add("enclosure", ENCLOSURE, Enclosure_Read, Enclosure_Init, 1,1,1,1);
-	//Sensor_Add("dilatometer", DILATOMETER, Dilatometer_Read, Dilatometer_Init, -1,-1,-1,-1);
+	Sensor_Add("dilatometer", 0, Dilatometer_Read, Dilatometer_Init, Dilatometer_Cleanup, NULL);
 }
 
 /**
