@@ -6,6 +6,7 @@
 #include <pthread.h>
 
 CvCapture *capture;
+IplImage *frame;
 int captureID = -1;
 
 void Image_Handler(FCGIContext * context, char * params)
@@ -31,7 +32,7 @@ void Image_Handler(FCGIContext * context, char * params)
 	CvMat * g_src = NULL;   // Source Image
 	CvMat * g_encoded;   	// Encoded Image
 
-	Camera_GetImage( num, width, height ,g_src); 
+	result = Camera_GetImage( num, width, height ,g_src); 
 	g_encoded = cvEncodeImage("test_encode.jpg",g_src,0);
 
 	Log(LOGNOTE, "Sending image!");
@@ -43,19 +44,29 @@ void Image_Handler(FCGIContext * context, char * params)
 	cvReleaseMat(&g_encoded);
 	cvReleaseMat(&g_src);
 }
-
+	
  bool Camera_GetImage(int num, int width, int height,  CvMat * image)
  {
 	static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; // Need to use a mutex to ensure 2 captures are not open at once
 	pthread_mutex_lock(&mutex);
 	bool result = false;
 
-	capture = cvCreateCameraCapture(num);
+	if( capture == NULL)
+	{
+		capture = cvCreateCameraCapture(num);
+		captureID = num;
+	}
+	else if( num != captureID)
+	{
+		cvReleaseCapture(&capture);
+		capture = cvCreateCameraCapture(num);	
+		captureID = num;
+	}
 
 	cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, width);
 	cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, height);
 
-	IplImage * frame = cvQueryFrame(capture);
+	frame = cvQueryFrame(capture);
 	if( frame == NULL)
 		return result;
 
@@ -65,11 +76,14 @@ void Image_Handler(FCGIContext * context, char * params)
 	if( image == NULL)
 		return result;
 
+	pthread_mutex_unlock(&mutex);	//Close the mutex
+	return true;
+}
+
+void Image_Cleanup()
+{
 	// Release the capture and IplImage pointers
 	cvReleaseImageHeader(&frame);
 	cvReleaseCapture(&capture);
-
-	pthread_mutex_unlock(&mutex);	//Close the mutex
-	return true;
 }
 

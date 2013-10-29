@@ -165,7 +165,7 @@ void CannyThreshold()
  * @param samples - Number of rows to scan (increasing will slow down performance!)
  * @returns true on successful read
  */
-bool Dilatometer_GetEdge( double * value, int samples)
+bool Dilatometer_GetExpansion( double * value, int samples)
 {
 	bool result = false; 
 	double average = 0;
@@ -244,7 +244,7 @@ bool Dilatometer_GetEdge( double * value, int samples)
  */
 bool Dilatometer_Read(int id, double * value)
 {
-	bool result = Dilatometer_GetEdge(value, SAMPLES);
+	bool result = Dilatometer_GetExpansion(value, SAMPLES);
 	return result;
 }
 
@@ -256,7 +256,7 @@ bool Dilatometer_Init(const char * name, int id)
 	// Make an initial reading (will allocate memory the first time only).
 	double val;
 	lastPosition = 0;  // Reset the last position
-	bool result = Dilatometer_GetEdge(&val, 1); 
+	bool result = Dilatometer_GetExpansion(&val, 1); 
 	return result;
 }
 
