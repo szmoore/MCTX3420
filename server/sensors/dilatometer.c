@@ -11,6 +11,10 @@
 // test positions
 static double test_left, test_right;
 
+// Remembers the last position to measure rate of expansion
+static double lastPosition;
+
+
 // Canny Edge algorithm variables
 int blur = 5;
 int lowThreshold = 30;
@@ -23,8 +27,8 @@ static CvMat * g_srcGray = NULL; 	// Gray scale of source image
 static CvMat * g_edges 	 = NULL; 	// Detected Edges
 
 /** Pointers for capturing image **/
-static CvCapture * g_capture = NULL;
-static IplImage * frame  = NULL;	// This is required as you can not use capture with CvMat in C
+//static CvCapture * g_capture = NULL;
+//static IplImage * frame  = NULL;	// This is required as you can not use capture with CvMat in C
 
 
 /**
@@ -70,10 +74,11 @@ void Dilatometer_TestImage()
  */
 bool Dilatometer_Cleanup(int id)
 {
-	if (g_capture != NULL)
-		cvReleaseCapture(&g_capture);
-	if (frame != NULL)
-		cvReleaseImageHeader(&frame);
+	//if (g_capture != NULL)
+	//	cvReleaseCapture(&g_capture);
+	//if (frame != NULL)
+	//	cvReleaseImageHeader(&frame);
+
 	//if (g_srcRGB != NULL)
 	//	cvReleaseMat(&g_srcRGB);	// Causing run time error in cvReleaseMat
 	if (g_srcGray != NULL)
@@ -84,9 +89,9 @@ bool Dilatometer_Cleanup(int id)
 }
 
 /**
- * Get an image from the Dilatometer
+ * Get an image from the Dilatometer. Replaced by Camera_GetImage in image.c
  */
-static bool Dilatometer_GetImage()
+/*static bool Dilatometer_GetImage()
 {	
 	bool result = true;
 	// If more than one camera is connected, then input needs to be determined, however the camera ID may change after being unplugged
@@ -118,10 +123,13 @@ static bool Dilatometer_GetImage()
 	cvCvtColor(g_srcRGB,g_srcGray,CV_RGB2GRAY);
 	
 	return result;
-}
+}*/
 
 void CannyThreshold()
 {
+	// Convert the RGB source file to grayscale
+	cvCvtColor(g_srcRGB,g_srcGray,CV_RGB2GRAY);
+
 	if ( g_edges == NULL)
 	{
 		g_edges = cvCreateMat(g_srcGray->rows,g_srcGray->cols,CV_8UC1);
@@ -152,7 +160,7 @@ void CannyThreshold()
 }
 
  /**
- * Read the dilatometer image. The value changed will correspond to the new location of the edge.
+ * Read the dilatometer image. The value changed will correspond to the rate of expansion. If no edge is found then 
  * @param val - Will store the read value if successful
  * @param samples - Number of rows to scan (increasing will slow down performance!)
  * @returns true on successful read
@@ -162,11 +170,12 @@ bool Dilatometer_GetEdge( double * value, int samples)
 	bool result = false; 
 	double average = 0;
 	// Get the image from the camera
-	result = Dilatometer_GetImage();
+	result = Camera_GetImage( 0, 1600, 1200 ,&g_srcRGB); // Get a 1600x1200 image and place it into src
+
 	// If an error occured when capturing image then return
 	if (!result)
 		return result;
-	
+
 	// Apply the Canny Edge theorem to the image
 	CannyThreshold();
 
@@ -180,7 +189,7 @@ bool Dilatometer_GetEdge( double * value, int samples)
 	}
 	
 	int sample_height;
-	int num_edges = 0;	// Number of edges. if each sample location has an edge, then num_edges = samples
+	int num_edges = 0;	// Number of edges found. if each sample location has an edge, then num_edges = samples
 
 	for (int i=0; i<samples; i++)
 	{
@@ -211,11 +220,19 @@ bool Dilatometer_GetEdge( double * value, int samples)
 	}
 	if (num_edges > 0)
 		average /= num_edges;
+	else
+		return result; 	// As no edges were found
 	
 	if( average > 0)
 	{	
-		result = true; //Successfully found an edge
-		*value = average;
+		result = true; // Successfully found an edge
+		// If the experiment has already been initialised
+		if( lastPosition > 0)
+		{	
+			// Find the rate of expansion and convert to mm. Will give a negative result for compression.
+			*value = (average - lastPosition) * SCALE;
+			lastPosition = average;	// Current position now becomes the last position
+		}
 	}
 	return result;
 }
@@ -238,8 +255,9 @@ bool Dilatometer_Init(const char * name, int id)
 {
 	// Make an initial reading (will allocate memory the first time only).
 	double val;
-	Dilatometer_GetEdge(&val, 1); 
-	return true;
+	lastPosition = 0;  // Reset the last position
+	bool result = Dilatometer_GetEdge(&val, 1); 
+	return result;
 }
 
 // Overlays a line over the given edge position
