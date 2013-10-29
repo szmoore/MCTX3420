@@ -68,7 +68,7 @@ void Dilatometer_TestImage()
 /**
  * Cleanup Dilatometer pointers
  */
-void Dilatometer_Cleanup()
+bool Dilatometer_Cleanup(int id)
 {
 	if (g_capture != NULL)
 		cvReleaseCapture(&g_capture);
@@ -80,6 +80,7 @@ void Dilatometer_Cleanup()
 		cvReleaseMat(&g_srcGray);
 	if (g_edges != NULL)
 		cvReleaseMat(&g_edges);
+	return true;
 }
 
 /**
@@ -224,7 +225,7 @@ bool Dilatometer_GetEdge( double * value, int samples)
  * @param val - Will store the read value if successful
  * @returns true on successful read
  */
-bool Dilatometer_Read( double * value)
+bool Dilatometer_Read(int id, double * value)
 {
 	bool result = Dilatometer_GetEdge(value, SAMPLES);
 	return result;
@@ -233,11 +234,12 @@ bool Dilatometer_Read( double * value)
 /**
  * Initialise the dilatometer
  */
-void Dilatometer_Init()
+bool Dilatometer_Init(const char * name, int id)
 {
 	// Make an initial reading (will allocate memory the first time only).
 	double val;
 	Dilatometer_GetEdge(&val, 1); 
+	return true;
 }
 
 // Overlays a line over the given edge position
