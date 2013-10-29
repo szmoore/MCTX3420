@@ -11,6 +11,12 @@
 //Number of samples of the image to take
 #define SAMPLES 600
 
+// Canny Edge algorithm variables
+#define BLUR 5
+#define LOWTHRESHOLD 30
+#define RATIO 3
+#define KERNELSIZE 3
+
 //Scaling factor required to change from pixels to mm
 #define SCALE 1 // Note camera has not been calibrated yet so result will be in pixels
 
