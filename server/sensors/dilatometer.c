@@ -230,7 +230,7 @@ bool Dilatometer_GetExpansion( int id, double * value, int samples)
 				if( lastPosition > 0)
 				{	
 					// Find the rate of expansion and convert to mm. Will give a negative result for compression.
-					*value = (average - lastPosition) * SCALE;
+					*value = (average - lastPosition) * SCALE *2;
 					lastPosition = average;	// Current position now becomes the last position
 				}
 				return result;
