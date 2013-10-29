@@ -6874,3 +6874,547 @@
 22:54 < Callum> and with all mats not released, same except possible loss of 17Mb
 23:16 -!- callum__ [~chatzilla@106-69-68-94.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 23.0/20130803215302]"]
 23:24 -!- Callum [~chatzilla@106-69-68-94.dyn.iinet.net.au] has quit [EOF From client]
+--- Day changed Tue Oct 29 2013
+06:38 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+06:48 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+12:10 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+12:27 -!- Callum [~Callum@130.95.105.240] has joined #mctxuwa_softdev
+12:31 < Callum> sam have you pushed the stuff we did today?
+12:31 < sam_moore> Not yet, sorry
+12:32 < sam_moore> It was mostly on the BBB
+12:44 < Callum> its ok, just let me know when you do
+12:44 < Callum> so i can go back and do what i need to do, il just do something else for now.
+12:57 < sam_moore> The dilatometer is pushed now at least
+13:00 < Callum> ok. thanks. il keep working on the report anyway.
+13:01 < Callum> did you want it by tomorrow or end of tomorrow?
+13:02 -!- Callum [~Callum@130.95.105.240] has left #mctxuwa_softdev []
+13:05 < jtanx> I guess i should work on this report too
+13:09 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["brb"]
+13:10 -!- jtanx [~chatzilla@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+13:24 -!- Callum [~Callum@130.95.105.240] has joined #mctxuwa_softdev
+13:25 < Callum> aand im back
+13:28 < jtanx> hello
+13:59 -!- jtanx [~chatzilla@106-68-93-93.dyn.iinet.net.au] has quit ["brb"]
+14:06 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [EOF From client]
+14:32 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+16:49 -!- Callum [~Callum@130.95.105.240] has quit [Ping timeout]
+16:55 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:50 -!- Callum [~chatzilla@106-69-68-94.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:52 < Callum> should i make the capture function pass a CvMat or do a bool and pass a CvMat pointer. 
+18:53 < Callum> actually. looking at out image code...it encodes the IplImage file to CvMat. so the capture file will have to deal in IplImage and then dilatometer will need to convert it to CvMat itself
+18:54 < sam_moore> It's up to you
+18:54 < sam_moore> I thought it was easier to work with the CvMat, so it might be better to convert to CvMat
+18:54 < sam_moore> But if the image code only works with IplImage just do it that way
+18:54 < Callum> i think we encoded it so it was compressed?
+18:54 < Callum> and encode takes IplImage afaik
+18:54 < Callum> and turns it into a CvMat
+18:55 < sam_moore> Ok
+18:55 < Callum> not sure if we can encode a CvMat outright. in the end the image code ends up in a CvMat file anyway
+18:55 < Callum> also whats the FCGI stuff in image for?
+18:55 < sam_moore> If the image module sends a CvMat to the user and the dilatometer requires a CvMat
+18:56 < sam_moore> The base function should probably return a CvMat
+18:56 < sam_moore> Maybe give it some arguments to determine if it's compressed or not
+18:56 < sam_moore> The FCGI stuff is all basically how the request gets handled
+18:56 < sam_moore> FCGI_Loop gets the request
+18:56 < sam_moore> There's a whole bunch of string parsing and login checking and stuff
+18:56 < sam_moore> It works out which function to call
+18:57 < sam_moore> Then calls say "Image_Handler" or "Sensor_Handler" or whatever
+18:57 < sam_moore> That function determines what key/value pairs it needs
+18:57 < Callum> also, for capture, 0 is default. -1 is any.
+18:57 < sam_moore> So there's a special helper function FCGI_ParseRequest which will take some structs and fill the requested variables after parsing the string
+18:58 < sam_moore> Yeah, -1 is any
+18:58 < Callum> 1+ is ID of  specific camera
+18:58 < sam_moore> Ok
+18:58 < sam_moore> Again, the Image_Get or whatever it is called should probably take an integer identifying the camera
+18:58 < sam_moore> If possible
+18:59 < jtanx> hmm
+18:59 < jtanx> http://unix.stackexchange.com/questions/77170/how-to-bind-v4l2-usb-cameras-to-the-same-device-names-even-after-reboot
+18:59 < jtanx> may not work wiht opencv though
+18:59 < sam_moore> Callum: Just try and get something that's reasonable written, then it can be adapted or built upon if needed
+19:00 < Callum> im just trying to make sense of the fcgi stuff in image handler
+19:00 < Callum> also, is there a reason width and height is hardcoded to 800x600?
+19:00 < jtanx> defaut value
+19:00 < jtanx> user can change it by specifying width and height
+19:01 < Callum> ok
+19:01 < sam_moore> Callum: FCGI stuff is a bit confusing I guess, but it's a lot nicer than it was before jtanx wrote FCGI_ParseRequest
+19:01 < sam_moore> It used to be like a billion calls to "strcmp" and things
+19:01 < Callum> should i just copy the capture code from image into its own functrion then?
+19:01 < Callum> instead of using my one
+19:01 < Callum> ?
+19:01 < sam_moore> Just think of it as automatically filling in the variables you need based on their names
+19:02 < sam_moore> Callum: You can use either one, I think they both work
+19:02 < sam_moore> Don't be afraid of just trying something
+19:02 < sam_moore> If it breaks things we always have git
+19:03 < jtanx> oh yeah, that was the other thing I should mention
+19:03 < jtanx> you can't have two cameras open 
+19:03 < jtanx> e.g you can'thave cvCreateCameraCapture
+19:04 < jtanx> for one camera
+19:04 < jtanx> while you have another one open
+19:04 < jtanx> otherwise the program crashes- it gets killed because there's not enough usb bandwidth or something
+19:04 < sam_moore> A mutex should solve that
+19:04 < sam_moore> (I love mutexes)
+19:04 < Callum> well we dont ever plan on having 2 cameras at once?
+19:04 < Callum> we should note it in report though
+19:05 < jtanx> well just saying, because thne you'd haveto explicitly turn off/free the other camera before using the other
+19:06 < sam_moore> Use a mutex to make sure you can never have two captures open
+19:06 < sam_moore> And yes, we should note it in the report
+19:07 < sam_moore> https://github.com/szmoore/MCTX3420/blob/master/server/sensors/strain.c
+19:07 < sam_moore> Start at line 102
+19:08 < sam_moore> The way it works is:
+19:08 < sam_moore> When you get to mutex_lock
+19:08 < sam_moore> If no thread is executing the code between there and the unlock, the thread will execute it all
+19:09 < sam_moore> Otherwise it will wait until the thread that is executing gets to the unlock
+19:09 < sam_moore> Then execute it
+19:09 < sam_moore> So...
+19:09 < Callum> ok
+19:09 < Callum> sso pretty much lines 102,103 and 122?
+19:10 < sam_moore> Yes, in whichever function gets the images, and make sure anything to do with the camera capture is between them
+19:10 < sam_moore> ie: create, use, and free it
+19:10 < Callum> yep
+19:11 < Callum> alright
+19:15 < sam_moore> Callum: gliffy is nice if you want to make flow charts for the image related stuff
+19:15 < sam_moore> This report is going to be hard to write...
+19:15 < Callum> gliffy?
+19:15 < Callum> we dont have nearly enough time to write it..
+19:15 < sam_moore> www.gliffy.com
+19:15 < jtanx> or you could use ms visio
+19:15 < Callum> i planned to be atleast half done by now :/
+19:16 < Callum> i have visio on my PC somewhere. although i couldnt get the stupid thing to register so long passed trial :p
+19:16 < jtanx> about the report, where do you want me to place my content
+19:16 < sam_moore> Make a flow chart, it'll take at least a page
+19:16 < jtanx> as in how should this be laid out
+19:16 < jtanx> i think there was a bit of overlap between some of the diagrams
+19:17 < Callum> umm
+19:17 < Callum> i just tried chucking a CvMat into encode 
+19:17 < Callum> and it seems to not have given me errors
+19:17 < sam_moore> Always good
+19:17 < Callum> but make isnt fully compiling because im missing something
+19:18 < jtanx> is it the mysql stuff
+19:18 < Callum> yup
+19:18 < sam_moore> Oh, sorry, I didn't realise
+19:18 < sam_moore> It probably won't like to compile on things without mysql anymore :S
+19:19 < sam_moore> ... We're getting to the point where we actually need a configure script to generate the Makefile
+19:19 < sam_moore> And that's a bit terrifying
+19:19 < jtanx> the easy way is to install mysql
+19:19 < jtanx> libmysqlclient-dev
+19:19 < jtanx> buut not ideal
+19:19 < sam_moore> Ok, about the layout of the report
+19:20 < Callum> is it the last thing to compile?
+19:20 < Callum> i can just assume its all ok. :P
+19:20 < sam_moore> Haha
+19:21 < sam_moore> Installing mysql is probably the best way to check
+19:21 < sam_moore> Alternately you can try comment out all the mysql guff, but that will probably take longer :S
+19:22 < jtanx> about Login_Shadow
+19:22 < jtanx> just found there's fopen without fclose
+19:22 < sam_moore> :O
+19:22 < Callum> oh noes!
+19:22 < Callum> we all gon fail
+19:22 < jtanx> :P
+19:22 < sam_moore> Yeah, there are undoubtably going to be problems with it
+19:23 < sam_moore> It's not fair to expect everything to get implemented *and* there to be absolutely no problems
+19:23 < jtanx> yeah
+19:23 < jtanx> that's true
+19:23 < sam_moore> We barely have time to test anything
+19:23 < sam_moore> It's just "Get it working and stick it in, the thing doesn't segfault, good, move on!"
+19:23 < Callum> good plan.
+19:23 < sam_moore> I think I broke the pressure regulator with the sanity check by the way
+19:24 < jtanx> Well, with what they've been asking us to do, what can you do
+19:24 < sam_moore> So good save whoever distracted him when I was demonstrating that and it wasn't working even when I put proper values in...
+19:24 < jtanx> Hahaha
+19:24 < Callum> :p
+19:24 < sam_moore> I was just like "As you can see... when you put bad values in it says bad value"
+19:25 < sam_moore> Really hoping that they didn't notice that it was a pretty reasonable value...
+19:25 < sam_moore> What I would love to do
+19:25 < sam_moore> Is plot overnight memory/cpu usage of both the beaglebone and the computer running the gui
+19:26 < sam_moore> I think the JavaScript is the weak point in terms of how much you can actually show in the gui
+19:26 < sam_moore> It seems to just shit itself trying to plot the microphone for example
+19:26 < sam_moore> Yet you can still download all the data and plot it in something else
+19:27 < jtanx> it's probably because it's just consuming too much memory, trying to store that many points
+19:27 < jtanx> if at any one point in time you reduce that, it should be fine
+19:27 < sam_moore> Yeah...
+19:27 < sam_moore> Anyway... report layout
+19:28 < sam_moore> Chapter 1 and 2 are mostly Justin's stuff
+19:28 < jtanx> Okay
+19:28 < Callum> should i change default width/height to 1600x1200?
+19:28 < sam_moore> Callum: Sure, why not?
+19:28 < sam_moore> Chapter 3 and 4 are "Design implementation" and "Results"
+19:28 < Callum> just making sure it wont break anything :P
+19:28 < sam_moore> But...
+19:29 < sam_moore> I was thinking of just doing "Design implementation" and "Discussion"
+19:29 < Callum> the C170 also 1600x1200 right?
+19:29 < sam_moore> So... when you write your report, do two bits (if you can)
+19:29 < sam_moore> One focusing on what the system is
+19:29 < sam_moore> And one focusing on why we made the decisions to make it that way
+19:29 < sam_moore> If that makes any sense :S
+19:29 < sam_moore> Honestly
+19:30 < jtanx> Yeah that makes sense
+19:30 < Callum> hmm. if you think it would be better that way.
+19:30 < Callum> wouldnt it seem disjointed that way though?
+19:30 < jtanx> I should probably cut down some explanation text then
+19:30 < sam_moore> Callum: The image processing is a bit more difficult, because we didn't have many choices with it
+19:30 < sam_moore> Callum: No, I think it will seem better
+19:30 < jtanx> add more 'how it works'
+19:30 < sam_moore> Because at the moment it's easy to get distracted
+19:30 < sam_moore> When you are explaining how it works
+19:30 < Callum> umm. why is num > 1 invalid?
+19:30 < jtanx> Camera 0 or 1
+19:31 < jtanx> there can only be two cameras connected
+19:31 < sam_moore> Like, I kept getting sidetracked about the design changes we made
+19:31 < Callum> -1,0 and 1 all do the same thing if theres only 1 camera connected :p
+19:31 < Callum> if tehres 2 cameras one would be 2
+19:31 < Callum> 0 is default
+19:31 < sam_moore> But someone who wants to know how it works will just want a section that says "This is how it works"
+19:31 < jtanx> nah
+19:31 < jtanx> if there's two
+19:31 < jtanx> its 0 or 1
+19:31 < sam_moore> Lastly...
+19:31 < jtanx> to switch between them
+19:31 < sam_moore> We should have a recommendations section
+19:31 < Callum> you sure? and yea definitely
+19:31 < jtanx> I tested it ont he bbb
+19:31 < Callum> more of a "what still needs to be done" but thats the same thing 
+19:31 < Callum> hmm ok
+19:31 < jtanx> that's how I know it works
+19:32 < sam_moore> Basically if you have any recommendations on what should and shouldn't be done, make some dot points and a sentence explaining it
+19:32 < sam_moore> ...
+19:32 < sam_moore> I really don't have time to email everyone all that
+19:32 < sam_moore> Justin's stuff is pretty good as it is though, it's just James and possibly Rowan that need to be informed/asked
+19:33 < jtanx> yeah justin's was pretty good
+19:33 < Callum> wheres testing go? in "what" the system is?
+19:34 < sam_moore> I'd put testing in the discussion
+19:34 < sam_moore> ie: we have "What" the system is, and "How" it got to be that way
+19:34 < Callum> so, design choice for testing>?
+19:34 < sam_moore> Yes
+19:34 < Callum> i guess that gives me something to populate design choice
+19:34 < Callum> considering i dont have much otherwise..'
+19:34 < sam_moore> Callum: If you could mention the interferometer that would be great
+19:35 < Callum> mention, how much?
+19:35 < sam_moore> Well, it is a design choice, mostly by sensors I'll admit
+19:35 < sam_moore> But we did have an algorithm for it
+19:35 < Callum> just we were told it would be necessary, algorithm was written and provide a couple of testi mages?
+19:36 < sam_moore> Yes, explain the algorithm if you feel the need
+19:36 < sam_moore> There is an email I sent that explains it... not very clearly :S
+19:36 < sam_moore> There are also graphs of how well it performs
+19:36 < Callum> well. if i need to buff it up a bit and i have the time il do so
+19:36 < sam_moore> I'm sure we have enough content
+19:36 < Callum> buuut im doubtful
+19:36 < sam_moore> There are tonnes of things to find to write about
+19:36 < sam_moore> Alright, no problem
+19:36 < sam_moore> Speaking of which
+19:37 < Callum> welll. im more worried about my contribution to the report.
+19:37 < Callum> need to make it as even as possibl;e
+19:38 < jtanx> we're working off the master branch now right?
+19:38 < sam_moore> Yes
+19:38 < jtanx> (for the report)
+19:38 < jtanx> okay
+19:39 < sam_moore> Callum: Just try and get 5/6 pages done then
+19:39 < Callum> ok. should be possible if i include lots of images :p
+19:39 < jtanx> Kinda worried about Rowan...
+19:40 < Callum> Yea.
+19:40 < sam_moore> I'm not sure what we can get him to write
+19:40 < Callum> meeting on monday he kinda rocked up hell late, wondered abotu and left barely saying anything
+19:40 < sam_moore> At one stage I thought he'd be doing some GUI design
+19:41 < sam_moore> There were lots of opportunities for people less inclined to do coding to help with that
+19:42 < sam_moore> Anyway
+19:42 < sam_moore> I really need to do something else
+19:43 < sam_moore> Hell, I'm going to have a hard time doing my part of the report by Wednesday, let alone editing everything
+19:43 < jtanx> :/
+19:44 < Callum> umm. should i clean the image stuff each time or just leave it til the end? (only issue i can see is if the image size changes)
+19:52 < Callum> jeremy if i was to call your handler function what do you pass it?
+19:52 < Callum> whats context/params from?
+19:52 < Callum> because if i wanted to call that from dilatometer?
+19:52 < jtanx> okay
+19:52 < jtanx> let's just explain a few things first
+19:53 < jtanx> Image_Handler is never called by anything else apart from some fastcgi function, and only when a request comes in from a user
+19:53 < jtanx> Say a user types in /image?width=800&height=600
+19:53 < jtanx> there's this thing called the fastcgi request loop
+19:53 < jtanx> it picks up the request
+19:53 < jtanx> It determines that it's after the image module
+19:53 < jtanx> so it calls Image_Handler
+19:54 < Callum> hmm. thought it was somethign like that. but is there a way to encorporate it into it so i can call it from dilatometer or should i just scrap your code and use my much soimpler image get functino
+19:54 < jtanx> well
+19:54 < jtanx> it depends on what you want to do
+19:54 < jtanx> if you want to return an image to the user, you have to use the framework
+19:54 < jtanx> I think you're getting confused over what it should be doing
+19:55 < jtanx> So from what I understand
+19:55 < Callum> yea hang on
+19:55 < jtanx> you have an image get function?
+19:55 < jtanx> If you just want to get an image for internal use, you don't use that fastcgi stuff
+19:56 < Callum> yea for dilatometer
+19:56 < jtanx> the fastcgi stuff is for when you want to return a response to the user
+19:56 < Callum> yea i was a little confused on how to separate the get iomage function so its usable by both image.c and dilatometer.c
+19:57 < jtanx> hmm
+19:57 < Callum> do we need the cv set capture propery width/height stufF?
+19:57 < Callum> and brb food
+19:57 < sam_moore> Try and think about what image.c and dilatometer.c are currently doing in common
+19:57 < sam_moore> Callum: If in doubt, make a function argument
+19:57 < sam_moore> Within reason :P
+19:57 < Callum> yea, issue i come across is my capture isnt trying to set width/height
+19:58 < sam_moore> Does it use a default?
+19:58 < jtanx> yea, you need to set capture widh/height
+19:58 < jtanx> otherwise it will be some random setting
+19:58 < Callum> iv never done it and its been fine?
+19:58 < jtanx> but you only need to set it when you initialise it, or if you want to change resolution
+19:58 < jtanx> on the beaglebone, default resolution is like 320x240 pixels or something like that
+20:20 < jtanx> hmm
+20:21 < jtanx> should we have a section on beaglebone setup or something
+20:21 < Callum> well we want them to be able to use it
+20:21 < jtanx> yeah
+20:21 < Callum> but that could go under wiki?
+20:21 < Callum> with brief description in report?
+20:21 < jtanx> True
+20:21 < jtanx> that would probably make more sense
+20:32 < sam_moore> 1. ssh to beaglebone 2. run server 3. see wiki for more details 4. By the way, write an /etc/init.d script to stop having to do this
+20:32 < sam_moore> Well, 4. can be a recommendation
+20:32 < jtanx> well what stuff did we install
+20:32 < sam_moore> Oh yeah
+20:32 < jtanx> what os did we use and how did we load it
+20:32 < sam_moore> We need a section on server setup
+20:32 < sam_moore> Le sigh
+20:32 < jtanx> Okay
+20:32 < jtanx> should that be part of the report or wiki
+20:32 < sam_moore> Report I think
+20:33 < jtanx> I guess I should look into that
+20:33 < sam_moore> Another recommendation...
+20:33 < sam_moore> Write a configure script :P
+20:33 < jtanx> Haha
+20:33 < sam_moore> Make a debian package...
+20:33 < jtanx> effooorrrrrt
+20:33 < sam_moore> That's why it's a recommendation Jeremy
+20:33 < jtanx> :P
+20:33 < sam_moore> You recommend that it get done *later*
+20:33 < sam_moore> You don't have to actually do it
+20:34 < jtanx> I like how our dependencies have ballooned from when we first started
+20:34 < sam_moore> Haha
+20:34 < sam_moore> It's mostly the user management stuff
+20:34 < sam_moore> That pulled in ldap, crypt, mysql...
+20:34 < jtanx> Yeah
+20:34 < jtanx> at least it's versatile!
+20:34 < sam_moore> mysql itself is like 4 link flags
+20:34 < sam_moore> opencv was always there though
+20:34 < sam_moore> That's like a billion link flags
+20:34 < sam_moore> Some we probably don't need...
+20:35 < jtanx> I don't understand why `pkg-config --libs opencv` doesn't work
+20:35 < sam_moore> Recommend someone work out why it doesn't work...
+20:35 < sam_moore> :P
+20:35 < jtanx> Hahaha
+20:35 < sam_moore> We could just make 30 pages of one line recommendations...
+20:35 < sam_moore> I think some recommendations of "Do *not* do this" might be good to
+20:36 < jtanx> Yeah
+20:36 < sam_moore> ie: I actually looked into RT linux
+20:36 < sam_moore> Admittedly I ran it on a laptop
+20:36 < jtanx> well
+20:36 < sam_moore> Which has other processes
+20:36 < sam_moore> But still
+20:36 < sam_moore> It's not that much better
+20:36 < jtanx> mm
+20:36 < sam_moore> So "Do *not* spend 6 months making RT linux work on the BeagleBone"
+20:37 < jtanx> I'm still amazed that that code to enable the pins works 
+20:37 < jtanx> 'enable in a particular order'
+20:37 < sam_moore> "Do not ever touch the kernel or pin control code, ever"
+20:37 < jtanx> especially that pwm stuff
+20:37 < sam_moore> There are still problems with that
+20:37 < jtanx> ahahaha
+20:37 < sam_moore> You have to reboot to change the period I think
+20:37 < jtanx> hmm
+20:37 < sam_moore> Don't fix it
+20:37 < jtanx> solution: try another pwm
+20:37 < sam_moore> We can just note it somewhere
+20:38 < jtanx> yep
+20:38 < sam_moore> Actually that's a good point
+20:38 < sam_moore> Is someone going to write about the pin control saga
+20:38 < jtanx> urgh
+20:38 < sam_moore> I started it, but you finished it...
+20:38 < sam_moore> I thought I solved it, but you seemed to rewrite 90% of the code :P
+20:38 < jtanx> :P
+20:53 < Callum> ok think iv done everything but the static variable/determining change of width rather than just edge
+20:54 < Callum> ..and then to continue the report
+20:58 < Callum> is there any way for me to tell if this is the start of a new experiment?
+20:58 < Callum> because if it is i need to reset last position dont i?
+20:58 < jtanx> Well
+20:58 < jtanx> Dilatometer_Init should be called everytime an experiment is started, afaik
+20:58 < sam_moore> Yes
+20:58 < sam_moore> Sigh, another recommendation
+20:58 < Callum> ok
+20:58 < Callum> well, is it?
+20:59 < sam_moore> Callum: Yeah, it is
+20:59 < sam_moore> I was just thinking
+20:59 < sam_moore> When an experiment isn't started, because it was sort of hacked in, you can't ask the server what sensors/actuators it has
+20:59 < sam_moore> It should just be a matter of having an extra init function
+20:59 < sam_moore> a sort of
+20:59 < sam_moore> init_init
+20:59 < sam_moore> if you will
+20:59 < sam_moore> I'm going crazy
+21:00 < jtanx> or Dilatometer_Start
+21:00 < jtanx> or Dilatometer_Stop
+21:00 < sam_moore> Well you can change the names easily
+21:00 < jtanx> Dilatometer_init for once off init
+21:00 < jtanx> Yeah
+21:00 < sam_moore> I don't think that's even necessary
+21:00 < sam_moore> Just seperate out the population of that array from the initialisation/uninitialisation of the devices
+21:01 < sam_moore> So the array is only populated once, not every time the experiment is started
+21:01 < jtanx> yeah
+21:05 < Callum> if no edge is found should i return 0?
+21:05 < Callum> wait, that would relate to no expansion
+21:08 < sam_moore> Return false remember
+21:08 < Callum> ah right forgot i was already doing that and it wouldnt actually record the value
+21:08 < Callum> :p
+21:10 < Callum> also iv added a SCALE to h but just made it 1. if we actually manage to calibrate the thing we can just change that/
+21:13 < Callum> ok. think im done
+21:16 < sam_moore> Cool, good work
+21:16 < Callum> how do i access the server stuff again?
+21:16 < Callum> to make sure it works
+21:16 < sam_moore> We can test it tomorrow after/before the strain gauges
+21:16 < Callum> or that
+21:16 < Callum> also bloody thing pushed to my branch xD
+21:16 < sam_moore> Callum: You can also run it on your laptop 
+21:17 < Callum> yea thats what i meant. iv done ./run.sh
+21:17 < sam_moore> Ah
+21:17 < Callum> how do i access it from there again?
+21:17 < sam_moore> You probably need to setup nginx
+21:17 < sam_moore> Install nginx
+21:17 < Callum> we set it up before
+21:17 < sam_moore> There is a server_configs directory or similar
+21:17 < Callum> well jeremy did
+21:17 < jtanx> okay
+21:17 < jtanx> umm
+21:18 < jtanx> is nginx started?
+21:18 < jtanx> try 
+21:18 < jtanx>  /etc/init.d/nginx restart
+21:18 < jtanx> Once started, run the run.sh script
+21:18 < sam_moore> Well
+21:18 < Callum> config gile blah blah test failed?
+21:18 < sam_moore> You should check that you can get the index to appear at "https://localhost" first
+21:18 < Callum> file
+21:19 < jtanx> what did you run?
+21:20 < Callum> the restart
+21:20 < jtanx> hmm
+21:20 < sam_moore> Callum: https://github.com/szmoore/MCTX3420/tree/master/server-configs
+21:20 < jtanx> okay
+21:20 < jtanx> yeah go to that folder
+21:20 < jtanx> chmod +x 
+21:20 < jtanx> the .sh files
+21:20 < sam_moore> You need to update all the config files; they have changed a lot
+21:21 < jtanx> chmod +x gen_ssl_cert.sh install.sh
+21:21 < jtanx> sudo ./install.sh
+21:21 < Callum> tbh
+21:21 < Callum> this sounds like too much time/effort
+21:21 < sam_moore> Well you did ask
+21:21 < Callum> when im already low on time
+21:21 < jtanx> running that install script shoul install everything
+21:30 < jtanx> we need like a glossary of terms
+21:31 < jtanx> all this HTTP, JSON, TLS/SSL, FastCGI, FCGI terms...
+21:32 < sam_moore> Sure...
+21:32 < sam_moore> The entire report will just be a glossary :S
+21:32 < jtanx> :/
+21:32 < sam_moore> Thread: Not like the ones in your shirt
+21:32 < sam_moore> Thread: Like a process, but not really. Executes a process.
+21:33 < sam_moore> Stupid terminology
+21:33 < jtanx> Yeah
+21:33 < sam_moore> process is a perfectly valid way to say "It does a thing"
+21:33 < sam_moore> But if you start referring to threads and processes in the context of computers...
+21:33 < sam_moore> Argh
+21:33 < jtanx> their eyes shall gloss over as they read this report
+21:33 < sam_moore> Haha
+21:43 < Callum> just merged my stuff too
+21:46 < sam_moore> I wonder if they will hire some random software engineering student to finish this
+21:46 < sam_moore> Personally I would quite like to work on it and actually get paid
+21:46 < Callum> idno. do they actually intend on using it?
+21:46 < jtanx> ._.
+21:46 < sam_moore> Callum: I think they do...
+21:46 -!- Callum [~chatzilla@106-69-68-94.dyn.iinet.net.au] has left #mctxuwa_softdev []
+21:47 -!- Callum [~chatzilla@106-69-68-94.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:47 < jtanx> Yeah, I wouldn't mind working on this if I got paid
+21:47 < Callum> ok i just lost connection to channel?
+21:47 < jtanx> Looks like it
+21:47 < sam_moore> You didn't miss anything
+21:48 < Callum> ok. so can we demand our 100K >?
+21:48 < sam_moore> Hahaha
+21:48 < jtanx> Unfortunately, software developers are often underpaid
+21:50 < sam_moore> Meh, I'd work on this for the job experience more than the money
+21:50 < sam_moore> Counting as vac work would be nice...
+21:50 < jtanx> Yeah, that would be great
+21:51 < Callum> heck i wouldnt mind actually learning how this shit works :p
+21:51 < sam_moore> Yeah, I know Jeremy and I sort of took ownership of a lot of the code base
+21:51 < sam_moore> But in our defence, we actually have a working system
+21:52 < sam_moore> For some definition of working
+21:52 < jtanx> Hmm
+21:53 < jtanx> if I start talking about javascript and ajax
+21:53 < jtanx> that really pushes the content out
+21:53 < jtanx> actually just trying to explain why we used what we did pushes it out
+21:53 < sam_moore> I was going to explain why we used HTTP and threads at the same time
+21:54 < sam_moore> It's just a sentence or so though
+21:54 < sam_moore> ...
+21:54 < sam_moore> Ok, it's a paragraph, whatever
+21:54 < sam_moore> I emphasised that the user could basically shut down their machine without stopping the experiment
+21:54 < sam_moore> I've found it's pretty hard to get accross the distinction between the GUI and the backend/server to people
+21:55 < jtanx> Yeah
+21:55 < Callum> some people..
+21:55 < jtanx> I've practically written about the 'communication' between the user and system
+22:13 < Callum> sam, will you be putting the design choices before or after the final system stuff in report?
+22:17 < sam_moore> After
+22:17 < sam_moore> They will want to read the actual implementation details first
+22:17 < Callum> hmmok
+22:28 < Callum> god its hot in my room..
+22:28 < jtanx> it's pretty cool outside...
+22:28 < Callum> hence why i was confused why its hot in my room
+22:29 < Callum> could be somewhat due to the fact i justfinished a coffee. :p
+22:29 < jtanx> ~.~
+22:29 < Callum> ^^
+22:29 < Callum> but yea. i intend on getting most of this report done tonight
+22:29 < Callum> not so much that sam can have it on time, so i can do my other work. :p
+22:30 < Callum> geng4402 project is going to kill me. rest of my group is being quite useless
+22:30 < Callum> and we're so far behind
+22:32 < jtanx> :|
+22:34 < Callum> one of them even dropped the unit
+22:34 < Callum> groups of 4/5
+22:34 < Callum> we had 4. 2 ppl done nothing all semester
+22:34 < Callum> 1 drops out
+22:34 < Callum> so we have 3. with 1 person doing practically nothing (hes trying to help now but...he spent all day stuck on shit)
+22:40 < Callum> jeremy before you were saying that image handler handles requests from the server right?
+22:40 < jtanx> yeah
+22:42 < jtanx> okay
+22:43 < jtanx> just with Camera_Getimage
+22:43 < jtanx> since you open/close the camera capture
+22:43 < Callum> yea?
+22:43 < jtanx> I think that's slow
+22:43 < Callum> umm. well sam said to do that inside the mutex
+22:43 < jtanx> and that makes the mutex unnecessary
+22:44 < jtanx> it's more like
+22:44 < Callum> hmm
+22:44 < Callum> true
+22:44 < jtanx> if you kept the camera initialised
+22:44 < jtanx> check to see which is initialised
+22:44 < jtanx> if it is the one we're after, then we're fine
+22:44 < jtanx> otherwise release it and enable the other one
+22:54 < Callum> mm. should i do the same with the mats in the handler?
+22:55 < jtanx> I'm not sure
+22:55 < Callum> i'd need to make sure all the parameters are the same (but really only width/height. nothing else should change really)
+22:56 < Callum> is it necessary?
+22:57 < jtanx> I think the mats should be left
+22:57 < jtanx> because I think you do need to free them each time?
+22:57 < jtanx> otherwise you'd have a matrix that you haven't freed
+22:57 < jtanx> and then you overwrite the pointer anyway
+22:57 < Callum> well you can reuse it. 
+22:57 < jtanx> okay
+22:57 < Callum> and besides in documentation it even says you dont need to release CvMats
+22:58 < Callum> buut..yea
+22:58 < sam_moore> Guys
+22:58 < Callum> Sam
+22:58 < sam_moore> You probably want to be able to get images from the dilatometer camera for non dilatometer purposes
+22:58 < Callum> which you can?
+22:58 < sam_moore> Well you could if you just had the (admittedly inefficient) mutex and reinitialise things all the time
+22:59 < sam_moore> Not sure if it's easy to do it the way jeremy is discussing
+22:59 < sam_moore> Whatever, can't think straight
+22:59 < Callum> iv changed it to the way jeremy described it
+22:59 < Callum> i think
+22:59 < Callum> as long as you pass it 0
+22:59 < Callum> which is what dilatometer is currently passing
+23:00 < Callum> it wont reinitialise capture
+23:00 < sam_moore> Alright then, we'll see if it works tomorrow
+23:02 < jtanx> 12pm was it
+23:04 < jtanx> okay, I'm out for today
+23:04 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["bye"]
+23:06 < Callum> oh shit its that late already?
+--- Day changed Wed Oct 30 2013
+00:20 -!- Callum [~chatzilla@106-69-68-94.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
