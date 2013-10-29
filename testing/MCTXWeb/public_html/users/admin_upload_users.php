@@ -72,7 +72,10 @@ if (!empty($_POST))
       }
       
       // generate the temporary password
-      $password = generatePassword();
+      //$password = generatePassword();
+
+      // hey, adrian suggested it
+      $password = "mctx".date("MY");
 
       //Construct a user object
       $user = new User($username,$displayname,$password,$email);
@@ -121,11 +124,13 @@ if (!empty($_POST))
     if(count($users) > 0)
     {
       $successes[] = (count($users)." users created.");
-      $successes[] = ("The list of usernames and passwords follow. You must save this!");
-      foreach($users as $user)
-      {
-        $successes[] = $user[0].",".$user[1];
-      }
+      $successes[] = "The temporary password is: "."mctx".date("MY");
+      $successes[] = "Please change this as soon as possible.";
+//      $successes[] = ("The list of usernames and passwords follow. You must save this!");
+//      foreach($users as $user)
+//      {
+//        $successes[] = $user[0].",".$user[1];
+//      }
     }
   }
 
