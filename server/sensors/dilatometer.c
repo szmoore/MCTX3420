@@ -15,12 +15,6 @@ static double test_left, test_right;
 static double lastPosition;
 
 
-// Canny Edge algorithm variables
-int blur = 5;
-int lowThreshold = 30;
-int ratio = 3;
-int kernel_size = 3;
-
 /** Buffers for storing image data.  **/
 static CvMat * g_srcRGB  = NULL; 	// Source Image
 static CvMat * g_srcGray = NULL; 	// Gray scale of source image
@@ -140,7 +134,7 @@ void CannyThreshold()
 	//cvWaitKey(0); 	
 	
 	// Reduce noise with a kernel blurxblur. Input the grayscale source image, output to edges. (0's mean it's determined from kernel sizes)
-	cvSmooth( g_srcGray, g_edges, CV_GAUSSIAN, blur, blur ,0 ,0 );
+	cvSmooth( g_srcGray, g_edges, CV_GAUSSIAN, BLUR, BLUR ,0 ,0 );
 	
 	//Save the image
 	//cvSaveImage("test_blurred.jpg",g_edges,0);
@@ -149,7 +143,7 @@ void CannyThreshold()
 	//cvWaitKey(0); 
 
 	// Find the edges in the image
-	cvCanny( g_edges, g_edges, lowThreshold, lowThreshold*ratio, kernel_size );
+	cvCanny( g_edges, g_edges, LOWTHRESHOLD, LOWTHRESHOLD*RATIO, KERNELSIZE );
 	
 	//Save the image
 	//cvSaveImage("test_edge.jpg",g_edges,0);
