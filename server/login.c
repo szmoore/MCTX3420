@@ -170,6 +170,8 @@ UserType Login_Shadow(const char * user, const char * pass, const char * shadow)
 		passwd_index = -1;
 	}
 
+	fclose(f);
+
 	if (passwd_index <= 0)
 	{
 		//Log(LOGDEBUG,"No user found matching %s\n", user);
