@@ -12,7 +12,7 @@
 extern void Image_Init();
 extern void Image_Handler(FCGIContext * context, char * params); 
 extern void Image_Cleanup();
-extern bool Camera_GetImage(int num, int width, int height,  CvMat * image);
+extern bool Camera_GetImage(int num, int width, int height,  IplImage ** image);
 
 #endif //_IMAGE_H
 

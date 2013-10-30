@@ -6,6 +6,7 @@
 #include "cv.h"
 #include "highgui_c.h"
 #include "dilatometer.h"
+#include "../image.h"
 #include <math.h>
 
 // test positions
@@ -121,9 +122,20 @@ bool Dilatometer_Cleanup(int id)
 
 void CannyThreshold()
 {
+
+	// Create greyscale array
+	if (g_srcGray == NULL)
+	{
+		Log(LOGDEBUG, "%d %d %d", g_srcRGB->rows, g_srcRGB->cols, CV_8UC1);
+		g_srcGray = cvCreateMat(g_srcRGB->rows,g_srcRGB->cols,CV_8UC1);
+	}
+
 	// Convert the RGB source file to grayscale
+	Log(LOGDEBUG, "About to cvCvtColor(%p, %p, %d)", g_srcRGB, g_srcGray, CV_RGB2GRAY);
 	cvCvtColor(g_srcRGB,g_srcGray,CV_RGB2GRAY);
 
+
+	Log(LOGDEBUG, "About to cvCreateMat");
 	if ( g_edges == NULL)
 	{
 		g_edges = cvCreateMat(g_srcGray->rows,g_srcGray->cols,CV_8UC1);
@@ -164,14 +176,34 @@ bool Dilatometer_GetExpansion( int id, double * value, int samples)
 	bool result = false; 
 	double average = 0;
 	// Get the image from the camera
-	result = Camera_GetImage( 0, 1600, 1200 ,&g_srcRGB); // Get a 1600x1200 image and place it into src
+	Log(LOGDEBUG, "GET IMAGE?");
+
+	IplImage * frame = NULL;
+	result = Camera_GetImage( 0, 1600, 1200 ,&frame); // Get a 1600x1200 image and place it into src
+	Log(LOGDEBUG, "Got image...");
 
 	// If an error occured when capturing image then return
+
+
+	if (result)
+	{
+		CvMat stub;
+		g_srcRGB = cvGetMat(frame,&stub,0,0);
+		result = (g_srcRGB != NULL);
+		Log(LOGDEBUG, "Converted image %d %p", result, g_srcRGB);
+	}
+	cvReleaseImageHeader(&frame);
+
 	if (!result)
 		return result;
 
+
+	Log(LOGDEBUG, "GOT IMAGE (without error)!");
+
 	// Apply the Canny Edge theorem to the image
 	CannyThreshold();
+
+	Log(LOGDEBUG, "Got past CannyThreshold()");
 
 	int width = g_edges->cols;
 	int height = g_edges->rows;
@@ -259,8 +291,8 @@ bool Dilatometer_Init(const char * name, int id)
 	// Make an initial reading (will allocate memory the first time only).
 	double val;
 	lastPosition = 0;  // Reset the last position
-	bool result = Dilatometer_GetExpansion(DIL_POS, &val, 1); 
-	return result;
+	Dilatometer_GetExpansion(DIL_POS, &val, 1); 
+	return true;
 }
 
 // Overlays a line over the given edge position

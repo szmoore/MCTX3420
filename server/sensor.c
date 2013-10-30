@@ -84,16 +84,16 @@ void Sensor_Init()
 	Sensor_Add("pressure_high1", PRES_HIGH1, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
 	Sensor_Add("pressure_low0", PRES_LOW0, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
 	//Sensor_Add("../testing/count.py", 0, Piped_Read, Piped_Init, Piped_Cleanup, 1e50,-1e50,1e50,-1e50);
-	Sensor_Add("strain0", STRAIN0, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
-	Sensor_Add("strain1", STRAIN1, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
-	Sensor_Add("strain2", STRAIN2, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
-	Sensor_Add("strain3", STRAIN3, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
+	Sensor_Add("strain0_endhoop", STRAIN0, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
+	Sensor_Add("strain1_endlong", STRAIN1, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
+	Sensor_Add("strain2_midhoop", STRAIN2, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
+	Sensor_Add("strain3_midlong", STRAIN3, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
 	//Sensor_Add("pressure0", PRESSURE0, Pressure_Read, Pressure_Init, 5000,0,5000,0);
 	//Sensor_Add("pressure1", PRESSURE1, Pressure_Read, Pressure_Init, 5000,0,5000,0);
 	//Sensor_Add("pressure_feedback", PRESSURE_FEEDBACK, Pressure_Read, Pressure_Init, 5000,0,5000,0);
 	//Sensor_Add("enclosure", ENCLOSURE, Enclosure_Read, Enclosure_Init, 1,1,1,1);
 	Sensor_Add("dilatometer_pos", DIL_POS, Dilatometer_Read, Dilatometer_Init, Dilatometer_Cleanup, NULL);
-	Sensor_Add("dilatometer_diff",DIL_DIFF, Dilatometer_Read, Dilatometer_Init, Dilatometer_Cleanup, NULL);
+	//Sensor_Add("dilatometer_diff",DIL_DIFF, Dilatometer_Read, Dilatometer_Init, Dilatometer_Cleanup, NULL);
 }
 
 /**

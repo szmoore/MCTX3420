@@ -25,8 +25,9 @@ pin_test="0"
 #auth_uri="ldaps://ldap.pheme.uwa.edu.au#ou=Users,ou=UWA,dc=uwads,dc=uwa,dc=edu,dc=au" #UWA
 #auth_uri="/etc/shadow"
 #auth_uri="shadow"
-auth_uri="mysql://localhost#root,$(cat mysql_password)"
+#auth_uri="mysql://localhost#root,$(cat mysql_password)"
 
 
 ## OPTIONS TO BE PASSED TO SERVER; DO NOT EDIT
-parameters="-v $verbosity -p $pin_test -A $auth_uri"
+parameters="-v $verbosity -p $pin_test"
+# -A $auth_uri"

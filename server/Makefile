@@ -18,6 +18,9 @@ all :
 $(BIN) : $(OBJ)
 	$(CXX) $(FLAGS) -o $(BIN) $(OBJ) $(LIB)
 
+microscope : microscope.o
+	$(CXX) $(FLAGS) -o microscope microscope.o $(LIB)
+
 
 %.o : %.c
 	$(CXX) $(FLAGS) -c $<

@@ -1,6 +1,7 @@
 #ifndef _STRAIN_H
 #define _STRAIN_H
 
+#include "../common.h"
 #include <stdbool.h>
 
 /**

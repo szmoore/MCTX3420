@@ -5,9 +5,8 @@
 #include <stdio.h>
 #include <pthread.h>
 
-CvCapture *capture;
-IplImage *frame;
-int captureID = -1;
+static CvCapture * g_capture = NULL;
+static int g_captureID = -1;
 
 void Image_Handler(FCGIContext * context, char * params)
 {
@@ -29,61 +28,74 @@ void Image_Handler(FCGIContext * context, char * params)
 		return;
 	}
 	
-	CvMat * g_src = NULL;   // Source Image
-	CvMat * g_encoded;   	// Encoded Image
+	IplImage * src = NULL;   // Source Image
+	CvMat * encoded = NULL;   	// Encoded Image
 
-	Camera_GetImage( num, width, height ,g_src); 
-	g_encoded = cvEncodeImage("test_encode.jpg",g_src,0);
+	Camera_GetImage( num, width, height ,&src); 
+
+	Log(LOGDEBUG, "About to encode");
+	encoded = cvEncodeImage(".jpg",src,0);
+	Log(LOGDEBUG, "Encoded");
 
 	Log(LOGNOTE, "Sending image!");
 	FCGI_PrintRaw("Content-type: image/jpg\r\n");
 	FCGI_PrintRaw("Cache-Control: no-cache, no-store, must-revalidate\r\n\r\n");
 	//FCGI_PrintRaw("Content-Length: %d", g_encoded->rows*g_encoded->cols);
-	FCGI_WriteBinary(g_encoded->data.ptr,1,g_encoded->rows*g_encoded->cols);
+	FCGI_WriteBinary(encoded->data.ptr,1,encoded->rows*encoded->cols);
 	
-	cvReleaseMat(&g_encoded);
-	cvReleaseMat(&g_src);
+	cvReleaseMat(&encoded);
+	cvReleaseImageHeader(&src);
 }
 	
- bool Camera_GetImage(int num, int width, int height,  CvMat * image)
+/**
+ * Attempts to get an image from a camera
+ * @param num - Camera id
+ * @param width - Width to force
+ * @param height - Height to force
+ * @param image - Pointer to CvMat* to set with result
+ * @returns true on success, false on error 
+ */
+ bool Camera_GetImage(int num, int width, int height,  IplImage ** frame)
  {
+	Log(LOGDEBUG, "Called with arguments num=%d width=%d height=%d frame=%p", num,width,height, frame);
 	static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; // Need to use a mutex to ensure 2 captures are not open at once
 	pthread_mutex_lock(&mutex);
 	bool result = false;
 
-	if( capture == NULL)
+	if( g_capture == NULL)
 	{
-		capture = cvCreateCameraCapture(num);
-		captureID = num;
+		g_capture = cvCreateCameraCapture(num);
+		g_captureID = num;
 	}
-	else if( num != captureID)
+	else if( num != g_captureID)
 	{
-		cvReleaseCapture(&capture);
-		capture = cvCreateCameraCapture(num);	
-		captureID = num;
+		cvReleaseCapture(&g_capture);
+		g_capture = cvCreateCameraCapture(num);	
+		g_captureID = num;
 	}
 
-	cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, width);
-	cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, height);
+	//cvSetCaptureProperty(g_capture, CV_CAP_PROP_FRAME_WIDTH, width);
+	//cvSetCaptureProperty(g_capture, CV_CAP_PROP_FRAME_HEIGHT, height);
 
-	frame = cvQueryFrame(capture);
-	if( frame == NULL)
-		return result;
+	*frame = cvQueryFrame(g_capture);
+	result = (*frame != NULL);
 
-	// Convert the IplImage pointer to CvMat
-        CvMat stub;
-        image = cvGetMat(frame, &stub, 0, 0);
-	if( image == NULL)
-		return result;
-
+	//cvShowImage("display", *image);
+	//cvWaitKey(0); 
+	//cvSaveImage("test.jpg",*image,0);
+		
+	Log(LOGDEBUG, "At end of mutex");
+	
 	pthread_mutex_unlock(&mutex);	//Close the mutex
-	return true;
+
+	//NOTE: Never have a "return" statement before the mutex is unlocked; it causes deadlocks!
+	return result;
 }
 
 void Image_Cleanup()
 {
 	// Release the capture and IplImage pointers
-	cvReleaseImageHeader(&frame);
-	cvReleaseCapture(&capture);
+	//cvReleaseImageHeader(&g_frame);
+	cvReleaseCapture(&g_capture);
 }
 

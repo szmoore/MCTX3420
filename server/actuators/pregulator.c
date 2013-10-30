@@ -31,6 +31,7 @@ bool Pregulator_Cleanup(int id)
 bool Pregulator_Set(int id, double value)
 {
 	double anti_calibrated = Data_Calibrate(value, preg_cal, pwm_raw, sizeof(pwm_raw)/sizeof(double));
+	Log(LOGDEBUG, "Pregulator value %f -> PWM duty cycle %f", value, anti_calibrated);
 	if (anti_calibrated < 0)
 		anti_calibrated = 0;
 	if (anti_calibrated > 1)
