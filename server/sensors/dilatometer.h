@@ -17,7 +17,7 @@
 #define RATIO 3
 #define KERNELSIZE 3
 
-//Scaling factor required to change from pixels to nm
+//Scaling factor required to change from pixels to um
 #define SCALE 1 // Note camera has not been calibrated yet so result will be in pixels
 
 /**
