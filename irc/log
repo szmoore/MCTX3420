@@ -7418,3 +7418,138 @@
 23:06 < Callum> oh shit its that late already?
 --- Day changed Wed Oct 30 2013
 00:20 -!- Callum [~chatzilla@106-69-68-94.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+08:36 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+10:27 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+11:19 -!- jtanx [~asfa@130.95.91.186] has joined #mctxuwa_softdev
+12:29 -!- jtanx [~asfa@130.95.91.186] has quit [Ping timeout]
+12:31 -!- jtanx_ [~asfa@130.95.91.186] has joined #mctxuwa_softdev
+12:31 -!- jtanx_ is now known as jtanx
+13:23 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+13:33 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:52 -!- jtanx [~asfa@130.95.91.186] has quit [Ping timeout]
+16:55 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:57 -!- Rowan [~Rowan@106-68-210-88.dyn.iinet.net.au] has joined #mctxuwa_softdev
+19:17 -!- Callum [~chatzilla@106-69-4-220.dyn.iinet.net.au] has joined #mctxuwa_softdev
+19:17 < jtanx> :O
+19:17 < Callum> what i miss?
+19:17 < jtanx> 4 people on at once
+19:17 < jtanx> nothing
+19:17 < Callum> haha. ok.
+19:17 < jtanx> no discussion as of yet
+19:18 < Callum> well. i came on mainly to say i likely won't be at demonstration tomorrow. unless it doesnt start til 12. got a physics thing i should go to at 11
+19:18 < jtanx> ok
+19:18 < jtanx> btw
+19:18 < jtanx> our beaglebone got fried this afternoon
+19:18 < jtanx> poor snoopy
+19:18 < Callum> D: how?
+19:18 < jtanx> um
+19:18 < jtanx> we were testing out the multiplexer
+19:19 < jtanx> and for some reason the power supply got cut
+19:19 < jtanx> when we powered it back on, it didn't work anymore
+19:19 < jtanx> it might have been that current flowed back into the gpio pins or something
+19:19 < jtanx> or maybe their power supply is dodgy
+19:20 < Callum> hmm
+19:20 < Callum> i know, lets plug it into the other one to try! *fries other BBB*
+19:20 < Callum> yup its powersupply
+19:20 < jtanx> we're down to one beaglebone now, which is the one that electronics ordered in after the first one blew
+19:20 < jtanx> and yeah
+19:20 < jtanx> not likely that'll be connected
+19:20 < jtanx> before they fix their electronics
+19:28 < Callum> yea.
+19:28 < Callum> well im pretty much done with my part of report i think
+19:28 < Callum> just need to edit it
+19:28 < jtanx> that's good
+19:28 < Callum> also why is oracle making me create an account to install java? ..
+19:29 < jtanx> really
+19:29 < Callum> atleast it is through the link in the tute assignment
+19:29 < jtanx> you probably have a later version installed than that link anyway
+19:29 < jtanx> don't install that old crap
+19:30 < Callum> java -version aint returning anything. aint recognising java
+19:30 < Callum> i dont think iv installed it since i reformatted
+19:30 < Callum> ahah
+19:30 < jtanx> is this on windows or linux?
+19:30 < Callum> windows
+19:30 < jtanx> okay, so just go to the java website and install it
+19:31 < jtanx> and uncheck that crap to install the ask toolbar
+19:31 < jtanx> http://www.java.com/en/download/index.jsp
+19:31 < Callum> wait. jre7 is in prog files
+19:31 < Callum> il just install it and see if it works
+19:31 < jtanx> yeah
+19:31 < jtanx> was about to say
+19:32 < Callum> so how longs this thing take?
+19:33 < jtanx> I dunno
+19:33 < jtanx> not too long
+19:33 < Callum> aha. dno. did it in my sleep.
+19:33 < Callum> :p\
+19:33 < jtanx> you just click some buttons
+19:33 < jtanx> it adds stuff to the display
+19:34 < Callum> comment providing feedback on experience...fuck those questions
+19:54 -!- Callum_ [~chatzilla@106-69-4-220.dyn.iinet.net.au] has joined #mctxuwa_softdev
+20:04 -!- Callum [~chatzilla@106-69-4-220.dyn.iinet.net.au] has quit [Ping timeout]
+20:19 -!- Rowan [~Rowan@106-68-210-88.dyn.iinet.net.au] has quit [Ping timeout]
+20:59 < Callum_> what did you guys say for the feedback?
+20:59 < jtanx> I had like two lines
+20:59 < jtanx> 'it was interesting'
+20:59 < jtanx> :/
+20:59 < Callum_> ahah. was a "good" experience.
+21:14 < Callum_> is his example for the transferring an ascii code wrong? :S
+21:15 < jtanx> I dunno
+21:15 < jtanx> what do you mean
+21:15 < jtanx> (I didn't watch the lecture btw)
+21:15 < Callum_> i havent either
+21:16 < Callum_> but in his notes
+21:16 < Callum_> haha
+21:16 < jtanx> Okey
+21:16 < jtanx> I found it confusing
+21:16 < jtanx> like logic 0 is up
+21:16 < jtanx> and logic 1 is down
+21:16 < jtanx> space vs mark
+21:16 < jtanx> then on the next chart it's reversed
+21:16 < Callum_> wait logic 0 is up?
+21:16 < jtanx> I dunno
+21:16 < Callum_> yea.
+21:16 < jtanx> I looked at an online example and it was
+21:17 < jtanx> I just followed an online diagram
+21:17 < jtanx> like the one on this page:
+21:17 < jtanx> http://academic.evergreen.edu/projects/biophysics/technotes/electron/serial.htm
+21:17 < jtanx> (scroll all the way down)
+21:17 < Callum_> thanks
+21:19 < Callum_> yea
+21:19 < Callum_> his is right
+21:19 < Callum_> its just
+21:19 < Callum_> you'd think
+21:19 < Callum_> he'd mention its active low?
+21:19 < jtanx> meh
+21:19 < Callum_> oh well
+21:34 -!- Rowan [~Rowan@106-68-210-88.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:53 -!- Callum [~Callum@106-69-4-220.dyn.iinet.net.au] has joined #mctxuwa_softdev
+21:55 -!- Callum_ [~chatzilla@106-69-4-220.dyn.iinet.net.au] has quit [Ping timeout]
+21:55 < Callum> do we need to hand in our diary?
+21:56 < jtanx> yep
+21:56 < jtanx> not sure how though
+21:56 < Callum> when/where?
+21:56 < Callum> yea
+21:56 < Callum> thats what i wasj ust thinking
+21:56 < jtanx> that reminds me
+21:56 < jtanx> I need to update it
+21:57 < Callum> also it says in something on lms theyd check it during the semester
+21:57 < Callum> LOL
+21:57 < jtanx> well
+21:57 < jtanx> trevelyan looked at it
+21:57 < jtanx> once
+21:57 < Callum> i havent even seen trevelyan once
+21:58 < jtanx> he was at one of the 9am lectures because adam couldn't make it or something
+21:58 < Callum> fair enoughj
+22:01 -!- Rowan [~Rowan@106-68-210-88.dyn.iinet.net.au] has quit [Ping timeout]
+22:10 < jtanx> herp derp
+22:10 < Callum> what?
+22:10 < jtanx> didn't push to git
+22:10 < Callum> ahaha
+22:10 < jtanx> had the console open waiting for me to type in the password
+22:44 -!- jtanx changed the topic of #mctxuwa_softdev to: ^-_-^
+22:44 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["~.~"]
+22:52 -!- Callum [~Callum@106-69-4-220.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+--- Day changed Thu Oct 31 2013
+00:25 -!- Rowan [~Rowan@106-68-210-88.dyn.iinet.net.au] has joined #mctxuwa_softdev
+00:28 < Rowan> im not entirly sure what i should be writing about. i never had a specific role ... just sorta butterflied around
+00:29 < Rowan> learnt a huge amount although havnt done any work that has been needed or used in any final product.
