@@ -119,6 +119,9 @@ bool Strain_Read(int id, double * value)
 	if (!GPIO_Set(gpio_num, false))
 		Fatal("Couldn't set GPIO%d for strain sensor %d to LOW (after reading)", gpio_num, id);
 
+
+	usleep(200);
+
 	pthread_mutex_unlock(&mutex);
 
 	return result;
