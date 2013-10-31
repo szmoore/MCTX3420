@@ -179,7 +179,7 @@ bool Dilatometer_GetExpansion( int id, double * value, int samples)
 	Log(LOGDEBUG, "GET IMAGE?");
 
 	IplImage * frame = NULL;
-	result = Camera_GetImage( 0, 1600, 1200 ,&frame); // Get a 1600x1200 image and place it into src
+	result = Camera_GetImage( 0, 800, 600,&frame); // Get a 1600x1200 image and place it into src
 	Log(LOGDEBUG, "Got image...");
 
 	// If an error occured when capturing image then return

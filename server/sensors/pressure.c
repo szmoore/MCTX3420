@@ -61,12 +61,13 @@ double Pressure_Callibrate(int id, int adc)
 			double Vout = ADC_TO_MVOLTS(adc);
 			return ((Vout - 0.1*Vs)/(0.8*Vs))*(Pmax - Pmin) + Pmin;
 			*/
-
-			return Data_Calibrate((double)adc, high_raw, high_cal, sizeof(high_raw)/sizeof(double));
+			return adc;
+			//return Data_Calibrate((double)adc, high_raw, high_cal, sizeof(high_raw)/sizeof(double));
 		}	
 		case PRES_LOW0:
 			// Not calibrated!
-			return (200.0 * (adc / ADC_RAW_MAX));
+			//return (200.0 * ((double)adc / ADC_RAW_MAX));
+			return adc;
 		default:
 			Fatal("Unknown Pressure id %d", id);
 			return -1; // Should never happen

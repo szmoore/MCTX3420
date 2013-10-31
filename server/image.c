@@ -74,8 +74,8 @@ void Image_Handler(FCGIContext * context, char * params)
 		g_captureID = num;
 	}
 
-	//cvSetCaptureProperty(g_capture, CV_CAP_PROP_FRAME_WIDTH, width);
-	//cvSetCaptureProperty(g_capture, CV_CAP_PROP_FRAME_HEIGHT, height);
+	cvSetCaptureProperty(g_capture, CV_CAP_PROP_FRAME_WIDTH, width);
+	cvSetCaptureProperty(g_capture, CV_CAP_PROP_FRAME_HEIGHT, height);
 
 	*frame = cvQueryFrame(g_capture);
 	result = (*frame != NULL);
