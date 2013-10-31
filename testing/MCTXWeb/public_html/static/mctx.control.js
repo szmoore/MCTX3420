@@ -21,6 +21,7 @@ function toggleControls(running) {
     $("#start-widget").hide();
   } else {
     $("#start-widget").show();
+    $("#start-widget input").removeAttr("disabled");
     $("#experiment-stop").hide();
     $("#pressure-widget").hide();
   }
