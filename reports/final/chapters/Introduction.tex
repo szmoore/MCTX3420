@@ -1,16 +1,18 @@
-\chapter{Introduction}
+\chapter{Introduction and Approach}
+
+% BEGIN Justin's section
 
 The following report describes the work of the software team on the MCTX3420 pressurised can project during Semester 2, 2013 at UWA. The report is intended to assist others in comprehending the decisions and processes involved, as well providing a tool for further development of the system. The report serves as a record of the planning, design, coding, testing and integration of the system, with specific reference to the development of the system software. Extensive documentation is also provided via a project wiki\cite{mctx3420_wiki}.
 
-The MCTX3420 project aimed to build an experimental apparatus for measuring the behaviour of a container with pressure – in this case, testing how a drink can deformed as air pressure inside it increased. The desired result was a self-contained, safe, reliable, effective and easy-to-use system which could perform the desired experimental tasks, to be used by both students and wider industry professionals.
+The MCTX3420 project aimed to build an experimental apparatus for measuring the behaviour of a container with pressure --- in this case, testing how a drink can deformed as air pressure inside it increased. The desired result was a self-contained, safe, reliable, effective and easy-to-use system which could perform the desired experimental tasks, to be used by both students and wider industry professionals.
 
-Unfortunately, the system is (as of 1st November 2013) still not complete; the hardware components have not been fully tested and integrated with the software, despite extensive work by all students. However, the project is very close to completion. The software can interact in the desired manner with the hardware components, and fulfils the majority of the required functionality. With some further testing and development using the final hardware, the software could easily be implemented – and the report has been written with this in mind, allowing another group in the future to build upon the project software.
+Unfortunately, the system is (as of 1st November 2013) still not complete; the hardware components have not been fully tested and integrated with the software, despite extensive work by all students. However, the project is very close to completion. The software can interact in the desired manner with the hardware components, and fulfils the majority of the required functionality. With some further testing and development using the final hardware, the software could easily be implemented --- and the report has been written with this in mind, allowing another group in the future to build upon the project software.
 
 The report begins with an overview of the whole system and the design of the software component. Each subsection then focuses on a specific aspect of the software, going into detail about its design, development, functionality, testing, and integration. Following this, there are sections focusing on the administrative aspects of the project, including teamwork, the general development process, and costs. The report concludes with some documentation of the software and recommendations for future development.
 
 \section{System Overview}
 
-To aid understanding of the context of the software project, a brief overview of the system as a whole is presented below. Essentially, the MCTX3420 project apparatus is designed to test the behaviour of a pressure vessel as air pressure inside it is gradually increased. A very basic system diagram showing the main components is below, with control components in \textcolor{red}{ red}, electronics in \textcolor{green}{ green}, sensors in \textcolor{Purple}{ purple}, pneumatics in  \textcolor{blue}{ blue}, and experimental targets in \textcolor{Orange}{ orange}.
+To aid understanding of the context of the software project, a brief overview of the system as a whole is presented below. Essentially, the MCTX3420 project apparatus is designed to test the behaviour of a pressure vessel as air pressure inside it is gradually increased. A very basic system diagram showing the main components is shown in Figure \ref{system_overview.png}, with control components in  \textcolor{red}{ red}, electronics in  \textcolor{green}{ green}, sensors in  \textcolor{Purple}{ purple}, pneumatics in  \textcolor{blue}{ blue}, and experimental targets in  \textcolor{Orange}{ orange}.
 
 \begin{figure}[H]
 	\centering
@@ -23,7 +25,7 @@ To aid understanding of the context of the software project, a brief overview of
 
 The general experimental procedure is to increase the pressure inside a pair of pressure vessels (in this case, drink cans), measuring one's deformation behaviour and measuring the other to failure point. The user does this by logging into a web browser interface, starting a new experiment, and increasing system pressure in the desired fashion.
 
-As pressure is increased, the web browser passes this instruction to the system controller, which manipulates the pneumatic pressure regulators to input correct pressure to the measured can. While doing this, the system controller also reads from a collection of sensors and returns this data to the web browser (strain, pressure, dilatometer deformation, visual images). The vessel’s deformation with pressure can then be characterised.
+As pressure is increased, the web browser passes this instruction to the system controller, which manipulates the pneumatic pressure regulators to input correct pressure to the measured can. While doing this, the system controller also reads from a collection of sensors and returns this data to the web browser (strain, pressure, dilatometer deformation, visual images). The vessel's deformation with pressure can then be characterised.
 
 This continues until the desired final pressure is reached. Then, pressure in the failure can may be increased further until that can reaches its failure point. The experiment then ends and the system is returned to room pressure. The user can view and download the resulting data.
 
@@ -32,10 +34,10 @@ This continues until the desired final pressure is reached. Then, pressure in th
 The main areas of the system are as follows:
 
 \begin{itemize}
-	\item {\bf Control:} The experiment is controlled through web browser interface from a client PC. This web interface connects to a server running on what is effectively a small, integrated PC – the ``BeagleBone Black'' – and this server directly controls the experiment hardware and reads the sensor data, providing a low-level interface to the system’s electronics. The BeagleBone itself is situated inside the experiment case, and the client PC connects to the BeagleBone server through the local network.
+	\item {\bf Control:} The experiment is controlled through web browser interface from a client PC. This web interface connects to a server running on what is effectively a small, integrated PC --- the ``BeagleBone Black'' --- and this server directly controls the experiment hardware and reads the sensor data, providing a low-level interface to the system's electronics. The BeagleBone itself is situated inside the experiment case, and the client PC connects to the BeagleBone server through the local network.
 	\item {\bf Electronics:} Because the system features a large array of electronic components, these must be run through a central filtering and amplification system to ensure that correct voltages and currents are provided. There is a circuit board inside the case which performs this task. The board connects the BeagleBone, pneumatics, sensors, and power supply to facilitate system operation. System power is provided by a PSU connected to the mains.
-	\item {\bf Pneumatics:} The system’s pneumatics feed the desired air pressure into the two pressure vessels being tested. Air is fed through a series of pipes from the laboratory’s pressurised air supply; solenoid valves control on/off air flow through the system, while pressure is controlled via regulators. Exhaust valves are provided for venting the system. Pneumatics are controlled by the BeagleBone, with signals fed through the electronics board.
-	\item {\bf Sensors:} A suite of sensors is used to collect system data and measure the deformation of the pressure vessel. The sensors include strain gauges, pressure sensors, a microphone, a dilatometer/microscope, and a camera – these give a comprehensive set of data to match the can’s deformation to the pressure level. Each sensor has a different output and must be conditioned by the central electronics board before its data is recorded by the BeagleBone.
+	\item {\bf Pneumatics:} The system's pneumatics feed the desired air pressure into the two pressure vessels being tested. Air is fed through a series of pipes from the laboratory's pressurised air supply; solenoid valves control on/off air flow through the system, while pressure is controlled via regulators. Exhaust valves are provided for venting the system. Pneumatics are controlled by the BeagleBone, with signals fed through the electronics board.
+	\item {\bf Sensors:} A suite of sensors is used to collect system data and measure the deformation of the pressure vessel. The sensors include strain gauges, pressure sensors, a microphone, a dilatometer/microscope, and a camera --- these give a comprehensive set of data to match the can's deformation to the pressure level. Each sensor has a different output and must be conditioned by the central electronics board before its data is recorded by the BeagleBone.
 
 	\item {\bf Mounting and Case:} The mounting system for the cans uses a screw-in mechanism to achieve an airtight seal. This holds the can in place so that pressure can be fed into it through the base of the mount. The system case holds all of the components in a sealed protective compartment, which ensures that the system will be safe in the event of failure and physically separates the various systems. The case also features an interlock switch that prevents any operation of the system if the lid is not fastened.
 
@@ -55,9 +57,9 @@ First, the actual software task to be completed is identified; this is organised
 Each section is then actually written. Most of the initial work is done individually (for consistency) and completed in between meetings. At group meetings the code is presented, and may be edited by other team members to fix issues, increase efficiency, and integrate it with other code sections.
 
 
-Extremely important to development was the use of the Git system and GitHub website. GitHub is specially designed for software use and is essentially a web-based hosting service for development projects, which uses the Git revision control system. It allows all team members to contribute to the same project by working on their own local “forks”, and then “merging” their changes back into the main branch of software\cite{github_fork}.
+Extremely important to development was the use of the Git system\cite{github,gitucc} and GitHub website\cite{github}. GitHub is specially designed for software use and is essentially a web-based hosting service for development projects, which uses the Git revision control system. It allows all team members to contribute to the same project by working on their own local ``forks'', and then ``merging'' their changes back into the main branch of software\cite{github_fork}.
 
-The Git system ensures that work by different team members is tracked, that work fits together consistently, and that other work is not accidentally overwritten or changed (important when dealing with large amounts of code). Git also features a notifications and issue tracking system with email alerts whenever a change is made. The basic GitHub process is as follows:
+The Git system ensures that work by different team members is tracked\cite{github_contribs}, that work fits together consistently, and that other work is not accidentally overwritten or changed (important when dealing with large amounts of code). Git also features a notifications and issue tracking system with email alerts whenever a change is made. The basic GitHub process is as follows:
 
 \begin{enumerate}
 	\item Create an individual ``fork'' of the software, separate from the main branch.
@@ -67,9 +69,9 @@ The Git system ensures that work by different team members is tracked, that work
 \end{enumerate}
 In this way, GitHub automates the more tedious aspects of code management.
 
-Another important aspect of the coding process is coding style. Throughout the project, all code that was written adhered to the same style to make it consistent and easier to read. One aspect of styling, for example, is use of capitals when defining function names (for example, \verb/Actuator_Init/), variable names (\verb/g_num_actuators/), or definitions of constants (\verb/ACTUATORS_MAX/), to make it immediately clear whether something is a function, variable or constant. Other aspects include use of indentation, the ordering of functions, and frequent use of comments. Essentially, styling is used to ensure the code is consistent, easy to follow, and can therefore be worked on by multiple people. 
+Another important aspect of the coding process is coding style. Throughout the project, all code that was written adhered to the same style to make it consistent and easier to read. One aspect of styling, for example, is use of capitals when defining function names (for example, \funct{Actuator_Init}), variable names (\var{g_num_actuators}), or definitions of constants (\var{ACTUATORS_MAX}), to make it immediately clear whether something is a function, variable or constant. Other aspects include use of indentation, the ordering of functions, and frequent use of comments. Essentially, styling is used to ensure the code is consistent, easy to follow, and can therefore be worked on by multiple people. 
 
-Coding style is also important when following general code standards. The C language features many standards and style guidelines which were also adhered to, to make the code readable by wider industry professionals. Some examples of this include beginning global variables with \verb/g_/, and correct use of brackets as separators\cite{mellon}. All efforts were made to follow common C and HTML code standards. The use of a common coding style and standards will hopefully make the project software easily expandable by others in the future.
+Coding style is also important when following general code standards. The C language features many standards and style guidelines which were also adhered to, to make the code readable by wider industry professionals. Some examples of this include beginning global variables with \texttt{g_} and correct use of brackets as separators\cite{mellon}. All efforts were made to follow common C and HTML code standards. The use of a common coding style and standards will hopefully make the project software easily expandable by others in the future.
 
 
 Code was also expected to adhere to safety standards. In the first weeks of the project, a document\cite{kruger_safety} was created that outlined all aspects of software safety - both for the software design itself, and ensuring that the system was still safe if the software failed. The results of this are explained further later in the report, with one example being the server's ``sanity check'' functions.
@@ -83,35 +85,35 @@ After the testing process is satisfied, the final code can be committed to the s
 
 \section{Team Collaboration}
 
-Collaboration between members of the software group was extremely important throughout the project. Members were often individually responsible for different areas of software --- or, alternately, were simultaneously rewriting different sections of the same code --- so it was essential to make sure that all parts were compatible, as well as completed on schedule. Communication between the software group and other project groups was similarly vital, to ensure that all work contributed to the project’s end goals. 
+Collaboration between members of the software group was extremely important throughout the project. Members were often individually responsible for different areas of software --- or, alternately, were simultaneously rewriting different sections of the same code --- so it was essential to make sure that all parts were compatible, as well as completed on schedule. Communication between the software group and other project groups was similarly vital, to ensure that all work contributed to the project's end goals. 
 
 \subsection{Communication} \label{Communication}
-The primary time for collaboration was during the team’s weekly meetings. Meetings occurred at 2pm-4pm on the Monday of every week, and were generally attended by all group members. While most work was expected to be done outside this time, the meetings were valuable for planning and scheduling purposes, for tackling problems and making design decisions as a group. Team members were able to work together in the meetings to complete certain tasks much more effectively. Importantly, at the end of each meeting, a report of the work done during the prior week and a list of tasks to do the following week was produced, giving the project a continuous, clear direction. 
+The primary time for collaboration was during the team's weekly meetings. Meetings occurred at 2pm-4pm on the Monday of every week, and were generally attended by all group members. While most work was expected to be done outside this time, the meetings were valuable for planning and scheduling purposes, for tackling problems and making design decisions as a group. Team members were able to work together in the meetings to complete certain tasks much more effectively. Importantly, at the end of each meeting, a report of the work done during the prior week and a list of tasks to do the following week was produced, giving the project a continuous, clear direction. 
 
-GitHub was used as the group’s repository for software work. The usefulness of GitHub was explained previously in the “General Development Process” section, but essentially, it is a very effective tool for managing and synchronising a large, multi-person software project. GitHub also features a notifications and issue-tracking system, which was useful for keeping track of tasks and immediately notifying team members of any changes.
+GitHub was used as the group's repository for software work. The usefulness of GitHub was explained previously in the “General Development Process” section, but essentially, it is a very effective tool for managing and synchronising a large, multi-person software project. GitHub also features a notifications and issue-tracking system, which was useful for keeping track of tasks and immediately notifying team members of any changes.
 
 
-Outside of meetings, email was the main form of communication. Email threads exist for all of the project’s main areas, discussing any ideas, changes or explanations. Email was also used for announcements and to organise additional meetings. For less formal communication, the software group created their own IRC channel. This was essentially a chat channel that could be used to discuss any aspect of the project and for communication about current work.
+Outside of meetings, email was the main form of communication. Email threads exist for all of the project's main areas, discussing any ideas, changes or explanations. Email was also used for announcements and to organise additional meetings. For less formal communication, the software group created their own IRC channel. This was essentially a chat channel that could be used to discuss any aspect of the project and for communication about current work.
 
 \subsection{Scheduling}
 
-At the beginning of the project, an overall software schedule was created, outlining the main tasks to be completed and their target dates. While this was useful for planning purposes and creating an overall impression of the task, it became less relevant as the semester continued. The nature of the software team’s work meant that it was often changing from week to week; varying hardware requirements from other teams, unexpected issues and some nebulous project guidelines led to frequent schedule modifications. For instance: use of the BeagleBone turned out to be a significant time-sink, requiring a lot of troubleshooting due to lack of documentation; and a sophisticated login system was not mentioned until late in the project, so resources had to be diverted to implement this. Essentially, while the software group did attempt to keep an overall schedule, this was only useful in planning stages due to the changing priorities of tasks.
+At the beginning of the project, an overall software schedule was created, outlining the main tasks to be completed and their target dates. While this was useful for planning purposes and creating an overall impression of the task, it became less relevant as the semester continued. The nature of the software team's work meant that it was often changing from week to week; varying hardware requirements from other teams, unexpected issues and some nebulous project guidelines led to frequent schedule modifications. For instance: use of the BeagleBone turned out to be a significant time-sink, requiring a lot of troubleshooting due to lack of documentation; and a sophisticated login system was not mentioned until late in the project, so resources had to be diverted to implement this. Essentially, while the software group did attempt to keep an overall schedule, this was only useful in planning stages due to the changing priorities of tasks.
 
 
-Far more useful was the weekly scheduling system. As mentioned in the ``Communication'' section\ref{Communication}, a weekly task list was created on each Monday, giving the team a clear direction. This suited the flexibility of the software well; tasks could be shuffled and re-prioritised easily and split between team members. It was still very important to keep the project’s overall deadline in mind, and the weekly task lists could be used to do this by looking separately at the main areas of software (such as GUI design, sensors, and so on) and summarising the remaining work appropriately. Brief weekly reports also covered what had been completed so far, providing a further measure of progress.
+Far more useful was the weekly scheduling system. As mentioned in the ``Communication'' section\ref{Communication}, a weekly task list was created on each Monday, giving the team a clear direction. This suited the flexibility of the software well; tasks could be shuffled and re-prioritised easily and split between team members. It was still very important to keep the project's overall deadline in mind, and the weekly task lists could be used to do this by looking separately at the main areas of software (such as GUI design, sensors, and so on) and summarising the remaining work appropriately. Brief weekly reports also covered what had been completed so far, providing a further measure of progress.
 
 
 The group also elected a ``meeting convener'' to assist with organisation (Samuel Moore). The meeting convener was responsible for organising group meetings week-to-week and coordinating group communication. A single elected convener made this process as efficient as possible.
 
 \subsection{Group Participation}
 
-The nature of software development means that it tends to be very specialised – extensive knowledge of coding is required to be effective, which is difficult to learn in a short timeframe. The members of the software team all had varying levels of experience, and therefore could not contribute equally to all areas of the project. Some team members had done very little coding before (outside of introductory units at university) which made it difficult for them to contribute in some areas, while others had the extensive knowledge required.
+The nature of software development means that it tends to be very specialised --- extensive knowledge of coding is required to be effective, which is difficult to learn in a short timeframe. The members of the software team all had varying levels of experience, and therefore could not contribute equally to all areas of the project. Some team members had done very little coding before (outside of introductory units at university) which made it difficult for them to contribute in some areas, while others had the extensive knowledge required.
 
 
 However, different team members had skills in other areas besides coding, and these skills were allocated to ensure that all members could contribute effectively. For instance, as some people worked on the server code, others worked on the visual GUI design; it made sense for the people who were most efficient with coding to work on those elements while others performed different tasks. Even though the software project was principally coding, there were many supplementary development tasks --- writing documentation, hardware testing, et cetera --- that were involved. Some areas of the software, such as the BeagleBone interfacing, were new to all team members and were worked on by everyone.
 
 
-On the whole, group participation was good. Team members regularly attended meetings, did the expected (often more-than-expected) work, and had a good understanding of the project. While all team members contributed significantly, some did stand out – in this case Samuel Moore and Jeremy Tan, who performed a large portion of the vita development work. Without their input and prior experience, the project would not have been completed to such a high standard, and their extensive skills and dedication were vital to its success.
+On the whole, group participation was good. Team members regularly attended meetings, did the expected (often more-than-expected) work, and had a good understanding of the project. While all team members contributed significantly, some did stand out --- in this case Samuel Moore and Jeremy Tan, who performed a large portion of the vita development work. Without their input and prior experience, the project would not have been completed to such a high standard, and their extensive skills and dedication were vital to its success.
 
 \subsection{Inter-Team Communication}
 
@@ -142,7 +144,7 @@ Server coding tasks included the threading system, data handling, sensors/actuat
 
 \subsection{Cost Estimation}
 
-The vast majority of the cost of the software team’s contribution is in man-hours rather than hardware. The only hardware specifically purchased by software was a BeagleBone Black; all other hardware was part of electronics. Some hardware used for testing was temporarily donated by team members, and has been included here only for completeness.
+The vast majority of the cost of the software team's contribution is in man-hours rather than hardware. The only hardware specifically purchased by software was a BeagleBone Black; all other hardware was part of electronics. Some hardware used for testing was temporarily donated by team members, and has been included here only for completeness.
 
 \begin{tabular}{l|l}
 	{\bf Item} & {\bf Cost} \\
@@ -153,20 +155,21 @@ The vast majority of the cost of the software team’s contribution is in man-ho
 	\emph{Total} & \$130 
 \end{tabular}
 
-In regards to the time spent, it is difficult to get an accurate record. At least three hours per week were spent in weekly meetings, and by consulting the team’s technical diaries, it is estimated that team members spent an average of ten hours per week working on the project.
+In regards to the time spent, it is difficult to get an accurate record. At least three hours per week were spent in weekly meetings, and by consulting the team's technical diaries, it is estimated that team members spent an average of ten hours per week working on the project.
 
-\begin{itemize}
-	\item Approximate time per week (individual): 10 hours
-	\item Team size: 6 people 
-	\item Approximate time per week (team): 60 hours
-	\item Project Duration: 13 weeks
-	\item Total time spent: 780 hours 
-	\item Hourly rate: \$150 / hour
-	\item Total cost: \$117,000 (+\$130 for hardware)
-\end{itemize}
+\begin{tabular}{l|l}
+	Approximate time per week (individual) & 10 hours \\
+	Team size & 6 people  \\
+	Approximate time per week (team) & 60 hours \\
+	Project Duration & 13 weeks \\ 
+	Total time spent & 780 hours \\
+	Hourly rate & \$150 / hour \\
+	Total cost & \$117,000 (+\$130 for hardware)
+\end{tabular}
 
-This is a large amount at first glance, though it must be remembered that this was a complex software development project with many interacting parts. There were some inefficiencies which did unfortunately add to cost (such as the BeagleBone’s lack of documentation) and these could hopefully avoided in the future. Given the final result, however, the cost appears reasonable.
+This is a large amount at first glance, though it must be remembered that this was a complex software development project with many interacting parts. There were some inefficiencies which did unfortunately add to cost (such as the BeagleBone's lack of documentation) and these could hopefully avoided in the future. Given the final result, however, the cost appears reasonable.
 
 
 The GitHub repository was also run through an online cost estimator\cite{ohloh}, which resulted in a similar number of ~\$100,000. The estimator takes into account the number of developers, time of development, and amount of code produced.
 
+% END Justin's section

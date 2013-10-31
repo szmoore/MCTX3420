@@ -1,41 +1,37 @@
-\chapter{Results}
-
-\section{Results}
-
-\subsection{Control of System}
-
-\subsection{Design of GUI}
-
-\subsection{Security and User Management}
-
-
-\section{Recommendations}
-
-\subsection{Approach and Integration}
-
-\subsection{Hardware Control}
-
-\subsection{Detect Loss of Power}
-
-\subsection{Detect Program Crashes}
-
-\subsection{Image Processing}
-
-\subsection{GUI Design}
-
-\subsection{BeagleBone/Server Configuration}
-
-\subsection{Security and User Management}
-
-
-
-\subsection{Debugging and Testing}
-
-
-
-\section{Conclusions}
+\chapter{Conclusions and Recommendations}
 
 This report has described the work of the software team on the MCTX3420 pressurised can project during Semester 2, 2013 at UWA.
+In summary, we have succeeded in the following goals:
+
+\begin{enumerate}
+	\item Design and implementation of a multithreaded process for providing continuous control over real hardware in response to intermittent user actions (Section \ref{Server Program}, \ref{Hardware Interfacing})
+	\item Design and implementation of a configuration allowing this process to interface with the \emph{nginx} HTTP server (Sections \ref{Communications}, \ref{Server Configuration}
+	\item Design and implementation of a API using the HTTP protocol to allow a client process to supply user commands to the system (Section \ref{Communications})
+	\item Design and implementation of the client process using a web browser based GUI that requires no additional software to be installed on the client PC (Section \ref{Communications}, \ref{GUI})
+	\item Design and implementation of several alternative authentication mechanisms for the system which can be integrated with different user management solutions (Section \ref{Authentication})
+	\item Partial design and implementation of a system for managing the datafiles of different users (Section \ref{API})
+	\item Partial design and implementation of a user management system in PHP based upon UserCake (Sections \ref{Authentication}, \ref{Cookies})
+	\item Integration and partial testing of the software with the overall MCTX3420 2013 Exploding Cans project (All sections)
+\end{enumerate}
+
+We make the following general recommendations for further development of the system software (with more specific recomendations discussed in the relevant setions):
+\begin{enumerate}
+	\item That the current software is built upon, rather than redesigned from scratch. The software can be adapted to run on a Raspberry Pi, or even a GNU/Linux laptop if required.
+	\item That more detailed testing and debugging of several aspects of the software are required; in particular:
+	\begin{enumerate}
+		\item The software should be tested for memory leaks by running for an extended time period
+		\item Any alternative image processing algorithms should be tested independently of the main system and then integrated after it is certain that no memory errors remain
+	\end{enumerate}
+	\item That work is continued on documenting all aspects of the system.
+	\item That the GitHub Issues page\cite{github_issues} is used to identify and solve future issues and/or bugs
+	\item That members of the 2013 software team are contacted if further explanation of any aspect of the software is needed.
+\end{enumerate}
+
+We would also like to make the following recommendations with regard to system hardware:
+\begin{enumerate}
+	\item Care is given to protecting the BeagleBone from electrical faults (eg: overloading or underloading the ADC/GPIO pins, a power surge overloading the supply voltage)
+	\item A mechanism (possibly employing a high value capacator) is included to allow a loss of power to be detected and the BeagleBone shut down safely
+\end{enumerate}
 
 
 

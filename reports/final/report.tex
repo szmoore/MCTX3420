@@ -1,6 +1,10 @@
 \documentclass[a4paper,10pt,titlepage]{report}
-
-
+%\linespread{1.3}
+%\usepackage{setspace}
+%\onehalfspacing 
+ \parskip 10pt           % sets spacing between paragraphs
+ %\renewcommand{\baselinestretch}{1.5} 	% Uncomment for 1.5 spacing between lines
+ %\parindent 0pt		  % sets leading space for paragraphs
 
 
 %\usepackage{natbib}
@@ -9,7 +13,7 @@
 \usepackage{caption}
 %\usepackage{subfigure}
 \usepackage{rotating}
-%\usepackage{lscape} % Needed for landscaping when printing
+%\usepackage{lscape}
 \usepackage{pdflscape} % Needed for landscaping - in pdf viewer
 \usepackage{verbatim}
 \usepackage{amsmath, amsthm,amssymb}
@@ -24,7 +28,7 @@
 {\normalfont\LARGE\bfseries}{\thechapter.}{1em}{}
 
 \usepackage[usenames,dvipsnames]{color}
-\usepackage{listings}
+\usepackage{listings} % For code snippets
 
 \definecolor{darkgray}{rgb}{0.95,0.95,0.95}
 \definecolor{darkred}{rgb}{0.75,0,0}
@@ -39,17 +43,60 @@
 \lstset{showstringspaces=false}
 \lstset{basicstyle=\small}
 
+
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}\newtheorem{definition}[theorem]{Definition}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{example}{Example}
+\theoremstyle{remark}\newtheorem*{remark}{Remark}
+
+\newcommand{\Phid}[0]{\dot{\Phi}}
+\newcommand{\Phib}[0]{\bar{\Phi}}
+
+\newcommand{\de}[0]{\delta}
+\newcommand{\deb}[0]{\bar{\delta}}
+
+\newcommand{\that}[0]{\hat{\theta}}
+
+\newcommand{\vect}[1]{\boldsymbol{#1}} % Draw a vector
+\newcommand{\divg}[1]{\nabla \cdot #1} % divergence
+\newcommand{\curl}[1]{\nabla \times #1} % curl
+\newcommand{\grad}[1]{\nabla #1} %gradient
+\newcommand{\pd}[3][ ]{\frac{\partial^{#1} #2}{\partial #3^{#1}}} %partial derivative
+\newcommand{\der}[3][ ]{\frac{d^{#1} #2}{d #3^{#1}}} %full derivative
+\newcommand{\phasor}[1]{\tilde{#1}} % make a phasor
+\newcommand{\laplacian}[1]{\nabla^2 {#1}} % The laplacian operator
+
+
+
+% Reference things in GitHub
+\newcommand{\gitref}[2]{\href{https://github.com/szmoore/MCTX3420/blob/master/#1/#2}{  \textcolor{blue}{\emph{#2}}}}
+% Refer to API commands
+\newcommand{\api}[1]{  ``\textcolor{black}{\texttt{/api/#1}}''}
+
+% To make underscores printable without escaping them
+\usepackage[T1]{fontenc}
+\catcode`\_=12
+
+% Refer to code (can change each one as needed)
+\newcommand{\funct}[1]{  \texttt{#1}}
+\newcommand{\var}[1]{  \texttt{#1}}
+\newcommand{\type}[1]{  \texttt{#1}}
+\newcommand{\code}[1]{  \texttt{#1}}
+
+
 %\usepackage{endfloat}
 %\nomarkersintext
- \topmargin -1.5cm        % read Lamport p.163
- \oddsidemargin -0.04cm   % read Lamport p.163
- \evensidemargin -0.04cm  % same as oddsidemargin but for left-hand pages
- \textwidth 16.59cm
- \textheight 23.94cm 
- %\pagestyle{empty}       % Uncomment if don't want page numbers
- \parskip 6.2pt           % sets spacing between paragraphs
- %\renewcommand{\baselinestretch}{1.5} 	% Uncomment for 1.5 spacing between lines
- \parindent 0pt		  % sets leading space for paragraphs
+\pagestyle{plain}
+\topmargin -0.6true in
+\textwidth 15true cm
+\textheight 9.5true in
+\oddsidemargin 0.25true in
+\evensidemargin 0.25true in
+\headsep 0.4true in
 
 \usepackage{fancyheadings}
 \pagestyle{fancy}
@@ -74,13 +121,23 @@
 
 \include{titlepage/Titlepage}               % This is who you are
 
+%\newpage
+
+%\include{acknowledgments/Acknowledgments}   % This is who you thank
+
+%\newpage
+
+%\include{abstract/Abstract}          % This is your thesis abstract
+
 \pagenumbering{roman}
 \newpage
 %---------------------------------------------------------
 % Do the table of Contents and lists of figures and tables
 %---------------------------------------------------------
+\linespread{0.8}
 \tableofcontents
 \markboth{}{}
+\linespread{1.0}
 \newpage
 
 \pagenumbering{arabic}
@@ -88,20 +145,32 @@
 %---------------------------------------------------------
 %Include the chapters!
 
-%\include{chapters/Demonstration}
 \include{chapters/Introduction}
-\include{chapters/Design}
-\include{chapters/Approach}
+
+\include{chapters/Design}           % This is chapter 1
+
+%\include{chapters/Approach}          % This is chapter 2
+
 \include{chapters/Results}
 %\newpage
 %---------------------------------------------------------
 \renewcommand{\bibname}{References}
 \bibliography{references/refs}
-%\bibliographystyle{apalike}  
+\bibliographystyle{ieeetr}  
 \addcontentsline{toc}{part}{References}
 %---------------------------------------------------------
 
 % Appendices
+\appendix
+\include{appendices/glossary}
+%\include{proposal/proposal.tex}
+%\renewcommand\chaptername{Appendix}
+%\chapter{Appendix} 
+%\include{appendices/electron_optics}
+%\include{appendices/electron_gun_circuit}
+%\include{appendices/tcs_noise}
+%\include{appendices/data_aquisition}
+
 
 %---------------------------------------------------------
 

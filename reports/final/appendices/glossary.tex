@@ -1,0 +1,22 @@
+\section*{Glossary}
+
+\begin{itemize}
+	\item {\bf Server} --- Refers to the MCTX3420 program that runs on the system and is responsible for controlling and querying hardware. ``Server'' is often also used to refer to a physical machine (computer or embedded device) that runs a Server program.
+	\item {\bf Client} ---  Refers to a program running on a computer that isn't part of the system. This program provides the user with an interface to the system; it will send commands and queries to the server as directed by a human user. ``Client'' is also often also used to refer to a physical machine that runs a Client program.
+	\item {\bf HTTP} --- Hyper Text Transfer Protocol - The protocol used by web browsers and web servers to exchange information. A "web" server is technically called a HTTP server. A "web" client is something like a web browser (firefox, chrome, etc) which uses HTTP to query servers on the internet.
+	\item {\bf HTTPS} --- HTTP itself involves sending plain text over a network, which can be intercepted and read by anyone on the network. The HTTPS protocol provides a layer of encryption to prevent eavesdropping on HTTP traffic.
+	\item {\bf API} --- Application Programming Interface - A standard defined for programs to interact with each other. In our case, the "Server API" (discussed on this page) defines what the Client can request and give to the Server.
+	\item {\bf HTML} --- Hypertext Markup Language - A language used by web browsers to display web pages. Static. HTML files are stored on a system that is running a HTTP server and transferred to web browsers when they are requested.
+	\item {\bf JavaScript} (not to be confused with Java) --- A language that is interpreted by a web browser to produce HTML dynamically (which is then rendered by the browser) in response to events. It can also direct the browser to send HTTP queries (AJAX). The response can be interpreted by the JavaScript. JavaScript files are also stored on the server.
+	\item {\bf JSON} --- JavaScript Object Notation - Text that can be directly interpreted as an Object in JavaScript.
+	\item {\bf CGI} --- Common Gateway Interface - Protocol by which HTTP servers respond to requests by calling an external (seperate) program. The CGI program does not run continuously.
+	\item {\bf FastCGI} --- Fast Common Gateway Interface - Protocol by which HTTP servers respond to requests by passing them to an external (separate) program. Differs from CGI because the external program runs continuously and separately from the HTTP server.
+	\item {\bf IP Address} --- Internet Protocol Address - Identifies a device on a network
+	\item {\bf Hostname} --- A human readable name of a device on a network. The hostname of the device is associated with its IP address.
+	\item {\bf Multithreading} --- A technique by which a single set of code can be used by several processors at different stages of execution.
+	\item {\bf OpenCV} --- A real time Image processing library
+	\item {\bf BBB} --- the BeagleBone Black, ARM processor board acts as the client, and communicates with the server to send and request data for physically running the experiment. 
+	\item {\bf nginx} --- Used for website architecture which integrates efficiency with functionality
+	\item {\bf OpenMP} --- Multiplatform memory processing: used for parallel tasks (not used in this project) 
+	\item {\bf PThreads (POSIX Threads)} --- A library used for thread management defining a set of c programing functions and constants. 
+\end{itemize}
