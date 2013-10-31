@@ -7,7 +7,7 @@ Figures \ref{block_diagram1.png} and \ref{block_diagram_final.png}shows the earl
 
 As the revised diagram in Figure \ref{block_diagram_final.png} shows, to remove an extra layer of complexity it was decided to use a single device (the BeagleBone Black) to play the role of both the experiment server and the embedded device. From a software perspective, this eliminated the need for an entire layer of communication and synchronization. From a hardware perspective, use of the BeagleBone black instead of a Raspberry Pi removed the need to design or source analogue to digital conversion modules.
 
-Another major design change which occured quite early in the project is the switch from using multiple processes to running a single multithreaded process on the server. After performing some rudimentary testing (see Section \ref{Server Interface}) it became clear that a system of seperate programs would be difficult to implement and maintain. Threads are similar to processes but are able to directly share memory, with the result that much less synchronisation is required in order to transfer information.
+Another major design change which occurred quite early in the project is the switch from using multiple processes to running a single multithreaded process on the server. After performing some rudimentary testing (see Section \ref{Server Interface}) it became clear that a system of separate programs would be difficult to implement and maintain. Threads are similar to processes but are able to directly share memory, with the result that much less synchronisation is required in order to transfer information.
 
 {\bf Note on filenames:} In the following, files and directories related to the server are located in the \href{https://github.com/szmoore/MCTX3420/tree/master/server}{server} directory, files related to the (currently used) GUI are in \href{https://github.com/szmoore/MCTX3420/tree/master/testing/MCTXWeb}{testing/MCTXWeb}, and files created for testing purposes are located in \href{https://github.com/szmoore/MCTX3420/tree/master/testing}{testing}.
 
@@ -38,11 +38,11 @@ The Server Program runs as a multithreaded process under a POSIX compliant GNU/L
 \end{enumerate}
 
 
-In reality, threads do not run simultaneously; the operating system is responsible for sharing execution time between threads in the same way as it shares execution times between processes. Because the linux kernel is not deterministic, it is not possible to predict when a given thread is actually running. This renders it impossible to maintain a consistent sampling rate, and necessitates the use of time stamps whenever a data point is recorded. 
+In reality, threads do not run simultaneously; the operating system is responsible for sharing execution time between threads in the same way as it shares execution times between processes. Because the Linux kernel is not deterministic, it is not possible to predict when a given thread is actually running. This renders it impossible to maintain a consistent sampling rate, and necessitates the use of time stamps whenever a data point is recorded. 
 
 Figure \ref{sample_rate_histogram.png} shows a distribution of times\footnote{The clock speed of the BeagleBone is between 200MHz and 700MHz (depends on power)\cite{cameon.net} which is fast enough to neglect the fact that recording the timestamp takes several CPU cycles} between samples for a test sensor with the software sampling as fast as possible. Note the logarithmic $t$ axis. Although context switching clearly causes the sample rate to vary (\textcolor{green}{green}), the actual process of reading an ADC (\textcolor{red}{red}) using \funct{ADC_Read} (\gitref{server}{bbb_pin.c}) is by far the greatest source of variation.
 
-It was not possible to obtain a real time linux kernel for the BeagleBone. In theory, real time variants of the linux kernel improve the reliability of sampling rates. However, testing on an amd64 laptop showed very little difference in the sampling time distribution when the real time linux kernel was used.
+It was not possible to obtain a real time Linux kernel for the BeagleBone. In theory, real time variants of the Linux kernel improve the reliability of sampling rates. However, testing on an amd64 laptop showed very little difference in the sampling time distribution when the real time Linux kernel was used.
 
 
 \begin{figure}[H]
@@ -55,16 +55,16 @@ It was not possible to obtain a real time linux kernel for the BeagleBone. In th
 
 \subsection{Main Thread}\label{Main Thread}
 
-The main thread of the process is responsible for transfering data between the server and the client through the Hypertext Transmission Protocol (HTTP). A library called FastCGI is used to interface with an existing webserver called nginx\cite{nginx}. This configuration and the format of data transferred between the GUI and the server is discussed in more detail Section \ref{Communications}.
+The main thread of the process is responsible for transferring data between the server and the client through the Hypertext Transmission Protocol (HTTP). A library called FastCGI is used to interface with an existing webserver called nginx\cite{nginx}. This configuration and the format of data transferred between the GUI and the server is discussed in more detail Section \ref{Communications}.
 
-Essentially, the main thread of the process responds to HTTP requests. The GUI is designed to send requests periodically (eg: to update a graph) or when a user action is taken (eg: changing the pressure setting). When this is received, the main thread parses the request, the requested action is performed, and a response is sent. The GUI is then responsible for updating its appearance or alerting the user based on this response. Figure \ref{fastcgi-flow-chart.png} in Section \ref{API}gives an overview of this process.
+Essentially, the main thread of the process responds to HTTP requests. The GUI is designed to send requests periodically (e.g.: to update a graph) or when a user action is taken (e.g.: changing the pressure setting). When this is received, the main thread parses the request, the requested action is performed, and a response is sent. The GUI is then responsible for updating its appearance or alerting the user based on this response. Figure \ref{fastcgi-flow-chart.png} in Section \ref{API}gives an overview of this process.
 
 
 \subsection{Sensor Threads}\label{Sensor Thread}
 
 Figure \ref{sensor_thread.pdf} shows a flow chart for the thread controlling an individual sensor. This process is implemented by \verb/Sensor_Loop/ and associated helper functions.
 
-All sensors are treated as returning a single floating point number when read. A \type{DataPoint} consists of a time stamp and the sensor value. \type{DataPoint}s are continously saved to a binary file as long as the experiment is in process. An appropriate HTTP request (Section\ref{API}) will cause the main thread of the server program to respond with \type{DataPoint}s read back from the file. By using independent threads for reading data and transferring it to the GUI, the system does not rely on maintaining a consistent and synchronised network connection. This means that one the experiment is started with the desired parameters, a user can safely close the GUI or even shutdown their computer without impacting on the operation of the experiment.
+All sensors are treated as returning a single floating point number when read. A \type{DataPoint} consists of a time stamp and the sensor value. \type{DataPoint}s are continuously saved to a binary file as long as the experiment is in process. An appropriate HTTP request (Section\ref{API}) will cause the main thread of the server program to respond with \type{DataPoint}s read back from the file. By using independent threads for reading data and transferring it to the GUI, the system does not rely on maintaining a consistent and synchronised network connection. This means that one the experiment is started with the desired parameters, a user can safely close the GUI or even shutdown their computer without impacting on the operation of the experiment.
 
 
 
@@ -76,7 +76,7 @@ Earlier versions of the software instead used a \verb/switch/ statement based on
 
 \subsection{Actuator Threads}\label{Actuator Thread}
 
-Actuators are controlled by threads in a similar way to sensors. Figure \ref{actuator_thread.pdf} shows a flow chart for these threads. This is implemented in \verb/Actuator_Loop/. Control over real hardware is seperated from the main logic in the same way as sensors (relevant files are in the \verb/actuators/ sub directory). The use of threads to control actuators gives similar advantages in terms of eliminating the need to syncronise the GUI and server software.
+Actuators are controlled by threads in a similar way to sensors. Figure \ref{actuator_thread.pdf} shows a flow chart for these threads. This is implemented in \verb/Actuator_Loop/. Control over real hardware is separated from the main logic in the same way as sensors (relevant files are in the \verb/actuators/ sub directory). The use of threads to control actuators gives similar advantages in terms of eliminating the need to synchronise the GUI and server software.
 
 The actuator thread has been designed for flexibility in how exactly an actuator is controlled. Rather than specifying a single value, the main thread initialises a structure that determines the behaviour of the actuator over a period of time. The current structure represents a simple set of discrete linear changes in the actuator value. This means that a user does not need to specify every single value for the actuator. The Actuator thread stores a value every time the actuator is changed which can be requested in a similar way to sensor data.
 
@@ -84,7 +84,7 @@ The actuator thread has been designed for flexibility in how exactly an actuator
 
 \subsection{Data Storage and Retrieval}
 
-Each sensor or actuator thread stores data points in a seperate binary file identified by the name of the device. When the main thread receives an appropriate HTTP request, it will read data back from the binary file. To allow for selection of a range of data points from the file, a binary search has been implemented. Functions related to data storage and retrieval are located in the \gitref{server}{data.h} and \gitref{server}{data.c} source files.
+Each sensor or actuator thread stores data points in a separate binary file identified by the name of the device. When the main thread receives an appropriate HTTP request, it will read data back from the binary file. To allow for selection of a range of data points from the file, a binary search has been implemented. Functions related to data storage and retrieval are located in the \gitref{server}{data.h} and \gitref{server}{data.c} source files.
 
 Several alternate means of data storage were considered for this project. Binary files were chosen because of the significant performance benefit after testing, and the ease with which data can be read from any location in file and converted directly into values. A downside of using binary files is that the server software must always be running in order to convert the data into a human readable format.
 
@@ -94,7 +94,7 @@ Several alternate means of data storage were considered for this project. Binary
 
 Given the inexperienced nature of the software team, the limited development time, and the unclear specifications, it is not wise to trust safety aspects of the system to software alone. It should also be mentioned that the correct functioning of the system is reliant not only upon the software written during this project, but also the many libraries which are used, and the operating system under which it runs. We found during development that many of the mechanisms for controlling BeagleBone hardware are unreliable and have unresolved issues; see the project wiki pages\cite{mctx3420_wiki} for more information. We attempted to incorporate safety mechanisms into the software wherever possible.
 
-Sensors and Actuators should define an initialisation and cleanup function. For an actuator (eg: the pressure regulator), the cleanup function must set the actuator to a predefined safe value (in the case of pressure, atmospheric pressure) before it can be deinitialised. In the case of a software error or user defined emergency, the \funct{Fatal} function can be called from any point in the software; this will lead to the cleanup functions of devices being called, which will in turn lead to the pressure being set to a safe value. 
+Sensors and Actuators should define an initialisation and cleanup function. For an actuator (e.g.: the pressure regulator), the cleanup function must set the actuator to a predefined safe value (in the case of pressure, atmospheric pressure) before it can be uninitialised. In the case of a software error or user defined emergency, the \funct{Fatal} function can be called from any point in the software; this will lead to the cleanup functions of devices being called, which will in turn lead to the pressure being set to a safe value. 
 
 Sensors and Actuators are designed to include an optional \funct{sanity} function which will check a reading or setting is safe respectively. These checks occur whenever a sensor value is read or an actuator is about to be set. In the case of a sensor reading failing the sanity check, \funct{Fatal} is called immediately and the software shuts down the experiment. In the case of an actuator being set to an unsafe value the software will simply refuse to set the value.
 
@@ -168,7 +168,7 @@ The use of a ``can select'' and ``can enable'' means that it is not a software p
 
 \subsubsection{PWM Outputs}
 
-A single PWM output is used to control a pressure regulator (model: ). The electrical team constructed an RC filter circuit which effectively averages the PWM signal to produce an almost constant analogue output. The period of the PWM is $2\text{kHz}$. This actuator has been calibrated, which allows the user to input the pressure value in kPa rather than having to control the PWM duty cycle corretly.
+A single PWM output is used to control a pressure regulator (model: ). The electrical team constructed an RC filter circuit which effectively averages the PWM signal to produce an almost constant analogue output. The period of the PWM is $2\text{kHz}$. This actuator has been calibrated, which allows the user to input the pressure value in kPa rather than having to control the PWM duty cycle correctly.
 
 
 \begin{figure}[H]
@@ -199,7 +199,7 @@ Several authentication methods are supported by the server; the method to use ca
 
   \item {\bf MySQL Database}
 
-        MySQL is a popular and free database system that is widely used in web applications. The ability to search for a user in a MySQL database and check their encrypted password was added late in the design as an alternative to LDAP. There are several existing online user management systems which interface with a MySQL database, and so it is feasable to employ one of these to maintain a list of users authorised to access the experiment. UserCake is recommended, as it is both minimalistic and open source, so can be modified to suit future requirements. We have already begun integration of the UserCake system into the project, however a great deal of work is still required.
+        MySQL is a popular and free database system that is widely used in web applications. The ability to search for a user in a MySQL database and check their encrypted password was added late in the design as an alternative to LDAP. There are several existing online user management systems which interface with a MySQL database, and so it is feasible to employ one of these to maintain a list of users authorised to access the experiment. UserCake is recommended, as it is both minimalistic and open source, so can be modified to suit future requirements. We have already begun integration of the UserCake system into the project, however a great deal of work is still required.
 
 
   MySQL and other databases are vulnerable to many different security issues which we did not have sufficient time to fully explore. Care should be taken to ensure that all these issues are addressed before deploying the system.
@@ -337,7 +337,7 @@ A JSON response is the direct representation of a JavaScript object, which is wh
 
 To generate the JSON response from the server program, \gitref{server}{fastcgi.c} contains a framework of helper functions. Most of the functions help to ensure that the generated output is in a valid JSON format, although only a subset of the JSON syntax is supported. Supporting the full syntax would overcomplicate writing the framework while being of little benefit. Modules can still respond with whatever format they like, using \funct{FCGI_JSONValue} (aka. \funct{FCGI_PrintRaw}), but lose the guarantee that the output will be in a valid JSON format. 
 
-Additionally, not all responses are in the JSON format. In specific cases, some module handlers will respond in a more suitable format. For example, the image handler will return an image (using \funct{FCGI_WriteBinary}); it would make no sense to return anything else. On the other hand, the sensor and actuator modules will return data as tab-separated values, if the user specifically asks for it (eg: using \url{https://host/api/sensors?id=X&format=tsv})
+Additionally, not all responses are in the JSON format. In specific cases, some module handlers will respond in a more suitable format. For example, the image handler will return an image (using \funct{FCGI_WriteBinary}); it would make no sense to return anything else. On the other hand, the sensor and actuator modules will return data as tab-separated values, if the user specifically asks for it (e.g.: using \url{https://host/api/sensors?id=X&format=tsv})
 
 \subsection{Server API - Cookies}\label{Cookies}
 
@@ -432,7 +432,7 @@ PWM control in particular took many hours to achieve, which was not helped by a 
 
 Getting the cameras to work on the BeagleBone was another major issue faced. After much testing, it was simply found that the cameras could only work on the latest version of the operating system. On anything else, only low resolution captures of around 352x288 pixels could be achieved.
 
-Finally, it should be noted that USB hotplugging does not work on the BeagleBone. This means that the cameras have to be plugged in before booting the BeagleBone. Upgrading to a newer kernel (when it exists) should solve this issue.
+Finally, it should be noted that USB hot-plugging does not work on the BeagleBone. This means that the cameras have to be plugged in before booting the BeagleBone. Upgrading to a newer kernel (when it exists) should solve this issue.
 
 
 \subsection{Required software}
@@ -556,12 +556,12 @@ Earlier in the semester we were informed by the Sensors Team that instead of a d
 
 \subsection{Results}
 
-Figure \ref{image_in_api.png} shows an image obtained from one of two dilatometers used in the system setup with collaboration between all teams. The image is of a white lego tile attached to the can. This image was successfully streamed using the server software, and results of the dilatometer readings were monitored using the same software. Unfortunately we were unable to maintain a constant value for a stationary can, indicating that the algorithm needs further development. Due to a leak in the can seal we were unable to pressurize the can sufficiently to see a noticable change in the edge position.
+Figure \ref{image_in_api.png} shows an image obtained from one of two dilatometers used in the system setup with collaboration between all teams. The image is of a white Lego tile attached to the can. This image was successfully streamed using the server software, and results of the dilatometer readings were monitored using the same software. Unfortunately we were unable to maintain a constant value for a stationary can, indicating that the algorithm needs further development. Due to a leak in the can seal we were unable to pressurize the can sufficiently to see a noticeable change in the edge position.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.6\textwidth]{figures/image_in_api.png}
-	\caption{Microscope image of actual lego tile attached to can in experimental setup} 
+	\caption{Microscope image of actual Lego tile attached to can in experimental setup} 
 	\label{image_in_api.png}
 \end{figure}
 
@@ -579,7 +579,7 @@ There are many considerations that are required to be taken into account for the
 
 	Due to the limits of the Beagle Bone such as available memory and processing power it was important that the code, images and all libraries used were both small in size and efficient.  This meant that careful consideration had to be made every time a library was considered for use.  It also meant that where possible processing should be offloaded onto the client hardware rather than running on the server which already runs the server side code.  This meant large libraries were ruled out and actions such as graphing were performed by the GUI on the client machine.
 
-	The final consideration is extensibility.  An extensible software base code allows easy addition of new features.  A good extensible interface makes it a simple case of simply dropping the extra code in in order to add extra features whereas a GUI that doesn't take this into account can require deleting and recoding of large chunks of the previous code.  This means that the interface code must be structured in a coherent way and all conform to a ``standard'' across the GUI.  Code must be laid out in the same way from page to page and where possible sections of code facilitating specific goals should be removed from the main page code.  The latter was achieved through the use of the \verb/.load()/ JavaScript function allowing whole widgets to be removed and placed in their own seperate files.  This feature alone lets the developer add new widgets simply by creating a widget file conforming to the GUI's standard and then \verb/.load()/ it into the actual page.
+	The final consideration is extensibility.  An extensible software base code allows easy addition of new features.  A good extensible interface makes it a simple case of simply dropping the extra code in in order to add extra features whereas a GUI that doesn't take this into account can require deleting and recoding of large chunks of the previous code.  This means that the interface code must be structured in a coherent way and all conform to a ``standard'' across the GUI.  Code must be laid out in the same way from page to page and where possible sections of code facilitating specific goals should be removed from the main page code.  The latter was achieved through the use of the \verb/.load()/ JavaScript function allowing whole widgets to be removed and placed in their own separate files.  This feature alone lets the developer add new widgets simply by creating a widget file conforming to the GUI's standard and then \verb/.load()/ it into the actual page.
 
 \subsection{Libraries used in GUI construction}
 
@@ -594,7 +594,7 @@ jQuery\cite{jQuery} is an open source library designed to make web coding easier
 Flot\cite{flot} is a Javascript library designed for plotting and built for jQuery.  This a lightweight easy to use library that allows easy production of attractive graphs.  It also includes advanced support for interactive features and can support for $\text{IE} < 9$ .  The Flot library provided an easy but powerful way to graph the data being sent by the server.
 
 
-\subsection{Libraries trialed but not used in GUI construction}
+\subsection{Libraries trialled but not used in GUI construction}
 
 These are libraries that were looked at and considered for use in the GUI software but were decided to not be used in the final product.
 
@@ -622,7 +622,7 @@ Once a design document was completed a Master Template was created.  Firstly a d
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\textwidth]{figures/draftGUI.png}
-	\caption{Draft GUI designed in Microsoft Powerpoint} 
+	\caption{Draft GUI designed in Microsoft PowerPoint} 
 	\label{draftGUI.png}
 \end{figure}
 
@@ -645,7 +645,7 @@ The First iteration of the GUI was a relatively simple and almost purely text ba
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{figures/GUI_creation.png}
+	\includegraphics[width=0.8\textwidth]{figures/gui_creation.png}
 	\caption{First Test GUI} 
 
 \end{figure}
@@ -656,7 +656,7 @@ Secondly we decided to test the FastCGI protocol. Where FastCGI can be used to i
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{figures/GUI_creation.png}
+	\includegraphics[width=0.8\textwidth]{figures/gui_creation.png}
 	\caption{Testing GUI} 
 
 \end{figure}
@@ -673,7 +673,7 @@ During the GUI development phase, several GUIs were created. Some used graphical
 
 \subsection{GUI Aesthetics}
 
-Once we had decided on our core GUI design, we decided that, although not yet complete we would get Adrain Keatings opinion on the GUI design. While the GUI design was simple and functional Dr. Keating pointed out the design was bland. He encouraged us to release our artistic flair onto our GUI and make it more graphical and easy to use. Taking this into account we began work on another final GUI designing almost from scratch. We kept our GUI design flow, and worked largely on the look and feel of the GUI rather the functionality the GUI needed. 
+Once we had decided on our core GUI design, we decided that, although not yet complete we would get Adrian Keating's opinion on the GUI design. While the GUI design was simple and functional Dr. Keating pointed out the design was bland. He encouraged us to release our artistic flair onto our GUI and make it more graphical and easy to use. Taking this into account we began work on another final GUI designing almost from scratch. We kept our GUI design flow, and worked largely on the look and feel of the GUI rather the functionality the GUI needed. 
 
 \subsection{HTML Structure}
 
@@ -681,7 +681,7 @@ The way our GUI works, in a nutshell, is that we use Basic HTML code to lay out 
 
 \subsection{Graphical Development VS Hard Coding}
 
-From the Multiple GUI we had accidently created during the GUI design phase we noticed a large variety in the styles of GUIs that came out (Which shouldn't have happened) GUIs were created using HTML CSS and JavaScript being hard coded, from development software like Dreamweaver, and various Java based development platforms. 
+From the Multiple GUI we had accidentally created during the GUI design phase we noticed a large variety in the styles of GUIs that came out (Which shouldn't have happened) GUIs were created using HTML CSS and JavaScript being hard coded, from development software like Dreamweaver, and various Java based development platforms. 
 
 \subsection{Final Design}
 
@@ -689,7 +689,7 @@ The final concept consists of widgets and a navigation bar to the left. We decid
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{figures/GUI_final.png}
+	\includegraphics[width=0.8\textwidth]{figures/gui_final.png}
 	\caption{Final GUI} 
 \end{figure}
 
@@ -697,31 +697,31 @@ This is the ``home screen'' it shows the layout of the experiment, the subsystem
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{figures/GUI_experiment.png}
+	\includegraphics[width=0.8\textwidth]{figures/gui_experiment.png}
 	\caption{The Experiment (While disconnected from the server in the pic above) displays the Warnings and the experiment state to allow device use by only 1 student and avoid nasty conflicting control} 
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{figures/GUI_results.png}
+	\includegraphics[width=0.8\textwidth]{figures/gui_results.png}
 	\caption{The Experimental Results page (also currently disconnected)} 
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{figures/GUI_data.png}
+	\includegraphics[width=0.8\textwidth]{figures/gui_data.png}
 	\caption{The experimental data page shows the start the sensors and actuators are reading, useful for checking the condition and measuring the experiment. } 
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{figures/GUI_pintest.png}
+	\includegraphics[width=0.8\textwidth]{figures/gui_pintest.png}
 	\caption{The BBB Pin test page is for the software team only so that we can test and debug the experiment we errors are found in the GUI or software. } 
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{figures/GUI_help.png}
+	\includegraphics[width=0.8\textwidth]{figures/gui_help.png}
 	\caption{The help page, which links to the wiki information from all the teams and allows new users to look at all aspects of the project to be further developed and finished. } 
 \end{figure}
 

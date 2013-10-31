@@ -50,7 +50,7 @@ The system software essentially is defined by the ``control'' component: allowin
 The development process is outlined below. Each part of the software followed the same general process, which is discussed in more detail for each section later in the report.
 
 \subsection{Planning and Design}
-First, the actual software task to be completed is identified; this is organised with group input. The software component is then designed according to the requirements. Parameters and features are chosen based on the project GUIdelines and how the component interacts with other software. 
+First, the actual software task to be completed is identified; this is organised with group input. The software component is then designed according to the requirements. Parameters and features are chosen based on the project guidelines and how the component interacts with other software. 
 
 \subsection{Coding}
 
@@ -64,21 +64,21 @@ The Git system ensures that work by different team members is tracked\cite{githu
 \begin{enumerate}
 	\item Create an individual ``fork'' of the software, separate from the main branch.
 	\item Modify this fork on a local machine with proposed changes or additions. This fork is also updated regularly with any changes that were made in the main branch.
-	\item When work is complete, create a ``pull request'' to merge local changes back into the main codebase.
+	\item When work is complete, create a ``pull request'' to merge local changes back into the main code base.
 	\item The pull request can be reviewed by other team members; if everything fits, the request is accepted and the local changes become part of the main code. 
 \end{enumerate}
 In this way, GitHub automates the more tedious aspects of code management.
 
 Another important aspect of the coding process is coding style. Throughout the project, all code that was written adhered to the same style to make it consistent and easier to read. One aspect of styling, for example, is use of capitals when defining function names (for example, \funct{Actuator_Init}), variable names (\var{g_num_actuators}), or definitions of constants (\var{ACTUATORS_MAX}), to make it immediately clear whether something is a function, variable or constant. Other aspects include use of indentation, the ordering of functions, and frequent use of comments. Essentially, styling is used to ensure the code is consistent, easy to follow, and can therefore be worked on by multiple people. 
 
-Coding style is also important when following general code standards. The C language features many standards and style GUIdelines which were also adhered to, to make the code readable by wider industry professionals. Some examples of this include beginning global variables with \texttt{g_} and correct use of brackets as separators\cite{mellon}. All efforts were made to follow common C and HTML code standards. The use of a common coding style and standards will hopefully make the project software easily expandable by others in the future.
+Coding style is also important when following general code standards. The C language features many standards and style guidelines which were also adhered to, to make the code readable by wider industry professionals. Some examples of this include beginning global variables with \texttt{g_} and correct use of brackets as separators\cite{mellon}. All efforts were made to follow common C and HTML code standards. The use of a common coding style and standards will hopefully make the project software easily expandable by others in the future.
 
 
 Code was also expected to adhere to safety standards. In the first weeks of the project, a document\cite{kruger_safety} was created that outlined all aspects of software safety - both for the software design itself, and ensuring that the system was still safe if the software failed. The results of this are explained further later in the report, with one example being the server's ``sanity check'' functions.
 
 \subsection{Testing}
 
-Once the software section is relatively complete, it can be tested with the larger codebase. This was generally done through writing specific test functions. Because the operating system on the BeagleBone (GNU/Linux) is widely available for commercial PCs and laptops, software development and testing could occur without needing to wait for a BeagleBone to become available. Code was also tested on the BeagleBone itself where possible to ensure correct operation. One example is for the sensors software - initially, functions were written that simulated sensors, so it could be tested if data was read correctly. These functions were rewritten for use with actual hardware as the specifics became known later in the project.
+Once the software section is relatively complete, it can be tested with the larger code base. This was generally done through writing specific test functions. Because the operating system on the BeagleBone (GNU/Linux) is widely available for commercial PCs and laptops, software development and testing could occur without needing to wait for a BeagleBone to become available. Code was also tested on the BeagleBone itself where possible to ensure correct operation. One example is for the sensors software - initially, functions were written that simulated sensors, so it could be tested if data was read correctly. These functions were rewritten for use with actual hardware as the specifics became known later in the project.
 
 \subsection{Collaboration}
 After the testing process is satisfied, the final code can be committed to the system. This requires input from the other project teams. If there is any feedback or the requirements change in the future, the code can be edited through the above process.
@@ -97,7 +97,7 @@ Outside of meetings, email was the main form of communication. Email threads exi
 
 \subsection{Scheduling}
 
-At the beginning of the project, an overall software schedule was created, outlining the main tasks to be completed and their target dates. While this was useful for planning purposes and creating an overall impression of the task, it became less relevant as the semester continued. The nature of the software team's work meant that it was often changing from week to week; varying hardware requirements from other teams, unexpected issues and some nebulous project GUIdelines led to frequent schedule modifications. For instance: use of the BeagleBone turned out to be a significant time-sink, requiring a lot of troubleshooting due to lack of documentation; and a sophisticated login system was not mentioned until late in the project, so resources had to be diverted to implement this. Essentially, while the software group did attempt to keep an overall schedule, this was only useful in planning stages due to the changing priorities of tasks.
+At the beginning of the project, an overall software schedule was created, outlining the main tasks to be completed and their target dates. While this was useful for planning purposes and creating an overall impression of the task, it became less relevant as the semester continued. The nature of the software team's work meant that it was often changing from week to week; varying hardware requirements from other teams, unexpected issues and some nebulous project guidelines led to frequent schedule modifications. For instance: use of the BeagleBone turned out to be a significant time-sink, requiring a lot of troubleshooting due to lack of documentation; and a sophisticated login system was not mentioned until late in the project, so resources had to be diverted to implement this. Essentially, while the software group did attempt to keep an overall schedule, this was only useful in planning stages due to the changing priorities of tasks.
 
 
 Far more useful was the weekly scheduling system. As mentioned in the ``Communication'' section\ref{Communication}, a weekly task list was created on each Monday, giving the team a clear direction. This suited the flexibility of the software well; tasks could be shuffled and re-prioritised easily and split between team members. It was still very important to keep the project's overall deadline in mind, and the weekly task lists could be used to do this by looking separately at the main areas of software (such as GUI design, sensors, and so on) and summarising the remaining work appropriately. Brief weekly reports also covered what had been completed so far, providing a further measure of progress.
@@ -107,7 +107,7 @@ The group also elected a ``meeting convener'' to assist with organisation (Samue
 
 \subsection{Group Participation}
 
-The nature of software development means that it tends to be very specialised --- extensive knowledge of coding is required to be effective, which is difficult to learn in a short timeframe. The members of the software team all had varying levels of experience, and therefore could not contribute equally to all areas of the project. Some team members had done very little coding before (outside of introductory units at university) which made it difficult for them to contribute in some areas, while others had the extensive knowledge required.
+The nature of software development means that it tends to be very specialised --- extensive knowledge of coding is required to be effective, which is difficult to learn in a short time frame. The members of the software team all had varying levels of experience, and therefore could not contribute equally to all areas of the project. Some team members had done very little coding before (outside of introductory units at university) which made it difficult for them to contribute in some areas, while others had the extensive knowledge required.
 
 
 However, different team members had skills in other areas besides coding, and these skills were allocated to ensure that all members could contribute effectively. For instance, as some people worked on the server code, others worked on the visual GUI design; it made sense for the people who were most efficient with coding to work on those elements while others performed different tasks. Even though the software project was principally coding, there were many supplementary development tasks --- writing documentation, hardware testing, et cetera --- that were involved. Some areas of the software, such as the BeagleBone interfacing, were new to all team members and were worked on by everyone.
@@ -125,7 +125,7 @@ Email was used extensively for other communication. All members of the unit were
 
 \subsection{Individual Contributions}
 
-Software project tasks were divided up between team members, and in this report, each team member has generally been the writer of the sections they actually worked upon. Throughout the project, team members had clear areas of responsibility, and their work can also be followed through the GitHub repository (which allows tracking of individual contributions to the codebase). Below is a rough summary of individual areas of interest:
+Software project tasks were divided up between team members, and in this report, each team member has generally been the writer of the sections they actually worked upon. Throughout the project, team members had clear areas of responsibility, and their work can also be followed through the GitHub repository (which allows tracking of individual contributions to the code base). Below is a rough summary of individual areas of interest:
 
 \begin{tabular}{l|l}
 	{\bf Team Member} & {\bf Development} \\
@@ -140,7 +140,7 @@ Software project tasks were divided up between team members, and in this report,
 It should also be noted that team members often helped each other with designing, problem solving and testing, so members did end up contributing in some way to most areas of the software.
 
 
-Server coding tasks included the threading system, data handling, sensors/actuators control, authentication, server/client communication, http/s use, FastCGI, AJAX and the server API, which were split mainly by Sam and Jeremy (with significant overlap). BeagleBone interfacing included hardware access, pin control, networking and testing, and involved most members of the team. Sam, Jeremy and Justin focused on pin control, Jeremy and Callum investigated webcam use, and Rowan performed additional testing. GUI design involved the visual design elements, HTML/CSS webpage coding and Javascript functionality. James was primarily in charge of the GUI design, functionality and implementation, with assistance and alternate designs provided by Jeremy. Other team members were responsible for individual GUI sections, including Sam (graphs), Justin (help and data) and Rowan (widgets). Other tasks included image processing with OpenCV (Callum) and project documentation and safety (Justin).
+Server coding tasks included the threading system, data handling, sensors/actuators control, authentication, server/client communication, HTTP(S) use, FastCGI, AJAX and the server API, which were split mainly by Sam and Jeremy (with significant overlap). BeagleBone interfacing included hardware access, pin control, networking and testing, and involved most members of the team. Sam, Jeremy and Justin focused on pin control, Jeremy and Callum investigated webcam use, and Rowan performed additional testing. GUI design involved the visual design elements, HTML/CSS webpage coding and Javascript functionality. James was primarily in charge of the GUI design, functionality and implementation, with assistance and alternate designs provided by Jeremy. Other team members were responsible for individual GUI sections, including Sam (graphs), Justin (help and data) and Rowan (widgets). Other tasks included image processing with OpenCV (Callum) and project documentation and safety (Justin).
 
 \subsection{Cost Estimation}
 
