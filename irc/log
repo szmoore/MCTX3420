@@ -7553,3 +7553,593 @@
 00:25 -!- Rowan [~Rowan@106-68-210-88.dyn.iinet.net.au] has joined #mctxuwa_softdev
 00:28 < Rowan> im not entirly sure what i should be writing about. i never had a specific role ... just sorta butterflied around
 00:29 < Rowan> learnt a huge amount although havnt done any work that has been needed or used in any final product.
+01:43 -!- Rowan [~Rowan@106-68-210-88.dyn.iinet.net.au] has quit [Ping timeout]
+07:21 -!- Rowan [~Rowan@106-68-210-88.dyn.iinet.net.au] has joined #mctxuwa_softdev
+08:03 -!- Rowan [~Rowan@106-68-210-88.dyn.iinet.net.au] has quit [Ping timeout]
+09:13 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+09:32 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:36 < jtanx> I added in some wiki pages last night, about the operating system, required packages and a special mention on pwm control
+09:39 -!- Rowan [~Rowan@130.95.95.20] has joined #mctxuwa_softdev
+09:39 < jtanx> hey
+09:39 < sam_moore> Hi, have to leave for bus now
+09:39 < jtanx> okay
+09:40 -!- Rowan [~Rowan@130.95.95.20] has quit [EOF From client]
+09:41 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+09:58 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+12:21 -!- Rowan [~Rowan@106-68-210-88.dyn.iinet.net.au] has joined #mctxuwa_softdev
+13:21 -!- Rowan [~Rowan@106-68-210-88.dyn.iinet.net.au] has quit [EOF From client]
+16:41 -!- Rowan [~Rowan@106-68-210-88.dyn.iinet.net.au] has joined #mctxuwa_softdev
+16:42 < Rowan> still not entirely sure what i can be helping with. james says hes done with the gui part. should i just ignore him and start again with it mayself
+16:54 -!- Rowan [~Rowan@106-68-210-88.dyn.iinet.net.au] has quit [EOF From client]
+18:21 -!- Rowan [~Rowan@106-68-210-88.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:54 < sam_moore> Rowan: James has covered stuff like the design process and library selection etc
+18:55 < sam_moore> It would probably be good to discuss how the GUI is actually meant to work, how people are supposed to use it
+18:55 < sam_moore> Things like: There is a menu bar to go between different pages
+18:55 < sam_moore> List each page and give an overview of what it does
+18:55 < sam_moore> I suggest you have a look at github for the MCTXWeb testing GUI as it is the most complete
+18:55 < sam_moore> And we were using it this week and showing it to Adrian
+18:56 < sam_moore> So, I suggest you read James' section first, then just cover anything you think he's missed
+18:57 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:58 < sam_moore> jtanx: The report is looking good, I'm going to add your and my sections last
+18:58 < jtanx> Okay, that's fine
+18:58 < jtanx> Sorry for leaving so abruptly
+18:58 < sam_moore> There is a lot of stuff I can potentially write about, so I think the best idea is to just put all the other stuff in and then work around it
+18:58 < sam_moore> That's OK
+18:58 < sam_moore> Nothing really got done
+18:59 < jtanx> Sure
+18:59 < sam_moore> I ended up getting a bit pissed off with the other teams :S
+18:59 < jtanx> :/
+18:59 < sam_moore> They wanted to test the dilatometer...
+18:59 < sam_moore> And the pressure sensors...
+18:59 < sam_moore> And the microphones...
+18:59 < jtanx> did any of that get tested?
+18:59 < sam_moore> And the can wasn't holding pressure...
+18:59 < sam_moore> Nope
+18:59 < sam_moore> You know how it is
+18:59 < sam_moore> They needed to refocus the dilatometer...
+18:59 < sam_moore> So then someone says "While they do that, we'll test the pressure sensors"
+18:59 < sam_moore> Then everyone gets distracted...
+18:59 < jtanx> ....
+19:00 < sam_moore> Then that gets delayed somehow...
+19:00 < sam_moore> Then the people say "We focused the dilatometer!"
+19:00 < sam_moore> And you try and go back to doing that...
+19:00 < sam_moore> Then someone says "Are we testing the pressure sensors"
+19:00 < jtanx> -.-
+19:00 < sam_moore> And you go, "Well, since the dilatometer isn't working, we'll go back to that!"
+19:01 < sam_moore> Then someone says "What if you just do this little thing to the dilatometer..."
+19:01 < sam_moore> Blergh
+19:01 < jtanx> that sounds stupid
+19:01 < sam_moore> I think that edge detection was really the wrong way to do that dilatometer algorithm
+19:01 < sam_moore> Looking at the images...
+19:02 < sam_moore> It'd be far more reliable to just locate the change between dark and light pixels directly
+19:02 < sam_moore> But either way
+19:02 < jtanx> Yeah, now that I think about it,that'd make more sense
+19:02 < jtanx> would reduce cpu usage too
+19:02 < sam_moore> There are all these creative ways people kept coming up with
+19:02 < sam_moore> That basically boil down to
+19:02 < sam_moore> Making a different image
+19:02 < sam_moore> And then processing that
+19:03 < sam_moore> When really... you should just look at how to process the image you already have
+19:03 < jtanx> Yeah
+19:03 < sam_moore> Kieran's mathematica image thing looks horrendously complicated to analyse
+19:03 < jtanx> Really trying to complicate something that sholdn't be
+19:03 < jtanx> Ah... Kieran
+19:04 < jtanx> Seems to always come up with overly complicated plans
+19:04 < sam_moore> I said "If you can make an algorithm that will take whatever you want to do and spit out a number, we can put it in the software"
+19:04 < sam_moore> "If you come up with an algorithm that says "Make an image and then quantify it somehow" it will not work"
+19:04 < jtanx> Yeah
+19:05 < sam_moore> Unrelated, but about the whole "strain sensors aren't used on the exploding can but get shown in the gui"
+19:06 < sam_moore> I say it doesn't matter
+19:06 < sam_moore> They don't have to plot those sensors
+19:06 < sam_moore> Just put it in the documentation. When you use the exploding can, these sensors are effectively meaningless.
+19:06 < jtanx> Yeah
+19:06 < jtanx> that's fine too
+19:07 < jtanx> future work, if they run out of other things to do
+19:07 < sam_moore> Yeah, but even in future work I wouldn't really want to deal with that issue
+19:07 < sam_moore> It makes the system less flexible to have to specify the sensors you want to appear in the API
+19:07 < jtanx> I guess
+19:07 < sam_moore> Perhaps do it in the GUI
+19:07 < jtanx> perhaps
+19:08 < sam_moore> There's no harm in the server allowing those API requests
+19:08 < sam_moore> But you can hide unused things in the GUI
+19:08 < sam_moore> Enough of that
+19:08 < sam_moore> To the report
+19:08 < sam_moore> Currently adding James' stuff, it seems to fit well
+19:08 < jtanx> That's good
+19:09 < jtanx> do we need more references or something
+19:09 < sam_moore> I've largely abandoned the idea of a chapter of what the system is vs a chapter of the design considerations
+19:09 < sam_moore> Just discuss things as they come up
+19:09 < jtanx> Okay
+19:09 < jtanx> fair enough
+19:10 < sam_moore> References might be good
+19:10 < sam_moore> I suppose for things like the binary search you can reference a wikipedia page on it?
+19:10 < sam_moore> Or for things like "What a thread is"
+19:10 < jtanx> with software it's a bit hard
+19:11 < sam_moore> Yeah, even if you use a known algorithm it still gets dramatically altered based on what you want to do with it
+19:11 < jtanx> Yeah
+19:11 < sam_moore> Rowan: If you are still here, a glossary of terms is also potentially useful
+19:11 < sam_moore> I think we have one in the wiki?
+19:11 < jtanx> But realistically, what sort of 'formal' references are there for software
+19:11 < sam_moore> Stack overflow?
+19:11 < jtanx> the wiki has a glossary, but it could be expanded
+19:12 < jtanx> stack overflow as a formal reference?
+19:12 < sam_moore> Haha
+19:12 < sam_moore> Reference any library we use
+19:12 < sam_moore> They aren't formal though
+19:12 < jtanx> It'll have to be good enough
+19:12 < sam_moore> Look, we didn't use any formal academic references
+19:12 < sam_moore> So we can't reference them
+19:13 < jtanx> Yeah
+19:13 < sam_moore> Computer Science papers would be next to useless on this anyway
+19:13 < jtanx> pretty much
+19:13 < sam_moore> Unless you can find the original paper on things like binary searches
+19:13 < jtanx> ugh
+19:13 < sam_moore> Or whoever first coined the term "thread"
+19:13 < sam_moore> Digging through papers from the 1970s/80s ...
+19:13 < jtanx> pretty sure, binary search is like common knowledge in computing by now
+19:13 < sam_moore> It is taught in first year
+19:14 < sam_moore> It is probably one of the few things that is taught at UWA that was employed in this project...
+19:14 < jtanx> Okay, so lets reference CITS1210
+19:14 < sam_moore> Ahahaha
+19:14 < jtanx> I think it was acceptable
+19:14 < jtanx> reference material from previous units
+19:14 < sam_moore> yes, do that
+19:14 < sam_moore> I can reference my honours course on multithreading :P
+19:14 < jtanx> yeah
+19:14 < jtanx> that's good :P
+19:16 < sam_moore> Rowan: I said some stuff earlier, you may need to scroll back to see it if your IRC client doesn't notify you
+19:18 < sam_moore> jtanx: Should we make "Read the IRC chatlogs" a recommendation? :P
+19:18 < jtanx> Yeah, it would be helpful I guess
+19:18 < jtanx> lots of text to scrawl through though
+19:18 < jtanx> "Read IRC chatlogs" and "commit history" of git repository
+19:18 < sam_moore> If you look though you can find design discussions
+19:18 < sam_moore> Even some links to things
+19:19 < sam_moore> The git commit history also has some design changes
+19:19 < sam_moore> Eg if someone were considering using SQlite...
+19:19 < sam_moore> I think I put the performance tests in testing
+19:20 < sam_moore> But if they ignored those, there is code that uses SQlite which could be helpful
+19:20 < Rowan> yep just finished reading through it .. ill put together some stuff after i shower :\
+19:20 < sam_moore> Ok, thanks
+19:20 < jtanx> You'd have to go back to the very first commits to see the sqlite code afaik
+19:21 < jtanx> but yeah, since we ran a full blown mysql server on it...
+19:23 < Rowan> did you guys learn all this over this sem. or was it by part from databases and cits1210?
+19:24 < Rowan> and other units..
+19:24 < sam_moore> I knew very little about databases before this project
+19:24 < jtanx> um
+19:24 < jtanx> I'd say most of it was from my own learning
+19:24 < sam_moore> I know a reasonable amount about pthreads due to a course I did last year which involved much more complicated stuff than this
+19:25 < jtanx> databases didn't really help...
+19:25 < sam_moore> Well no
+19:25 < jtanx> bah that unit was shit
+19:25 < sam_moore> I never did Databases
+19:25 < Rowan> i though sqlite and cgi stuff was covered in the database unit?
+19:25 < jtanx> sqlite yeah, cgi no
+19:26 < sam_moore> I've used CGI before, but not that much
+19:26 < sam_moore> When I tested it I realised it would be an absolute pain to synchronise everything
+19:26 < jtanx> pretty much all of the web stuff for this unit, I learnt during this course
+19:26 < sam_moore> I've done low level network programming as a hobby
+19:26 < sam_moore> So I was going to write a custom HTTP server
+19:26 < sam_moore> But fortunately Jeremy found FastCGI
+19:26 < sam_moore> Which I'd never heard of
+19:26 < Rowan> yeha
+19:26 < sam_moore> So there is a lot of stuff I've learned I would say
+19:27 < Rowan> i really gotta learn more of this. i hated this unis cos ive been so pathetically useless ...
+19:27 < Rowan> ive learnt heaps aswell
+19:27 < Rowan> but no where near enough
+19:27 < Rowan> what was your multithreading honours thing you mentioned?
+19:28 < sam_moore> That was for Physics
+19:29 < sam_moore> Parallel Programming
+19:29 < jtanx> you should have used f# :P
+19:29 < sam_moore> We didn't cover f# since I suspect it is not great for low level type stuff
+19:30 < jtanx> I guess not, but apparently functional code is really good for parallelisation 
+19:31 < sam_moore> Maybe...
+19:31 < sam_moore> Well, OpenMP is much nicer than pthreads in a lot of cases
+19:31 < sam_moore> It's really simple to make things parallelised
+19:31 < jtanx> have you heard of multithreading without locks
+19:31 < sam_moore> But it's terrible for communicating between threads
+19:32 < sam_moore> Great for doing something like a for loop where each thread calculates part of an array
+19:32 < Rowan> -----> should we have general info about the BBB in the glossary?
+19:32 < sam_moore> That might be useful
+19:33 < sam_moore> We are probably going to go over the 30 pages
+19:33 < jtanx> well
+19:33 < jtanx> lsat I heard, weren't sensors at ~50 pages
+19:33 < sam_moore> Yeah
+19:33 < sam_moore> Write all the things
+19:33 < sam_moore> If people are free tomorrow we will have to have a group meeting if we are over 30 pages
+19:33 < sam_moore> But...
+19:34 < sam_moore> Even though LaTeX uses a large amount of space by default
+19:34 < sam_moore> It can also be tweaked...
+19:34 < sam_moore> Definitely going with 10 point font
+19:34 < jtanx> sounds like a plan
+19:36 < sam_moore> jtanx: OpenMP has a lot of implicit locks by the way
+19:36 < Rowan> im not able to come in tomorrow though. . . i need to stop doing unit i need to be present for.
+19:36 -!- Rowan [~Rowan@106-68-210-88.dyn.iinet.net.au] has quit [EOF From client]
+19:36 < sam_moore> Which is why it's easy to do stuff with
+19:36 < jtanx> um
+19:36 < jtanx> doesn't rowan have to sign the coversheet
+19:36 < sam_moore> Yeahhhh
+19:37 < sam_moore> We could get a "digital" signature?
+19:37 < jtanx> maybe
+19:37 < sam_moore> One of my friends got a digital signature from their honours supervisor...
+19:37 < jtanx> hahaha
+19:37 < sam_moore> It was a png file containing their signature
+19:37 < jtanx> that could work
+19:38 < jtanx> there's a digital copy of the cover sheet somewhere
+19:38 < jtanx> I figured out why the wiki git repository wasn't cloning properly
+19:38 < jtanx> you can't have colons (:) in the filename on windows
+19:38 < sam_moore> Ahaha
+19:38 < jtanx> :/
+19:39 < sam_moore> Having two people that know linux already is really good for this project by the way...
+19:39 < jtanx> Yeah
+19:39 < sam_moore> I suspect someone who hadn't used linux before would have serious difficulties...
+19:40 < jtanx> ahh yeah that would be a problem
+19:41 < sam_moore> Dinner time
+19:41 < jtanx> Okay
+19:43 < jtanx> aha
+19:43 < jtanx> you can push to the wiki repository
+20:19 < sam_moore> Hmm
+20:20 < sam_moore> Could you push non plain text files to the wiki repository
+20:20 < jtanx> yep
+20:20 < jtanx> I pushed some images
+20:20 < sam_moore> It would be a good way to organise all documentation
+20:20 < jtanx> so all the images reside in the wiki repo
+20:20 < sam_moore> That's good
+20:20 < jtanx> well all of mine 
+20:20 < jtanx> I should convert all of those imgur links
+20:20 < sam_moore> We could have put all the documentation and report cruft in the wiki repo!
+20:21 < sam_moore> Oh well, that's good to know for next time I use GitHub for something
+20:21 < jtanx> except half the stuff won't show up on my computer, with them fancy colons
+20:21 < sam_moore> Haha
+20:21 < sam_moore> No problem for me :P
+20:21 < sam_moore> Join us...
+20:21 < jtanx> bah
+20:21 < sam_moore> Any problem can be solved with sufficient use of `apt-get install`
+20:22 < jtanx> I don't think it would be a good idea to put all documentation on the project wiki
+20:22 < sam_moore> Oh?
+20:22 < jtanx> because github doesn't provide the same overview
+20:22 < sam_moore> Hmm
+20:22 < jtanx> you know how you can see the commit history and stuff for a normal repo
+20:22 < sam_moore> Yeah
+20:22 < jtanx> it doesn't have the same thing
+20:22 < sam_moore> But you can do that for the wiki if you clone it as a normal repo...
+20:22 < sam_moore> And...
+20:23 < jtanx> yeah
+20:23 < sam_moore> You can make post commit hooks for repos...
+20:23 < jtanx> but you can't visualise it as easy on github
+20:23 < sam_moore> Alright, fair enough
+20:23 < jtanx> oh right
+20:23 < sam_moore> It might be possible to hack together post commit hooks to have the wiki and an overview of other files in it
+20:24 < jtanx> quite possibly yeah
+20:24 < jtanx> but that's a hack
+20:24 < sam_moore> It might be a better suggestion for GitHub to start adding features for repos that aren't just for coding purposes
+20:24 < jtanx> hmm
+20:25 < sam_moore> Depending on how good the markup language is, you could probably do a report through GitHub entirely
+20:25 < jtanx> quite possibly
+20:25 < jtanx> with github you can have your choice of markup language
+20:25 < sam_moore> Of course, people's brains tend to shutdown when they have to use anything that isn't WYSIWYG
+20:26 < sam_moore> Which may explain why Labview is popular...
+20:26 < jtanx> huh
+20:26 < jtanx> I just realised
+20:26 < jtanx> When you set an image link 
+20:26 < jtanx> and say it's imgur
+20:26 < jtanx> github caches it or something
+20:27 < sam_moore> ... Interesting
+20:27 < jtanx> so it appears as if it;s coming from github
+20:27 < sam_moore> I'd still put the images in the wiki repo
+20:27 < jtanx> yeah
+20:27 < jtanx> ...just that there are /so many/ images to convert
+20:28 < jtanx> right
+20:28 < jtanx> time to get out notepad++
+20:28 < sam_moore> I didn't mean you should actually convert all the images...
+20:29 < sam_moore> Just in future it's probably better to do it that way
+20:29 < sam_moore> Our whole repo should be structured more cleanly
+20:30 < sam_moore> Seperate branches probably
+20:30 < sam_moore> Store some install scripts in the master branch that will pull from the other branches...
+20:31 < jtanx> hmm
+20:31 < jtanx> I think I heard that you could have a git repository
+20:31 < jtanx> that links others
+20:31 < sam_moore> That could also work, branches are nice though
+20:31 < jtanx> yeah
+20:31 < sam_moore> git pull <source> server
+20:31 < sam_moore> or `git pull <source> website
+20:31 < sam_moore> etc
+20:32 < jtanx> sounds googd
+20:44 < jtanx> the pressure signal from the regulator was never used 
+20:44 < jtanx> right?
+20:54 < sam_moore> Nope, but it could be in future work
+20:54 < sam_moore> Eg: This afternoon
+20:54 < jtanx> haha,okay
+20:54 < sam_moore> The pressure regulator was taking a very long time to reach the values specified
+20:54 < sam_moore> Although
+20:55 < sam_moore> I suspect that might be to do with the fact that Omid had the mains pressure turned down ridiculously low
+20:55 < jtanx> hmm
+20:55 < sam_moore> Like, the higher the mains pressure, the faster the pressure increases when the regulator is active, so the less time it has to wait
+20:56 < sam_moore> I guess it just vents air when it's over pressurized and uses PID
+20:56 < jtanx> most likely
+20:57 < sam_moore> But yeah, there were a lot of times when the mains pressure was cut completely for some reason and the regulator was struggling to set the pressure :S
+20:57 < jtanx> Yeah
+20:57 < jtanx> didn't sound healthy
+20:57 < sam_moore> Even when it was set to zero it would do it though
+20:57 < jtanx> I like how we're so careless with what, $800 equipment
+20:58 < sam_moore> Haha
+20:58 < sam_moore> Apparently the strain gauge circuit is now behaving fine...
+20:58 < sam_moore> the suggestion of testing them was raised...
+20:58 < sam_moore> But that was before I got angry and said "I still have to collate our report and it's 5pm!"
+20:58 < jtanx> Yep
+20:59 < jtanx> A bit too late for that
+20:59 < sam_moore> And if we broke the BeagleBone at 5pm on the second last day of semester...
+20:59 < sam_moore> So much shitstorm
+20:59 < sam_moore> I should have let someone else tell Adrian that snoopy got killed :S
+20:59 < sam_moore> He asked me all these questions about why it happened!
+20:59 < jtanx> :/
+21:00 < sam_moore> "Electronics designed the circuit, I don't know!"
+21:00 < sam_moore> "Don't fingerpoint!"
+21:00 < sam_moore> :S
+21:00 < jtanx> that was stupid
+21:00 < sam_moore> It's fair enough I guess
+21:00 < jtanx> I guess
+21:00 < sam_moore> We should have stopped the testing as soon as that reset button went wierd
+21:01 < jtanx> yeah, well I blame not enough sleep
+21:01 < sam_moore> Yeah, 3 hours sleep the night before...
+21:01 < sam_moore> s/night/morning/ because technically it was the same day...
+21:01 < jtanx> :S
+21:02 < sam_moore> James' section is in the report
+21:02 < jtanx> Cool
+21:03 < sam_moore> 3 pages when put into 10 point font with the figures
+21:03 < sam_moore> Justin's is 6 pages with 10 point font though
+21:03 < jtanx> Okay
+21:04 < sam_moore> The stuff I currently have in my section is 6 pages with 3 pages of figures... but it is referencing figures that aren't included yet :S
+21:04 < sam_moore> Oh well, I'm not taking ownership of the report
+21:04 < jtanx> urp
+21:05 < sam_moore> I've put in exactly what James wrote with no changes
+21:05 < sam_moore> Except a spelling mistake I think
+21:05 < sam_moore> It's a good overview of the libraries to be fair
+21:06 < sam_moore> I really like how "dilatometer" is underlined by the spell checker in the powerpoint slide
+21:06 < sam_moore> Shows it's authentically done in power point
+21:07 < sam_moore> Rowan's sent me me stuff that has screen shots mostly of the "testing" GUI
+21:07 < sam_moore> That's good, because I wanted to put those in
+21:07 < jtanx> Which 'testing gui'
+21:07 < sam_moore> The one we actually used today
+21:08 < sam_moore> Well... some version of it
+21:08 < jtanx> Ah, right
+21:08 < sam_moore> I'm going to update some of the figures, eg: the graph page doesn't show a graph, which can easily be fixed
+21:09 < sam_moore> Annoyingly, all the references and citations are currently giving [?] and ??
+21:09 < sam_moore> Probably because I copied the template from the ENSC1001 report where I screwed up the references somehow
+21:13 < sam_moore> ... Actually using the write references file would be good...
+21:13 < jtanx> What's that?
+21:13 < sam_moore> s/write/right
+21:13 < sam_moore> references/refs.bib
+21:14 < jtanx> ohh right
+21:14 < jtanx> was that vim notation
+21:14 < sam_moore> The s/ yeah
+21:15 < sam_moore> It's for a regex replace
+21:15 < sam_moore> Oddly enough, I tend to use it in IRC more than in actual vim...
+21:15 < jtanx> ~.~
+21:15 < sam_moore> #ucc used to have a regex bot that would interpret it
+21:15 < sam_moore> And do the replace on the last line you said...
+21:15 < sam_moore> Then spit it back out
+21:15 < sam_moore> It got abused and then removed
+21:15 < jtanx> I can imagine...
+21:15 < sam_moore> s/.*/I AM TERRIBLE
+21:16 < sam_moore> Sorry, the reason it got abused
+21:16 < sam_moore> Was because it was the last line *anyone* said that matched the regex
+21:16 < sam_moore> Not just your own
+21:16 < jtanx> well, that could have been fixed
+21:16 < jtanx> but perl scripts... ugh
+21:16 < sam_moore> Probably
+21:17 < sam_moore> I think it might have been a python bot, but I'm not sure
+21:17 < jtanx> huh
+21:17 < jtanx> never heard of a python irc bot
+21:17 < sam_moore> I wrote a bash IRC bot...
+21:17 < sam_moore> It doesn't actually say anything
+21:17 < jtanx> then what does it do?
+21:18 < sam_moore> It reads the channel and pipes things to text to speech
+21:18 < sam_moore> It is amazing
+21:18 < jtanx> uhh
+21:18 < jtanx> whyyyyy
+21:18 < sam_moore> To use it you have to run irssi in screen and setup log files
+21:18 < sam_moore> The script itself periodically parses the log files...
+21:19 < sam_moore> Passes them through a regex to get rid of things that don't pronounce well (eg: 21:18 < sam_moore> becomes "sam moore says")
+21:19 < sam_moore> Then says them through festival
+21:19 < sam_moore> Best thing I ever did
+21:20 < jtanx> Riiiiight
+21:20 < jtanx> sounds useful.... 
+21:20 < jtanx> *cough*
+21:20 < sam_moore> Well it can be told to only say lines that include a regex
+21:20 < sam_moore> The idea being you go "clubroom: You over there, pick up that rubbish"
+21:20 < sam_moore> And it plays that over the clubroom speakers...
+21:21 < jtanx> that would be creepy
+21:21 < sam_moore> I gave it the closest sounding voice to GladOS that I could find
+21:22 < sam_moore> Which isn't very close, but it's very disconcerting
+21:22 < jtanx> ...
+21:29 < sam_moore> References are fixed
+21:30 < sam_moore> I always screw up the .bib file
+21:32 < sam_moore> I will admit, LaTeX is a very complicated way to produce a document :P
+21:32 < sam_moore> But it looks nice
+21:33 < jtanx> Yes, it is complicated
+21:34 < jtanx> But I'll admit that it does look nice too
+21:34 < jtanx> I definitely know it's better for stuff that involves a lot of equations and the like
+21:34 < sam_moore> Once you've had to include mathematical equations you start to appreciate it a lot more
+21:34 < sam_moore> I quite like it for figures though
+21:34 < sam_moore> \includeimage
+21:34 < sam_moore> You can change the image or whatever you like
+21:34 < sam_moore> Don't have to reimport it
+21:34 < jtanx> Yeah, using MS Word with equations is... not fun
+21:35 < sam_moore> Don't have to screw around with moving where the image is in the text...
+21:35 < sam_moore> If you actually want to have the image somewhere other than just the centre of the page though it could get painful
+21:35 < sam_moore> But why would you want that anyway
+21:35 < jtanx> It looks nice?
+21:36 < sam_moore> Well if you write the document in columns (lots of papers do), centre of page/centre of column is the same
+21:36 < sam_moore> It never looks nice to have a figure randomly to the side with the width of the text changing to fit it in...
+21:42 < sam_moore> Should I put in Rowan's stuff now or wait until tomorrow morning?
+21:42 < sam_moore> He said he wanted to change a lot of it
+21:42 < sam_moore> I'll do Callum's next
+21:42 < jtanx> Hmm
+21:43 < jtanx> Maybe just leave some space for it for now
+21:55 < sam_moore> We'll be pushing it...
+21:56 < sam_moore> Although we can maybe fit some figures in at the end of chapters
+21:56 < jtanx> Appendix?
+21:56 < jtanx> Urgh
+21:56 < sam_moore> Yeah, appendix everything :P
+21:57 < sam_moore> It won't get read, but it's important that the stuff we care about is in the report...
+21:57 < jtanx> :/
+21:57 < jtanx> I really wonder just how much they will understand, or care to understand
+21:58 < sam_moore> It doesn't matter to me, it's more about personal satisfaction of knowing everything is covered
+21:58 < sam_moore> Because I'm not going to remember this project in detail and I'd like to have a good report to be able to look at later :P
+21:59 < sam_moore> Or maybe I will remember the project in detail...
+21:59 < jtanx> Haha
+21:59 < jtanx> Well, I must say this has been the most interesting project that I've been involved in to date
+22:00 < sam_moore> It's pretty cool that we covered so many layers of software yeah
+22:00 < jtanx> Yeah, that was cool
+22:01 < jtanx> I don't really know what to say about the content side of this unit though
+22:01 < jtanx> I can't say I learnt that much
+22:01 < sam_moore> Well, as a result of the teaching, or the project?
+22:02 < jtanx> The teaching, I guess
+22:02 < sam_moore> I didn't really learn that much from the tutorials, although it would have been damn helpful if I did this unit *before* my honours project last year
+22:02 < jtanx> Well, I felt that a lot of material was covered, but so briefly that I didn't learn much
+22:02 < sam_moore> I pretty much made every single rookie mistake he went through in terms of signals/noise/data processing
+22:02 < jtanx> :P
+22:02 < jtanx> Well, you learn more by making mistakes
+22:03 < sam_moore> I was like "There's a fucking capacitor in the system and I don't know why!"
+22:03 < sam_moore> Well... now I think I know why at least
+22:03 < jtanx> Or so they say
+22:03 < jtanx> hahaha
+22:03 < sam_moore> I still don't know why having the DAC on a multiple of 50 was causing the ADC input to drop by exactly 100 channels...
+22:04 < jtanx> uhhhhh
+22:04 < sam_moore> The only explanation is that there was an invisible "if (dac % 50 == 0) adc -= 100;" somewhere...
+22:04 < jtanx> Was this for your honours project?
+22:04 < sam_moore> Yeah, I don't want to think about that again, too painful...
+22:05 < sam_moore> Yes
+22:05 < jtanx> Okay
+22:05 < sam_moore> Not an issue for us as far as I know
+22:05 < jtanx> filtering?
+22:05 < sam_moore> It was too regular though
+22:06 < sam_moore> It also only happened if the dac was stepping in 25 or something wierd
+22:06 < jtanx> Weird...
+22:06 < sam_moore> Great success...
+22:06 < sam_moore> I just got LaTeX to compile a reference inside the references section
+22:07 < jtanx> ....
+22:07 < sam_moore> So... normally to do references you go 'pdflatex; bibtex; pdflatex; pdflatex'
+22:07 < sam_moore> I have no idea why, you just have to do it
+22:07 < sam_moore> But if you put a \cite in the actual refs.bib file, that ends up as an undefined reference.
+22:07 < sam_moore> The solution
+22:08 < sam_moore> is 'pdflatex; bibtex; pdflatex; pdflatex; bibtex; pdflatex; pdflatex'
+22:08 < sam_moore> I do not know why pdflatex needs to be run 5 times...
+22:08 < jtanx> wtf
+22:08 < jtanx> yeah, like why do you need to run pdflatex twice in a row
+22:09 < sam_moore> Well I can try not doing that and see if it breaks it...
+22:09 < sam_moore> You need it at least once because bibtex takes your original output and magically links all the references
+22:09 < sam_moore> Not sure why twice...
+22:10 < sam_moore> Nope, you appear to need it twice :S
+22:10 < sam_moore> Do not question the power that is LaTeX
+22:11 < jtanx> LaTex seems quite esoteric
+22:12 < sam_moore> Apparently when Knuth dies the last version of tex released becomes the final version and any remaining bugs are classified as features...
+22:12 < sam_moore> Also the version number becomes \pi
+22:13 < jtanx> Hahaha
+22:13 < sam_moore> That could be quite a problem if Linus Torvalds had a similar will...
+22:18 < sam_moore> I'm sort of being a bit cunning about adding information to people's sections...
+22:18 < sam_moore> When they mention a library I add a reference to it
+22:18 < sam_moore> And then add a "note" section...
+22:18 < sam_moore> :S
+22:19 < jtanx> Good enough
+22:19 < sam_moore> I wonder if I should add references to filenames...
+22:20 < jtanx> as in, 'sensors.c'?
+22:20 < sam_moore> eg: Where Callum mentions "image.c" I could link that to the current version of image.c in GitHub?
+22:20 < sam_moore> Yeah, that
+22:20 < sam_moore> That could be good
+22:20 < jtanx> Yeah, that might be good
+22:21 < sam_moore> \href command
+22:23 < jtanx> Okay, just about made the wiki page for administration stuff
+22:29 < sam_moore> Cool
+22:29 < sam_moore> I think some of Callum's description is actually not implemented yet :S
+22:29 < jtanx> :/
+22:29 < sam_moore> I don't think dilatometer.c currently has a static variable
+22:29 < sam_moore> Oh wait, it might have...
+22:29 < sam_moore> Not sure
+22:29 < sam_moore> Oh well
+22:30 < jtanx> the dilatometer code is a bit of a mess right now...
+22:30 < sam_moore> I'm just happy it got written
+22:30 < jtanx> Yeah
+22:31 < sam_moore> Ok, that's it
+22:32 < sam_moore> I need to define a latex command to automatically reference files in our github
+22:32 < sam_moore> Because having \href{https://github.com/szmoore/MCTX3420/blob/master/server/image.c}{\emph{image.c}} everywhere is *really* painful
+22:32 < jtanx> Yeah...
+22:33 < jtanx> sort of like a macro
+22:33 < jtanx> ?
+22:34 < sam_moore> Pretty much
+22:34 < sam_moore> \newcommand{\gitref}[2]{\href{https://github.com/szmoore/MCTX3420/blob/master/#1/#2}{\emph{#2}}
+22:34 < sam_moore> Should work
+22:34 < jtanx> Okay
+22:37 < sam_moore> I think this description of the OpenCV stuff would have been more effectively conveyed with a flow chart and some notes...
+22:38 < sam_moore> First we call this function, then we call this function passing these arguments...
+22:38 < sam_moore> Is really hard to read
+22:38 < sam_moore> Probably harder than just reading the source code
+22:38 < jtanx> ... assuming the person knows how to read source code
+22:39 < sam_moore> I suppose
+22:40 < jtanx> I just realised something
+22:40 < jtanx> When you do 'force' on starting a new experiment
+22:40 < jtanx> I don't think the old files are deleted, just overwritten
+22:40 < jtanx> so if for some reason the sensors/actuators change
+22:41 < jtanx> there may be old files still present
+22:42 < sam_moore> File it as a bug under github
+22:42 < sam_moore> ...
+22:42 < sam_moore> Actually if we file everything that doesn't work as a bug...
+22:42 < sam_moore> Then we can go "Recommendations: See the bugs and open issues on github"
+22:42 < jtanx> that would be future work?
+22:42 < sam_moore> Yep
+22:42 < jtanx> yeah
+22:42 < jtanx> good idea
+22:43 < sam_moore> We could have been more rigorous with our use of the issues system on github
+22:43 < sam_moore> But oh well
+22:43 < jtanx> yeah
+22:43 < sam_moore> Issue: PWM doesn't work
+22:43 < sam_moore> springs to mind
+22:44 < sam_moore> Then we could have tracked exactly when/how it was fixed and all our notes...
+22:44 < jtanx> it doesn't?
+22:44 < jtanx> oh right
+22:44 < jtanx> yeah, that would have been handy
+22:44 < sam_moore> Nicer than the technical diary
+22:52 < sam_moore> Callum refers to himself in the first person a lot in his section
+22:52 < sam_moore> Even in a report written by a single author you're still meant to use "We"
+22:52 < jtanx> :/
+22:52 < sam_moore> In a report written by multiple authors...
+22:53 < sam_moore> Who the hell is "I" ?
+22:53 < sam_moore> Unless you say "This section was written by me, <insert name>" at the start of each section
+22:54 < jtanx> Even then, I think "I" is a bit too informal
+22:54 < sam_moore> Yes, I will ask him if it's OK to change it tomorrow
+22:54 < sam_moore> Haha
+22:54 < sam_moore> There's also a bit of implied finger pointing at the sensors team :P
+22:54 < jtanx> :p
+22:55 < sam_moore> "From the graphs"
+22:55 < sam_moore> What graphs...
+23:10 < sam_moore> Compiling other people's sections takes longer than I expected :S
+23:10 < sam_moore> It's mostly copy/paste
+23:10 < sam_moore> But I decided to use monospace wherever a function or variable is referred to inline...
+23:11 < jtanx> :S
+23:13 < sam_moore> Oh well, sleep is for the weak
+23:13 < sam_moore> It's coming together surprisingly well though
+23:13 < sam_moore> ...
+23:13 < jtanx> We're almost there...
+23:13 < sam_moore> I'll get to your bit and have to fit in 100 pages won't I :P
+23:13 < jtanx> Hopefully not :S
+23:29 < sam_moore> Approaching 27 pages...
+23:29 < sam_moore> I think my bit needs some rewriting
+23:30 < sam_moore> Oh, right, we have some basically empty chapters
+23:30 < sam_moore> ...
+23:30 < sam_moore> We don't need that chapter
+23:30 < sam_moore> Introduction, Design, Conclusions
+23:30 < sam_moore> Good enough
+23:31 < sam_moore> I'd have to edit people's work to make it fit in 4 chapters, and as well as being unfair, we also do not have that kind of time left
+23:33 < sam_moore> Have you covered everything you want to cover?
+23:33 < sam_moore> Either you or Rowan is next
+23:33 < sam_moore> To be assimilated
+23:34 < sam_moore> Into the master report
+23:34 < jtanx> I hope so
+23:37 < sam_moore> Right then, here I go
+--- Day changed Fri Nov 01 2013
+00:04 < jtanx> Alright, I think that's it for me today
+00:05 < jtanx> I'll go through it tomorrow if we need to edit anything...
+00:05 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["good luck"]
+00:25 < sam_moore> ... 12 pages... :S
+00:46 -!- Callum [~Callum@106-69-4-220.dyn.iinet.net.au] has joined #mctxuwa_softdev
+00:58 -!- Callum [~Callum@106-69-4-220.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
