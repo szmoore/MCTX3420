@@ -188,13 +188,13 @@ Several authentication methods are supported by the server; the method to use ca
   \item {\bf Unix style authentication}
 
 
-  Unix like operating systems store a plain text file (/etc/shadow) of usernames and encrypted passwords. To check a password is valid, it is encrypted and then compared to the stored encrypted password. The actual password is never stored anywhere. The /etc/shadow file must be maintained by shell commands run directly from the beaglebone. Alternatively a web based system to upload a similar file may be created.
+  Unix like operating systems store a plain text file (/etc/shadow) of usernames and encrypted passwords. To check a password is valid, it is encrypted and then compared to the stored encrypted password. The actual password is never stored anywhere. The /etc/shadow file must be maintained by shell commands run directly from the BeagleBone. Alternatively a web based system to upload a similar file may be created.
 
   \item {\bf Lightweight Directory Access Protocol (LDAP)}
 
   LDAP is a widely used data base for storing user information. A central server is required to maintain the LDAP database; programs running on the same network can query the server for authentication purposes.
 
-  The UWA user management system (pheme) employs an LDAP server for storing user information and passwords. The software has been designed so that it can interface with an LDAP server configured similarly to the server on UWA's network. Unfortunately we were unable to gain permission to query this server. However an alternative server could be setup to provide this authentication mechanism for our system.
+  The UWA user management system (Pheme) employs an LDAP server for storing user information and passwords. The software has been designed so that it can interface with an LDAP server configured similarly to the server on UWA's network. Unfortunately we were unable to gain permission to query this server. However an alternative server could be setup to provide this authentication mechanism for our system.
 
 
   \item {\bf MySQL Database}
@@ -341,8 +341,8 @@ Additionally, not all responses are in the JSON format. In specific cases, some 
 
 \subsection{Server API - Cookies}\label{Cookies}
 
-The system makes use of HTTP cookies to keep track of who is logged in at any point. The cookie is a small token of information that gets sent by the server, which is then stored automatically by the web browser. The cookie then gets sent back automatically on subsequent requests to the server. If the cookie sent back matches what is expected, the user is ‘logged in'. Almost all web sites in existence that has some sort of login use cookies to keep track of this sort of information, so this method is standard practice. 
-In the server code, this information is referred to as the ‘control key'. A control key is only provided to a user if they provide valid login credentials, and no one else is logged in at that time. 
+The system makes use of HTTP cookies to keep track of who is logged in at any point. The cookie is a small token of information that gets sent by the server, which is then stored automatically by the web browser. The cookie then gets sent back automatically on subsequent requests to the server. If the cookie sent back matches what is expected, the user is `logged in'. Almost all web sites in existence that has some sort of login use cookies to keep track of this sort of information, so this method is standard practice. 
+In the server code, this information is referred to as the `control key'. A control key is only provided to a user if they provide valid login credentials, and no one else is logged in at that time. 
 
 The control key used is the SHA-1 hash of some randomly generated data, in hexadecimal format. In essence, this is just a string of random numbers and letters that uniquely identifies the current user.
 
@@ -571,7 +571,7 @@ Figure \ref{image_in_api.png} shows an image obtained from one of two dilatomete
 % BEGIN James' section
 \subsection{Design Considerations}
 
-There are many considerations that are required to be taken into account for the successful creation of a Graphical User Interface (GUI) that allows Human Computer Interaction.  A poorly design GUI can make a system difficult and frustrating to use. A GUI made with no considerations to the underlying software can make a system inoperable or block key features.  Without a well designed GUI the Human Computer Interaction becomes difficult and discourages any interaction with the system at all.
+There are many considerations that are required to be taken into account for the successful creation of a Graphical User Interface (GUI) that allows Human Computer Interaction.  A poorly designed GUI can make a system difficult and frustrating to use. A GUI made with no considerations to the underlying software can make a system inoperable or block key features.  Without a well designed GUI the Human Computer Interaction becomes difficult and discourages any interaction with the system at all.
 
 	One of the key considerations made during the design of the GUI was the functionality it required.  Originally this was limited to just allowing for simple control of the system including a start and stop and a display of system pressures however as the project progressed this was expanded to include a user login, limited admin functionality, graphing, image streaming and live server logs.  The addition of these features came as a result of changing requirements from the initial brief as well as logical progression of the GUI's capabilities.  This gradual progression represents a continual improvement in Human Computer interaction for the system.  
 
@@ -645,7 +645,7 @@ The First iteration of the GUI was a relatively simple and almost purely text ba
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{figures/gui_creation.png}
+	\includegraphics[width=0.8\textwidth]{figures/GUI_creation.png}
 	\caption{First Test GUI} 
 
 \end{figure}
@@ -656,32 +656,32 @@ Secondly we decided to test the FastCGI protocol. Where FastCGI can be used to i
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{figures/gui_creation.png}
+	\includegraphics[width=0.8\textwidth]{figures/GUI_creation.png}
 	\caption{Testing GUI} 
 
 \end{figure}
 
-This gui was running over a free domain name which allowed us to play with control and command. 
+This GUI was running over a free domain name which allowed us to play with control and command. 
 
 \subsection{Iterations}
 
-After the basic testing of the initial GUIs we started playing with gui design ideas which would be aesthetic, easy to use and reflect on UWA in a positive way.  To do this we looked into how professional websites were made by opening their source code and investigating techniques into layout, structure and style. Then we went away and completed some gui design trees, where there would be a clear flow between pages.  
+After the basic testing of the initial GUIs we started playing with GUI design ideas which would be aesthetic, easy to use and reflect on UWA in a positive way.  To do this we looked into how professional websites were made by opening their source code and investigating techniques into layout, structure and style. Then we went away and completed some GUI design trees, where there would be a clear flow between pages.  
 
 \subsection{Parallel GUI Design}
 
-During the GUI development phase, several GUIs were created. Some used graphical development software, while others used hard codded HTML, JavaScript, and CSS.  Due to no organization within the group and a lack in communication a “final gui” was made by several of the team members.  Some of theses are shown below.
+During the GUI development phase, several GUIs were created. Some used graphical development software, while others used hard codded HTML, JavaScript, and CSS.  Due to no organization within the group and a lack in communication a ``final GUI'' was made by several of the team members.  Some of theses are shown below.
 
 \subsection{GUI Aesthetics}
 
-Once we had decided on our core GUI design, we decided that, although not yet complete we would get Adrain Keatings opinion on the GUI design. While the gui design was simple and functional Dr. Keating pointed out the design was bland. He encouraged us to release our artistic flair onto our GUI and make it more graphical and easy to use. Taking this into account we Began work on another final GUI designing almost from scratch. We kept our GUI design flow, and worked largely on the look and feel of the GUI rather the functionality the gui needed. 
+Once we had decided on our core GUI design, we decided that, although not yet complete we would get Adrain Keatings opinion on the GUI design. While the GUI design was simple and functional Dr. Keating pointed out the design was bland. He encouraged us to release our artistic flair onto our GUI and make it more graphical and easy to use. Taking this into account we began work on another final GUI designing almost from scratch. We kept our GUI design flow, and worked largely on the look and feel of the GUI rather the functionality the GUI needed. 
 
 \subsection{HTML Structure}
 
-The way our GUI works, in a nutshell, is that we use Basic HTML code to lay out what the page needs, then we have CSS(Styles) on top which lays out and formats the basic HTML code. We the put JavaScript files into the HTML code so that graphs and images and be streamed. In out GUI we have chosen to use JQuery to ask the server for information from the client and jFlot for javascripts graphing functionality. 
+The way our GUI works, in a nutshell, is that we use Basic HTML code to lay out what the page needs, then we have CSS(Styles) on top which lays out and formats the basic HTML code. We the put JavaScript files into the HTML code so that graphs and images and be streamed. In our GUI we have chosen to use JQuery to ask the server for information from the client and flot for graphing functionality. 
 
 \subsection{Graphical Development VS Hard Coding}
 
-From the Multiple GUI we had accidently created during the GUI design phase we noticed a large Varity in the styles of GUIs that came out (Which shouldn’t of happened) GUIs were created using HTML CSS and JavaScript being hard codded, from development software like Dreamweaver, and various java based development platforms. 
+From the Multiple GUI we had accidently created during the GUI design phase we noticed a large variety in the styles of GUIs that came out (Which shouldn't have happened) GUIs were created using HTML CSS and JavaScript being hard coded, from development software like Dreamweaver, and various Java based development platforms. 
 
 \subsection{Final Design}
 
@@ -689,7 +689,7 @@ The final concept consists of widgets and a navigation bar to the left. We decid
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{figures/gui_final.png}
+	\includegraphics[width=0.8\textwidth]{figures/GUI_final.png}
 	\caption{Final GUI} 
 \end{figure}
 
@@ -697,31 +697,31 @@ This is the ``home screen'' it shows the layout of the experiment, the subsystem
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{figures/gui_experiment.png}
+	\includegraphics[width=0.8\textwidth]{figures/GUI_experiment.png}
 	\caption{The Experiment (While disconnected from the server in the pic above) displays the Warnings and the experiment state to allow device use by only 1 student and avoid nasty conflicting control} 
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{figures/gui_results.png}
+	\includegraphics[width=0.8\textwidth]{figures/GUI_results.png}
 	\caption{The Experimental Results page (also currently disconnected)} 
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{figures/gui_data.png}
+	\includegraphics[width=0.8\textwidth]{figures/GUI_data.png}
 	\caption{The experimental data page shows the start the sensors and actuators are reading, useful for checking the condition and measuring the experiment. } 
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{figures/gui_pintest.png}
-	\caption{The BBB Pin test page is for the software team only so that we can test and debug the experiment we errors are found in the gui or software. } 
+	\includegraphics[width=0.8\textwidth]{figures/GUI_pintest.png}
+	\caption{The BBB Pin test page is for the software team only so that we can test and debug the experiment we errors are found in the GUI or software. } 
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{figures/gui_help.png}
+	\includegraphics[width=0.8\textwidth]{figures/GUI_help.png}
 	\caption{The help page, which links to the wiki information from all the teams and allows new users to look at all aspects of the project to be further developed and finished. } 
 \end{figure}
 

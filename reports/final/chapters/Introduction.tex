@@ -12,7 +12,7 @@ The report begins with an overview of the whole system and the design of the sof
 
 \section{System Overview}
 
-To aid understanding of the context of the software project, a brief overview of the system as a whole is presented below. Essentially, the MCTX3420 project apparatus is designed to test the behaviour of a pressure vessel as air pressure inside it is gradually increased. A very basic system diagram showing the main components is shown in Figure \ref{system_overview.png}, with control components in  \textcolor{red}{ red}, electronics in  \textcolor{green}{ green}, sensors in  \textcolor{Purple}{ purple}, pneumatics in  \textcolor{blue}{ blue}, and experimental targets in  \textcolor{Orange}{ orange}.
+To aid understanding of the context of the software project, a brief overview of the system as a whole is presented below. Essentially, the MCTX3420 project apparatus is designed to test the behaviour of a pressure vessel as air pressure inside it is gradually increased. A very basic system diagram showing the main components is shown in Figure \ref{system_overview.png}, with control components in \textcolor{red}{ red}, electronics in \textcolor{green}{ green}, sensors in \textcolor{Purple}{ purple}, pneumatics in \textcolor{blue}{ blue}, and experimental targets in \textcolor{Orange}{ orange}.
 
 \begin{figure}[H]
 	\centering
@@ -43,14 +43,14 @@ The main areas of the system are as follows:
 
 \end{itemize}
 
-The system software essentially is defined by the “control” component: allowing a user to control the experiment hardware. To do this, the software must successfully interface with all of the system areas above so that the desired experiment can be run. 
+The system software essentially is defined by the ``control'' component: allowing a user to control the experiment hardware. To do this, the software must successfully interface with all of the system areas above so that the desired experiment can be run. 
 
 \section{Development Process}
 
 The development process is outlined below. Each part of the software followed the same general process, which is discussed in more detail for each section later in the report.
 
 \subsection{Planning and Design}
-First, the actual software task to be completed is identified; this is organised with group input. The software component is then designed according to the requirements. Parameters and features are chosen based on the project guidelines and how the component interacts with other software. 
+First, the actual software task to be completed is identified; this is organised with group input. The software component is then designed according to the requirements. Parameters and features are chosen based on the project GUIdelines and how the component interacts with other software. 
 
 \subsection{Coding}
 
@@ -71,7 +71,7 @@ In this way, GitHub automates the more tedious aspects of code management.
 
 Another important aspect of the coding process is coding style. Throughout the project, all code that was written adhered to the same style to make it consistent and easier to read. One aspect of styling, for example, is use of capitals when defining function names (for example, \funct{Actuator_Init}), variable names (\var{g_num_actuators}), or definitions of constants (\var{ACTUATORS_MAX}), to make it immediately clear whether something is a function, variable or constant. Other aspects include use of indentation, the ordering of functions, and frequent use of comments. Essentially, styling is used to ensure the code is consistent, easy to follow, and can therefore be worked on by multiple people. 
 
-Coding style is also important when following general code standards. The C language features many standards and style guidelines which were also adhered to, to make the code readable by wider industry professionals. Some examples of this include beginning global variables with \texttt{g_} and correct use of brackets as separators\cite{mellon}. All efforts were made to follow common C and HTML code standards. The use of a common coding style and standards will hopefully make the project software easily expandable by others in the future.
+Coding style is also important when following general code standards. The C language features many standards and style GUIdelines which were also adhered to, to make the code readable by wider industry professionals. Some examples of this include beginning global variables with \texttt{g_} and correct use of brackets as separators\cite{mellon}. All efforts were made to follow common C and HTML code standards. The use of a common coding style and standards will hopefully make the project software easily expandable by others in the future.
 
 
 Code was also expected to adhere to safety standards. In the first weeks of the project, a document\cite{kruger_safety} was created that outlined all aspects of software safety - both for the software design itself, and ensuring that the system was still safe if the software failed. The results of this are explained further later in the report, with one example being the server's ``sanity check'' functions.
@@ -90,14 +90,14 @@ Collaboration between members of the software group was extremely important thro
 \subsection{Communication} \label{Communication}
 The primary time for collaboration was during the team's weekly meetings. Meetings occurred at 2pm-4pm on the Monday of every week, and were generally attended by all group members. While most work was expected to be done outside this time, the meetings were valuable for planning and scheduling purposes, for tackling problems and making design decisions as a group. Team members were able to work together in the meetings to complete certain tasks much more effectively. Importantly, at the end of each meeting, a report of the work done during the prior week and a list of tasks to do the following week was produced, giving the project a continuous, clear direction. 
 
-GitHub was used as the group's repository for software work. The usefulness of GitHub was explained previously in the “General Development Process” section, but essentially, it is a very effective tool for managing and synchronising a large, multi-person software project. GitHub also features a notifications and issue-tracking system, which was useful for keeping track of tasks and immediately notifying team members of any changes.
+GitHub was used as the group's repository for software work. The usefulness of GitHub was explained previously in the ``General Development Process'' section, but essentially, it is a very effective tool for managing and synchronising a large, multi-person software project. GitHub also features a notifications and issue-tracking system, which was useful for keeping track of tasks and immediately notifying team members of any changes.
 
 
 Outside of meetings, email was the main form of communication. Email threads exist for all of the project's main areas, discussing any ideas, changes or explanations. Email was also used for announcements and to organise additional meetings. For less formal communication, the software group created their own IRC channel. This was essentially a chat channel that could be used to discuss any aspect of the project and for communication about current work.
 
 \subsection{Scheduling}
 
-At the beginning of the project, an overall software schedule was created, outlining the main tasks to be completed and their target dates. While this was useful for planning purposes and creating an overall impression of the task, it became less relevant as the semester continued. The nature of the software team's work meant that it was often changing from week to week; varying hardware requirements from other teams, unexpected issues and some nebulous project guidelines led to frequent schedule modifications. For instance: use of the BeagleBone turned out to be a significant time-sink, requiring a lot of troubleshooting due to lack of documentation; and a sophisticated login system was not mentioned until late in the project, so resources had to be diverted to implement this. Essentially, while the software group did attempt to keep an overall schedule, this was only useful in planning stages due to the changing priorities of tasks.
+At the beginning of the project, an overall software schedule was created, outlining the main tasks to be completed and their target dates. While this was useful for planning purposes and creating an overall impression of the task, it became less relevant as the semester continued. The nature of the software team's work meant that it was often changing from week to week; varying hardware requirements from other teams, unexpected issues and some nebulous project GUIdelines led to frequent schedule modifications. For instance: use of the BeagleBone turned out to be a significant time-sink, requiring a lot of troubleshooting due to lack of documentation; and a sophisticated login system was not mentioned until late in the project, so resources had to be diverted to implement this. Essentially, while the software group did attempt to keep an overall schedule, this was only useful in planning stages due to the changing priorities of tasks.
 
 
 Far more useful was the weekly scheduling system. As mentioned in the ``Communication'' section\ref{Communication}, a weekly task list was created on each Monday, giving the team a clear direction. This suited the flexibility of the software well; tasks could be shuffled and re-prioritised easily and split between team members. It was still very important to keep the project's overall deadline in mind, and the weekly task lists could be used to do this by looking separately at the main areas of software (such as GUI design, sensors, and so on) and summarising the remaining work appropriately. Brief weekly reports also covered what had been completed so far, providing a further measure of progress.
