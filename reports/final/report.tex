@@ -1,10 +1,6 @@
 \documentclass[a4paper,10pt,titlepage]{report}
-\linespread{0.9}
-\usepackage{setspace}
-%\onehalfspacing  % 1.5 spacing is uuuglly
- \parskip 15pt           % sets spacing between paragraphs
- %\renewcommand{\baselinestretch}{1.5} 	% Uncomment for 1.5 spacing between lines
- \parindent 8pt		  % sets leading space for paragraphs
+
+
 
 
 %\usepackage{natbib}
@@ -27,7 +23,7 @@
 \titleformat{\chapter}
 {\normalfont\LARGE\bfseries}{\thechapter.}{1em}{}
 
-\usepackage{color}
+\usepackage[usenames,dvipsnames]{color}
 \usepackage{listings}
 
 \definecolor{darkgray}{rgb}{0.95,0.95,0.95}
@@ -52,7 +48,7 @@
  \textheight 23.94cm 
  %\pagestyle{empty}       % Uncomment if don't want page numbers
  \parskip 6.2pt           % sets spacing between paragraphs
- \renewcommand{\baselinestretch}{1.5} 	% Uncomment for 1.5 spacing between lines
+ %\renewcommand{\baselinestretch}{1.5} 	% Uncomment for 1.5 spacing between lines
  \parindent 0pt		  % sets leading space for paragraphs
 
 \usepackage{fancyheadings}
@@ -94,8 +90,8 @@
 
 %\include{chapters/Demonstration}
 \include{chapters/Introduction}
-\include{chapters/Approach}
 \include{chapters/Design}
+\include{chapters/Approach}
 \include{chapters/Results}
 %\newpage
 %---------------------------------------------------------
