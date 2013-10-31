@@ -228,6 +228,40 @@ $.fn.logout = function () {
 };
 
 /**
+* Sets the camera autoupdater
+* Obsolete?
+* @returns {$.fn}
+*/
+$.fn.setCamera = function () {
+  var url = mctx.api + "image"; //http://beaglebone/api/image
+  var update = true;
+
+  //Stop updating if we can't retrieve an image!
+  this.error(function() {
+    update = false;
+  });
+  
+  var parent = this;
+  
+  var updater = function() {
+    if (!update) {
+      parent.parent().text("Cam fail");
+      parent.attr("src", "");
+      return;
+    }
+    
+    parent.attr("src", url + "#" + (new Date()).getTime());
+    
+    setTimeout(updater, 2000);
+  };
+  
+  updater();
+  return this;
+};
+
+
+
+/**
 * Sets the error log to continuously update.
 * @returns itself */
 $.fn.setErrorLog = function () {
