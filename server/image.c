@@ -10,6 +10,7 @@ static int g_captureID = -1;
 
 void Image_Handler(FCGIContext * context, char * params)
 {
+
 	int num = 0, width = 1600, height = 1200;	// Set Default values
 	FCGIValue val[] = {
 		{"num", &num, FCGI_INT_T},
@@ -74,18 +75,22 @@ void Image_Handler(FCGIContext * context, char * params)
 		g_captureID = num;
 	}
 
-	cvSetCaptureProperty(g_capture, CV_CAP_PROP_FRAME_WIDTH, width);
-	cvSetCaptureProperty(g_capture, CV_CAP_PROP_FRAME_HEIGHT, height);
+	if (g_capture != NULL)
+	{
 
-	*frame = cvQueryFrame(g_capture);
-	result = (*frame != NULL);
+		cvSetCaptureProperty(g_capture, CV_CAP_PROP_FRAME_WIDTH, width);
+		cvSetCaptureProperty(g_capture, CV_CAP_PROP_FRAME_HEIGHT, height);
+
+		*frame = cvQueryFrame(g_capture);
+		result = (*frame != NULL);
 
 	//cvShowImage("display", *image);
 	//cvWaitKey(0); 
 	//cvSaveImage("test.jpg",*image,0);
 		
-	Log(LOGDEBUG, "At end of mutex");
-	
+		Log(LOGDEBUG, "At end of mutex");
+	}
+
 	pthread_mutex_unlock(&mutex);	//Close the mutex
 
 	//NOTE: Never have a "return" statement before the mutex is unlocked; it causes deadlocks!
