@@ -1,4 +1,4 @@
-\chapter{Design and Implementation}
+\chapter{Design and Implementation}\label{Design and Implementation}
 
 % BEGIN Sam's section
 
@@ -119,7 +119,7 @@ An alternative safety mechanism involves modification of the script that starts 
 \end{figure}
 
 
-\section{Hardware Interfacing}\label{Hardware}
+\section{Hardware Interfacing}\label{Hardware Interfacing}
 
 Figure \ref{pinout.pdf} shows the pin out diagram of the BeagleBone Black. There are many contradictory pin out diagrams available on the internet; this figure was initially created by the software team after trial and error testing with an oscilloscope to determine the correct location of each pin. Port labels correspond with those marked on the BeagleBone PCB. The choice of pin allocations was made by the electrical team after discussion with software when it became apparent that some pins could not be controlled reliably.
 
@@ -179,7 +179,7 @@ A single PWM output is used to control a pressure regulator. The electrical team
 \end{figure}
 
 
-\section{Authentication Mechanisms}\label{Authentication}
+\section{Authentication Mechanisms}\label{Authentication Mechanisms}
 
 The \funct{Login_Handler} function (\gitref{server}{login.c}) is called in the main thread when a HTTP request for authentication is received (see Section \ref{Communication}). This function checks the user's credentials and will give them access to the system if they are valid. Whilst we had originally planned to include only a single username and password, changing client requirements forced us to investigate many alternative authentication methods to cope with multiple users.
 
@@ -210,7 +210,7 @@ Several authentication methods are supported by the server; the method to use ca
 % END Sam's section
 
 
-\section{Server/Client Communication}\label{Communications}
+\section{Server/Client Communication}\label{Server/Client Communication}
 
 % BEGIN Jeremy's section
 
@@ -357,7 +357,7 @@ AJAX requests are essentially web requests made in JavaScript that occur ``behin
 
 Whilst AJAX requests are possible with plain JavaScript, the use of the jQuery library (see Section \ref{jQuery}) greatly simplifies the way in which requests can be made and interpreted.
 
-\section{Alternative Communication Technologies}\label{Alternative Communication}
+\section{Alternative Communication Technologies}\label{Alternative Communication Technologies}
 
 This section attempts to explain the reasoning behind the communication method chosen. This choice was not trivial, as it had to allow for anyone to remotely control the experiment, while imposing as little requirements from the user as possible. These requirements can be summarised by:
 \begin{enumerate}
@@ -416,7 +416,7 @@ In comparison, FastCGI (Figure \ref{fastcgi.png}) can be seen as the ``best of b
 	\item Consider using X-Accel-Redirect along with UserCake (Section \ref{Authentication}) to make a finer-grained access control system to information such as the system logs
 \end{enumerate}
 
-\section{BeagleBone Configuration}\label{Configuration}
+\section{BeagleBone Configuration}\label{BeagleBone Configuration}
 
 \subsection{Operating system}
 The Beaglebone has been configured to use the Ubuntu operating system. The original operating system was Angstrom, which was unsuitable because it lacked a number of software packages required. Detailed instructions on how to install this operating system exist on the project wiki\cite{mctx3420_wiki}.
@@ -578,7 +578,7 @@ Figure \ref{image_in_api.png} shows an image obtained from one of two dilatomete
 
 
 
-\section{Human Computer Interaction and the Graphical User Interface}
+\section{Human Computer Interaction and the Graphical User Interface}\label{Human Computer Interaction and the Graphical User Interface}
 
 % BEGIN James' section
 \subsection{Design Considerations}
@@ -649,7 +649,7 @@ Once a design document was completed a Master Template was created.  Firstly a d
 
 % BEGIN Rowan's section
 
-\section{GUI Design Process}
+\section{GUI Design Process}\label{GUI Design Process}
 
 \subsection{Creation}
 
