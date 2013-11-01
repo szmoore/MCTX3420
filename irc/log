@@ -8143,3 +8143,94 @@
 00:25 < sam_moore> ... 12 pages... :S
 00:46 -!- Callum [~Callum@106-69-4-220.dyn.iinet.net.au] has joined #mctxuwa_softdev
 00:58 -!- Callum [~Callum@106-69-4-220.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+03:08 < sam_moore> Oh hi Calum
+03:09 < sam_moore> Heh, I suppose people are staying up late fretting about the report since I haven't updated it in a while...
+03:09 < sam_moore> Mwuhahaha the power
+05:41 -!- Callum [~Callum@106-69-4-220.dyn.iinet.net.au] has joined #mctxuwa_softdev
+05:43 < Callum> so you've pulled an all nighter too then i take it?
+06:13 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+06:50 < Callum> morning jeremy
+06:50 < jtanx> morning Callum
+07:20 < jtanx> stupid server
+07:20 < jtanx> losing time...
+07:37 -!- Callum [~Callum@106-69-4-220.dyn.iinet.net.au] has quit [Ping timeout]
+08:26 < jtanx> just ran a spellcheck
+08:26 < jtanx> hopefully haven't broken anything...
+08:27 < jtanx> the refs.bib on github is out of date
+08:40 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit ["leaving"]
+08:51 -!- Rowan [~Rowan@203-214-144-111.perm.iinet.net.au] has joined #mctxuwa_softdev
+09:43 < jtanx> damn
+09:43 < jtanx> running out of time to edit this...
+09:44 < jtanx> I'll be at uni from 12pm onwards
+09:44 < jtanx> I managed to cut it down a small amount, but not nearly enough
+09:45 < jtanx> I have a feeling that shrinking some of the images may help to reduce it, or to move some to the (an) appendix like the pinout diagram
+09:45 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+10:48 -!- Rowan [~Rowan@203-214-144-111.perm.iinet.net.au] has quit [Ping timeout]
+11:27 -!- Rowan [~Rowan@130.95.77.219] has joined #mctxuwa_softdev
+12:13 -!- Rowan [~Rowan@130.95.77.219] has quit [Ping timeout]
+12:18 -!- jtanx [~asfa@130.95.101.188] has joined #mctxuwa_softdev
+12:18 < jtanx> just saw the extension...
+12:21 < jtanx> how do you cite a subsection
+12:21 < jtanx> No extra software should be required from the client. Detailed reasons for this choice are outlined in Section ??
+12:23 < jtanx> oh, right
+12:23 < jtanx> \ref{Alternative Communication} --> \ref{Alternative Communication Technologies}
+12:35 -!- Rowan [~Rowan@130.95.77.219] has joined #mctxuwa_softdev
+12:35 < jtanx> There are a few references that are not linking properly
+12:37 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+12:39 -!- Rowan [~Rowan@130.95.77.219] has quit [EOF From client]
+12:48 < sam_moore> Yes, sorry, I screwed up the labels a bit
+12:48 < sam_moore> I had them all fixed, and then I decided to name the labels logically (ie: Actually after the section)...
+12:48 < sam_moore> So now it's broken again
+12:48 < jtanx> Haha
+12:49 < jtanx> So I guess we're meeting not today, but on monday?
+12:49 < sam_moore> Yeah, sure
+12:49 < jtanx> okay
+12:49 < jtanx> I'm in g19 right now, but I'll probably go soon then
+12:51 < sam_moore> I think the report is pretty good
+12:51 < jtanx> Yeah, it looks good
+12:51 < sam_moore> It always seems like there are bits missing though
+12:51 < jtanx> I'm glad you stuck with LaTeX after all :P
+12:51 < sam_moore> Yes...
+12:51 < sam_moore> It's all worth it for \gitref
+12:51 < jtanx> Hahaha
+12:51 < jtanx> the clicky links is cool
+12:52 < jtanx> it doesn't list out those links though, does it?
+12:52 < jtanx> like a reference
+12:52 < sam_moore> Hopefully that makes up for some of the disorganisation
+12:52 < sam_moore> No, it doesn't list them as references
+12:53 < sam_moore> We could probably make Rowan's figures nicer by redoing them with a "connected" system, but I don't want to edit other people's stuff more than necessary
+12:53 < jtanx> Yeah
+12:53 < sam_moore> Since it seems like doing that will get me in trouble
+12:54 < jtanx> The only thing that irks me a bit is the first-person stuff in the camera section
+12:54 < jtanx> But as you said...
+12:54 < sam_moore> I'm not sure I got the camera figures right
+12:55 < jtanx> time for more proofreading!
+12:55 < sam_moore> They were all over the place and underneath each other and not labelled when I downloaded the document
+12:55 < jtanx> :S
+12:55 < sam_moore> I think I screen shotted the right ones, but even in google docs some of them were underneath each other
+12:56 < jtanx> google docs doesn't display them properly I think
+12:56 < jtanx> I can upload a pdf version
+12:56 < jtanx> ...if I can find the current version
+12:58 < sam_moore> It's interesting that the dilatometer wasn't working so well the other day
+12:58 < sam_moore> Given that those test images look pretty close to the real image
+12:58 < sam_moore> And they seem to show good results
+12:58 < jtanx> Yeah, it was a bit disappointing
+12:58 < sam_moore> Although I guess that is just one frame
+12:59 < sam_moore> I forgot, we need to recommend that the edge detected image can be shown through the API somehow
+12:59 < sam_moore> ...
+12:59 < sam_moore> I think the best way to do that is just to add the canny edge algorithm to "image.c" and allow Image_Handler to call it if needed
+13:00 < sam_moore> Abstract out all the image procesing stuff to "image.c" and then the dilatometer "sensor" will eventually just become a set of wrapper functions :P
+13:01 < jtanx> Yeah, i think there needs to be some redesign of that image stuff
+13:01 < sam_moore> The way all the other sensors/actuators work is that as much stuff as possible is abstracted out to make it really easy to customise them
+13:02 < sam_moore> Eg: If you were manually doing the file system operations for each actuator/sensor... eww
+13:02 < sam_moore> Images should be similar
+13:02 < jtanx> ummm 
+13:02 < jtanx> yeah
+13:03 < jtanx> not sure if it's useful, but...
+13:04 < jtanx> https://drive.google.com/a/student.uwa.edu.au/file/d/0ByHupdgjAZ9XaHF6djdJc0RvLVE/edit?usp=sharing
+13:04 < jtanx> callum's stuff in pd
+13:04 < jtanx> f
+13:31 -!- jtanx [~asfa@130.95.101.188] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+14:40 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:57 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+21:20 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
