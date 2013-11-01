@@ -218,7 +218,7 @@ This section describes the methods and processes used to communicate between the
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=1.1\textwidth]{figures/client_request_flowchart.png}
+	\includegraphics[width=0.8\textwidth]{figures/client_request_flowchart.png}
 	\caption{High level flow chart of a client request to server response} 
 	\label{client_request_flowchart.png}
 \end{figure}
@@ -256,7 +256,7 @@ From the client side, the server interface is accessed through an Application Pr
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=1.1\textwidth]{figures/fastcgi-flow-chart.png}
+	\includegraphics[width=0.9\textwidth]{figures/fastcgi-flow-chart.png}
 	\caption{Flow chart of a client request being processed (within the server program). Relevant files are \gitref{server}{fastcgi.c} and \gitref{server}{fastcgi.h}.} 
 	\label{fastcgi-flow-chart.png}
 \end{figure}
@@ -266,7 +266,7 @@ In the case of the server API designed, requests are formatted as such:
 \url{https://host/api/module?key1=value1&key2=value2...&keyN=valueN} (where \verb/host/ is replaced with the IP address or hostname of the server).
 
 
-The API consists of modules that can accept a certain number of arguments (specified as key-value pairs), depending on what that module (Figure \ref{modules}) does. For example, to query the API about basic information (running state, whether the user is logged in etc), the following query is used:
+The API consists of modules accepting arguments (specified as key-value pairs), depending on what that module (Figure \ref{modules}) does. For example, to query the API about basic information (running state, whether the user is logged in etc), the following query is used:
 
 \url{https://host/api/identify}
 
@@ -285,9 +285,9 @@ Keeping the API format simple also made it easier to write the code that parsed 
 
 This request handling code went through a number of iterations before the final solution was reached. Changes were made primarily as the number of modules grew, and as the code was used more. 
 
-One of the greatest changes to request handling was with regards to how parameters were parsed. Given a request of: \url{http://host/api/actuators?name=pregulator\&start_time=0\&end_time=2}, The module handler would receive as the parameters \texttt{name=pregulator\&start_time=0\&end_time=2}. This string had to be split into the key/value pairs to be used, which resulted in the function \funct{FCGI_KeyPair} being made, which was initially sufficient for most cases.
+One of the greatest changes to request handling was with regards to how parameters were parsed. Given a request of: \url{http://host/api/actuators?name=pregulator\&start_time=0\&end_time=2}, The module handler would receive as the parameters \texttt{name=pregulator\&start_time=0\&end_time=2}. This string had to be split into the key/value pairs, so the function \funct{FCGI_KeyPair} being made.
 
-However, as more module handlers were created, and as the number of parameters required increased, \funct{FCGI_KeyPair} became increasingly cumbersome to use. \funct{FCGI_ParseRequest} was created in response, and internally uses \funct{FCGI_KeyPair}, but abstracts request parsing greatly. In essence, it validates the user input, rejecting anything that doesn't match a specified format. If it passes this test, it automatically populates variables with these values. The \funct{IndentifyHandler} module handler in \gitref{server}{fastcgi.c} is a very good example of how this works. 
+With increased usage, this was found to be insufficient. \funct{FCGI_ParseRequest} was created in response, and internally uses \funct{FCGI_KeyPair}, but abstracts request parsing greatly. In essence, it validates the user input, rejecting anything that doesn't match a specified format. If it passes this test, it automatically populates variables with these values. The \funct{IndentifyHandler} module handler in \gitref{server}{fastcgi.c} is a very good example of how this works. 
 
 \begin{figure}[H]
 	\centering
@@ -323,7 +323,6 @@ A standard JSON response looks like such:
     "control_state" : "Running",
     "description" : "MCTX3420 Server API (2013)",
     "build_date" : "Oct 24 2013 19:41:04",
-    "clock_getres" : 0.000000001,
     "api_version" : 0,
     "logged_in" : true,
     "user_name" : "_anonymous_noauth"
@@ -392,13 +391,11 @@ Initially, a system known as ``Common Gateway Interface'', or CGI was explored. 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\textwidth]{figures/custom_webserver.png}
-	\caption{Block Diagram of a request to a custom webserver} 
+	\caption{Block Diagram of a request to a custom web server} 
 	\label{custom_webserver.png}
 \end{figure}
 
-Before FastCGI was found, the plan was to build a custom web server (Figure \ref{custom_webserver.png} that used threading. Both the sensor/actuator control and the web interface would reside in the same process. By having both in the same process, continuous control is possible whilst waiting for web requests to be received.
-
-This would have worked, and in fact operates similarly to the final solution, but it was not without drawbacks. By building a custom web server, more effort would have to be spent just to maintain low-level web functionalities, such as responding appropriately to a client request. Perhaps more importantly, features taken for granted from a standard web server would become increasingly difficult to support with a custom web server. For example, services like TLS encryption and PHP support would be near-impossible, or at least very difficult to add. In other words, it was deemed that this solution would be inflexible and not particularly maintainable into the future.
+Another system considered was to build a custom web server (Figure \ref{custom_webserver.png} that used threading, integrating both the control and web components. This option was primarily discarded because it was inflexible to supporting extended services like PHP and TLS encryption. See \href{https://github.com/szmoore/MCTX3420/issues/6}{Issue 6} on GitHub for more information.
 
 \begin{figure}[H]
 	\centering
@@ -428,7 +425,7 @@ In particular, Ubuntu 13.04 running Linux kernel 3.8.13-bone28 was used, which i
 
 Specifically, there was much grief over getting the pins to function correctly, especially for PWM output. Lacking any great documentation, much trial and error was spent determining the best configuration. The BeagleBone Black uses what is termed a ``device tree'' \cite{beaglebone3.8, devicetreetutorial} and ``device tree overlays'' to dynamically determine what each pin does. This is because each pin can have more than one function, so a ``device tree overlay'' determines what it does at any one point. However, this also complicates matters, since what pins do essentially have to be loaded at runtime. 
 
-PWM control in particular took many hours to achieve, which was not helped by a lot of conflicting information available online. As a result, the primary tool used to correctly determine proper PWM control was the use of a cathode ray oscilloscope. Quite briefly, it was found that certain actions had to be performed in a very specific order to make PWM control available. There were also specific limitations, such as pairs of pins being coupled to the same time base (period). The wiki goes into more detail on the issues found.
+PWM control in particular took many hours to achieve, which was not helped by a lot of conflicting information available online. As a result, the primary tool used to correctly determine proper PWM control was the use of a cathode ray oscilloscope. Quite briefly, it was found that certain actions had to be performed in a very specific order to make PWM control available. The wiki goes into more detail on the issues found.
 
 Getting the cameras to work on the BeagleBone was another major issue faced. After much testing, it was simply found that the cameras could only work on the latest version of the operating system. On anything else, only low resolution captures of around 352x288 pixels could be achieved.
 
@@ -442,9 +439,7 @@ A number of packages are required to compile the code:
 These packages should be installed with the command \texttt{apt-get install}.
 
 \subsection{Required configurations}
-Many components need to be configured correctly for the server to work. In particular, these configurations relate to the web server, nginx, as well as logging software used, rsyslog. These configurations are automatically installed by a specific script on the git repository.
-
-There is a folder, labelled server-configs. Executing \gitref{server-configs}{install.sh} as root should install all the required configuration files to run the server correctly.
+Many components need to be configured correctly for the server to work. In particular, these configurations relate to the web server, nginx, as well as logging software used, rsyslog. Executing \gitref{server-configs}{install.sh} as root should install all the required configuration files to run the server correctly.
 
 % END Jeremy's section
 
