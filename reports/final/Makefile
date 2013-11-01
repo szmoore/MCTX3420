@@ -11,6 +11,10 @@ report.pdf : report.tex
 	bibtex report
 	pdflatex --shell-escape report
 	pdflatex --shell-escape report
+	bibtex report
+	pdflatex --shell-escape report
+	pdflatex --shell-escape report
+
 
 	rm -f *.bbl *.log *.toc *.lof *.blg *.lot
 
