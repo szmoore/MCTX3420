@@ -12,7 +12,7 @@ The report begins with an overview of the whole system and the design of the sof
 
 \section{System Overview}
 
-To aid understanding of the context of the software project, a brief overview of the system as a whole is presented below. Essentially, the MCTX3420 project apparatus is designed to test the behaviour of a pressure vessel as air pressure inside it is gradually increased. A very basic system diagram showing the main components is shown in Figure \ref{system_overview.png}, with control components in  \textcolor{red}{ red}, electronics in  \textcolor{green}{ green}, sensors in  \textcolor{Purple}{ purple}, pneumatics in  \textcolor{blue}{ blue}, and experimental targets in  \textcolor{Orange}{ orange}.
+To aid understanding of the context of the software project, a brief overview of the system as a whole is presented below. Essentially, the MCTX3420 project apparatus is designed to test the behaviour of a pressure vessel as air pressure inside it is gradually increased. A very basic system diagram showing the main components is shown in Figure \ref{system_overview.png}, with control components in \textcolor{red}{ red}, electronics in \textcolor{green}{ green}, sensors in \textcolor{Purple}{ purple}, pneumatics in \textcolor{blue}{ blue}, and experimental targets in \textcolor{Orange}{ orange}.
 
 \begin{figure}[H]
 	\centering
@@ -43,7 +43,7 @@ The main areas of the system are as follows:
 
 \end{itemize}
 
-The system software essentially is defined by the “control” component: allowing a user to control the experiment hardware. To do this, the software must successfully interface with all of the system areas above so that the desired experiment can be run. 
+The system software essentially is defined by the ``control'' component: allowing a user to control the experiment hardware. To do this, the software must successfully interface with all of the system areas above so that the desired experiment can be run. 
 
 \section{Development Process}
 
@@ -64,7 +64,7 @@ The Git system ensures that work by different team members is tracked\cite{githu
 \begin{enumerate}
 	\item Create an individual ``fork'' of the software, separate from the main branch.
 	\item Modify this fork on a local machine with proposed changes or additions. This fork is also updated regularly with any changes that were made in the main branch.
-	\item When work is complete, create a ``pull request'' to merge local changes back into the main codebase.
+	\item When work is complete, create a ``pull request'' to merge local changes back into the main code base.
 	\item The pull request can be reviewed by other team members; if everything fits, the request is accepted and the local changes become part of the main code. 
 \end{enumerate}
 In this way, GitHub automates the more tedious aspects of code management.
@@ -78,7 +78,7 @@ Code was also expected to adhere to safety standards. In the first weeks of the 
 
 \subsection{Testing}
 
-Once the software section is relatively complete, it can be tested with the larger codebase. This was generally done through writing specific test functions. Because the operating system on the BeagleBone (GNU/Linux) is widely available for commercial PCs and laptops, software development and testing could occur without needing to wait for a BeagleBone to become available. Code was also tested on the BeagleBone itself where possible to ensure correct operation. One example is for the sensors software - initially, functions were written that simulated sensors, so it could be tested if data was read correctly. These functions were rewritten for use with actual hardware as the specifics became known later in the project.
+Once the software section is relatively complete, it can be tested with the larger code base. This was generally done through writing specific test functions. Because the operating system on the BeagleBone (GNU/Linux) is widely available for commercial PCs and laptops, software development and testing could occur without needing to wait for a BeagleBone to become available. Code was also tested on the BeagleBone itself where possible to ensure correct operation. One example is for the sensors software - initially, functions were written that simulated sensors, so it could be tested if data was read correctly. These functions were rewritten for use with actual hardware as the specifics became known later in the project.
 
 \subsection{Collaboration}
 After the testing process is satisfied, the final code can be committed to the system. This requires input from the other project teams. If there is any feedback or the requirements change in the future, the code can be edited through the above process.
@@ -90,7 +90,7 @@ Collaboration between members of the software group was extremely important thro
 \subsection{Communication} \label{Communication}
 The primary time for collaboration was during the team's weekly meetings. Meetings occurred at 2pm-4pm on the Monday of every week, and were generally attended by all group members. While most work was expected to be done outside this time, the meetings were valuable for planning and scheduling purposes, for tackling problems and making design decisions as a group. Team members were able to work together in the meetings to complete certain tasks much more effectively. Importantly, at the end of each meeting, a report of the work done during the prior week and a list of tasks to do the following week was produced, giving the project a continuous, clear direction. 
 
-GitHub was used as the group's repository for software work. The usefulness of GitHub was explained previously in the “General Development Process” section, but essentially, it is a very effective tool for managing and synchronising a large, multi-person software project. GitHub also features a notifications and issue-tracking system, which was useful for keeping track of tasks and immediately notifying team members of any changes.
+GitHub was used as the group's repository for software work. The usefulness of GitHub was explained previously in the ``General Development Process'' section, but essentially, it is a very effective tool for managing and synchronising a large, multi-person software project. GitHub also features a notifications and issue-tracking system, which was useful for keeping track of tasks and immediately notifying team members of any changes.
 
 
 Outside of meetings, email was the main form of communication. Email threads exist for all of the project's main areas, discussing any ideas, changes or explanations. Email was also used for announcements and to organise additional meetings. For less formal communication, the software group created their own IRC channel. This was essentially a chat channel that could be used to discuss any aspect of the project and for communication about current work.
@@ -107,7 +107,7 @@ The group also elected a ``meeting convener'' to assist with organisation (Samue
 
 \subsection{Group Participation}
 
-The nature of software development means that it tends to be very specialised --- extensive knowledge of coding is required to be effective, which is difficult to learn in a short timeframe. The members of the software team all had varying levels of experience, and therefore could not contribute equally to all areas of the project. Some team members had done very little coding before (outside of introductory units at university) which made it difficult for them to contribute in some areas, while others had the extensive knowledge required.
+The nature of software development means that it tends to be very specialised --- extensive knowledge of coding is required to be effective, which is difficult to learn in a short time frame. The members of the software team all had varying levels of experience, and therefore could not contribute equally to all areas of the project. Some team members had done very little coding before (outside of introductory units at university) which made it difficult for them to contribute in some areas, while others had the extensive knowledge required.
 
 
 However, different team members had skills in other areas besides coding, and these skills were allocated to ensure that all members could contribute effectively. For instance, as some people worked on the server code, others worked on the visual GUI design; it made sense for the people who were most efficient with coding to work on those elements while others performed different tasks. Even though the software project was principally coding, there were many supplementary development tasks --- writing documentation, hardware testing, et cetera --- that were involved. Some areas of the software, such as the BeagleBone interfacing, were new to all team members and were worked on by everyone.
@@ -125,7 +125,7 @@ Email was used extensively for other communication. All members of the unit were
 
 \subsection{Individual Contributions}
 
-Software project tasks were divided up between team members, and in this report, each team member has generally been the writer of the sections they actually worked upon. Throughout the project, team members had clear areas of responsibility, and their work can also be followed through the GitHub repository (which allows tracking of individual contributions to the codebase). Below is a rough summary of individual areas of interest:
+Software project tasks were divided up between team members, and in this report, each team member has generally been the writer of the sections they actually worked upon. Throughout the project, team members had clear areas of responsibility, and their work can also be followed through the GitHub repository (which allows tracking of individual contributions to the code base). Below is a rough summary of individual areas of interest:
 
 \begin{tabular}{l|l}
 	{\bf Team Member} & {\bf Development} \\
@@ -140,7 +140,7 @@ Software project tasks were divided up between team members, and in this report,
 It should also be noted that team members often helped each other with designing, problem solving and testing, so members did end up contributing in some way to most areas of the software.
 
 
-Server coding tasks included the threading system, data handling, sensors/actuators control, authentication, server/client communication, http/s use, FastCGI, AJAX and the server API, which were split mainly by Sam and Jeremy (with significant overlap). BeagleBone interfacing included hardware access, pin control, networking and testing, and involved most members of the team. Sam, Jeremy and Justin focused on pin control, Jeremy and Callum investigated webcam use, and Rowan performed additional testing. GUI design involved the visual design elements, HTML/CSS webpage coding and Javascript functionality. James was primarily in charge of the GUI design, functionality and implementation, with assistance and alternate designs provided by Jeremy. Other team members were responsible for individual GUI sections, including Sam (graphs), Justin (help and data) and Rowan (widgets). Other tasks included image processing with OpenCV (Callum) and project documentation and safety (Justin).
+Server coding tasks included the threading system, data handling, sensors/actuators control, authentication, server/client communication, HTTP(S) use, FastCGI, AJAX and the server API, which were split mainly by Sam and Jeremy (with significant overlap). BeagleBone interfacing included hardware access, pin control, networking and testing, and involved most members of the team. Sam, Jeremy and Justin focused on pin control, Jeremy and Callum investigated webcam use, and Rowan performed additional testing. GUI design involved the visual design elements, HTML/CSS webpage coding and Javascript functionality. James was primarily in charge of the GUI design, functionality and implementation, with assistance and alternate designs provided by Jeremy. Other team members were responsible for individual GUI sections, including Sam (graphs), Justin (help and data) and Rowan (widgets). Other tasks included image processing with OpenCV (Callum) and project documentation and safety (Justin).
 
 \subsection{Cost Estimation}
 
