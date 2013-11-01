@@ -7,8 +7,8 @@ http://usercake.com
 //Database Information
 $db_host = "localhost"; //Host address (most likely localhost)
 $db_name = "users"; //Name of Database
-$db_user = "root"; //Name of database user
-$db_pass = trim(file_get_contents("mysql_password"));// TODO: Create that file or replace this line.
+$db_user = "usercake"; //Name of database user
+$db_pass = trim(file_get_contents('mysql_password', FILE_USE_INCLUDE_PATH));
 $db_table_prefix = "uc_";
 
 
