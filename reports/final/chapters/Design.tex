@@ -9,7 +9,7 @@ As the revised diagram in Figure \ref{block_diagram_final.png} shows, to remove 
 
 Another major design change which occurred quite early in the project is the switch from using multiple processes to running a single multithreaded process on the server. After performing some rudimentary testing (see Section \ref{Server Interface}) it became clear that a system of separate programs would be difficult to implement and maintain. Threads are similar to processes but are able to directly share memory, with the result that much less synchronisation is required in order to transfer information.
 
-{\bf Note on filenames:} In the following, files and directories related to the server are located in the \href{https://github.com/szmoore/MCTX3420/tree/master/server}{server} directory, files related to the (currently used) GUI are in \href{https://github.com/szmoore/MCTX3420/tree/master/testing/MCTXWeb}{testing/MCTXWeb}, and files created for testing purposes are located in \href{https://github.com/szmoore/MCTX3420/tree/master/testing}{testing}.
+{\bf Note on filenames:} In the following, files and directories related to the server are located in the \href{https://github.com/szmoore/MCTX3420/tree/master/server}{server} directory, files related to the (currently used) GUI are in \href{https://github.com/szmoore/MCTX3420/tree/master/testing/MCTXWeb}{testing/MCTXWeb}, and files created for testing purposes are located in \href{https://github.com/szmoore/MCTX3420/tree/master/testing}{testing}. In the server there is nearly always an associated \texttt{.h} ``header'' file for each \texttt{.c} ``source'' file.
 
 \begin{figure}[H]
 	\centering
@@ -131,18 +131,18 @@ Figure \ref{pinout.pdf} shows the pin out diagram of the BeagleBone Black. There
 Code to read sensor values is located in the \gitref{server}{sensors} subdirectory. With the exception of the dilatometer (discussed in Section \ref{Image Processing}), all sensors used in this project produce an analogue output. After conditioning and signal processing, this arrives at an analogue input pin on the BeagleBone as a signal in the range $0\to1.8\text{V}$. The sensors currently controlled by the software are:
 
 \begin{itemize}
-	\item {\bf Strain Gauges} (x4)
+	\item {\bf Strain Gauges} (x4) \gitref{server}{sensors/strain.c}
 
 	To simplify the amplifier electronics, a single ADC is used to read all strain gauges. GPIO pins are used to select the appropriate strain gauge output from a multiplexer. A mutex is used to ensure that no two strain gauges can be read simultaneously.
 
 
-	\item {\bf Pressure Sensors} (x3)
+	\item {\bf Pressure Sensors} (x3) \gitref{server}{sensors/pressure.c}
 
 	 There are two high range pressure sensors and a single low range pressure sensor; all three are read independently
-	\item {\bf Microphone} (x1) 
+	\item {\bf Microphone} (x1) \gitref{server}{sensors/microphone/c}
 
 	The microphone's purpose is to detect the explosion of a can. This sensor was given a low priority, but has been tested with a regular clicking tone and found to register spikes with the predicted frequency (~1.5Hz).
-	\item {\bf Dilatometer} (x2) - See Section \ref{Image Processing}
+	\item {\bf Dilatometer} (x2) - \gitref{server}{sensors/dilatometer.c} See Section \ref{Image Processing}
 \end{itemize}
 
 Additional sensors can be added and enabled through use of the \funct{Sensor_Add} function in \funct{Sensor_Init} in the file \gitref{server}{sensors.c}.
@@ -153,7 +153,7 @@ The function \funct{Data_Calibrate} located in \gitref{server}{data.c} can be us
 
 Code to set actuator values is located in the \gitref{server}{actuators} subdirectory. The following actuators are (as of writing) controlled by the software and have been successfully tested in collaboration with the Electronics and Pneumatics teams. Additional actuators can be added and enabled through use of the \funct{Actuator_Add} function in \funct{Actuator_Init} in the file \gitref{server}{actuators.c}.
 
-\subsubsection{Relay Controls}
+\subsubsection{Relay Controls} \gitref{server}{actuators/relay.c}
 
 The electrical team employed three relays for control over digital devices. The relays are switched using the GPIO outputs of the BeagleBone Black.
 
@@ -168,7 +168,7 @@ The use of a ``can select'' and ``can enable'' means that it is not a software p
 
 \subsubsection{PWM Outputs}
 
-A single PWM output is used to control a pressure regulator. The electrical team constructed an RC filter circuit which effectively averages the PWM signal to produce an almost constant analogue output. The period of the PWM is $2\text{kHz}$. This actuator has been calibrated, which allows the user to input the pressure value in kPa rather than having to control the PWM duty cycle correctly.
+A single PWM output is used to control a pressure regulator (\gitref{server}{actuators/pregulator.c}). The electrical team constructed an RC filter circuit which effectively averages the PWM signal to produce an almost constant analogue output. The period of the PWM is $2\text{kHz}$. This actuator has been calibrated, which allows the user to input the pressure value in kPa rather than having to control the PWM duty cycle correctly.
 
 
 \begin{figure}[H]
