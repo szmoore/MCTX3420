@@ -32,7 +32,7 @@ Another major design change which occurred quite early in the project is the swi
 
 The Server Program runs as a multithreaded process under a POSIX compliant GNU/Linux operating system\footnote{Tested on Debian and Ubuntu}. Each thread runs in parallel and is dedicated to a particular task; the three types of threads we have implemented are:
 \begin{enumerate}
-  \item Main Thread (Section \ref{Main Thread}) - Starts all other threads, accepts and responds to HTTP requests passed to the program by the HTTP server in the \funct{FastCGI_Loop} function (also see Section \ref{Communications})
+  \item Main Thread (Section \ref{Main Thread}) - Starts all other threads, accepts and responds to HTTP requests passed to the program by the HTTP server in the \funct{FastCGI_Loop} function (also see Section \ref{Server/Client Communication})
   \item Sensor Thread (Section \ref{Sensor Thread}) - Each sensor in the system is monitored by an individual thread running the \funct{Sensor_Loop} function.
   \item Actuator Thread (Section \ref{Actuator Thread}) - Each actuator in the system is controlled by an individual thread running the \funct{Actuator_Loop} function.
 \end{enumerate}
@@ -40,7 +40,7 @@ The Server Program runs as a multithreaded process under a POSIX compliant GNU/L
 
 In reality, threads do not run simultaneously; the operating system is responsible for sharing execution time between threads in the same way as it shares execution times between processes. Because the Linux kernel is not deterministic, it is not possible to predict when a given thread is actually running. This renders it impossible to maintain a consistent sampling rate, and necessitates the use of time stamps whenever a data point is recorded. 
 
-Figure \ref{sample_rate_histogram.png} shows a distribution of times\footnote{The clock speed of the BeagleBone is between 200MHz and 700MHz (depends on power)\cite{cameon.net} which is fast enough to neglect the fact that recording the timestamp takes several CPU cycles} between samples for a test sensor with the software sampling as fast as possible. Note the logarithmic $t$ axis. Although context switching clearly causes the sample rate to vary (\textcolor{green}{green}), the actual process of reading an ADC (\textcolor{red}{red}) using \funct{ADC_Read} (\gitref{server}{bbb_pin.c}) is by far the greatest source of variation.
+Figure \ref{sample_rate_histogram.png} shows a distribution of times\footnote{The clock speed of the BeagleBone is around 1GHz\cite{bbb_specs}, which is fast enough to neglect the fact that recording the timestamp takes several CPU cycles.} between samples for a test sensor with the software sampling as fast as possible. Note the logarithmic $t$ axis. Although context switching clearly causes the sample rate to vary (\textcolor{green}{green}), the actual process of reading an ADC (\textcolor{red}{red}) using \funct{ADC_Read} (\gitref{server}{bbb_pin.c}) is by far the greatest source of variation.
 
 It was not possible to obtain a real time Linux kernel for the BeagleBone. In theory, real time variants of the Linux kernel improve the reliability of sampling rates. However, testing on an amd64 laptop showed very little difference in the sampling time distribution when the real time Linux kernel was used.
 
@@ -55,16 +55,16 @@ It was not possible to obtain a real time Linux kernel for the BeagleBone. In th
 
 \subsection{Main Thread}\label{Main Thread}
 
-The main thread of the process is responsible for transferring data between the server and the client through the Hypertext Transmission Protocol (HTTP). A library called FastCGI is used to interface with an existing webserver called nginx\cite{nginx}. This configuration and the format of data transferred between the GUI and the server is discussed in more detail Section \ref{Communications}.
+The main thread of the process is responsible for transferring data between the server and the client through the Hypertext Transmission Protocol (HTTP). A library called FastCGI is used to interface with an existing webserver called nginx\cite{nginx}. This configuration and the format of data transferred between the GUI and the server is discussed in more detail Section \ref{Server/Client Communication}.
 
-Essentially, the main thread of the process responds to HTTP requests. The GUI is designed to send requests periodically (e.g.: to update a graph) or when a user action is taken (e.g.: changing the pressure setting). When this is received, the main thread parses the request, the requested action is performed, and a response is sent. The GUI is then responsible for updating its appearance or alerting the user based on this response. Figure \ref{fastcgi-flow-chart.png} in Section \ref{API}gives an overview of this process.
+Essentially, the main thread of the process responds to HTTP requests. The GUI is designed to send requests periodically (e.g.: to update a graph) or when a user action is taken (e.g.: changing the pressure setting). When this is received, the main thread parses the request, the requested action is performed, and a response is sent. The GUI is then responsible for updating its appearance or alerting the user based on this response. Figure \ref{fastcgi-flow-chart.png} in Section \ref{API} gives an overview of this process.
 
 
 \subsection{Sensor Threads}\label{Sensor Thread}
 
 Figure \ref{sensor_thread.pdf} shows a flow chart for the thread controlling an individual sensor. This process is implemented by \verb/Sensor_Loop/ and associated helper functions.
 
-All sensors are treated as returning a single floating point number when read. A \type{DataPoint} consists of a time stamp and the sensor value. \type{DataPoint}s are continuously saved to a binary file as long as the experiment is in process. An appropriate HTTP request (Section\ref{API}) will cause the main thread of the server program to respond with \type{DataPoint}s read back from the file. By using independent threads for reading data and transferring it to the GUI, the system does not rely on maintaining a consistent and synchronised network connection. This means that one the experiment is started with the desired parameters, a user can safely close the GUI or even shutdown their computer without impacting on the operation of the experiment.
+All sensors are treated as returning a single floating point number when read. A \type{DataPoint} consists of a time stamp and the sensor value. \type{DataPoint}s are continuously saved to a binary file as long as the experiment is in process. An appropriate HTTP request (Section \ref{API}) will cause the main thread of the server program to respond with \type{DataPoint}s read back from the file. By using independent threads for reading data and transferring it to the GUI, the system does not rely on maintaining a consistent and synchronised network connection. This means that one the experiment is started with the desired parameters, a user can safely close the GUI or even shutdown their computer without impacting on the operation of the experiment.
 
 
 
@@ -214,7 +214,7 @@ Several authentication methods are supported by the server; the method to use ca
 
 % BEGIN Jeremy's section
 
-This section describes the methods and processes used to communicate between the server and client. For this system, client-server interaction is achieved completely over the internet, via standard HTTP web requests with TLS encryption. In other words, it has been designed to interact with the client over the internet, {\bf completely through a standard web browser} (Figure \ref{client_request_flowchart.png}). No extra software should be required from the client. Detailed reasons for this choice are outlined in Section \ref{Alternative Communication}
+This section describes the methods and processes used to communicate between the server and client. For this system, client-server interaction is achieved completely over the internet, via standard HTTP web requests with TLS encryption. In other words, it has been designed to interact with the client over the internet, {\bf completely through a standard web browser} (Figure \ref{client_request_flowchart.png}). No extra software should be required from the client. Detailed reasons for this choice are outlined in Section \ref{Alternative Communication Technologies}
 
 \begin{figure}[H]
 	\centering
@@ -240,7 +240,7 @@ In particular, nginx has been configured to:
 
 Transport Layer Security (TLS) encryption, better known as SSL or HTTPS encryption has been enabled to ensure secure communications between the client and server. This is primarily important for when user credentials (username / password) are supplied, and prevents what is called ``man-in-the-middle'' attacks. In other words, it prevents unauthorised persons from viewing such credentials as they are transmitted from the client to the server. 
 
-As also mentioned in Section \ref{Authentication} this system also runs a MySQL server for the user management system, UserCake. This kind of server setup is commonly referred to as a LAMP (Linux, Apache, MySQL, PHP) configuration\cite{}, except in this case, nginx has been used in preference to the Apache web server. 
+As also mentioned in Section \ref{Authentication Mechanisms} this system also runs a MySQL server for the user management system, UserCake. This kind of server setup is commonly referred to as a LAMP (Linux, Apache, MySQL, PHP) configuration\cite{lamp}, except in this case, nginx has been used in preference to the Apache web server. 
 
 Nginx was used as the web server because it is well established, lightweight and performance oriented. It also supports FastCGI by default, which is how nginx interfaces with the server program. Realistically, any well known web server would have sufficed, such as Apache or Lighttpd, given that this is not a large scale service.
 
@@ -386,7 +386,7 @@ Other options were explored apart from FastCGI to implement the server interface
 	\label{cgi.png}
 \end{figure}
 
-Initially, a system known as ``Common Gateway Interface'', or CGI was explored. However, CGI based software is only executed when a request is received (Figure \ref{cgi.png}, which makes continuous control and logging over the sensors and actuators unfeasible. 
+Initially, a system known as ``Common Gateway Interface'', or CGI was explored. However, CGI based software is only executed when a request is received (Figure \ref{cgi.png}), which makes continuous control and logging over the sensors and actuators unfeasible. 
 
 \begin{figure}[H]
 	\centering
@@ -395,7 +395,7 @@ Initially, a system known as ``Common Gateway Interface'', or CGI was explored. 
 	\label{custom_webserver.png}
 \end{figure}
 
-Another system considered was to build a custom web server (Figure \ref{custom_webserver.png} that used threading, integrating both the control and web components. This option was primarily discarded because it was inflexible to supporting extended services like PHP and TLS encryption. See \href{https://github.com/szmoore/MCTX3420/issues/6}{Issue 6} on GitHub for more information.
+Another system considered was to build a custom web server (Figure \ref{custom_webserver.png}) that used threading, integrating both the control and web components. This option was primarily discarded because it was inflexible to supporting extended services like PHP and TLS encryption. See \href{https://github.com/szmoore/MCTX3420/issues/6}{Issue 6} on GitHub for more information.
 
 \begin{figure}[H]
 	\centering
@@ -413,7 +413,7 @@ In comparison, FastCGI (Figure \ref{fastcgi.png}) can be seen as the ``best of b
 \begin{enumerate}
 	\item A self-signed TLS certificate has been used, as it is free. It is equally secure as any, but users will get a security warning when accessing the web site. A proper TLS certificate signed by a trusted certificate authority should be used instead.
 	\item Consider expanding the framework of JSON functions to simplify creating a response. 
-	\item Consider using X-Accel-Redirect along with UserCake (Section \ref{Authentication}) to make a finer-grained access control system to information such as the system logs
+	\item Consider using X-Accel-Redirect along with UserCake (Section \ref{Authentication Mechanisms}) to make a finer-grained access control system to information such as the system logs
 \end{enumerate}
 
 \section{BeagleBone Configuration}\label{BeagleBone Configuration}
@@ -481,7 +481,7 @@ As the \funct{Camera_GetImage} function in \gitref{server}{image.c} is external,
 
 The Canny Edge algorithm\cite{OpenCV_Canny} determines which pixels are ``edge'' pixels through a series of steps.  The algorithm applies the Sobel operator in the x and y directions using \var{KERNELSIZE} for the size of the kernel.  The result of this gives the gradient strength and direction. The direction is rounded to 0, 45, 90 or 135 degrees. Non-maximum suppression is then used to remove any pixels not considered to be part of an edge.  The pixels left are then put through the hysteresis step.  If the gradient of the pixel is higher than the upper threshold (in our algorithm denoted by \var{LOWTHRESHOLD*RATIO}) then the pixel is accepted as an edge.  If it is below the lower threshold (i.e. \var{LOWTHRESHOLD}) then the pixel is disregarded.  The remaining pixels are removed unless that is connected to a pixel above the upper threshold (Canny Edge Detector). The defined values in the header file can be altered to improve accuracy.
 
-The \funct{CannyThreshold} function fills the \type{CvMat} \var{g_edges} structure with the current images edge (i.e. an image containing only pixels considering to be edges, see Appendix \ref{appendix_imageedge} ). The code then finds the location of the line.  It does this by sampling a number of rows, determined by the number of samples and the height of the image, finding the pixel/s in the row considered to be an edge.  The algorithm then takes the average position of these pixels.  The average position over all rows sampled then determines the actual edge position.  The rows sampled are evenly spaced over the height of the image.  If a row does not contain an edge, then it will not be included in the average.  If a blank image goes through, or the algorithm has a low number of samples and does not pick up an edge, then the function will return false and the data point will not be recorded.
+The \funct{CannyThreshold} function fills the \type{CvMat} \var{g_edges} structure with the current image edge (i.e. an image containing only pixels considering to be edges, see Appendix \ref{appendix_imageedge} ). The code then finds the location of the line.  It does this by sampling a number of rows, determined by the number of samples and the height of the image, finding the pixel/s in the row considered to be an edge.  The algorithm then takes the average position of these pixels.  The average position over all rows sampled then determines the actual edge position.  The rows sampled are evenly spaced over the height of the image.  If a row does not contain an edge, then it will not be included in the average.  If a blank image goes through, or the algorithm has a low number of samples and does not pick up an edge, then the function will return false and the data point will not be recorded.
 
 Once the edge is found, we will either return the position of the edge, if the \var{DIL_POS} ID is set. It needs to be noted that this will only show the change in position of one side of the can.  If the \var{DIL_DIFF} ID is set then the value will be set to the difference between the current position and the last position, multiplied by \var{SCALE} and 2.  We need to multiply by 2 as we are only measuring the change in width to one side of the can, however we must assume that the expansion is symmetrical.  The scale will be used to convert from pixels to $\mu$m (or a more suitable scale).  Currently the scale is set to 1, as the dilatometer has not been calibrated, thus we are only measuring the rate of change of pixels (which is arbitrary). The static variable, \var{lastPosition}, is then set to determine the next change in size.  If the difference is negative, then the can is being compressed or is being depressurized. 
 The rate of expansion can then be determined from the data set.  As the system does not have a fixed refresh rate, however each data point is time-stamped.  If the data is the edge position, then plotting the derivative of the time graph will show the rate of expansion over time.
@@ -681,7 +681,7 @@ After the basic testing of the initial GUIs we started playing with GUI design i
 
 \subsection{Parallel GUI Design}
 
-During the GUI development phase, several GUIs were created. Some used graphical development software, while others used hard codded HTML, JavaScript, and CSS.  Due to no organization within the group and a lack in communication a ``final GUI'' was made by several of the team members.  Some of theses are shown below.
+During the GUI development phase, several GUIs were created. Some used graphical development software, while others used hard coded HTML, JavaScript, and CSS.  Due to no organization within the group and a lack in communication a ``final GUI'' was made by several of the team members.  Some of these are shown below.
 
 \subsection{GUI Aesthetics}
 
