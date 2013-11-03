@@ -6,7 +6,8 @@
 #ifndef _DATAPOINT_H
 #define _DATAPOINT_H
 
-#define DATA_BUFSIZ 10 /** Size to use for DataPoint buffers (TODO: Optimise) **/
+/** Size to use for DataPoint buffers (TODO: Optimise) **/
+#define DATA_BUFSIZ 10 
 
 
 #include "common.h"
