@@ -119,6 +119,9 @@ static bool Dilatometer_GetImage()
 	return result;
 }
 
+/**
+ * Applies the Canny threshold algorithm to the captured image.
+ */
 void CannyThreshold()
 {
 	if ( g_edges == NULL)
@@ -240,7 +243,9 @@ void Dilatometer_Init()
 	Dilatometer_GetEdge(&val, 1); 
 }
 
-// Overlays a line over the given edge position
+/**
+ * Overlays a line over the given edge position
+ */
 void Draw_Edge(double edge)
 {
 	CvScalar value;

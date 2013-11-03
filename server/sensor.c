@@ -23,10 +23,8 @@ int g_num_sensors = 0;
  * @param user_id - User identifier
  * @param read - Function to call whenever the sensor should be read
  * @param init - Function to call to initialise the sensor (may be NULL)
- * @param max_error - Maximum error threshold; program will exit if this is exceeded for the sensor reading
- * @param min_error - Minimum error threshold; program will exit if the sensor reading falls below this value
- * @param max_warn - Maximum warning threshold; program will log warnings if the value exceeds this threshold
- * @param min_warn - Minimum warning threshold; program will log warnings if the value falls below this threshold
+ * @param cleanup - Function to call whenever to deinitialise the sensor (may be NULL)
+ * @param sanity - Function to call to check that the sensor value is sane (may be NULL)
  * @returns Number of actuators added so far
  */
 int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn cleanup, SanityFn sanity)
@@ -277,7 +275,7 @@ Sensor * Sensor_Identify(const char * name)
 /**
  * Helper: Begin sensor response in a given format
  * @param context - the FCGIContext
- * @param id - ID of sensor
+ * @param s - Sensor to begin the response for
  * @param format - Format
  */
 void Sensor_BeginResponse(FCGIContext * context, Sensor * s, DataFormat format)
@@ -300,7 +298,7 @@ void Sensor_BeginResponse(FCGIContext * context, Sensor * s, DataFormat format)
 /**
  * Helper: End sensor response in a given format
  * @param context - the FCGIContext
- * @param id - ID of the sensor
+ * @param s - Sensor to end the response for
  * @param format - Format
  */
 void Sensor_EndResponse(FCGIContext * context, Sensor * s, DataFormat format)
@@ -424,6 +422,11 @@ const char * Sensor_GetName(int id)
 	return g_sensors[id].name;
 }
 
+/**
+ * Returns the last DataPoint that is currently available.
+ * @param id - The sensor ID for which to retrieve data from
+ * @return The last DataPoint
+ */
 DataPoint Sensor_LastData(int id)
 {
 	Sensor * s = &(g_sensors[id]);

@@ -16,8 +16,12 @@ static Actuator g_actuators[ACTUATORS_MAX];
 /** 
  * Add and initialise an Actuator
  * @param name - Human readable name of the actuator
- * @param read - Function to call whenever the actuator should be read
+ * @param user_id - Caller specified ID to be associated with this actuator
+ * @param set - Function to call whenever the actuator should be set
  * @param init - Function to call to initialise the actuator (may be NULL)
+ * @param cleanup - Function to call to deinitialise the actuator (may be NULL)
+ * @param sanity - Function to call to check that a user specified value is sane (may be NULL)
+ * @param initial_value - The initial value to set the actuator to
  * @returns Number of actuators added so far
  */
 int Actuator_Add(const char * name, int user_id, SetFn set, InitFn init, CleanFn cleanup, SanityFn sanity, double initial_value)
@@ -242,6 +246,7 @@ void Actuator_SetControl(Actuator * a, ActuatorControl * c)
  * Set an Actuator value
  * @param a - The Actuator
  * @param value - The value to set
+ * @param record - Whether or not to record the value to the Actuator's DataFile.
  */
 void Actuator_SetValue(Actuator * a, double value, bool record)
 {
@@ -275,8 +280,8 @@ void Actuator_SetValue(Actuator * a, double value, bool record)
 /**
  * Helper: Begin Actuator response in a given format
  * @param context - the FCGIContext
+ * @param a - the actuator to begin a response for
  * @param format - Format
- * @param id - ID of Actuator
  */
 void Actuator_BeginResponse(FCGIContext * context, Actuator * a, DataFormat format)
 {
@@ -298,7 +303,7 @@ void Actuator_BeginResponse(FCGIContext * context, Actuator * a, DataFormat form
 /**
  * Helper: End Actuator response in a given format
  * @param context - the FCGIContext
- * @param id - ID of the Actuator
+ * @param a - the actuator to end a response for
  * @param format - Format
  */
 void Actuator_EndResponse(FCGIContext * context, Actuator * a, DataFormat format)
@@ -458,6 +463,11 @@ Actuator * Actuator_Identify(const char * name)
 	return NULL;
 }
 
+/**
+ * Returns the last DataPoint that is currently available.
+ * @param id - The actuator ID for which to retrieve data from
+ * @return The last DataPoint
+ */
 DataPoint Actuator_LastData(int id)
 {
 	Actuator * a = &(g_actuators[id]);

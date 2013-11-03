@@ -8,6 +8,11 @@
 static CvCapture * g_capture = NULL;
 static int g_captureID = -1;
 
+/**
+ * Image stream handler. Returns an image to the user.
+ * @param context The context to work in
+ * @param params User specified parameters
+ */
 void Image_Handler(FCGIContext * context, char * params)
 {
 
@@ -53,7 +58,7 @@ void Image_Handler(FCGIContext * context, char * params)
  * @param num - Camera id
  * @param width - Width to force
  * @param height - Height to force
- * @param image - Pointer to CvMat* to set with result
+ * @param frame - Pointer to IplImage* to set with result
  * @returns true on success, false on error 
  */
  bool Camera_GetImage(int num, int width, int height,  IplImage ** frame)
@@ -97,6 +102,9 @@ void Image_Handler(FCGIContext * context, char * params)
 	return result;
 }
 
+/**
+ * Executed on cleanup. Releases the OpenCV Capture structs.
+ */
 void Image_Cleanup()
 {
 	// Release the capture and IplImage pointers

@@ -30,6 +30,12 @@ void Pin_Close()
 		PWM_Unexport(i);
 }
 
+/**
+ * Configures a pin (Export/Unexport business)
+ * @param type The pin type (GPIO/PWM/ADC)
+ * @param pin_export Whether to export/unexport/leave-as-is the pin
+ * @param num The pin number
+ */
 bool Pin_Configure(const char *type, int pin_export, int num)
 {
 	bool ret = true;

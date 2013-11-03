@@ -10,7 +10,6 @@
 #define BBB_PIN_COUNT 92
 
 /** GPIO0 defines **/
-
 #define GPIO0_1 1
 #define GPIO0_2 2 // Used for PWM
 #define GPIO0_3 3 // Used for PWM
@@ -136,13 +135,16 @@ extern const unsigned char g_pin_index_to_gpio[GPIO_NUM_PINS];
 #define ADC5 5
 #define ADC6 6
 #define ADC7 7
+/** The maximum voltage input to the ADC **/
 #define ADC_VOLTAGE_MAX 1800
+/** The maximum raw value from the ADC **/
 #define ADC_RAW_MAX (2 << ADC_BITS)
+/** Converts the raw ADC value to a voltage in millivolts **/
 #define ADC_TO_MVOLTS(x) ((double)((x)/2 << ADC_BITS) * (double)ADC_VOLTAGE_MAX)
 
 /** Number of ADC pins **/
 #define ADC_NUM_PINS 8
-
+/** The path to the ADCs on the BBB **/
 #define ADC_DEVICE_PATH "/sys/bus/iio/devices/iio:device0/"
 
 /** PWM names to sysfs numbers **/

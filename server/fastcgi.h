@@ -35,12 +35,20 @@ typedef enum StatusCodes {
 
 #define CONTROL_KEY_BUFSIZ 41
 
+/**
+ * An entry that describes an expected user parameter for parsing.
+ * To be used in conjunction with @see FCGI_ParseRequest.
+ */
 typedef struct FCGIValue {
+	/** The name of the key (from key/value pair) [in] **/
 	const char *key;
+	/** A pointer to a variable that will hold the parsed value [out] **/
 	void *value;
+	/** Bit flags that determine things like if the field is required and if it was received [in/out] **/
 	unsigned flags;
 } FCGIValue;
 
+/** The type of a user (unauthorised, normal, admin). **/
 typedef enum {USER_UNAUTH, USER_NORMAL, USER_ADMIN} UserType;
 
 /**Contextual information related to FCGI requests*/
@@ -66,6 +74,7 @@ typedef struct
 	int response_number;
 } FCGIContext;
 
+/** The type definition of a module handler. **/
 typedef void (*ModuleHandler) (FCGIContext *context, char *params);
 
 extern bool FCGI_LockControl(FCGIContext *context, const char * user_name, UserType user_type);
