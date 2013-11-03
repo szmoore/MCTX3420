@@ -51,7 +51,7 @@
 										(tv)->tv_nsec = ((value) - (int)(value))*1e9; \
 									}
 
-extern bool PathExists(const char * path);
+//extern bool PathExists(const char * path);
 extern bool DirExists(const char * path);
 
 

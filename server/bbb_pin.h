@@ -31,6 +31,7 @@ extern bool PWM_Set(int pin, bool polarity, long period, long duty); // period a
 extern bool PWM_Stop(int pin);
 
 #else
+//! @cond Doxygen_Suppress
 //Horrible hacks to silence gcc when compiling on systems that are not the BBB
 extern bool True_Stub(int arg, ...);
 extern bool ADC_Read_Stub(int *val, ...);
@@ -53,7 +54,7 @@ extern bool GPIO_Read_Stub(bool *val, ...);
 #define PWM_Set(pin, polarity, period, duty) True_Stub((int)pin, polarity, period, duty)
 #define PWM_Stop(pin) True_Stub((int)pin) 
 //yuck
-
+//! @endcond
 #endif //_BBB
 
 #endif //_BBB_PIN_H

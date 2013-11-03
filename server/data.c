@@ -292,7 +292,7 @@ int Data_FindByTime(DataFile * df, double time_stamp, DataPoint * closest)
  * @param df - DataFile to access
  * @param start - Info about start_time param 
  * @param end - Info about end_time param
- * @param fmt - Info about format param
+ * @param format - Info about format param
  * @param current_time - Current time
  */
 void Data_Handler(DataFile * df, FCGIValue * start, FCGIValue * end, DataFormat format, double current_time)

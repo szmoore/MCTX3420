@@ -28,6 +28,7 @@ microscope : microscope.o
 
 clean :
 	make -C sensors clean
+	make -C actuators clean
 	$(RM) $(BIN) $(BIN2)
 	$(RM) *.o
 

@@ -334,6 +334,7 @@ void ADC_Unexport(int pin)
 /**
  * Set a GPIO pin
  * @param pin - The pin to set. MUST have been exported before calling this function.
+ * @param value - The value to set the GPIO pin to.
  */
 bool GPIO_Set(int pin, bool value)
 {

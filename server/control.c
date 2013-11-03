@@ -11,17 +11,25 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+/**
+ * Control state information (start/stop/pause etc)
+ */
 typedef struct ControlData {
-	ControlModes current_mode;
-	pthread_mutex_t mutex;
-	struct timespec start_time;
-	char user_name[31]; // The user who owns the currently running experiment
-	char experiment_dir[BUFSIZ]; //Directory for experiment
-	char experiment_name[BUFSIZ];
+	ControlModes current_mode; /** Current experiment mode **/
+	pthread_mutex_t mutex; /** Mutex to serialise access to control methods **/
+	struct timespec start_time; /** Start time of current experiment **/
+	char user_name[31]; /** The user who owns the currently running experiment **/
+	char experiment_dir[BUFSIZ]; /** Directory for experiment **/
+	char experiment_name[BUFSIZ]; /** Name of the current experiment **/
 } ControlData;
 
 ControlData g_controls = {CONTROL_STOP, PTHREAD_MUTEX_INITIALIZER, {0}};
 
+/**
+ * Determines if a directory exists or not.
+ * @param path The path to check
+ * @return true iff the path exists
+ */
 bool DirExists(const char *path)
 {
 	DIR *dir = opendir(path);
@@ -32,19 +40,9 @@ bool DirExists(const char *path)
 	return false;
 }
 
-bool PathExists(const char *path) 
-{
-	FILE *fp = fopen(path, "r");
-	if (fp) {
-		fclose(fp);
-		return true;
-	}
-	return false;
-}
-
 /**
  * Lists all experiments for the current user.
- * @param The context to work in
+ * @param context The context to work in
  */
 void ListExperiments(FCGIContext *context) 
 {
@@ -260,7 +258,6 @@ const char* Control_SetMode(ControlModes desired_mode, void * arg)
 
 /**
  * Gets a string representation of the current mode
- * @param mode The mode to get a string representation of
  * @return The string representation of the mode
  */
 const char * Control_GetModeName() {

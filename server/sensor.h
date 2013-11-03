@@ -80,7 +80,7 @@ extern void Sensor_SetModeAll(ControlModes mode, void * arg);
 extern void Sensor_SetMode(Sensor * s, ControlModes mode, void * arg);
 
 extern void * Sensor_Loop(void * args); // Main loop for a thread that handles a Sensor
-extern bool Sensor_Read(Sensor * s, DataPoint * d); // Read a single DataPoint, indicating if it has changed since the last one
+//extern bool Sensor_Read(Sensor * s, DataPoint * d); // Read a single DataPoint, indicating if it has changed since the last one
 extern Sensor * Sensor_Identify(const char * str); // Identify a Sensor from a string
 
 extern void Sensor_Handler(FCGIContext *context, char * params); // Handle a FCGI request for Sensor data

@@ -164,7 +164,6 @@ bool FCGI_LockControl(FCGIContext *context, const char * user_name, UserType use
  * the key) has control or not. If validated, the context control_timestamp is
  * updated.
  * @param context The context to work in
- * @param key The control key to be validated.
  * @return TRUE if authorized, FALSE if not.
  */
 bool FCGI_HasControl(FCGIContext *context)
@@ -386,7 +385,6 @@ void FCGI_BeginJSON(FCGIContext *context, StatusCodes status_code)
  * Generic accept response in JSON format.
  * @param context The context to work in
  * @param description A short description.
- * @param cookie Optional. If given, the cookie field is set to that value.
  */
 void FCGI_AcceptJSON(FCGIContext *context, const char *description)
 {
@@ -510,7 +508,7 @@ void FCGI_WriteBinary(void * data, size_t size, size_t num_elem)
 /**
  * Escapes a string so it can be used safely.
  * Currently escapes to ensure the validity for use as a JSON string
- * Does not support unicode specifiers in the form of \uXXXX.
+ * Does not support unicode specifiers in the form of \\uXXXX.
  * @param buf The string to be escaped
  * @return The escaped string (return value == buf)
  */

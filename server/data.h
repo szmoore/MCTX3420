@@ -6,7 +6,7 @@
 #ifndef _DATAPOINT_H
 #define _DATAPOINT_H
 
-#define DATA_BUFSIZ 10 // Size to use for DataPoint buffers (TODO: Optimise)
+#define DATA_BUFSIZ 10 /** Size to use for DataPoint buffers (TODO: Optimise) **/
 
 
 #include "common.h"
@@ -23,8 +23,8 @@ typedef struct
 /** Enum of output format types for DataPoints **/
 typedef enum
 {
-	JSON, // JSON data
-	TSV // Tab seperated vector
+	JSON, /** JSON data */
+	TSV /** Tab seperated vector */
 } DataFormat;
 
 /** 
@@ -34,10 +34,10 @@ typedef enum
  */
 typedef struct
 {
-	FILE * file; // file pointer
-	int num_points; // Number of DataPoints in the file
-	char * filename; // Name of the file
-	pthread_mutex_t mutex; // Mutex around num_points
+	FILE * file; /** file pointer */
+	int num_points; /** Number of DataPoints in the file */
+	char * filename; /** Name of the file */
+	pthread_mutex_t mutex; /** Mutex around num_points */
 } DataFile;
 
 
@@ -53,8 +53,5 @@ extern double Data_Calibrate(double value, double x[], double y[], int size);
 
 extern void Data_Handler(DataFile * df, FCGIValue * start, FCGIValue * end, DataFormat format, double current_time); // Helper; given FCGI params print data
 extern DataFormat Data_GetFormat(FCGIValue * fmt); // Helper; convert human readable format string to DataFormat
-
-
-extern double Data_Callibrate(double value, double map[], int map_size);
 
 #endif //_DATAPOINT_H
