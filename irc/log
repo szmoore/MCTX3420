@@ -8240,3 +8240,121 @@
 21:36 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
 21:58 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit ["reboot"]
 22:35 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+--- Day changed Sun Nov 03 2013
+01:41 -!- Rowan [~Rowan@130.95.91.235] has joined #mctxuwa_softdev
+01:44 -!- Rowan [~Rowan@130.95.91.235] has quit [EOF From client]
+13:55 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:21 -!- Callum [~Callum@106-69-4-220.dyn.iinet.net.au] has joined #mctxuwa_softdev
+15:21 < jtanx> hello
+15:21 < Callum> hey
+15:22 < jtanx> how's life
+15:22 < Callum> ok 
+15:22 < Callum> that appendix reference
+15:23 < jtanx> yeah?
+15:23 < Callum> was because i put the canny edge figures in an appendix
+15:23 < jtanx> okay, so would that now be figure 2.17
+15:25 < Callum> technically no, im reffering to 2.17 C-F but without the edge line superimposed onto it
+15:25 < jtanx> sure
+15:26 < Callum> also is the other thing you were referring to when i said graphs instead of figures?
+15:26 < Callum> must of glanced over that in my proof read
+15:26 < jtanx> "The results can be seen in figure 2.14. From the graphs (Figure ??)
+15:27 < Callum> change graphs to figure
+15:27 < jtanx> figure 2.17 again?
+15:27 < Callum> no
+15:27 < Callum> its referring to 2.14 still
+15:27 < jtanx> okay
+15:27 < jtanx> seems a bit redundant, with the previous sentence
+15:28 < Callum> yea. remove previous sentece and say From figure 2.14 it can be..
+15:28 < jtanx> Sure
+15:33 < Callum> also
+15:33 < Callum> 2.17A and B are the same thing?
+15:33 < Callum> ones meant to be grayscale
+15:33 < jtanx> so they are...
+15:33 < jtanx> woops
+15:44 < jtanx> okay, it should be fixed (in my repo for now)
+15:50 < Callum> thanks
+15:57 < jtanx> no problem
+15:57 -!- Callum [~Callum@106-69-4-220.dyn.iinet.net.au] has quit [Connection reset by peer]
+16:05 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["reboot this POS computer"]
+16:20 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+17:20 -!- Callum [~Callum@106-69-4-220.dyn.iinet.net.au] has joined #mctxuwa_softdev
+17:32 < jtanx> Callum: are you sure you want to leave your section in first person?
+17:33 < Callum> hmm. has everyone else done 3rd? 
+17:33 < jtanx> I think the rest of it is in 3rd
+17:34 < jtanx> it's up to you though
+17:34 < Callum> well the way i understood it was we were writing about what we did, but if the rest is in 3rd then should probably change it to be consistent
+17:34 < Callum> we did individually*
+17:34 < Callum> probably doesnt matter
+17:34 < Callum> better to go with consistency
+17:36 < Callum> most of mine is in 3rd anyway ahah.
+17:37 < Callum> just change the first person ones to third then. or i can..but il need to learn how to modify this stuff
+17:37 < jtanx> you can just modify your original .doc one and I can probably then make the changes
+17:37 < jtanx> if you feel more comfortable with that
+17:37 < Callum> it would be easier to modify the final one surely
+17:38 < jtanx> Okay
+17:38 < jtanx> Well the stuff is in Design.tex
+17:38 < jtanx> hmm
+17:38 < jtanx> I should probably just merge my stuff first
+18:07 < Callum> hmm i should probably go through and fix/make sure references to images are right. i originally had 5 edges images, and sam im presuming? removed the one i was using in the progression
+18:08 < jtanx> probably
+18:08 < Callum> as i split it in two (one set of images shows 1 images progression, other just shows the end for different values)
+18:08 < jtanx> he had some issues reading your original images correctly afaik
+18:09 < Callum> hmm. il look into it soon
+18:23 -!- Callum_ [~Callum@106-69-4-220.dyn.iinet.net.au] has joined #mctxuwa_softdev
+18:34 -!- Callum [~Callum@106-69-4-220.dyn.iinet.net.au] has quit [Ping timeout]
+18:37 < Callum_> yea the images arent referenced properly
+18:39 < Callum_> also make reference to an image he removed
+18:48 < Callum_> can the figure removed be added back and 2.17F be moved to before the current 3?
+18:48 < Callum_> or atleast just the second request
+18:48 < Callum_> zz. by current 3 i mean the 3 before it
+18:48 < jtanx> well, what figure are you referring to that's been removed?
+18:48 < Callum_> in my original document
+18:48 < Callum_> 2D
+18:48 < Callum_> 2C*
+18:49 < Callum_> but as 2F is the same original image
+18:49 < Callum_> i can just change the values i refer to
+18:49 < Callum_> 2.17F
+18:49 < Callum_> i must sound pretty confusing right now.. :p
+18:49 < jtanx> yes...
+18:50 < Callum_> ok. 2.17A,B,F are all from the same original image, C,D,E are from another (which i dont actually show anywhere..oh well)
+18:51 < Callum_> in my text i refer to an image which is comment to A,B,F but isnt actually there. but i can change the values i say is used to make it equivalent to F
+18:51 < Callum_> TBH i'd probably prefer to have 2 figures, one to show the progression of the images and another to add some more examples. but if thats too hard to do its ok. i can work with wahts there
+18:52 < Callum_> progression of 1 image*
+18:57 < Callum_> get that? :P
+18:59 < jtanx> sort of...
+18:59 < jtanx> I don't know
+18:59 < jtanx> split figure 2.17 into two
+19:00 < jtanx> you're updating the text?
+19:02 < Callum_> yea
+19:02 < Callum_> i can just leave it as 1 figure, iv switched F and C
+19:02 < jtanx> okay
+19:08 < Callum_> Also. I think the majority of this should be moved down into the results section
+19:08 < Callum_> so its actually next to/after what its referring to
+19:12 < Callum_> this automatically numbers stuff yea? so if i want to split a figure all i need to do is copy the format and halve it?
+19:12 < jtanx> I'm not sure
+19:12 < jtanx> but I'd think so
+19:12 < jtanx> so long as you name it appropriately
+19:12 < jtanx> do you have latex installed
+19:12 < Callum_> yea
+19:13 < jtanx> okay
+19:15 < Callum_> wait. bi'
+19:15 < Callum_> no
+19:15 < Callum_> i was saying yea to labelling
+19:15 < jtanx> right
+19:28 < Callum_> ok well iv fixed the referencing. just left it as 1 figure
+21:18 < Callum_> so when are we meeting tomorrow then?
+21:18 < jtanx> we have to
+21:18 < jtanx> oh right when
+21:18 < jtanx> I dunno
+21:18 < Callum_> haha
+21:51 < jtanx> before 5pm? :P
+21:51 < Callum_> sounds good. 4.59 it is :p
+21:52 < Callum_> but if we dont set a time il probably end up getting there around 11/12, maybe a bit earlier. depends when i can drag myself out of bad 
+21:52 < Callum_> bes
+21:52 < Callum_> ugh the place you sleep Dx
+21:53 < jtanx> haha
+21:54 < jtanx> okay, well 11am sounds good I guess
+22:03 -!- Callum_ [~Callum@106-69-4-220.dyn.iinet.net.au] has quit [Connection reset by peer]
+23:02 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+23:40 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+23:46 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
