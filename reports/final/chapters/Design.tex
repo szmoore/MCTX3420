@@ -495,7 +495,7 @@ One thing to note however is the documentation for OpenCV for the language C is 
 
 \subsubsection{Memory Management}
 
-An initial problem I faced when coding in OpenCV was memory leaks.  My simple program to take an image and save it to file was causing us to lose approximately 18Mb, which is unacceptable and would cause issues in the long term.  After researching the issue I found that I was not properly releasing the structure dealing with storing the image for the data, \type{IplImage}.  For example I was using:
+An initial problem we faced when coding in OpenCV was memory leaks.  Our simple program to take an image and save it to file was causing us to lose approximately 18Mb, which is unacceptable and would cause issues in the long term.  After researching the issue we found that we were not properly releasing the structure dealing with storing the image for the data, \type{IplImage}.  For example we were using:
 \begin{lstlisting}
 	cvReleaseImage(&frame);
 \end{lstlisting}
@@ -504,14 +504,14 @@ When the correct release function is actually:
 	cvReleaseImageHeader(&frame);
 \end{lstlisting}
 
-Another thing to note was that releasing one of the \type{CvMat} structures (\verb/g_srcRGB/) during the cleanup of the dilatometer module, a \verb/NULL/ pointer exception was returned and the program execution stopped.  The reason for this is unknown, but the other \type{CvMat} structures appear to be released properly. For now I simply removed this release; however the cause should be looked into.
+Another thing to note was that releasing one of the \type{CvMat} structures (\verb/g_srcRGB/) during the cleanup of the dilatometer module, a \verb/NULL/ pointer exception was returned and the program execution stopped.  The reason for this is unknown, but the other \type{CvMat} structures appear to be released properly. For now we simply removed this release; however the cause should be looked into.
 
 \subsubsection{Dilatometer}
-The dilatometer code went through a few iterations.  Originally we were informed by the Sensors Team that the camera would be watching the can, rather than object attached to the can.  Thus my original algorithms were revolved around finding the actual width and change in width of the can.
+The dilatometer code went through a few iterations.  Originally we were informed by the Sensors Team that the camera would be watching the can, rather than object attached to the can.  Thus our original algorithms were revolved around finding the actual width and change in width of the can.
 
-Originally I designed the algorithm to find the edge of the can via the pixel thresholds.  By finding the average position of the pixels below a certain threshold (as ideally you would have a dark can on a light background to create a contrast for the edge). This would already give a fairly inaccurate result, as it assumes a relatively sharp intensity gradient.  Even with little noise the system would have accuracy issues.
+Originally we designed the algorithm to find the edge of the can via the pixel thresholds.  By finding the average position of the pixels below a certain threshold (as ideally you would have a dark can on a light background to create a contrast for the edge). This would already give a fairly inaccurate result, as it assumes a relatively sharp intensity gradient.  Even with little noise the system would have accuracy issues.
 
-To increase the accuracy in finding the edge, I considered the Canny Edge theorem.  I wrote my algorithm to find all points above a certain threshold and take the average of these, considering this as an edge.  I then scanned through the rest of the image until the next edge was found and do the same.  The width of the can is found by taking the difference of the two locations.  I also wrote an algorithm to generate these edges so I can test the algorithm.  The function (\funct{Dilatometer_TestImage}/, which is still located within \gitref{server}{sensors/dilatometer.c}) generated two edges, with an amount of noise.  The edges were created by taking an exponential decay around the edge and adding (and subtracting) a random noise from the expected decay.  The edges where then moved outwards using a for loop. From Figure \ref{canny_edges.png}, it can be seen how effective the algorithm was for a system with negligible noise, as it gave negligible percentage error.  However with increasing levels of noise we notice a considerable increase in inaccuracy (Figure \ref{canny_edges_noise.png}).  
+To increase the accuracy in finding the edge, we considered the Canny Edge theorem.  We wrote the algorithm to find all points above a certain threshold and take the average of these, considering this as an edge.  We then scanned through the rest of the image until the next edge was found and do the same.  The width of the can is found by taking the difference of the two locations. A test algorithm was also written to generate the egdes in order to test the algorithm.  The function (\funct{Dilatometer_TestImage}/, which is still located within \gitref{server}{sensors/dilatometer.c}) generated two edges, with an amount of noise.  The edges were created by taking an exponential decay around the edge and adding (and subtracting) a random noise from the expected decay.  The edges where then moved outwards using a for loop. From Figure \ref{canny_edges.png}, it can be seen how effective the algorithm was for a system with negligible noise, as it gave negligible percentage error.  However with increasing levels of noise we notice a considerable increase in inaccuracy (Figure \ref{canny_edges_noise.png}).  
 
 
 
@@ -529,9 +529,12 @@ To increase the accuracy in finding the edge, I considered the Canny Edge theore
 	\label{canny_edges_noise.png}
 \end{figure}
 
-After the Sensors Team relayed that they were now attaching something to the can in order to measure the change position, I decided to simply stick with the Canny Edge algorithm and implement something similar to what I had in my previous testing.  The images in Figure \ref{canny_demo} shows the progression of the image through the algorithm.  Figure \ref{canny_demo} A shows the original image, whereas \ref{canny_demo}B shows the blurred (with a BLUR value of 5) gray scale image.  Whereas Figure \ref{canny_demo}C shows the image after going through the Canny Edge algorithm with a low threshold of 35.   Figures \ref{canny_demo}D and \ref{canny_demo}E both have the same input image, however different input values.  It can be seen how tweaking the values can remove outliers, as Figure \ref{canny_demo}E is skewed to the right due to the outliers.  From Figure \ref{canny_demo}F it can be seen that despite there being no points in the edge in the top half of the image, the edge has still been accurately determined.  
+After the Sensors Team relayed that they were now attaching something to the can in order to measure the change position, we decided to simply stick with the Canny Edge algorithm and implement something similar to what we had in my previous testing.  The images in Figure \ref{canny_demo} shows the progression of the image through the algorithm. Figure \ref{canny_demo}A shows the original image, whereas \ref{canny_demo}B shows the blurred (with a BLUR value of 9) gray scale image.  Whereas Figure \ref{canny_demo}C shows the image after going through the Canny Edge algorithm with a low threshold of 35 and the location of the determined edge superimposed on top.    
+
+Figures \ref{canny_demo}D, \ref{canny_demo}E and \ref{canny_demo}F all have the same input image (however different to \ref{canny_demo}A).  Figure \ref{canny_demo}D had a blur of 5 and a low threshold value of 40, \ref{canny_demo}E had a blur of 9 and a low threshold value of 35, and \ref{canny_demo}F had a blur of 7 and a low threshold of 36.  It can be seen how tweaking the values can remove outliers, as Figure \ref{canny_demo}D is skewed to the right due to theincreased number of outliers.  From Figure \ref{canny_demo}E it can be seen that despite there being no points in the edge in the top half of the image, the edge has still been accurately determined.  
 
 The testing done shows that given a rough edge with few outliers an edge can be determined, however there is an obvious degree of inaccuracy the greater the variance of the edge. The best solution to this however does not lie in software.  If an edge was used that was straight even at that magnification with a good contrast then the results would be much more accurate (i.e. the accuracy of the dilatometer is currently more dependent on the object used than the software). 
+  
 
 \subsubsection{Interferometer}
 Earlier in the semester we were informed by the Sensors Team that instead of a dilatometer we would be using an interferometer.  The algorithm for this was written and tested; it is currently still located in the file \gitref{server}{interferometer.c} and header \gitref{server}{interferometer.h}. However development of the algorithm ceased after the sensors team informed us that the interferometer would no longer be implemented.
@@ -564,10 +567,10 @@ Figure \ref{image_in_api.png} shows an image obtained from one of two dilatomete
 	\begin{tabular}{cc}
 		\includegraphics[width=0.4\textwidth]{figures/dilatometer_test.jpg} A &
 		\includegraphics[width=0.4\textwidth]{figures/dilatometer_test2.jpg} B  \\
-		\includegraphics[width=0.4\textwidth]{figures/dila_blur7thresh36.png} C &
+		\includegraphics[width=0.4\textwidth]{figures/dila_blur9thresh35_2.png}C &
 		\includegraphics[width=0.4\textwidth]{figures/dila_blur5thresh30.png} D \\
 		\includegraphics[width=0.4\textwidth]{figures/dila_blur9thresh35.png} E &
-		\includegraphics[width=0.4\textwidth]{figures/dila_blur9thresh35_2.png} F
+		\includegraphics[width=0.4\textwidth]{figures/dila_blur7thresh36.png} F
 	\end{tabular}
 	\caption{Canny Edge Algorithm in Action}
 	\label{canny_demo}
