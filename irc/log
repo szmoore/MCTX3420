@@ -8358,3 +8358,76 @@
 23:02 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
 23:40 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
 23:46 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+--- Day changed Mon Nov 04 2013
+08:11 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+08:43 < sam_moore> The report looks good (enough)
+08:43 < jtanx> :S
+08:44 < sam_moore> I hope this is just a matter of showing up and printing it and there aren't any last minute "Edit the entire thing!" issues...
+08:44 < jtanx> Yeah, I hope not
+08:44 < sam_moore> Maybe I'll show up early and print it and then we can just hand it in once everyone arrives?
+08:44 < jtanx> That may work...
+08:44 < jtanx> How much does it cost to print it?
+08:44 < sam_moore> I don't even know
+08:44 < sam_moore> It would have to be in colour
+08:45 < sam_moore> So, 50c a page? 50 pages?
+08:46 < jtanx> about $4/person
+08:46 < sam_moore> Gah there are still mistakes in the glossary
+08:46 < sam_moore> I don't even care...
+08:47 < jtanx> Rowan never got around to fixing it... unless he plans to fix it when we meet?
+08:47 < jtanx> I was looking at the sensors team report... it's like 35MB and ~70 pages long
+08:49 < sam_moore> Huh
+08:49 < sam_moore> I guess they did do some stuff after all
+08:50 < sam_moore> :P
+08:50 < jtanx> :P
+08:50 < jtanx> just a small font issue again
+08:50 < jtanx> implemented âand
+08:50 < jtanx> that introduction paragraph
+08:50 < sam_moore> Yeah it sucks copy/pasting from openoffice into plain text
+08:51 < jtanx> Yeah
+08:51 < jtanx> it copied it as an en-dash and not hyphen-minus
+08:51 < sam_moore> Fixed
+08:51 < jtanx> Cool
+08:51 < sam_moore> I'll fix the glossary I guess
+08:51 < jtanx> :/
+08:51 < sam_moore> That will be the first thing anyone turns to when they are confused
+08:51 < sam_moore> And if it is wrong...
+08:52 < jtanx> ...
+08:55 < sam_moore> It's never bothered me until now that server/client refers not only to an individual process, but also to the physical machine it runs on
+08:56 < sam_moore> I wonder if it's clear what "server" we are talking about in context
+08:56 < sam_moore> (This is why I changed the "Server Configuration" to "BeagleBone Configuration"
+08:56 < jtanx> Yeah, that might get a bit confusing
+08:57 < jtanx> Hmm
+08:58 < jtanx> Server used in multiple contexts
+09:00 < jtanx> what else has our software on the bbb been referred to? I've just called it 'server program'
+09:05 < sam_moore> Yes, it's just always been called server, too late to change that now
+09:06 < sam_moore> It *is* a server
+09:07 < jtanx> Yeah
+09:07 < sam_moore> Ok, I don't need to explain "Operating System" in the glossary
+09:07 < sam_moore> I'll stop at "Threads"
+09:08 < sam_moore> I added CSS as well
+09:08 < jtanx> Ah... forgot about that one
+09:09 < sam_moore> That's it
+09:09 < sam_moore> No more changes!
+09:09 < sam_moore> It's done!
+09:09 < sam_moore> I'm putting it on a USB
+09:10 < sam_moore> As soon as I get to university I am going straight to the printers
+09:59 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+10:56 -!- jtanx [~asfa@130.95.119.218] has joined #mctxuwa_softdev
+11:07 -!- jtanx_ [825f77da@ircip1.mibbit.com] has joined #mctxuwa_softdev
+11:07 < jtanx_> uhh
+11:07 < jtanx_> so where are we meeting
+11:13 < jtanx_> actually, never mind I've just seen the emails
+11:13 -!- jtanx [~asfa@130.95.119.218] has quit [Ping timeout]
+11:16 -!- jtanx_ [825f77da@ircip1.mibbit.com] has quit ["http://www.mibbit.com ajax IRC Client"]
+11:17 -!- jtanx_ [~asfa@130.95.119.218] has joined #mctxuwa_softdev
+11:17 -!- jtanx_ is now known as jtanx
+11:50 -!- james_ [~chatzilla@130.95.180.45] has joined #mctxuwa_softdev
+11:59 -!- jtanx [~asfa@130.95.119.218] has quit [Ping timeout]
+13:17 -!- james_ [~chatzilla@130.95.180.45] has quit [Ping timeout]
+13:28 -!- james_ [~chatzilla@130.95.180.45] has joined #mctxuwa_softdev
+14:02 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+14:11 -!- james_ [~chatzilla@130.95.180.45] has quit ["ChatZilla 0.9.90.1 [Firefox 24.0/20130910160258]"]
+14:40 -!- jtanx [~asfa@106-68-93-93.dyn.iinet.net.au] has quit ["~ ~ ~ ~ ~ ~ ~ ~ ~"]
+16:17 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has quit [Ping timeout]
+16:55 -!- MctxBot [~twang@106-68-93-93.dyn.iinet.net.au] has joined #mctxuwa_softdev
+20:14 -!- Irssi: #mctxuwa_softdev: Total of 2 nicks [0 ops, 0 halfops, 0 voices, 2 normal]
