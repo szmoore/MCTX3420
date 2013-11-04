@@ -145,13 +145,13 @@ Code to read sensor values is located in the \gitref{server}{sensors} subdirecto
 	\item {\bf Dilatometer} (x2) - \gitref{server}{sensors/dilatometer.c} See Section \ref{Image Processing}
 \end{itemize}
 
-Additional sensors can be added and enabled through use of the \funct{Sensor_Add} function in \funct{Sensor_Init} in the file \gitref{server}{sensors.c}.
+Additional sensors can be added and enabled through use of the \funct{Sensor_Add} function in \funct{Sensor_Init} in the file \gitref{server}{sensor.c}.
 
 The function \funct{Data_Calibrate} located in \gitref{server}{data.c} can be used for interpolating calibration. The pressure sensors and microphone have been calibrated in collaboration with the Sensors Team; however only a small number of data points were taken and the calibration was not tested in detail. We would recommend a more detailed calibration of the sensors for future work.
 
 \subsection{Actuators}
 
-Code to set actuator values is located in the \gitref{server}{actuators} subdirectory. The following actuators are (as of writing) controlled by the software and have been successfully tested in collaboration with the Electronics and Pneumatics teams. Additional actuators can be added and enabled through use of the \funct{Actuator_Add} function in \funct{Actuator_Init} in the file \gitref{server}{actuators.c}.
+Code to set actuator values is located in the \gitref{server}{actuators} subdirectory. The following actuators are (as of writing) controlled by the software and have been successfully tested in collaboration with the Electronics and Pneumatics teams. Additional actuators can be added and enabled through use of the \funct{Actuator_Add} function in \funct{Actuator_Init} in the file \gitref{server}{actuator.c}.
 
 \subsubsection{Relay Controls} \gitref{server}{actuators/relay.c}
 
@@ -294,8 +294,8 @@ With increased usage, this was found to be insufficient. \funct{FCGI_ParseReques
 	\begin{tabular}{llll}
 		{\bf API} & {\bf File} & {\bf Function} & {\bf Purpose} \\
 		\api{identify} & \gitref{server}{fastcgi.c} & \funct{IdentifyHandler} & Provide system information \\
-		\api{sensors} & \gitref{server}{sensors.c} & \funct{Sensor_Handler} & Query sensor data points or set sampling rate\\
-		\api{actuators} & \gitref{server}{actuators.c} & \funct{Actuator_Handler} & Set actuator values or query past history \\
+		\api{sensors} & \gitref{server}{sensor.c} & \funct{Sensor_Handler} & Query sensor data points or set sampling rate\\
+		\api{actuators} & \gitref{server}{actuator.c} & \funct{Actuator_Handler} & Set actuator values or query past history \\
 		\api{image} & \gitref{server}{image.c} & \funct{Image_Handler} & Return image from a camera (See Section \ref{Image Processing}) \\
 		\api{control} & \gitref{server}{control.c} & \funct{Control_Handler} & Start/Stop/Pause/Resume the Experiment \\
 		\api{bind} & \gitref{server}{login.c} & \funct{Login_Handler} & Attempt to login to the system (See Section \ref{Cookies})\\
