@@ -25,7 +25,7 @@ pin_test="0"
 
 #LDAP auth
 #auth_uri="ldap://192.168.1.1#ou=People,dc=daedalus"
-#auth_uri="ldaps://ldap.pheme.uwa.edu.au#ou=Users,ou=UWA,dc=uwads,dc=uwa,dc=edu,dc=au" #UWA
+auth_uri="ldaps://ldap.pheme.uwa.edu.au#ou=Users,ou=UWA,dc=uwads,dc=uwa,dc=edu,dc=au" #UWA
 
 #Shadow auth (choose the file location)
 #auth_uri="/etc/shadow"
