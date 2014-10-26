@@ -2,7 +2,7 @@
 CXX = gcc
 FLAGS = -std=c99 -Wall -pedantic -g -I../ -I/usr/include/opencv -I/usr/include/opencv2/highgui #For OpenCV
 LIB = -lpthread
-OBJ = strain.o resource.o pressure.o dilatometer.o
+OBJ = strain.o resource.o pressure.o dilatometer.o microphone.o
 HEADERS = $(wildcard *.h)
 RM = rm -f
 

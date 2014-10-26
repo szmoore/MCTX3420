@@ -20,6 +20,9 @@ verbosity="$LOGDEBUG"
 #TODO: This option isn't actually implemented yet...
 pin_test="0"
 
+# Experiment file storage directory
+expdir="/home/ubuntu/experiments"
+
 # Set to the URI to use authentication
 # (Uncomment one of these to enable authentication)
 
@@ -36,7 +39,7 @@ auth_uri="ldaps://ldap.pheme.uwa.edu.au#ou=Users,ou=UWA,dc=uwads,dc=uwa,dc=edu,d
 
 ## OPTIONS TO BE PASSED TO SERVER; DO NOT EDIT
 if [ -n "$auth_uri" ]; then
-	parameters="-v $verbosity -p $pin_test -A $auth_uri"
+	parameters="-v $verbosity -p $pin_test -e $expdir -A $auth_uri"
 else
-	parameters="-v $verbosity -p $pin_test"
+	parameters="-v $verbosity -p $pin_test -e $expdir"
 fi;

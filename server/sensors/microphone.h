@@ -1,6 +1,10 @@
 #ifndef _MICROPHONE_H
 #define _MICROPHONE_H
 
+#include "../common.h"
+#include "../data.h"
+#include <stdbool.h>
+
 extern bool Microphone_Init(const char * name, int id);
 extern bool Microphone_Cleanup(int id);
 extern bool Microphone_Read(int id, double * value);
