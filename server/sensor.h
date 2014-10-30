@@ -88,6 +88,7 @@ extern void Sensor_Handler(FCGIContext *context, char * params); // Handle a FCG
 extern DataPoint Sensor_LastData(int id);
 
 extern const char * Sensor_GetName(int id);
+extern DataFile * Sensor_GetFile(int id);
 
 
 

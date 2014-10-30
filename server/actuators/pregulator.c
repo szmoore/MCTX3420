@@ -3,14 +3,11 @@
 
 
 #include "../data.h"
-#define PREGULATOR_PWM ECAP0
-#define PREGULATOR_PERIOD 500000
-//16666667
 
 /** PWM duty cycles raw **/
-static double pwm_raw[] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6};
+static double pwm_raw[] = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6};
 /** Calibrated pressure values match with pwm_raw **/
-static double preg_cal[] = {96, 190, 285, 380, 475, 569};
+static double preg_cal[] = {0, 94, 189, 284, 380, 475, 570};
 
 /**
  * Initiliase the pressure regulator

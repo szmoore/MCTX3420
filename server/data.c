@@ -34,9 +34,9 @@ void Data_Open(DataFile * df, const char * filename)
  	df->num_points = 0; 
 
 	// Set file pointer
-	df->file = fopen(filename, "wb+");
-	if (df->file == NULL)
-	{
+	df->file = fopen(filename, "rb+");
+	if (df->file == NULL) df->file = fopen(filename, "wb+");
+	if (df->file == NULL) {
 		Fatal("Error opening DataFile %s - %s", filename, strerror(errno));
 	}
 }
@@ -114,11 +114,12 @@ int Data_Read(DataFile * df, DataPoint * buffer, int index, int amount)
 	
 	// If we would read past the end of the file, reduce the amount	of points to read
 	
-	if (index + amount > df->num_points)
+	//Loaded files have num_points = 0 despite having data. This makes it impossible to read them.
+	/*if (index + amount > df->num_points)
 	{
 		Log(LOGDEBUG, "Requested %d points but will only read %d to get to EOF (%d)", amount, df->num_points - index, df->num_points);
 		amount = df->num_points - index;
-	}
+	}*/
 	
 
 	// Go to position in file
@@ -133,7 +134,7 @@ int Data_Read(DataFile * df, DataPoint * buffer, int index, int amount)
 	// Check if correct number of points were read
 	if (amount_read != amount)
 	{
-		Log(LOGERR,"Read %d points instead of %d from DataFile %s - %s", amount_read, amount, df->filename, strerror(errno));
+		Log(LOGNOTE,"Read %d points instead of %d from DataFile %s - %s", amount_read, amount, df->filename, strerror(errno));
 	}
 
 	pthread_mutex_unlock(&(df->mutex));
@@ -151,8 +152,10 @@ void Data_PrintByIndexes(DataFile * df, int start_index, int end_index, DataForm
 {
 	assert(df != NULL);
 	assert(start_index >= 0);
-	assert(end_index >= 0);
+	assert(end_index >= -1);
 	assert(end_index <= df->num_points || df->num_points == 0);
+
+	if (start_index == end_index) return;
 
 	const char * fmt_string; // Format for each data point
 	char separator; // Character used to seperate successive data points
@@ -175,25 +178,28 @@ void Data_PrintByIndexes(DataFile * df, int start_index, int end_index, DataForm
 	DataPoint buffer[DATA_BUFSIZ] = {{0}}; // Buffer
 	int index = start_index;
 
+	if (Data_Read(df, buffer, index++, 1) != 1) return;
+	FCGI_PrintRaw(fmt_string, buffer[0].time_stamp, buffer[0].value);
+
 	// Repeat until all DataPoints are printed
-	while (index < end_index)
+	while (index < end_index || end_index == -1)
 	{
 		// Fill the buffer from the DataFile
 		int amount_read = Data_Read(df, buffer, index, DATA_BUFSIZ);
 
 		// Print all points in the buffer
-		for (int i = 0; i < amount_read && index < end_index; ++i)
+		for (int i = 0; i < amount_read && (index < end_index || end_index == -1); ++i)
 		{
+			FCGI_PrintRaw("%c", separator);
+
 			// Print individual DataPoint
 			FCGI_PrintRaw(fmt_string, buffer[i].time_stamp, buffer[i].value);
-			
-			// Last separator is not required
-			if (index+1 < end_index)
-				FCGI_PrintRaw("%c", separator);
 
 			// Advance the position in the DataFile
 			++index;
 		}
+
+		if (amount_read < DATA_BUFSIZ) break;
 	}
 	
 	switch (format)

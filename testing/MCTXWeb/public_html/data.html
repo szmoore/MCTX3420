@@ -18,13 +18,52 @@
     <link rel="stylesheet" type="text/css" href="static/style.css">
     <link rel="stylesheet" type="text/css" href="static/nav-menu.css">
     <script type="text/javascript">
-      runBeforeLoad().done(function() {
-        $(document).ready(function() {
-        });
-      })
-      //function to load new experiment depending on drop-down menu
-      function expLoad(expName) {
-		window.open("api/control?action=load&name=" + expName);
+      runBeforeLoad();
+      
+      function genTable(experiments, sensors, actuators) {
+          var oldTable = document.getElementById('linktable');
+          var newTable = oldTable.cloneNode();
+          for (var i = 0; i < experiments.length; i++) {
+	      var tr = document.createElement('tr');
+	      var td = document.createElement('td');
+	      td.appendChild(document.createTextNode(experiments[i]));
+	      tr.appendChild(td);
+	      for (var j = 0; j < Object.keys(sensors).length; j++) {
+	          td = document.createElement('td');
+	          var lnk = document.createElement('A')
+	          lnk.href = location.protocol + "//" + location.host + "/" + "api/sensordl?name=" + experiments[i] + "&id=" + j;
+	          lnk.appendChild(document.createTextNode(sensors[j].name));
+	          td.appendChild(lnk);
+	          tr.appendChild(td);
+	      }
+	      for (var j = 0; j < Object.keys(actuators).length; j++) {
+	          td = document.createElement('td');
+	          var lnk = document.createElement('A')
+	          lnk.href = location.protocol + "//" + location.host + "/" + "api/actuatordl?name=" + experiments[i] + "&id=" + j;
+	          lnk.appendChild(document.createTextNode(actuators[j].name));
+	          td.appendChild(lnk);
+	          tr.appendChild(td);
+	      }
+	      newTable.appendChild(tr);
+          }
+          oldTable.parentNode.replaceChild(newTable, oldTable);
+      }
+
+
+      window.onload = function() {
+          //$(document).ready(function() {
+              $.ajax({
+	          url : location.protocol + "//" + location.host + "/" + "api/control",
+		  data : {'action' : 'list'}
+	      }).done(function (expdata) {
+	          $.ajax({
+		      url : location.protocol + "//" + location.host + "/" + "api/identify",
+		      data : {'sensors' : 1, 'actuators' : 1}
+		  }).done(function (iddata) {
+		      genTable(expdata.experiments, iddata.sensors, iddata.actuators);
+		  });
+	      });
+	  //});
       }
     </script>
   </head>
@@ -98,52 +137,7 @@
         <div id="main">
           <div class="widget">
             <div class="title">Experiment Data</div>
-            <b>Select An Experiment</b>
-              <p><select id="expselect" onChange="expLoad(this.value)">
-                <option value="current">Current (12-12-13)</option>
-                <option value="exp2">Experiment 1 (12-10-13)</option>
-                <option value="exp3">Experiment 2 (15-10-13)</option>
-                <option value="exp4">Experiment 3 (01-11-13)</option>
-                <option value="exp5">Experiment 4 (27-11-13)</option>
-				<option value="exp6">Experiment 5 (28-11-13)</option>
-              </select></p>
-            <table>
-			  <tr>
-			    <td>Experiment Date</td>
-			    <td><em>Date Lookup</em></td>
-			  </tr>
-              <tr>
-                <!--uses the download attribute to force downloads, only compatible with some browsers. Other users will just have to right-click and Save File As-->
-                <td><a class="datalink" href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-Sensors#strain-gauges" target="_blank">Strain Data</a></td>
-                <td><a href="current/strain.zip" download><input type="button" value="Download All"></a></td>
-                <td><input type="button" value="Strain Gauge 1" onclick="window.open('api/sensors?start_time=0&format=tsv&id=0')"></td>
-                <td><input type="button" value="Strain Gauge 2" onclick="window.open('api/sensors?start_time=0&format=tsv&id=1')"></td>
-                <td><input type="button" value="Strain Gauge 3" onclick="window.open('api/sensors?start_time=0&format=tsv&id=2')"></td>
-                <td><input type="button" value="Strain Gauge 4" onclick="window.open('api/sensors?start_time=0&format=tsv&id=3')"></td>
-			  </tr>
-			  <tr>
-			    <td><a class="datalink" href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-Sensors#pressure-sensors" target="_blank">Pressure Data</a></td>
-                <td><a href="current/pressure.zip" download><input type="button" value="Download All"></a></td>
-                <td><input type="button" value="Pressure Sensor 1" onclick="window.open('api/sensors?start_time=0&format=tsv&id=4')"></td>
-                <td><input type="button" value="Pressure Sensor 2" onclick="window.open('api/sensors?start_time=0&format=tsv&id=5')"></td>
-				<td><input type="button" value="Pressure Sensor 3" onclick="window.open('api/sensors?start_time=0&format=tsv&id=6')"></td>
-              </tr>
-              <tr>
-                <!--this assumes dilatometer and camera data will be kept on separate pages in the GUI-->
-                <td><a class="datalink" href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-Sensors#dilatometer" target="_blank">Dilatometer</a></td>
-                <td><a href="dilatometer.zip" download=><input type="button" value="Download Data"></a></td>
-                <td><a href="dilatometer.html">View Data</a></td>
-              </tr>
-              <tr>
-                <td><a class="datalink" href="https://github.com/szmoore/MCTX3420/wiki/Hardware:-Sensors#camera" target="_blank">Camera Data</a></td>
-                <td><a href="image.jpeg" download><input type="button" value="Download Data"></a></td>
-                <td><a href="image.html">View Data</a></td>
-              </tr>
-              <tr>
-                <td>Graphs</td>
-                <td><a href="graph.html">Graphs Page</a></td>
-              </tr>
-            </table>
+            <table id="linktable"></table>
           </div>
         </div>
         <!-- End main content -->

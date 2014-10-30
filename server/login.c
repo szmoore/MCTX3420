@@ -231,7 +231,7 @@ UserType Login_Shadow(const char * user, const char * pass, const char * shadow)
  */
 int Login_LDAP_Bind(const char * uri, const char * dn, const char * pass)
 {
-	Log(LOGDEBUG, "Bind to %s with dn %s and pass %s", uri, dn, pass);
+	Log(LOGDEBUG, "Bind to %s with dn %s", uri, dn);
 
 	// Initialise LDAP; prepares to connect to the server
 	LDAP * ld = NULL;

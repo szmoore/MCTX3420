@@ -16,6 +16,7 @@
 #include "common.h"
 #include "sensor.h"
 #include "actuator.h"
+#include "data.h"
 #include "control.h"
 #include "options.h"
 #include "image.h"
@@ -59,6 +60,8 @@ static void IdentifyHandler(FCGIContext *context, char *params)
 
 	//Sensor and actuator information
 	if (ident_sensors) {
+		bool initflag = false;
+		if ((initflag = (g_num_sensors == 0))) Sensor_Init();
 		FCGI_JSONKey("sensors");
 		FCGI_JSONValue("{\n\t\t");
 		for (i = 0; i < g_num_sensors; i++) {
@@ -70,8 +73,11 @@ static void IdentifyHandler(FCGIContext *context, char *params)
 				i, Sensor_GetName(i), d.time_stamp, d.value); 
 		}
 		FCGI_JSONValue("\n\t}");
+		if (initflag) Sensor_Cleanup();
 	}
 	if (ident_actuators) {
+		bool initflag = false;
+		if ((initflag = (g_num_actuators == 0))) Actuator_Init();
 		FCGI_JSONKey("actuators");
 		FCGI_JSONValue("{\n\t\t");
 		for (i = 0; i < g_num_actuators; i++) {
@@ -83,8 +89,133 @@ static void IdentifyHandler(FCGIContext *context, char *params)
 			FCGI_JSONValue("\"%d\" : {\"name\" : \"%s\", \"value\" : [%f, %f] }", i, Actuator_GetName(i), d.time_stamp, d.value); 
 		}
 		FCGI_JSONValue("\n\t}");
+		if (initflag) Actuator_Cleanup();
 	}
 	FCGI_EndJSON();
+}
+
+/**
+ * Download TSV of sensor data for particular experiment and sensor.
+ * @param context The context to work in
+ * @param params The input parameters
+ */
+static void SensorDL_Handler(FCGIContext *context, char *params) {
+	const char *name = "";
+	int id;
+
+	FCGIValue values[2] = {
+		{"name", &name, FCGI_REQUIRED(FCGI_STRING_T)},
+		{"id", &id, FCGI_REQUIRED(FCGI_INT_T)}
+	};
+
+	if (!FCGI_ParseRequest(context, params, values, 2))
+		return;
+
+	if ((strcmp(Control_GetExpName(), name) == 0) && (g_num_sensors != 0)) {
+		DataFile * df;
+		df = Sensor_GetFile(id);
+	
+		FCGI_PrintRaw("Content-Type:application/x-download\n");
+		FCGI_PrintRaw("Content-Disposition: attachment; filename=%s.tsv\n\n", Sensor_GetName(id));
+		
+		Data_PrintByIndexes(df, 0, df->num_points, TSV);
+	} else {
+		DataFile df;
+		Data_Init(&df);
+
+		char filename[BUFSIZ];
+		int ret;
+
+		ret = snprintf(filename, BUFSIZ, "%s/%s.exp/sensor_%d", context->user_dir, name, id);
+
+		if (ret >= BUFSIZ) {
+			FCGI_RejectJSON(context, "File path too long. Check experiment name.");
+			return;
+		}
+
+		struct stat st;
+		int result = stat(filename, &st);
+		if (result != 0) {
+			FCGI_RejectJSON(context, "File does not exist.");
+			return;
+		}
+
+		Data_Open(&df, filename);
+
+		bool initflag = false;
+		if ((initflag = (g_num_sensors == 0))) Sensor_Init();
+		FCGI_PrintRaw("Content-Type:application/x-download\n");
+		FCGI_PrintRaw("Content-Disposition: attachment; filename=%s.tsv\n\n", Sensor_GetName(id));
+		if (initflag) Sensor_Cleanup();
+
+		Data_PrintByIndexes(&df, 0, -1, TSV);
+
+		Data_Close(&df);
+	}
+
+	return;
+}
+
+/**
+ * Download TSV of actuator data for particular experiment and actuator.
+ * @param context The context to work in
+ * @param params The input parameters
+ */
+static void ActuatorDL_Handler(FCGIContext *context, char *params) {
+	const char *name = "";
+	int id;
+
+	FCGIValue values[2] = {
+		{"name", &name, FCGI_REQUIRED(FCGI_STRING_T)},
+		{"id", &id, FCGI_REQUIRED(FCGI_INT_T)}
+	};
+
+	if (!FCGI_ParseRequest(context, params, values, 2))
+		return;
+
+	if ((strcmp(Control_GetExpName(), name) == 0) && (g_num_actuators != 0)) {
+		DataFile * df;
+		df = Actuator_GetFile(id);
+	
+		FCGI_PrintRaw("Content-Type:application/x-download\n");
+		FCGI_PrintRaw("Content-Disposition: attachment; filename=%s.tsv\n\n", Actuator_GetName(id));
+		
+		Data_PrintByIndexes(df, 0, -1, TSV);
+	} else {
+		DataFile df;
+		Data_Init(&df);
+
+		char filename[BUFSIZ];
+		int ret;
+
+		ret = snprintf(filename, BUFSIZ, "%s/%s.exp/actuator_%d", context->user_dir, name, id);
+
+		if (ret >= BUFSIZ) {
+			FCGI_RejectJSON(context, "File path too long. Check experiment name.");
+			return;
+		}
+
+		struct stat st;
+		int result = stat(filename, &st);
+		if (result != 0) {
+			FCGI_RejectJSON(context, "File does not exist.");
+			return;
+		}
+
+		Data_Open(&df, filename);
+
+		bool initflag = false;
+		if ((initflag = (g_num_actuators == 0))) Actuator_Init();
+		FCGI_PrintRaw("Content-Type:application/x-download\n");
+		FCGI_PrintRaw("Content-Disposition: attachment; filename=%s.tsv\n\n", Actuator_GetName(id));
+		if (initflag) Actuator_Cleanup();
+
+		Data_PrintByIndexes(&df, 0, -1, TSV);
+
+		Data_Close(&df);
+	}
+
+	return;
 }
 
 /**
@@ -612,6 +743,10 @@ void * FCGI_RequestLoop (void *data)
 		
 		if (!strcmp("identify", module)) {
 			module_handler = IdentifyHandler;
+		} else if (!strcmp("sensordl", module)) {
+			module_handler = SensorDL_Handler;
+		} else if (!strcmp("actuatordl", module)) {
+			module_handler = ActuatorDL_Handler;
 		} else if (!strcmp("control", module)) {
 			module_handler = Control_Handler;
 		} else if (!strcmp("sensors", module)) {

@@ -3,6 +3,7 @@
  * @brief Implementation of Actuator related functionality
  */
 
+#include <stdio.h>
 #include "actuator.h"
 #include "options.h"
 // Files containing GPIO and PWM definitions
@@ -37,6 +38,7 @@ int Actuator_Add(const char * name, int user_id, SetFn set, InitFn init, CleanFn
 	a->name = name;
 	a->set = set; // Set read function
 	a->init = init; // Set init function
+	a->cleanup = cleanup; // Set cleanup function
 
 	a->sanity = sanity;
 	a->cleanup = cleanup;
@@ -66,7 +68,7 @@ void Actuator_Init()
 	Actuator_Add("pregulator", 0, Pregulator_Set, Pregulator_Init, Pregulator_Cleanup, Pregulator_Sanity, 0);
 	Actuator_Add("can_select", RELAY_CANSELECT, Relay_Set, Relay_Init, Relay_Cleanup, Relay_Sanity, 0);
 	Actuator_Add("can_enable", RELAY_CANENABLE, Relay_Set, Relay_Init, Relay_Cleanup, Relay_Sanity, 0);
-	Actuator_Add("main_pressure", RELAY_MAIN, Relay_Set, Relay_Init, Relay_Cleanup, Relay_Sanity, 1);
+	Actuator_Add("main_pressure", RELAY_MAIN, Relay_Set, Relay_Init, Relay_Cleanup, Relay_Sanity, 0);
 }
 
 /**
@@ -115,6 +117,7 @@ void Actuator_SetMode(Actuator * a, ControlModes mode, void *arg)
 				Log(LOGDEBUG, "Actuator %d with DataFile \"%s\"", a->id, filename);
 				// Open DataFile
 				Data_Open(&(a->data_file), filename);
+				freopen(NULL, "wb+", a->data_file.file);
 			} 
 		case CONTROL_RESUME:  //Case fallthrough; no break before
 			{
@@ -446,6 +449,15 @@ void Actuator_Handler(FCGIContext * context, char * params)
 const char * Actuator_GetName(int id)
 {
 	return g_actuators[id].name;
+}
+
+/**
+ * Get a reference to the DataFile of an actuator
+ * @param id - ID number
+ */
+DataFile * Actuator_GetFile(int id)
+{
+	return &g_actuators[id].data_file;
 }
 
 /**

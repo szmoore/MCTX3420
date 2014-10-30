@@ -4,6 +4,7 @@
  * TODO: Finalise implementation
  */
 
+#include <stdio.h>
 #include "common.h"
 #include "sensor.h"
 #include "options.h"
@@ -43,6 +44,7 @@ int Sensor_Add(const char * name, int user_id, ReadFn read, InitFn init, CleanFn
 	s->name = name;
 	s->read = read; // Set read function
 	s->init = init; // Set init function
+	s->cleanup = cleanup; // Set cleanup function
 
 	// Start by averaging values taken over a second
 	DOUBLE_TO_TIMEVAL(1, &(s->sample_time));
@@ -79,16 +81,17 @@ void Sensor_Init()
 {
 	//Sensor_Add("cpu_stime", RESOURCE_CPU_SYS, Resource_Read, NULL, NULL, NULL);	
 	//Sensor_Add("cpu_utime", RESOURCE_CPU_USER, Resource_Read, NULL, NULL, NULL);	
-	Sensor_Add("pressure_high0", PRES_HIGH0, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
-	Sensor_Add("pressure_high1", PRES_HIGH1, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
-	Sensor_Add("pressure_low0", PRES_LOW0, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
+	Sensor_Add("Explode_Pressure_kPa", PRES_HIGH0, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
+	Sensor_Add("Mains_Pressure_kPa", PRES_HIGH1, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
+	Sensor_Add("Strain_Pressure_kPa", PRES_LOW0, Pressure_Read, Pressure_Init, Pressure_Cleanup, NULL);
 	//Sensor_Add("../testing/count.py", 0, Piped_Read, Piped_Init, Piped_Cleanup, 1e50,-1e50,1e50,-1e50);
-	Sensor_Add("strain0_endhoop", STRAIN0, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
-	Sensor_Add("strain1_endlong", STRAIN1, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
-	Sensor_Add("strain2_midhoop", STRAIN2, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
-	Sensor_Add("strain3_midlong", STRAIN3, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
+	Sensor_Add("Strain_End_Hoop", STRAIN0, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
+	Sensor_Add("Strain_End_Long", STRAIN1, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
+	Sensor_Add("Strain_Mid_Hoop", STRAIN2, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
+	Sensor_Add("Strain_Mid_Long", STRAIN3, Strain_Read, Strain_Init, Strain_Cleanup, Strain_Sanity);
 
-	Sensor_Add("microphone", 0, Microphone_Read, Microphone_Init, Microphone_Cleanup, Microphone_Sanity);
+	Sensor_Add("Microphone", 0, Microphone_Read, Microphone_Init, Microphone_Cleanup, Microphone_Sanity);
+	DOUBLE_TO_TIMEVAL(0.1, &(g_sensors[g_num_sensors-1].sample_time));
 	//Sensor_Add("pressure0", PRESSURE0, Pressure_Read, Pressure_Init, 5000,0,5000,0);
 	//Sensor_Add("pressure1", PRESSURE1, Pressure_Read, Pressure_Init, 5000,0,5000,0);
 	//Sensor_Add("pressure_feedback", PRESSURE_FEEDBACK, Pressure_Read, Pressure_Init, 5000,0,5000,0);
@@ -144,6 +147,7 @@ void Sensor_SetMode(Sensor * s, ControlModes mode, void * arg)
 				Log(LOGDEBUG, "Sensor %d with DataFile \"%s\"", s->id, filename);
 				// Open DataFile
 				Data_Open(&(s->data_file), filename);
+				freopen(NULL, "wb+", s->data_file.file);
 			}
 		case CONTROL_RESUME: //Case fallthrough, no break before
 			{
@@ -420,6 +424,15 @@ void Sensor_Handler(FCGIContext *context, char * params)
 const char * Sensor_GetName(int id)
 {
 	return g_sensors[id].name;
+}
+
+/**
+ * Get a reference to the DataFile of a sensor
+ * @param id - ID number
+ */
+DataFile * Sensor_GetFile(int id)
+{
+	return &g_sensors[id].data_file;
 }
 
 /**

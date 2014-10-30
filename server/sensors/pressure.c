@@ -11,9 +11,12 @@
 #define PSI_TO_KPA 6.89475729
 
 /** Uncalibrated values in ADC readings **/
-static double high_raw[] = {642,910,1179,1445,1712,1980}; 
+static double high_raw[] = {368, 517, 661, 806, 950, 1093, 1232, 1378, 1518, 1660, 1800, 1942, 2000}; 
 /** Calibrated values in kPa **/
-static double high_cal[] = {95, 190, 285, 380, 474, 560};
+static double high_cal[] = {0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 569};
+
+static double low_raw[] = {5, 309, 390, 868, 1152, 1430, 1710, 1980, 2260};
+static double low_cal[] = {0, 50, 100, 150, 200, 250, 300, 350, 400};
 
 /**
  * Get the ADC number of a Pressure sensor
@@ -42,37 +45,19 @@ static int Pressure_GetADC(int id)
  * @param adc - ADC reading
  * @returns Pressure in kPa
  */
-double Pressure_Callibrate(int id, int adc)
+double Pressure_Calibrate(int id, int adc)
 {
-	//double voltage = ADC_TO_VOLTS(adc); // convert reading to voltage
-
-
-
-	//TODO: Fix this
 	switch (id)
 	{
 		case PRES_HIGH0:
 		case PRES_HIGH1:
-		{
-			/*
-			static const double Vs = 5e3; // In mVs
-			static const double Pmin = 0.0 * PSI_TO_KPA;
-			static const double Pmax = 150.0 * PSI_TO_KPA;
-			double Vout = ADC_TO_MVOLTS(adc);
-			return ((Vout - 0.1*Vs)/(0.8*Vs))*(Pmax - Pmin) + Pmin;
-			*/
-			return adc;
-			//return Data_Calibrate((double)adc, high_raw, high_cal, sizeof(high_raw)/sizeof(double));
-		}	
+			return Data_Calibrate((double) adc, high_raw, high_cal, sizeof(high_raw)/sizeof(high_raw[0]));
 		case PRES_LOW0:
-			// Not calibrated!
-			//return (200.0 * ((double)adc / ADC_RAW_MAX));
-			return adc;
+			return Data_Calibrate((double) adc, low_raw, low_cal, sizeof(low_raw)/sizeof(low_raw[0]));
 		default:
 			Fatal("Unknown Pressure id %d", id);
 			return -1; // Should never happen
-	}
-	
+	}	
 }
 
 /**
@@ -111,7 +96,7 @@ bool Pressure_Read(int id, double * value)
 	int adc = 0;
 	if (ADC_Read(Pressure_GetADC(id), &adc))
 	{
-		*value = Pressure_Callibrate(id, adc);
+		*value = Pressure_Calibrate(id, adc);
 		result = true;
 	}
 	//pthread_mutex_unlock(&mutex);

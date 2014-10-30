@@ -158,27 +158,40 @@ $.fn.startExperiment = function (group, experiment, force, result) {
     return;
    }
    
-   //Select the can
+   //Open mains
    $.ajax({
     url : mctx.api + "actuators",
-    data : {name : "can_select", set : can_number}
+    data : {name : "main_pressure", set : 1}
    }).done(function (data) {
     if (!result.checkStatus(data)) {
      $(group).removeAttr('disabled');
      return;
     }
-    
-    //Enable the can
+
+    //Select the can
     $.ajax({
-      url : mctx.api + 'actuators',
-      data : {name : "can_enable", set : 1}
+     url : mctx.api + "actuators",
+     data : {name : "can_select", set : can_number}
     }).done(function (data) {
-      if (!result.checkStatus(data)) {
-        $(group).removeAttr('disabled');
-        return;
-      }
-      result.html("&nbsp;");
-      toggleControls(true);
+     if (!result.checkStatus(data)) {
+      $(group).removeAttr('disabled');
+      return;
+     }
+     
+     //Enable the can
+     $.ajax({
+       url : mctx.api + 'actuators',
+       data : {name : "can_enable", set : 1}
+     }).done(function (data) {
+       if (!result.checkStatus(data)) {
+         $(group).removeAttr('disabled');
+         return;
+       }
+       result.html("&nbsp;");
+       toggleControls(true);
+     }).fail(function () {
+       $(group).removeAttr('disabled');
+     });
     }).fail(function () {
       $(group).removeAttr('disabled');
     });

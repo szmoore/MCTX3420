@@ -274,6 +274,14 @@ const char * Control_GetModeName() {
 }
 
 /**
+ * Gets the current experiment name
+ * @return The current experiment name
+ */
+const char * Control_GetExpName() {
+	return g_controls.experiment_name;
+}
+
+/**
  * Gets the start time for the current experiment
  * @return the start time
  */

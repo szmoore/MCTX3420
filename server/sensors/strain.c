@@ -9,6 +9,8 @@
 // TODO: Choose this
 #define STRAIN_GPIO 45
 
+static int g_numsgs = 0;
+
 /**
  * Convert Strain gauge id number to a GPIO pin on the Mux
  * @param id - The strain gauge id
@@ -61,8 +63,7 @@ bool Strain_Init(const char * name, int id)
 	if (!GPIO_Set(gpio_num, false))
 		Fatal("Couldn't set GPIO%d for strain sensor %d to LOW", gpio_num, id);
 
-	static int init = 0;
-	if (++init == 1)
+	if (g_numsgs++ == 0)
 	{
 		GPIO_Export(STRAIN_GPIO);
 		GPIO_Set(STRAIN_GPIO, true);
@@ -73,11 +74,10 @@ bool Strain_Init(const char * name, int id)
 
 bool Strain_Cleanup(int id)
 {
-	static int killed = 0;
-	if (++killed == 4)
+	if (--g_numsgs == 0)
 	{
-
 		GPIO_Set(STRAIN_GPIO, false);
+		GPIO_Unexport(STRAIN_GPIO);
 		ADC_Unexport(STRAIN_ADC);
 	}
 
