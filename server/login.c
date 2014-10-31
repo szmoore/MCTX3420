@@ -6,6 +6,7 @@
 
 #include "common.h"
 #include "options.h"
+#include "control.h"
 #include <ctype.h>
 #include <unistd.h>
 
@@ -279,6 +280,7 @@ int Login_LDAP_Bind(const char * uri, const char * dn, const char * pass)
  */
 void Logout_Handler(FCGIContext * context, char * params)
 {
+	Control_SetMode(CONTROL_STOP, NULL);
 	FCGI_ReleaseControl(context);
 	FCGI_SendControlCookie(context, false); //Unset the cookie
 	FCGI_AcceptJSON(context, "Logged out");
